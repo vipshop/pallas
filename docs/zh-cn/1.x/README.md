@@ -85,7 +85,7 @@ cd quickstart
 java -Dfile.encoding=UTF-8 -jar pallas-demo.jar
 (或者运行：sh quickstart.sh)
 ```
-Click here for more details: [Quick Start](https://vipshop.github.io/pallas/zh-cn/1.x/tutorial.html)
+Click here for more details: [Quick Start](https://vipshop.github.io/pallas/#/zh-cn/1.x/tutorial)
 
 ## Team members
 * Architect & Dev Leader: Dylan Xue (dylan_xueke@hotmail.com)  
