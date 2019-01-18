@@ -2,7 +2,7 @@
 
 ### 1.1 下载
 
-正式开源环境，直接访问https://github.com/vipshop/pallas，下载quickstart目录内容到本地。
+直接访问[https://github.com/vipshop/pallas](https://github.com/vipshop/pallas) ，下载quickstart目录内容到本地。
 
 ### 1.2 解压及运行
 
@@ -12,9 +12,9 @@
 
 进入quickstart目录
 
-运行命令：`java -Dfile.encoding=UTF-8 -jar pallas-demo.jar (或者运行：sh quickstart.sh)`
+运行命令：`java -Dfile.encoding=UTF-8 -jar pallas-demo.jar`
 
-`或者，在pallas-demo中直接运行com.vip.pallas.demo.LaunchAll，也可以一键quickstart~~（代码导入见后面章节）`
+`也可以直接运行：sh quickstart.sh，或者在pallas-demo中直接运行com.vip.pallas.demo.LaunchAll，也可以一键quickstart~~（代码导入见后面章节）`
 
 
 即可启动pallas各主要组件，包括
