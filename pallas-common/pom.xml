@@ -1,0 +1,76 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+        <groupId>com.vip.pallas</groupId>
+        <artifactId>pallas-open</artifactId>
+        <version>master-SNAPSHOT</version>
+    </parent>
+
+	<artifactId>pallas-common</artifactId>
+	<name>${project.artifactId}</name>
+	<packaging>jar</packaging>
+
+	<properties>
+		<maven.javadoc.skip>true</maven.javadoc.skip>
+	</properties>
+
+	<dependencies>
+		<dependency>
+	        <groupId>org.slf4j</groupId>
+	        <artifactId>slf4j-api</artifactId>
+	    </dependency>
+	    <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+	    <dependency>
+            <groupId>com.vip.vjtools</groupId>
+            <artifactId>vjkit</artifactId>
+        </dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-maven-plugin</artifactId>
+				<version>9.4.4.v20170414</version>
+			</plugin>
+		</plugins>
+	</build>
+	
+	<profiles>
+		<profile>
+			<id>initialize</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-install-plugin</artifactId>
+						<executions>
+							<execution>
+								<goals>
+									<goal>install-file</goal>
+								</goals>
+								<phase>initialize</phase>
+								<configuration>
+									<artifactId>elasticsearch-sql</artifactId>
+									<groupId>org.nlpcn</groupId>
+									<version>${elasticsearch-sql.version}</version>
+									<packaging>jar</packaging>
+									<file>${project.basedir}/../lib/org/nlpcn/elasticsearch-sql/5.5.2.0/elasticsearch-sql-5.5.2.0.jar</file>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>

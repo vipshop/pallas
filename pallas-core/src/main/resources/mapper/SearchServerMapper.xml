@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vip.pallas.mybatis.repository.SearchServerRepository">
+  <resultMap id="BaseResultMap" type="com.vip.pallas.mybatis.entity.SearchServer">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="ipport" jdbcType="VARCHAR" property="ipport" />
+    <result column="cluster" jdbcType="VARCHAR" property="cluster" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="take_traffic" jdbcType="TINYINT" property="takeTraffic" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.vip.pallas.mybatis.entity.SearchServer">
+    <result column="info" jdbcType="LONGVARCHAR" property="info" />
+  </resultMap>
+  
+  <select id="selectDistictCluster" resultType="java.lang.String">
+    select DISTINCT cluster from `search_server`;
+  </select>
+
+  <select id="selectAll" resultMap="BaseResultMap">
+    select * from `search_server`;
+  </select>
+  
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, ipport, cluster, create_time, update_time, take_traffic
+  </sql>
+
+  <select id="deleteNDaysOldServer" resultMap="BaseResultMap">
+    <![CDATA[delete from search_server
+    where TIMESTAMPDIFF(day,update_time,now()) > #{0}]]>
+  </select>
+  
+  <select id="selectHealthyServers" resultMap="BaseResultMap">
+    <![CDATA[select id, ipport, cluster, create_time, update_time, take_traffic from search_server where TIMESTAMPDIFF(SECOND,update_time,now()) < #{0}]]>
+  </select>
+  <select id="selectHealthyServersByCluster" resultMap="BaseResultMap">
+    <![CDATA[select id, ipport, cluster, create_time, update_time, take_traffic from search_server where TIMESTAMPDIFF(SECOND,update_time,now()) < #{0} and cluster = #{1}]]>
+  </select>
+  
+  <sql id="Blob_Column_List">
+    info
+  </sql>
+  <select id="selectByExampleWithBLOBsAndHealthyInterval" parameterType="com.vip.pallas.mybatis.entity.SearchServerExample" resultMap="ResultMapWithBLOBs">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    , <![CDATA[case when TIMESTAMPDIFF(SECOND,update_time,now()) < ${healthyInterval} then true else false end as healthy]]>, 
+    <include refid="Blob_Column_List" />
+    from search_server
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+  <select id="selectByExample" parameterType="com.vip.pallas.mybatis.entity.SearchServerExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from search_server
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="ResultMapWithBLOBs">
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from search_server
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from search_server
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.vip.pallas.mybatis.entity.SearchServerExample">
+    delete from search_server
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.vip.pallas.mybatis.entity.SearchServer">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into search_server (ipport, cluster, create_time, 
+      update_time, info)
+    values (#{ipport,jdbcType=VARCHAR}, #{cluster,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{updateTime,jdbcType=TIMESTAMP}, #{info,jdbcType=LONGVARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.vip.pallas.mybatis.entity.SearchServer">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into search_server
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="ipport != null">
+        ipport,
+      </if>
+      <if test="cluster != null">
+        cluster,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+        update_time,
+      <if test="info != null">
+        info,
+      </if>
+      <if test="takeTraffic != null">
+        take_traffic,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="ipport != null">
+        #{ipport,jdbcType=VARCHAR},
+      </if>
+      <if test="cluster != null">
+        #{cluster,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      now(),
+      <if test="info != null">
+        #{info,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="takeTraffic != null">
+        #{takeTraffic,jdbcType=BIT},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.vip.pallas.mybatis.entity.SearchServerExample" resultType="java.lang.Long">
+    select count(*) from search_server
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update search_server
+    <set>
+      <if test="record.id != null">
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.ipport != null">
+        ipport = #{record.ipport,jdbcType=VARCHAR},
+      </if>
+      <if test="record.cluster != null">
+        cluster = #{record.cluster,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createTime != null">
+        create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.updateTime != null">
+        update_time = #{record.updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.info != null">
+        info = #{record.info,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="record.takeTraffic != null">
+       take_traffic = #{takeTraffic,jdbcType=BIT},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExampleWithBLOBs" parameterType="map">
+    update search_server
+    set id = #{record.id,jdbcType=BIGINT},
+      ipport = #{record.ipport,jdbcType=VARCHAR},
+      cluster = #{record.cluster,jdbcType=VARCHAR},
+      create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      update_time = #{record.updateTime,jdbcType=TIMESTAMP},
+      info = #{record.info,jdbcType=LONGVARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update search_server
+    set id = #{record.id,jdbcType=BIGINT},
+      ipport = #{record.ipport,jdbcType=VARCHAR},
+      cluster = #{record.cluster,jdbcType=VARCHAR},
+      create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      update_time = #{record.updateTime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.vip.pallas.mybatis.entity.SearchServer">
+    update search_server
+    <set>
+      <if test="ipport != null">
+        ipport = #{ipport,jdbcType=VARCHAR},
+      </if>
+      <if test="cluster != null">
+        cluster = #{cluster,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="info != null">
+        info = #{info,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="takeTraffic != null">
+       take_traffic = #{takeTraffic,jdbcType=BIT},
+      </if>
+      update_time = now()
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.vip.pallas.mybatis.entity.SearchServer">
+    update search_server
+    set ipport = #{ipport,jdbcType=VARCHAR},
+      cluster = #{cluster,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = now(),
+      info = #{info,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.vip.pallas.mybatis.entity.SearchServer">
+    update search_server
+    set ipport = #{ipport,jdbcType=VARCHAR},
+      cluster = #{cluster,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = now()
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="setTakeTraffic">
+    update search_server
+    set take_traffic = #{takeTraffic}
+    where id = #{id}
+  </update>
+
+</mapper>

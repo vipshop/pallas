@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vip.pallas.mybatis.repository.FlowRecordConfigRepository">
+  <resultMap id="BaseResultMap" type="com.vip.pallas.mybatis.entity.FlowRecordConfig">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="index_id" jdbcType="BIGINT" property="indexId" />
+    <result column="template_id" jdbcType="BIGINT" property="templateId" />
+    <result column="sample_rate" jdbcType="DOUBLE" property="sampleRate" />
+    <result column="limit" jdbcType="BIGINT" property="limit" />
+    <result column="start_time" jdbcType="TIMESTAMP" property="startTime" />
+    <result column="end_time" jdbcType="TIMESTAMP" property="endTime" />
+    <result column="is_enable" jdbcType="BIT" property="isEnable" />
+    <result column="note" jdbcType="VARCHAR" property="note" />
+    <result column="create_user" jdbcType="VARCHAR" property="createUser" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="is_deleted" jdbcType="BIT" property="isDeleted" />
+  </resultMap>
+
+  <resultMap id="FlowRecordConfigResultMap" type="com.vip.pallas.mybatis.entity.FlowRecordConfig">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="index_id" jdbcType="BIGINT" property="indexId" />
+    <result column="template_id" jdbcType="BIGINT" property="templateId" />
+    <result column="sample_rate" jdbcType="DOUBLE" property="sampleRate" />
+    <result column="limit" jdbcType="BIGINT" property="limit" />
+    <result column="start_time" jdbcType="TIMESTAMP" property="startTime" />
+    <result column="end_time" jdbcType="TIMESTAMP" property="endTime" />
+    <result column="is_enable" jdbcType="BIT" property="isEnable" />
+    <result column="note" jdbcType="VARCHAR" property="note" />
+    <result column="create_user" jdbcType="VARCHAR" property="createUser" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="is_deleted" jdbcType="BIT" property="isDeleted" />
+
+    <association property="index" resultMap="IndexResultMap" />
+    <association property="template" resultMap="TemplateResultMap" />
+    <association property="cluster" resultMap="ClusterResultMap" />
+  </resultMap>
+
+  <resultMap id="IndexResultMap" type="com.vip.pallas.mybatis.entity.Index">
+    <id column="_index_id" jdbcType="BIGINT" property="id" />
+    <result column="index_name" jdbcType="VARCHAR" property="indexName" />
+    <result column="cluster_name" jdbcType="VARCHAR" property="clusterName" />
+  </resultMap>
+
+  <resultMap id="TemplateResultMap" type="com.vip.pallas.mybatis.entity.SearchTemplate">
+    <id column="_template_id" jdbcType="BIGINT" property="id" />
+    <result column="template_name" jdbcType="VARCHAR" property="templateName" />
+  </resultMap>
+
+  <resultMap id="ClusterResultMap" type="com.vip.pallas.mybatis.entity.Cluster">
+    <id column="_cluster_id" jdbcType="BIGINT" property="id" />
+    <result column="_cluster_name" jdbcType="VARCHAR" property="clusterId" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    id, index_id, template_id, sample_rate, `limit`, start_time, end_time, is_enable, note,
+    create_user, create_time, update_time, is_deleted
+  </sql>
+
+  <select id="selectAll" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from `flow_record_config` order by update_time desc
+  </select>
+
+  <select id="selectByIndexName" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from `flow_record_config` where cluster_name = #{0} and index_name = #{1} order by update_time desc
+  </select>
+
+  <select id="selectFlowRecordConfigByPage" parameterType="com.vip.pallas.mybatis.entity.Page" resultMap="FlowRecordConfigResultMap">
+    select config.*, i.id _index_id, i.*, t.id _template_id, t.*, cluster.id _cluster_id, cluster.cluster_id _cluster_name, cluster.*
+    from `flow_record_config` config
+    inner join `index` i on config.index_id = i.id
+    inner join `cluster` cluster on i.cluster_name = cluster.cluster_id
+    left join `search_template` t on config.template_id = t.id
+    where config.index_id = #{params.indexId}
+    and config.is_deleted = 0
+    order by config.update_time desc
+  </select>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from flow_record_config
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from flow_record_config
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.vip.pallas.mybatis.entity.FlowRecordConfig">
+    insert into flow_record_config (id, index_id, template_id, 
+      sample_rate, `limit`, start_time,
+      end_time, is_enable, note, 
+      create_user, create_time, update_time, 
+      is_deleted)
+    values (#{id,jdbcType=BIGINT}, #{indexId,jdbcType=BIGINT}, #{templateId,jdbcType=BIGINT}, 
+      #{sampleRate,jdbcType=DOUBLE}, #{limit,jdbcType=BIGINT}, #{startTime,jdbcType=TIMESTAMP}, 
+      #{endTime,jdbcType=TIMESTAMP}, #{isEnable,jdbcType=BIT}, #{note,jdbcType=VARCHAR}, 
+      #{createUser,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, 
+      #{isDeleted,jdbcType=BIT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.vip.pallas.mybatis.entity.FlowRecordConfig">
+    insert into flow_record_config
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="indexId != null">
+        index_id,
+      </if>
+      <if test="templateId != null">
+        template_id,
+      </if>
+      <if test="sampleRate != null">
+        sample_rate,
+      </if>
+      <if test="limit != null">
+        `limit`,
+      </if>
+      <if test="startTime != null">
+        start_time,
+      </if>
+      <if test="endTime != null">
+        end_time,
+      </if>
+      <if test="isEnable != null">
+        is_enable,
+      </if>
+      <if test="note != null">
+        note,
+      </if>
+      <if test="createUser != null">
+        create_user,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+      <if test="isDeleted != null">
+        is_deleted,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="indexId != null">
+        #{indexId,jdbcType=BIGINT},
+      </if>
+      <if test="templateId != null">
+        #{templateId,jdbcType=BIGINT},
+      </if>
+      <if test="sampleRate != null">
+        #{sampleRate,jdbcType=DOUBLE},
+      </if>
+      <if test="limit != null">
+        #{limit,jdbcType=BIGINT},
+      </if>
+      <if test="startTime != null">
+        #{startTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endTime != null">
+        #{endTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isEnable != null">
+        #{isEnable,jdbcType=BIT},
+      </if>
+      <if test="note != null">
+        #{note,jdbcType=VARCHAR},
+      </if>
+      <if test="createUser != null">
+        #{createUser,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDeleted != null">
+        #{isDeleted,jdbcType=BIT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.vip.pallas.mybatis.entity.FlowRecordConfig">
+    update flow_record_config
+    <set>
+      <if test="indexId != null">
+        index_id = #{indexId,jdbcType=BIGINT},
+      </if>
+      <if test="templateId != null">
+        template_id = #{templateId,jdbcType=BIGINT},
+      </if>
+      <if test="sampleRate != null">
+        sample_rate = #{sampleRate,jdbcType=DOUBLE},
+      </if>
+      <if test="limit != null">
+        `limit` = #{limit,jdbcType=BIGINT},
+      </if>
+      <if test="startTime != null">
+        start_time = #{startTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endTime != null">
+        end_time = #{endTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isEnable != null">
+        is_enable = #{isEnable,jdbcType=BIT},
+      </if>
+      <if test="note != null">
+        note = #{note,jdbcType=VARCHAR},
+      </if>
+      <if test="createUser != null">
+        create_user = #{createUser,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDeleted != null">
+        is_deleted = #{isDeleted,jdbcType=BIT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.vip.pallas.mybatis.entity.FlowRecordConfig">
+    update flow_record_config
+    set index_id = #{indexId,jdbcType=BIGINT},
+      template_id = #{templateId,jdbcType=BIGINT},
+      sample_rate = #{sampleRate,jdbcType=DOUBLE},
+      `limit` = #{limit,jdbcType=BIGINT},
+      start_time = #{startTime,jdbcType=TIMESTAMP},
+      end_time = #{endTime,jdbcType=TIMESTAMP},
+      is_enable = #{isEnable,jdbcType=BIT},
+      note = #{note,jdbcType=VARCHAR},
+      create_user = #{createUser,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      is_deleted = #{isDeleted,jdbcType=BIT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

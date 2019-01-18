@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vip.pallas.mybatis.repository.MappingRepository">
+  <resultMap id="BaseResultMap" type="com.vip.pallas.mybatis.entity.Mapping">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="parent_id" jdbcType="BIGINT" property="parentId" />
+    <result column="version_id" jdbcType="BIGINT" property="versionId" />
+    <result column="field_name" jdbcType="VARCHAR" property="fieldName" />
+    <result column="field_type" jdbcType="VARCHAR" property="fieldType" />
+    <result column="multi" jdbcType="BIT" property="multi" />
+    <result column="search" jdbcType="BIT" property="search" />
+    <result column="doc_value" jdbcType="BIT" property="docValue" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="dynamic" jdbcType="BIT" property="dynamic" />
+  </resultMap>
+  
+  <resultMap id="OnlyFieldName" type="com.vip.pallas.mybatis.entity.Mapping">
+    <result column="field_name" jdbcType="VARCHAR" property="fieldName" />
+  </resultMap>
+    
+  <sql id="Base_Column_List">
+    id, parent_id, version_id, field_name, field_type, multi, search, doc_value, create_time, 
+    update_time, dynamic
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from mapping
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  
+  <select id="selectMultiFieldsByVersionId" parameterType="java.lang.Long" resultType="java.lang.String">
+    select field_name from mapping where multi = 1
+    and version_id = #{versionId,jdbcType=BIGINT}
+  </select>  
+  
+  <select id="selectByVersionId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from mapping
+    where version_id = #{versionId,jdbcType=BIGINT}
+  </select>
+  
+  <select id="deleteByVersionId" parameterType="java.lang.Long">
+    delete
+    from mapping
+    where version_id = #{versionId,jdbcType=BIGINT}
+  </select>      
+  
+  <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+    insert into mapping (id, parent_id, version_id, 
+      field_name, field_type, multi, 
+      search, doc_value, create_time, 
+      update_time)
+    values 
+    <foreach collection="list" item="item" index="index" separator="," >  
+     (#{item.id,jdbcType=BIGINT}, #{item.parentId,jdbcType=BIGINT}, #{item.versionId,jdbcType=BIGINT}, 
+      #{item.fieldName,jdbcType=VARCHAR}, #{item.fieldType,jdbcType=VARCHAR}, #{item.multi,jdbcType=BIT}, 
+      #{item.search,jdbcType=BIT}, #{item.docValue,jdbcType=BIT}, #{item.createTime,jdbcType=TIMESTAMP}, 
+      #{item.updateTime,jdbcType=TIMESTAMP})
+    </foreach>  
+  </insert>  
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from mapping
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.vip.pallas.mybatis.entity.Mapping" useGeneratedKeys="true" keyProperty="id">
+    insert into mapping (id, parent_id, version_id, 
+      field_name, field_type, multi, 
+      search, doc_value, create_time, 
+      update_time, dynamic)
+    values (#{id,jdbcType=BIGINT}, #{parentId,jdbcType=BIGINT}, #{versionId,jdbcType=BIGINT}, 
+      #{fieldName,jdbcType=VARCHAR}, #{fieldType,jdbcType=VARCHAR}, #{multi,jdbcType=BIT}, 
+      #{search,jdbcType=BIT}, #{docValue,jdbcType=BIT}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{updateTime,jdbcType=TIMESTAMP},#{dynamic,jdbcType=BIT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.vip.pallas.mybatis.entity.Mapping">
+    insert into mapping
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="parentId != null">
+        parent_id,
+      </if>
+      <if test="versionId != null">
+        version_id,
+      </if>
+      <if test="fieldName != null">
+        field_name,
+      </if>
+      <if test="fieldType != null">
+        field_type,
+      </if>
+      <if test="multi != null">
+        multi,
+      </if>
+      <if test="search != null">
+        search,
+      </if>
+      <if test="docValue != null">
+        doc_value,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+      <if test="dynamic != null">
+        dynamic,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="parentId != null">
+        #{parentId,jdbcType=BIGINT},
+      </if>
+      <if test="versionId != null">
+        #{versionId,jdbcType=BIGINT},
+      </if>
+      <if test="fieldName != null">
+        #{fieldName,jdbcType=VARCHAR},
+      </if>
+      <if test="fieldType != null">
+        #{fieldType,jdbcType=VARCHAR},
+      </if>
+      <if test="multi != null">
+        #{multi,jdbcType=BIT},
+      </if>
+      <if test="search != null">
+        #{search,jdbcType=BIT},
+      </if>
+      <if test="docValue != null">
+        #{docValue,jdbcType=BIT},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="dynamic != null">
+        #{dynamic,jdbcType=BIT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.vip.pallas.mybatis.entity.Mapping">
+    update mapping
+    <set>
+      <if test="parentId != null">
+        parent_id = #{parentId,jdbcType=BIGINT},
+      </if>
+      <if test="versionId != null">
+        version_id = #{versionId,jdbcType=BIGINT},
+      </if>
+      <if test="fieldName != null">
+        field_name = #{fieldName,jdbcType=VARCHAR},
+      </if>
+      <if test="fieldType != null">
+        field_type = #{fieldType,jdbcType=VARCHAR},
+      </if>
+      <if test="multi != null">
+        multi = #{multi,jdbcType=BIT},
+      </if>
+      <if test="search != null">
+        search = #{search,jdbcType=BIT},
+      </if>
+      <if test="docValue != null">
+        doc_value = #{docValue,jdbcType=BIT},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="dynamic != null">
+        dynamic = #{dynamic,jdbcType=BIT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.vip.pallas.mybatis.entity.Mapping">
+    update mapping
+    set parent_id = #{parentId,jdbcType=BIGINT},
+      version_id = #{versionId,jdbcType=BIGINT},
+      field_name = #{fieldName,jdbcType=VARCHAR},
+      field_type = #{fieldType,jdbcType=VARCHAR},
+      multi = #{multi,jdbcType=BIT},
+      search = #{search,jdbcType=BIT},
+      doc_value = #{docValue,jdbcType=BIT},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      dynamic = #{dynamic,jdbcType=BIT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

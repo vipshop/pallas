@@ -1,0 +1,39 @@
+{
+    "settings": {
+      "index": {
+        "number_of_shards": "1",
+        "number_of_replicas": "1"
+      }
+    },
+	"mappings": {
+      "log": {
+        "include_in_all": false,
+        "properties": {
+          "username": {
+            "type": "keyword",
+            "doc_values": false
+          },
+          "created_at": {
+            "type": "date",
+            "format": "yyyy-MM-dd'T'HH:mm:ssZ||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss'.0'||yyyy-MM-dd||epoch_millis"
+          },
+          "path": {
+			"index": false,
+			"doc_values": false,
+            "type": "keyword"
+          },
+          "body": {
+			"index": false,
+			"doc_values": false,
+            "type": "keyword"
+          },
+          "method": {
+			"index": false,
+			"doc_values": false,
+            "type": "keyword"
+          }
+        }
+      }
+    }
+}
+

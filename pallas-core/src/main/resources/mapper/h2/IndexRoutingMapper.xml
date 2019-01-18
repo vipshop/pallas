@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vip.pallas.mybatis.repository.IndexRoutingRepository">
+
+  <resultMap id="resultListMap" type="com.vip.pallas.mybatis.entity.IndexRouting">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="index_id" jdbcType="BIGINT" property="indexId" />
+    <result column="index_name" jdbcType="VARCHAR" property="indexName" />
+    <result column="type" jdbcType="VARCHAR" property="type" />
+    <result column="routings_info" jdbcType="VARCHAR" property="routingsInfo" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+
+  <select id="select" parameterType="com.vip.pallas.mybatis.entity.IndexRouting" resultMap="resultListMap">
+    select * from `index_routing` where index_id=#{ownId} and type=#{type};
+  </select>
+
+  <select id="selectAll" resultMap="resultListMap">
+    select * from `index_routing` order by id desc;
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from `index_routing` where id = #{id}
+  </delete>
+
+  <update id="update" parameterType="com.vip.pallas.mybatis.entity.IndexRouting" >
+    update `index_routing`
+    <set>
+      <if test="routingsInfo != null">
+        routings_info = #{routingsInfo},
+      </if>
+    </set>
+    where id = #{id}
+  </update>
+
+  <insert id="insert" parameterType="com.vip.pallas.mybatis.entity.IndexRouting">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
+      SELECT LAST_INSERT_ID() as id
+    </selectKey>
+    insert into `index_routing`
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+    <if test="indexName != null">
+      index_name,
+    </if>
+      <if test="indexId != null">
+        index_id,
+      </if>
+      <if test="type != null">
+        type,
+      </if>
+    <if test="routingsInfo != null">
+      routings_info,
+    </if>
+    <if test="createTime != null">
+      create_time,
+    </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+    <if test="indexName != null">
+      #{indexName},
+    </if>
+      <if test="indexId != null">
+        #{indexId},
+      </if>
+      <if test="type != null">
+        #{type},
+      </if>
+      <if test="routingsInfo != null">
+        #{routingsInfo},
+      </if>
+      <if test="createTime != null">
+        #{createTime},
+      </if>
+    </trim>
+    </insert>
+
+</mapper>

@@ -1,0 +1,11 @@
+{
+	"size":100,
+    "sort":{
+        "created_at":"desc"
+    },
+    "query":{
+        "term":{
+            "username":"{0}"
+        }
+    }
+}

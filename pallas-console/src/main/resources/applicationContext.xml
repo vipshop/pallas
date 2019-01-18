@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sec="http://www.springframework.org/schema/security"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans classpath:spring-beans-4.1.xsd
+    http://www.springframework.org/schema/context classpath:spring-context-4.1.xsd">
+
+	<bean id="propertyConfigurer" class="com.vip.pallas.utils.ConfigReader" >
+		<property name="ignoreResourceNotFound" value="true" />
+		<property name="locations">
+			<array>
+				<value>classpath:/properties/pallas-application.properties</value>
+				<value>classpath:/properties/${spring.profiles.active}/application-${spring.profiles.active}.properties</value>
+	        </array>
+    	</property>
+	</bean>
+
+	<bean class="com.vip.pallas.utils.SpringContextUtil"
+		scope="singleton" lazy-init="false" />
+
+	<import resource="classpath:spring/applicationContext-service.xml" />
+
+</beans>

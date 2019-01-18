@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vip.pallas.mybatis.repository.SearchTemplateHistoryRepository">
+
+  <resultMap id="resultListMap" type="com.vip.pallas.mybatis.entity.SearchTemplateHistory">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="template_id" jdbcType="BIGINT" property="templateId" />
+    <result column="creator" jdbcType="VARCHAR" property="creator" />
+    <result column="description" jdbcType="VARCHAR" property="description" />
+    <!--
+    <result column="content" jdbcType="LONGVARCHAR" property="content" />
+    <result column="params" jdbcType="LONGVARCHAR" property="params" />
+    -->
+    <result column="create_time" jdbcType="TIMESTAMP" property="createdTime" />
+  </resultMap>
+
+  <resultMap id="resultWholeListMap" type="com.vip.pallas.mybatis.entity.SearchTemplateHistory">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="template_id" jdbcType="BIGINT" property="templateId" />
+    <result column="creator" jdbcType="VARCHAR" property="creator" />
+    <result column="description" jdbcType="VARCHAR" property="description" />
+    <result column="content" jdbcType="LONGVARCHAR" property="content" />
+    <result column="params" jdbcType="LONGVARCHAR" property="params" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createdTime" />
+  </resultMap>
+
+  <insert id="insert" parameterType="com.vip.pallas.mybatis.entity.SearchTemplateHistory">
+    insert into `search_template_h` (id, template_id, creator, description, content, params, create_time)
+    values (#{id}, #{templateId}, #{creator}, #{description}, #{content}, #{params}, #{createdTime})
+  </insert>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from `search_template_h` where id = #{id}
+  </delete>
+  <select id="selectAllByTemplateId" resultMap="resultListMap">
+    select * from `search_template_h` where template_id = #{templateId} order by id desc;
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="resultWholeListMap">
+    select * from `search_template_h` where id = #{id}
+  </select>
+  <select id="getCountByTemplateId" parameterType="java.lang.Long" resultType="java.lang.Integer">
+    select count(*) from `search_template_h` where template_id = #{id}
+  </select>
+  <select id="getLastUpdateTime" resultType="java.util.Date">
+  select create_time from `search_template_h` where template_id = #{templateId} order by create_time desc limit 1;
+  </select>
+  <select id="getLastOnlineById" resultMap="resultListMap">
+    select * from `search_template_h` where template_id = #{templateId} order by create_time desc limit 1;
+  </select>
+
+</mapper>

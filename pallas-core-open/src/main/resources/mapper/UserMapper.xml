@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.vip.pallas.mybatis.repository.UserRepository" >
+  <resultMap id="BaseResultMap" type="com.vip.pallas.mybatis.entity.User" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="username" property="username" jdbcType="VARCHAR" />
+    <result column="password" property="password" jdbcType="VARCHAR" />
+    <result column="real_name" property="realName" jdbcType="VARCHAR" />
+    <result column="employee_id" property="employeeId" jdbcType="VARCHAR" />
+    <result column="email" property="email" jdbcType="VARCHAR" />
+    <result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+    <result column="last_updated_by" property="lastUpdatedBy" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="is_deleted" property="isDeleted" jdbcType="BIT" />
+  </resultMap>
+  
+  <resultMap id="UserExtRolesResultMap" type="com.vip.pallas.mybatis.entity.ext.UserExtRoles" extends="BaseResultMap">
+    <collection property="roles" ofType="com.vip.pallas.mybatis.entity.Role">
+        <id column="role_id" property="id" jdbcType="BIGINT"/>
+        <result column="role_role_name" property="roleName" jdbcType="VARCHAR"/>
+        <result column="role_description" property="description" jdbcType="VARCHAR" />
+        <result column="role_created_by" property="createdBy" jdbcType="VARCHAR" />
+        <result column="role_last_updated_by" property="lastUpdatedBy" jdbcType="VARCHAR" />
+        <result column="role_create_time" property="createTime" jdbcType="TIMESTAMP" />
+        <result column="role_update_time" property="updateTime" jdbcType="TIMESTAMP" />
+        <result column="role_is_deleted" property="isDeleted" jdbcType="BIT" />
+    </collection>
+  </resultMap>
+
+ <sql id="Base_Column_List" >
+   `id`,
+   `username`,
+   `password`,
+   `real_name`,
+   `employee_id`,
+   `email`,
+   `created_by`,
+   `last_updated_by`,
+   `create_time`,
+   `update_time`,
+   `is_deleted`
+ </sql>
+ 
+  <sql id="Base_Column_List_With_Alias" >
+    t.id,
+    t.username,
+    t.real_name,
+    t.employee_id,
+    t.email,
+    t.created_by,
+    t.last_updated_by,
+    t.create_time,
+    t.update_time,
+    t.is_deleted
+  </sql>
+  
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from user
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  
+  <update id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    update user 
+    set `is_deleted` = 1
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <insert id="insert" parameterType="com.vip.pallas.mybatis.entity.User" keyProperty="id" useGeneratedKeys="true">
+    insert into user ( 
+     `id`,
+     `username`,
+     `password`,
+     `real_name`,
+     `employee_id`,
+     `email`,
+     `created_by`,
+     `last_updated_by`,
+     `create_time`,
+     `update_time`,
+     `is_deleted`
+    )
+    values (
+     #{id,jdbcType=BIGINT},
+     #{username,jdbcType=VARCHAR},
+     #{password,jdbcType=VARCHAR},
+     #{realName,jdbcType=VARCHAR},
+     #{employeeId,jdbcType=VARCHAR},
+     #{email,jdbcType=VARCHAR},
+     #{createdBy,jdbcType=VARCHAR},
+     #{lastUpdatedBy,jdbcType=VARCHAR},
+     #{createTime,jdbcType=TIMESTAMP},
+     #{updateTime,jdbcType=TIMESTAMP},
+     #{isDeleted,jdbcType=BIT}
+ )
+  </insert>
+  
+  <insert id="insertSelective" parameterType="com.vip.pallas.mybatis.entity.User" keyProperty="id" useGeneratedKeys="true">
+    insert into user
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        `id`,
+      </if>
+      <if test="username != null" >
+        `username`,
+      </if>
+      <if test="password != null" >
+        `password`,
+      </if>
+      <if test="realName != null" >
+        `real_name`,
+      </if>
+      <if test="employeeId != null" >
+        `employee_id`,
+      </if>
+      <if test="email != null" >
+        `email`,
+      </if>
+      <if test="createdBy != null" >
+        `created_by`,
+      </if>
+      <if test="lastUpdatedBy != null" >
+        `last_updated_by`,
+      </if>
+      <if test="createTime != null" >
+        `create_time`,
+      </if>
+      <if test="updateTime != null" >
+        `update_time`,
+      </if>
+      <if test="isDeleted != null" >
+        `is_deleted`,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="username != null" >
+        #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null" >
+        #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="realName != null" >
+        #{realName,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeId != null" >
+        #{employeeId,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null" >
+        #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="createdBy != null" >
+        #{createdBy,jdbcType=VARCHAR},
+      </if>
+      <if test="lastUpdatedBy != null" >
+        #{lastUpdatedBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDeleted != null" >
+        #{isDeleted,jdbcType=BIT},
+      </if>
+    </trim>
+  </insert>
+  
+  <update id="updateByPrimaryKeySelective" parameterType="com.vip.pallas.mybatis.entity.User" >
+    update user
+	  <set>
+       <if test="username != null" >
+        `username`= #{username,jdbcType=VARCHAR},
+       </if>
+       <if test="password != null" >
+        `password`= #{password,jdbcType=VARCHAR},
+       </if>
+       <if test="realName != null" >
+        `real_name`= #{realName,jdbcType=VARCHAR},
+       </if>
+       <if test="employeeId != null" >
+        `employee_id`= #{employeeId,jdbcType=VARCHAR},
+       </if>
+       <if test="email != null" >
+        `email`= #{email,jdbcType=VARCHAR},
+       </if>
+       <if test="createdBy != null" >
+        `created_by`= #{createdBy,jdbcType=VARCHAR},
+       </if>
+       <if test="lastUpdatedBy != null" >
+        `last_updated_by`= #{lastUpdatedBy,jdbcType=VARCHAR},
+       </if>
+       <if test="createTime != null" >
+        `create_time`= #{createTime,jdbcType=TIMESTAMP},
+       </if>
+       <if test="updateTime != null" >
+        `update_time`= #{updateTime,jdbcType=TIMESTAMP},
+       </if>
+       <if test="isDeleted != null" >
+        `is_deleted`= #{isDeleted,jdbcType=BIT},
+       </if>
+          </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <update id="updateByPrimaryKey" parameterType="com.vip.pallas.mybatis.entity.User" >
+    update user
+    set 
+       `username` = #{username,jdbcType=VARCHAR},
+       `password` = #{password,jdbcType=VARCHAR},
+       `real_name` = #{realName,jdbcType=VARCHAR},
+       `employee_id` = #{employeeId,jdbcType=VARCHAR},
+       `email` = #{email,jdbcType=VARCHAR},
+       `created_by` = #{createdBy,jdbcType=VARCHAR},
+       `last_updated_by` = #{lastUpdatedBy,jdbcType=VARCHAR},
+       `create_time` = #{createTime,jdbcType=TIMESTAMP},
+       `update_time` = #{updateTime,jdbcType=TIMESTAMP},
+       `is_deleted` = #{isDeleted,jdbcType=BIT}
+     where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from user
+    where
+        is_deleted = '0' AND
+        id = #{id,jdbcType=BIGINT}
+  </select>
+  
+  <select id="selectByUsername" resultMap="BaseResultMap">
+    select
+      <include refid="Base_Column_List"></include>
+    from
+      user
+    where
+      is_deleted = '0' AND
+      username = #{username, jdbcType=VARCHAR}
+  </select>
+  
+  <select id="selectCountBykeywords" resultType="java.lang.Integer">
+    select
+        count(*)
+    from
+      user t
+    where
+	  t.is_deleted = 0 
+	  <if test="keywords != null and keywords !=''">
+	   and (t.username like concat('%', #{keywords}, '%') or t.real_name like concat('%', #{keywords}, '%'))
+    </if>
+  </select>
+  
+  <select id="selectUserBykeywords" parameterType="map" resultMap="UserExtRolesResultMap">
+	select 
+	  <include refid="Base_Column_List_With_Alias" />,
+	  r.id AS role_id, 
+	  r.role_name AS role_role_name,
+	  r.description AS role_description,
+	  r.created_by AS role_created_by,
+	  r.last_updated_by AS role_last_updated_by,
+	  r.description AS role_description,
+	  r.create_time AS role_create_time,
+	  r.update_time AS role_update_time,
+	  r.is_deleted AS role_is_deleted
+    from
+      (select
+		    <include refid="Base_Column_List" />
+		from
+		    user 
+		where
+		    is_deleted = 0 
+		    <if test="keywords != null and keywords !=''" >
+		        And (
+		            username like concat('%', #{keywords}, '%') 
+	              or real_name like concat('%', #{keywords}, '%')
+		        )
+		    </if>
+		    <if test="offset >= 0 and pageSize > 0" >
+		        limit ${offset}, ${pageSize}
+		    </if>) t
+		      left join (
+		          user_role ur 
+		          inner join role r on r.id = ur.role_id and r.is_deleted = 0 
+                    ) on ur.user_id = t.id and ur.is_deleted = 0
+  </select>
+ </mapper>
+  
+
+  
+	

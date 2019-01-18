@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vip.pallas.mybatis.repository.IndexRoutingSecurityRepository">
+
+  <resultMap id="resultListMap" type="com.vip.pallas.mybatis.entity.IndexRoutingSecurity">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="index_id" jdbcType="BIGINT" property="indexId" />
+    <result column="index_name" jdbcType="VARCHAR" property="indexName" />
+    <result column="criteria" jdbcType="VARCHAR" property="criteria" />
+    <result column="protocol_controls" jdbcType="VARCHAR" property="protocolControls" />
+    <result column="state" jdbcType="INTEGER" property="state" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+
+  <select id="selectByIndexId" parameterType="com.vip.pallas.mybatis.entity.IndexRoutingSecurity" resultMap="resultListMap">
+    select * from `index_routing_security` where index_id=#{indexId}
+  </select>
+
+  <select id="selectAll" resultMap="resultListMap">
+    select * from `index_routing_security` order by id desc;
+  </select>
+
+  <update id="update" parameterType="com.vip.pallas.mybatis.entity.IndexRoutingSecurity" >
+    update `index_routing_security`
+    <set>
+      <if test="criteria != null">
+        criteria = #{criteria},
+      </if>
+      <if test="protocolControls != null">
+        protocol_controls = #{protocolControls},
+      </if>
+      <if test="state != null">
+        state = #{state},
+      </if>
+    </set>
+    where id = #{id}
+  </update>
+  <insert id="insert" parameterType="com.vip.pallas.mybatis.entity.IndexRoutingSecurity">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
+      SELECT LAST_INSERT_ID() as id
+    </selectKey>
+    insert into `index_routing_security`
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="indexId != null">
+        index_id,
+      </if>
+    <if test="indexName != null">
+      index_name,
+    </if>
+    <if test="criteria != null">
+      criteria,
+    </if>
+      <if test="protocolControls != null">
+        protocol_controls,
+      </if>
+      <if test="state != null">
+        state,
+      </if>
+    <if test="createTime != null">
+      create_time,
+    </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="indexId != null">
+        #{indexId},
+      </if>
+      <if test="indexName != null">
+        #{indexName},
+      </if>
+      <if test="criteria != null">
+        #{criteria},
+      </if>
+      <if test="protocolControls != null">
+        #{protocolControls},
+      </if>
+      <if test="state != null">
+        #{state},
+      </if>
+      <if test="createTime != null">
+        #{createTime},
+      </if>
+    </trim>
+    </insert>
+
+</mapper>

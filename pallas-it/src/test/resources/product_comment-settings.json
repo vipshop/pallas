@@ -1,0 +1,54 @@
+{
+    "index": {
+      "search": {
+        "slowlog": {
+          "threshold": {
+            "fetch": {
+              "info": "0ms"
+            },
+            "query": {
+              "info": "0ms"
+            }
+          }
+        }
+      },
+      "refresh_interval": "60s",
+      "indexing": {
+        "slowlog": {
+          "level": "info",
+          "threshold": {
+            "index": {
+              "info": "0ms"
+            }
+          },
+          "source": "0"
+        }
+      },
+      "number_of_shards": "1",
+      "translog": {
+        "durability": "async"
+      },
+      "analysis": {
+        "analyzer": {
+          "literally_analyzer": {
+            "filter": [
+              "lowercase"
+            ],
+            "tokenizer": "literally_ngram"
+          }
+        },
+        "tokenizer": {
+          "literally_ngram": {
+            "token_chars": [
+              "letter",
+              "digit"
+            ],
+            "min_gram": "1",
+            "type": "nGram",
+            "max_gram": "1"
+          }
+        }
+      },
+      "number_of_replicas": "1"
+    }
+}

@@ -1,0 +1,62 @@
+<div class="row">
+  <div class="col-xs-12">
+    <div class="stats">
+      <div class="row">
+        <div class="col-lg-2">
+      <span class="stat">
+        <span class="stat-value">
+            {{data.cluster_name}}
+        </span>
+      </span>
+        </div>
+        <div class="col-lg-2">
+      <span class="stat">
+        <span class="stat-value">
+            {{data.number_of_nodes | number:0}}
+        </span>
+        <span>
+          nodes
+        </span>
+      </span>
+        </div>
+        <div class="col-lg-2">
+      <span class="stat">
+        <span class="stat-value">
+            {{data.indices.length | number:0}}
+        </span>
+        <span>
+          indices
+        </span>
+      </span>
+        </div>
+        <div class="col-lg-2">
+      <span class="stat">
+        <span class="stat-value">
+            {{data.active_shards + data.initializing_shards + data.relocating_shards + data.unassigned_shards | number:0}}
+        </span>
+        <span>
+          shards
+        </span>
+      </span>
+        </div>
+        <div class="col-lg-2">
+      <span class="stat">
+        <span class="stat-value">
+            {{data.docs_count | number:0}}
+        </span>
+        <span>
+          docs
+        </span>
+      </span>
+        </div>
+        <div class="col-lg-2">
+      <span class="stat">
+        <span class="stat-value">
+            {{data.size_in_bytes | bytes}}
+        </span>
+      </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

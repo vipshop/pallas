@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sec="http://www.springframework.org/schema/security"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans classpath:spring-beans-4.1.xsd
+	http://www.springframework.org/schema/tx  classpath:spring-tx-4.1.xsd
+    http://www.springframework.org/schema/context  classpath:spring-context-4.1.xsd http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.vip.pallas.mybatis.repository" />
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+        <property name="annotationClass" value="org.springframework.stereotype.Repository" />
+    </bean>
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="typeAliasesPackage" value="com.vip.pallas.mybatis.entity" />
+        <property name="mapperLocations" value="classpath*:mapper/h2/*Mapper.xml" />
+        <property name="plugins">
+            <bean class="com.vip.pallas.mybatis.interceptor.h2.H2PageInterceptor"></bean>
+        </property>
+    </bean>
+
+    <bean name="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close" lazy-init="true">
+        <property name="driverClassName" value="org.h2.Driver" />
+        <property name="url" value="${h2.connect.url}" />
+        <property name="username" value="${h2.username}" />
+        <property name="password" value="${h2.password}" />
+        <property name="maxActive" value="30" />
+        <property name="initialSize" value="0" />
+        <property name="minIdle" value="1" />
+        <property name="maxWait" value="10000" />
+        <property name="testWhileIdle" value="true" />
+    </bean>
+
+    <jdbc:initialize-database data-source="dataSource" ignore-failures="NONE" enabled="${pallas.db.initialize:true}">
+        <jdbc:script location="classpath:db/ddl/h2/schema.sql"/>
+        <jdbc:script location="classpath:db/dml/h2/data.sql" encoding="utf-8" />
+    </jdbc:initialize-database>
+
+</beans>

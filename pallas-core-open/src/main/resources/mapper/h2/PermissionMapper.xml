@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.vip.pallas.mybatis.repository.PermissionRepository" >
+  <resultMap id="BaseResultMap" type="com.vip.pallas.mybatis.entity.Permission" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="permission_code" property="permissionCode" jdbcType="VARCHAR" />
+    <result column="permission_name" property="permissionName" jdbcType="VARCHAR" />
+    <result column="description" property="description" jdbcType="VARCHAR" />
+    <result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+    <result column="last_updated_by" property="lastUpdatedBy" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="is_deleted" property="isDeleted" jdbcType="BIT" />
+  </resultMap>
+
+ <sql id="Base_Column_List" >
+   `id`,
+   `permission_code`,
+   `permission_name`,
+   `description`,
+   `created_by`,
+   `last_updated_by`,
+   `create_time`,
+   `update_time`,
+   `is_deleted`
+ </sql>
+ 
+  <sql id="Base_Column_List_With_Alias" >
+    t.id,
+    t.permission_code,
+    t.permission_name,
+    t.description,
+    t.created_by,
+    t.last_updated_by,
+    t.create_time,
+    t.update_time,
+    t.is_deleted
+  </sql>
+  
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from permission
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  
+  <update id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from permission
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <insert id="insert" parameterType="com.vip.pallas.mybatis.entity.Permission" >
+    insert into permission ( 
+     `id`,
+     `permission_code`,
+     `permission_name`,
+     `description`,
+     `created_by`,
+     `last_updated_by`,
+     `create_time`,
+     `update_time`,
+     `is_deleted`
+    )
+    values (
+     #{id,jdbcType=BIGINT},
+     #{permissionCode,jdbcType=VARCHAR},
+     #{permissionName,jdbcType=VARCHAR},
+     #{description,jdbcType=VARCHAR},
+     #{createdBy,jdbcType=VARCHAR},
+     #{lastUpdatedBy,jdbcType=VARCHAR},
+     #{createTime,jdbcType=TIMESTAMP},
+     #{updateTime,jdbcType=TIMESTAMP},
+     #{isDeleted,jdbcType=BIT}
+ )
+  </insert>
+  
+  
+  
+  <insert id="insertSelective" parameterType="com.vip.pallas.mybatis.entity.Permission" >
+    insert into permission
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        `id`,
+      </if>
+      <if test="permissionCode != null" >
+        `permission_code`,
+      </if>
+      <if test="permissionName != null" >
+        `permission_name`,
+      </if>
+      <if test="description != null" >
+        `description`,
+      </if>
+      <if test="createdBy != null" >
+        `created_by`,
+      </if>
+      <if test="lastUpdatedBy != null" >
+        `last_updated_by`,
+      </if>
+      <if test="createTime != null" >
+        `create_time`,
+      </if>
+      <if test="updateTime != null" >
+        `update_time`,
+      </if>
+      <if test="isDeleted != null" >
+        `is_deleted`,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="permissionCode != null" >
+        #{permissionCode,jdbcType=VARCHAR},
+      </if>
+      <if test="permissionName != null" >
+        #{permissionName,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null" >
+        #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="createdBy != null" >
+        #{createdBy,jdbcType=VARCHAR},
+      </if>
+      <if test="lastUpdatedBy != null" >
+        #{lastUpdatedBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDeleted != null" >
+        #{isDeleted,jdbcType=BIT},
+      </if>
+    </trim>
+  </insert>
+  
+  <update id="updateByPrimaryKeySelective" parameterType="com.vip.pallas.mybatis.entity.Permission" >
+    update permission
+	  <set>
+       <if test="permissionCode != null" >
+        `permission_code`= #{permissionCode,jdbcType=VARCHAR},
+       </if>
+       <if test="permissionName != null" >
+        `permission_name`= #{permissionName,jdbcType=VARCHAR},
+       </if>
+       <if test="description != null" >
+        `description`= #{description,jdbcType=VARCHAR},
+       </if>
+       <if test="createdBy != null" >
+        `created_by`= #{createdBy,jdbcType=VARCHAR},
+       </if>
+       <if test="lastUpdatedBy != null" >
+        `last_updated_by`= #{lastUpdatedBy,jdbcType=VARCHAR},
+       </if>
+       <if test="createTime != null" >
+        `create_time`= #{createTime,jdbcType=TIMESTAMP},
+       </if>
+       <if test="updateTime != null" >
+        `update_time`= #{updateTime,jdbcType=TIMESTAMP},
+       </if>
+       <if test="isDeleted != null" >
+        `is_deleted`= #{isDeleted,jdbcType=BIT},
+       </if>
+          </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <update id="updateByPrimaryKey" parameterType="com.vip.pallas.mybatis.entity.Permission" >
+    update permission
+    set 
+       `permission_code` = #{permissionCode,jdbcType=VARCHAR},
+       `permission_name` = #{permissionName,jdbcType=VARCHAR},
+       `description` = #{description,jdbcType=VARCHAR},
+       `created_by` = #{createdBy,jdbcType=VARCHAR},
+       `last_updated_by` = #{lastUpdatedBy,jdbcType=VARCHAR},
+       `create_time` = #{createTime,jdbcType=TIMESTAMP},
+       `update_time` = #{updateTime,jdbcType=TIMESTAMP},
+       `is_deleted` = #{isDeleted,jdbcType=BIT}
+     where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <select id="selectByUsername" resultMap="BaseResultMap">
+    select
+        <include refid="Base_Column_List_With_Alias"></include>
+    from `user` u
+		inner join user_role ur on ur.user_id = u.id
+		inner join role r on r.id = ur.role_id
+		inner join role_permission rp on rp.role_id = r.id
+		inner join permission t on t.id = rp.permission_id
+	where
+	    u.username = #{username,jdbcType=VARCHAR}
+        and u.is_deleted = 0
+		and ur.is_deleted = 0
+		and r.is_deleted = 0
+		and rp.is_deleted = 0
+		and t.is_deleted = 0
+  </select>
+ </mapper>
+  
+
+  
+	

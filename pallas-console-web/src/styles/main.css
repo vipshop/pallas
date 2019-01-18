@@ -1,0 +1,132 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Microsoft YaHei', Tahoma, Geneva, sans-serif, SimSun;
+    font-size: 1rem;
+    font-weight: normal;
+    line-height: 1.5;
+    color: #fff;
+    background-color: #222;
+}
+a{
+    color:#eee;
+    text-decoration: none;
+}
+a:hover{
+    color:#97a8be;
+}
+
+input, textarea, keygen, select, button {
+    font-family: 'Microsoft YaHei', Tahoma, Geneva, sans-serif, SimSun;
+}
+table{
+    font-size:14px;
+}
+pre {
+    font: 12px/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+}
+
+.mrg-lft-10 {
+    margin-left: 10px;
+}
+
+.mrg-top-10 {
+   margin-top: 10px; 
+}
+
+.mrg-top-15 {
+    margin-top: 15px; 
+ }
+
+.pad-top-20 {
+    padding-top: 20px;
+}
+
+.my-breadcrumb {
+    margin: 10px 0;
+    background: #373a3c;
+    border-radius: 0.25rem;
+    height: 30px;
+    padding-left: 15px;
+}
+
+.my-breadcrumb-content {
+    line-height: 30px;
+    font-size: 15px;
+}
+
+.pull-left {
+    float: left!important;
+}
+
+.pull-right {
+    float: right!important;
+}
+
+.my-a-link a {
+    text-decoration: initial;
+    cursor: pointer;
+}
+
+.my-pagination {
+    padding: 10px 0;
+}
+
+/*过滤组件样式*/
+.data-table-filter {
+    overflow: hidden;
+    height: 40px;
+    margin-bottom: 8px;
+}
+
+.el-form--inline .filter-search {
+    margin-right: 0px;
+}
+
+.content {
+    margin: 0px 0px 5px 0px !important;
+}
+
+[class*="fa fa-"] {
+    margin-right: 4px;
+    margin-left: 0;
+}
+
+.my-tab-content {
+    background-color: #373a3c;
+    padding: 0 15px 15px;
+}
+
+.page-content {
+    padding: 0 15px 20px;
+}
+
+.dropdown-operation li.el-dropdown-menu__item a span {
+    font-size: 13px;
+}
+
+.dropdown-operation li.el-dropdown-menu__item a span i {
+    color: #bfcbd9;
+}
+
+.my-switch {
+    height: 36px;
+}
+
+.my-switch:after {
+    content: '';
+    display: inline-block;
+    height: 36px;
+    width: 0;
+    vertical-align: middle;
+}
+
+.view-content {
+    width: 700px;
+    color: #fff;
+    overflow: auto;
+}
+
+.text-danger {
+    color: #FF4949;
+}

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.vip.pallas.mybatis.repository.RolePermissionRepository" >
+  <resultMap id="BaseResultMap" type="com.vip.pallas.mybatis.entity.RolePermission" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="role_id" property="roleId" jdbcType="BIGINT" />
+    <result column="permission_id" property="permissionId" jdbcType="BIGINT" />
+    <result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+    <result column="last_updated_by" property="lastUpdatedBy" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="is_deleted" property="isDeleted" jdbcType="BIT" />
+  </resultMap>
+
+ <sql id="Base_Column_List" >
+   `id`,
+   `role_id`,
+   `permission_id`,
+   `created_by`,
+   `last_updated_by`,
+   `create_time`,
+   `update_time`,
+   `is_deleted`
+ </sql>
+  
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from role_permission
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  
+  <update id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    update role_permission 
+    set `is_deleted` = 1
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <insert id="insert" parameterType="com.vip.pallas.mybatis.entity.RolePermission" >
+    insert into role_permission ( 
+     `id`,
+     `role_id`,
+     `permission_id`,
+     `created_by`,
+     `last_updated_by`,
+     `create_time`,
+     `update_time`,
+     `is_deleted`
+    )
+    values (
+     #{id,jdbcType=BIGINT},
+     #{roleId,jdbcType=BIGINT},
+     #{permissionId,jdbcType=BIGINT},
+     #{createdBy,jdbcType=VARCHAR},
+     #{lastUpdatedBy,jdbcType=VARCHAR},
+     #{createTime,jdbcType=TIMESTAMP},
+     #{updateTime,jdbcType=TIMESTAMP},
+     #{isDeleted,jdbcType=BIT}
+ )
+  </insert>
+  
+  
+  
+  <insert id="insertSelective" parameterType="com.vip.pallas.mybatis.entity.RolePermission" >
+    insert into role_permission
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        `id`,
+      </if>
+      <if test="roleId != null" >
+        `role_id`,
+      </if>
+      <if test="permissionId != null" >
+        `permission_id`,
+      </if>
+      <if test="createdBy != null" >
+        `created_by`,
+      </if>
+      <if test="lastUpdatedBy != null" >
+        `last_updated_by`,
+      </if>
+      <if test="createTime != null" >
+        `create_time`,
+      </if>
+      <if test="updateTime != null" >
+        `update_time`,
+      </if>
+      <if test="isDeleted != null" >
+        `is_deleted`,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="roleId != null" >
+        #{roleId,jdbcType=BIGINT},
+      </if>
+      <if test="permissionId != null" >
+        #{permissionId,jdbcType=BIGINT},
+      </if>
+      <if test="createdBy != null" >
+        #{createdBy,jdbcType=VARCHAR},
+      </if>
+      <if test="lastUpdatedBy != null" >
+        #{lastUpdatedBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDeleted != null" >
+        #{isDeleted,jdbcType=BIT},
+      </if>
+    </trim>
+  </insert>
+  
+  <update id="updateByPrimaryKeySelective" parameterType="com.vip.pallas.mybatis.entity.RolePermission" >
+    update role_permission
+	  <set>
+       <if test="roleId != null" >
+        `role_id`= #{roleId,jdbcType=BIGINT},
+       </if>
+       <if test="permissionId != null" >
+        `permission_id`= #{permissionId,jdbcType=BIGINT},
+       </if>
+       <if test="createdBy != null" >
+        `created_by`= #{createdBy,jdbcType=VARCHAR},
+       </if>
+       <if test="lastUpdatedBy != null" >
+        `last_updated_by`= #{lastUpdatedBy,jdbcType=VARCHAR},
+       </if>
+       <if test="createTime != null" >
+        `create_time`= #{createTime,jdbcType=TIMESTAMP},
+       </if>
+       <if test="updateTime != null" >
+        `update_time`= #{updateTime,jdbcType=TIMESTAMP},
+       </if>
+       <if test="isDeleted != null" >
+        `is_deleted`= #{isDeleted,jdbcType=BIT},
+       </if>
+          </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <update id="updateByPrimaryKey" parameterType="com.vip.pallas.mybatis.entity.RolePermission" >
+    update role_permission
+    set 
+       `role_id` = #{roleId,jdbcType=BIGINT},
+       `permission_id` = #{permissionId,jdbcType=BIGINT},
+       `created_by` = #{createdBy,jdbcType=VARCHAR},
+       `last_updated_by` = #{lastUpdatedBy,jdbcType=VARCHAR},
+       `create_time` = #{createTime,jdbcType=TIMESTAMP},
+       `update_time` = #{updateTime,jdbcType=TIMESTAMP},
+       `is_deleted` = #{isDeleted,jdbcType=BIT}
+     where id = #{id,jdbcType=BIGINT}
+  </update>
+
+ </mapper>
+  
+
+  
+	

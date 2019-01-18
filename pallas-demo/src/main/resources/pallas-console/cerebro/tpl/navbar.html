@@ -1,0 +1,55 @@
+<nav class="navbar navbar-default navbar-fixed-top navbar-{{status}}" ng-controller="NavbarController">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li><a class="nav-item nav-link" ng-class="{'active':isUrl('/dashboard')}" ng-href="#dashboard?cluster={{cluster}}&host={{host}}"><i class="fa fa-sitemap"></i> 状态面板</a></li>
+        <li><a class="nav-item nav-link" ng-class="{'active':isUrl('/overview')}" ng-href="#overview?cluster={{cluster}}&host={{host}}"><i class="fa fa-sitemap"></i> 索引总览</a></li>
+        <li><a class="nav-item nav-link" ng-class="{'active':isUrl('/nodes')}" ng-href="#nodes?cluster={{cluster}}&host={{host}}"><i class="fa fa-server"></i> 节点总览</a></li>
+        <li><a class="nav-item nav-link" ng-class="{'active':isUrl('/rest')}" ng-href="#rest?cluster={{cluster}}&host={{host}}"><i class="fa fa-edit"></i> 命令控制台</a></li>
+        <li><a class="nav-item nav-link" ng-class="{'active':isUrl('/cluster_settings')}" ng-href="#cluster_settings?cluster={{cluster}}&host={{host}}"><i class="fa fa-cogs"></i> 集群设置</a></li>
+        <li><a class="nav-item nav-link" ng-class="{'active':isUrl('/cat')}" ng-href="#cat?cluster={{cluster}}&host={{host}}"><i class="fa fa-list"></i> cat apis</a></li>
+        <li><a class="nav-item nav-link" ng-class="{'active':isUrl('/aliases')}" ng-href="#aliases?cluster={{cluster}}&host={{host}}"><i class="fa fa-tags"></i> 别名管理</a></li>
+        <li><a class="nav-item nav-link" ng-class="{'active':isUrl('/analysis')}" ng-href="#analysis?cluster={{cluster}}&host={{host}}"><i class="fa fa-puzzle-piece"></i> 字段分析</a></li>
+        <li><a class="nav-item nav-link" ng-class="{'active':isUrl('/templates')}" ng-href="#templates?cluster={{cluster}}&host={{host}}"><i class="fa fa-puzzle-piece"></i> 动态模板</a></li>
+
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+          <a target="_self" href="#" data-toggle="dropdown" class="dropdown-toggle">
+            <i class="fa fa-fw fa-refresh"></i> {{refreshInterval | timeInterval}} <i class="fa fa-fw fa-caret-down"></i>
+          </a>
+          <ul class="dropdown-menu" style="min-width: 60px;">
+            <li ng-repeat="i in [3000, 5000, 10000, 15000, 30000, 60000, 1800000] track by $index">
+              <a class="nav-item nav-link" ng-click="setRefreshInterval(i)">
+                {{i | timeInterval}}
+              </a>
+            </li>
+          </ul>
+        </li>
+         <!--<li class="hidden-xs">
+          <a class="nav-item nav-link">
+            <span ng-show="host">{{host}}</span>
+          </a>
+        </li>
+       <li>
+          <a href="#connect" class="nav-item nav-link hidden-xs"><i class="fa fa-plug"></i></a>
+        </li>
+        <li>
+          <form action="auth/logout" method="POST" ng-show="username">
+            <button class="btn btn-lg btn-link" type="submit">
+              <i class="fa fa-power-off"></i>
+            </button>
+          </form>
+        </li>-->
+      </ul>
+    </div>
+  </div>
+</nav>

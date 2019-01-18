@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vip.pallas.mybatis.repository.IndexVersionRepository">
+  <resultMap id="BaseResultMap" type="com.vip.pallas.mybatis.entity.IndexVersion">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="index_id" jdbcType="BIGINT" property="indexId" />
+    <result column="version_name" jdbcType="VARCHAR" property="versionName" />
+    <result column="is_used" jdbcType="BIT" property="isUsed" />
+    <result column="sync_stat" jdbcType="VARCHAR" property="syncStat" />
+    <result column="num_of_shards" jdbcType="TINYINT" property="numOfShards" />
+    <result column="num_of_replication" jdbcType="TINYINT" property="numOfReplication" />
+    <result column="vdp_queue" jdbcType="VARCHAR" property="vdpQueue" />
+    <result column="routing_key" jdbcType="VARCHAR" property="routingKey" />
+    <result column="id_field" jdbcType="VARCHAR" property="idField" />
+    <result column="update_time_field" jdbcType="VARCHAR" property="updateTimeField" />    
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="is_sync" jdbcType="BIT" property="isSync" />
+    <result column="vdp" jdbcType="BIT" property="vdp" />
+    <result column="check_sum" jdbcType="BIT" property="checkSum" />
+    <result column="filter_fields" jdbcType="BIT" property="filterFields" />
+    <result column="prefer_executor" jdbcType="VARCHAR" property="preferExecutor" />
+    <result column="real_cluster_id" jdbcType="BIGINT" property="clusterId" />
+    <result column="allocation_nodes" jdbcType="BIGINT" property="allocationNodes" />
+    <result column="dynamic" jdbcType="BIT" property="dynamic" />
+    <result column="index_slow_threshold" jdbcType="BIGINT" property="indexSlowThreshold" />
+    <result column="fetch_slow_threshold" jdbcType="BIGINT" property="fetchSlowThreshold" />
+    <result column="query_slow_threshold" jdbcType="BIGINT" property="querySlowThreshold" />
+    <result column="refresh_interval" jdbcType="TINYINT" property="refreshInterval" />
+  </resultMap>
+  
+  <resultMap id="IndexParam" type="com.vip.pallas.bean.IndexParam">
+    <result column="cluster_name" jdbcType="VARCHAR" property="clusterName" />
+    <result column="client_address" jdbcType="VARCHAR" property="clusterIPList" />
+    <result column="index_name" jdbcType="VARCHAR" property="indexName" />
+    <result column="routing_key" jdbcType="VARCHAR" property="routingField" />
+    <result column="id_field" jdbcType="VARCHAR" property="idField" />
+    <result column="update_time_field" jdbcType="VARCHAR" property="updateTimeField" />
+    <result column="vdp" jdbcType="BIT" property="vdp" />
+    <result column="check_sum" jdbcType="BIT" property="checkSum" />
+    <result column="filter_fields" jdbcType="BIT" property="filterFields" />
+    <result column="preferExecutor" jdbcType="VARCHAR" property="preferExecutor" />
+
+    <result column="version_id" jdbcType="BIGINT" property="versionId" />
+    <result column="index_id" jdbcType="BIGINT" property="indexId" />
+    <result column="is_sync" jdbcType="BIT" property="isSync" />
+        
+    <collection property="dataSourceList" ofType="com.vip.pallas.mybatis.entity.DataSource">
+		<result column="dbname" jdbcType="VARCHAR" property="dbname" />
+		<result column="table_name" jdbcType="VARCHAR" property="tableName" />
+		<result column="username" jdbcType="VARCHAR" property="username" />
+		<result column="password" jdbcType="VARCHAR" property="password" />
+    	<result column="ip" jdbcType="VARCHAR" property="ip" />
+    	<result column="port" jdbcType="VARCHAR" property="port" />
+	</collection>
+  </resultMap>
+    
+  <sql id="Base_Column_List">
+    id, index_id, version_name, is_used, sync_stat, num_of_shards, num_of_replication, 
+    vdp_queue, routing_key, create_time, update_time, id_field, update_time_field, is_sync,
+    vdp, filter_fields, prefer_executor, check_sum, real_cluster_id, allocation_nodes, dynamic,
+    index_slow_threshold, fetch_slow_threshold, query_slow_threshold, refresh_interval
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from index_version
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from index_version
+  </select>
+  
+   <select id="selectUsed"  resultMap="IndexParam">
+  SELECT v.id version_id,  v.index_id, c.cluster_id as cluster_name, c.client_address, i.index_name, ds.dbname, ds.table_name, routing_key, 
+  	id_field, update_time_field, ds.ip, ds.port, ds.username, ds.password  FROM `index` i, cluster c, index_version v, data_source ds 
+    WHERE i.id = v.index_id 
+    AND v.real_cluster_id = c.id
+	AND ds.index_id = v.index_id
+	AND v.is_used = 1
+  </select>
+  
+  
+  <select id="selectPage" parameterType="com.vip.pallas.mybatis.entity.Page" resultMap="BaseResultMap">
+  select 
+    <include refid="Base_Column_List" />
+    from index_version
+    where index_id = #{params.indexId,jdbcType=BIGINT}
+    ORDER BY id DESC
+  </select>  
+  
+  <update id="updateSyncState" parameterType="java.lang.Boolean">
+    update index_version
+    <set>
+      <if test="isSync != null">
+        is_sync = #{isSync,jdbcType=BIT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>  
+  
+   <update id="deleteVersion">
+    delete from index_version where id = #{id,jdbcType=BIGINT};
+  </update>  
+  
+  <update id="enableVersion">
+    update index_version set is_used = 1 where id = #{id,jdbcType=BIGINT};
+  </update>
+
+  <update id="disableSameIndexVersion">
+    update index_version set is_used = 0 where index_id = #{indexId,jdbcType=BIGINT} and real_cluster_id = #{clusterId,jdbcType=BIGINT};
+  </update>
+  
+  <update id="disableVersion">
+    update index_version set is_used = 0 where id = #{id,jdbcType=BIGINT}
+  </update>  
+  
+  <select id="getUsedVersionByIndexIdAndClusterId" resultType="java.lang.Long">
+    select id 
+    from index_version
+    where is_used = 1
+    and index_id = #{indexId,jdbcType=BIGINT} and real_cluster_id = #{clusterId,jdbcType=BIGINT}
+    limit 0,1
+  </select>
+  
+  <select id="findAllByClusterIdAndIndexId" parameterType="com.vip.pallas.mybatis.entity.Page" resultMap="BaseResultMap">
+  select 
+    <include refid="Base_Column_List" />
+    from index_version
+    where index_id = #{indexId,jdbcType=BIGINT} and real_cluster_id = #{clusterId,jdbcType=BIGINT}
+  </select>
+ 
+    <select id="selectIndexParamById" parameterType="java.lang.Long" resultMap="IndexParam">
+  	SELECT v.id version_id,  v.index_id, c.cluster_id as cluster_name, c.client_address, i.index_name, ds.dbname, ds.table_name, routing_key, 
+  	id_field, update_time_field, ds.ip, ds.port, ds.username, ds.password , v.vdp, v.filter_fields, v.prefer_executor, v.check_sum
+  	FROM `index` i, cluster c, index_version v left join data_source ds on ds.index_id = v.index_id
+    WHERE i.id = v.index_id 
+    AND v.real_cluster_id = c.id
+	AND v.id = #{id,jdbcType=BIGINT}
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from index_version
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.vip.pallas.mybatis.entity.IndexVersion" useGeneratedKeys="true" keyProperty="id">
+  	<selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
+      SELECT LAST_INSERT_ID() as id
+    </selectKey>
+    insert into index_version (id, index_id, version_name, 
+      is_used, sync_stat, num_of_shards, 
+      num_of_replication, vdp_queue, routing_key, 
+      create_time, update_time, id_field, 
+      update_time_field, is_sync, vdp, filter_fields, check_sum, real_cluster_id, allocation_nodes, dynamic, index_slow_threshold, fetch_slow_threshold,
+      query_slow_threshold, refresh_interval)
+    values (#{id,jdbcType=BIGINT}, #{indexId,jdbcType=BIGINT}, #{versionName,jdbcType=VARCHAR}, 
+      #{isUsed,jdbcType=BIT}, #{syncStat,jdbcType=VARCHAR}, #{numOfShards,jdbcType=TINYINT}, 
+      #{numOfReplication,jdbcType=TINYINT}, #{vdpQueue,jdbcType=VARCHAR}, #{routingKey,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{idField,jdbcType=VARCHAR}, 
+      #{updateTimeField,jdbcType=VARCHAR}, #{isSync,jdbcType=BIT}, #{vdp,jdbcType=BIT}, #{filterFields,jdbcType=BIT},
+      #{checkSum,jdbcType=BIT}, #{clusterId,jdbcType=BIGINT}, #{allocationNodes,jdbcType=VARCHAR}, #{dynamic,jdbcType=BIT},
+      #{indexSlowThreshold,jdbcType=BIGINT}, #{fetchSlowThreshold,jdbcType=BIGINT},#{querySlowThreshold,jdbcType=BIGINT},
+      #{refreshInterval,jdbcType=TINYINT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.vip.pallas.mybatis.entity.IndexVersion">
+    insert into index_version
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="indexId != null">
+        index_id,
+      </if>
+      <if test="versionName != null">
+        version_name,
+      </if>
+      <if test="isUsed != null">
+        is_used,
+      </if>
+      <if test="syncStat != null">
+        sync_stat,
+      </if>
+      <if test="numOfShards != null">
+        num_of_shards,
+      </if>
+      <if test="numOfReplication != null">
+        num_of_replication,
+      </if>
+      <if test="vdpQueue != null">
+        vdp_queue,
+      </if>
+      <if test="routingKey != null">
+        routing_key,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+      <if test="idField != null">
+        id_field,
+      </if>
+      <if test="updateTimeField != null">
+        update_time_field,
+      </if>
+      <if test="isSync != null">
+        is_sync,
+      </if>
+      <if test="clusterId != null">
+        real_cluster_id,
+      </if>
+      <if test="allocationNodes != null">
+        allocation_nodes,
+      </if>
+      <if test="dynamic != null">
+        dynamic,
+      </if>
+      <if test="indexSlowThreshold != null">
+        index_slow_threshold,
+      </if>
+      <if test="fetchSlowThreshold != null">
+        fetch_slow_threshold,
+      </if>
+      <if test="querySlowThreshold != null">
+        query_slow_threshold,
+      </if>
+      <if test="refreshInterval != null">
+        refresh_interval,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="indexId != null">
+        #{indexId,jdbcType=BIGINT},
+      </if>
+      <if test="versionName != null">
+        #{versionName,jdbcType=VARCHAR},
+      </if>
+      <if test="isUsed != null">
+        #{isUsed,jdbcType=BIT},
+      </if>
+      <if test="syncStat != null">
+        #{syncStat,jdbcType=VARCHAR},
+      </if>
+      <if test="numOfShards != null">
+        #{numOfShards,jdbcType=TINYINT},
+      </if>
+      <if test="numOfReplication != null">
+        #{numOfReplication,jdbcType=TINYINT},
+      </if>
+      <if test="vdpQueue != null">
+        #{vdpQueue,jdbcType=VARCHAR},
+      </if>
+      <if test="routingKey != null">
+        #{routingKey,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="idField != null">
+        #{idField,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTimeField != null">
+        #{updateTimeField,jdbcType=VARCHAR},
+      </if>
+      <if test="isSync != null">
+        #{isSync,jdbcType=BIT},
+      </if>
+      <if test="clusterId != null">
+        #{clusterId,jdbcType=BIGINT},
+      </if>
+      <if test="allocationNodes != null">
+        #{allocationNodes,jdbcType=VARCHAR},
+      </if>
+      <if test="dynamic != null">
+        #{dynamic,jdbcType=BIT},
+      </if>
+      <if test="indexSlowThreshold != null">
+        #{indexSlowThreshold,jdbcType=BIGINT},
+      </if>
+      <if test="fetchSlowThreshold != null">
+        #{fetchSlowThreshold,jdbcType=BIGINT},
+      </if>
+      <if test="querySlowThreshold != null">
+        #{querySlowThreshold,jdbcType=BIGINT},
+      </if>
+      <if test="refreshInterval != null">
+        #{refreshInterval,jdbcType=TINYINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.vip.pallas.mybatis.entity.IndexVersion">
+    update index_version
+    <set>
+      <if test="indexId != null">
+        index_id = #{indexId,jdbcType=BIGINT},
+      </if>
+      <if test="versionName != null">
+        version_name = #{versionName,jdbcType=VARCHAR},
+      </if>
+      <if test="isUsed != null">
+        is_used = #{isUsed,jdbcType=BIT},
+      </if>
+      <if test="syncStat != null">
+        sync_stat = #{syncStat,jdbcType=VARCHAR},
+      </if>
+      <if test="numOfShards != null">
+        num_of_shards = #{numOfShards,jdbcType=TINYINT},
+      </if>
+      <if test="numOfReplication != null">
+        num_of_replication = #{numOfReplication,jdbcType=TINYINT},
+      </if>
+      <if test="vdpQueue != null">
+        vdp_queue = #{vdpQueue,jdbcType=VARCHAR},
+      </if>
+      <if test="routingKey != null">
+        routing_key = #{routingKey,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="idField != null">
+        id_field = #{idField,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTimeField != null">
+        update_time_field = #{updateTimeField,jdbcType=VARCHAR},
+      </if>
+      <if test="isSync != null">
+        is_sync = #{isSync,jdbcType=BIT},
+      </if>
+      <if test="vdp != null">
+        vdp = #{vdp,jdbcType=BIT},
+      </if>
+      <if test="filterFields != null">
+        filter_fields = #{filterFields,jdbcType=BIT},
+      </if>
+      <if test="checkSum != null">
+        check_sum = #{checkSum,jdbcType=BIT},
+      </if>
+      <if test="clusterId != null">
+        real_cluster_id = #{clusterId,jdbcType=BIGINT},
+      </if>
+      <if test="allocationNodes != null">
+        allocation_nodes = #{allocationNodes,jdbcType=VARCHAR},
+      </if>
+      <if test="dynamic != null">
+        dynamic = #{dynamic,jdbcType=BIT},
+      </if>
+      <if test="indexSlowThreshold != null">
+        index_slow_threshold = #{indexSlowThreshold,jdbcType=BIGINT},
+      </if>
+      <if test="fetchSlowThreshold != null">
+        fetch_slow_threshold = #{fetchSlowThreshold,jdbcType=BIGINT},
+      </if>
+      <if test="querySlowThreshold != null">
+        query_slow_threshold = #{querySlowThreshold,jdbcType=BIGINT},
+      </if>
+      <if test="refreshInterval != null">
+        refresh_interval = #{refreshInterval,jdbcType=TINYINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.vip.pallas.mybatis.entity.IndexVersion">
+    update index_version
+    set index_id = #{indexId,jdbcType=BIGINT},
+      version_name = #{versionName,jdbcType=VARCHAR},
+      is_used = #{isUsed,jdbcType=BIT},
+      sync_stat = #{syncStat,jdbcType=VARCHAR},
+      num_of_shards = #{numOfShards,jdbcType=TINYINT},
+      num_of_replication = #{numOfReplication,jdbcType=TINYINT},
+      vdp_queue = #{vdpQueue,jdbcType=VARCHAR},
+      routing_key = #{routingKey,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      id_field = #{idField,jdbcType=VARCHAR},
+      update_time_field = #{updateTimeField,jdbcType=VARCHAR},
+      is_sync = #{isSync,jdbcType=BIT},
+      real_cluster_id = #{record.clusterId,jdbcType=BIGINT},
+      allocation_nodes = #{allocationNodes,jdbcType=VARCHAR},
+      dynamic = #{dynamic,jdbcType=BIT},
+      index_slow_threshold = #{indexSlowThreshold,jdbcType=BIGINT},
+      fetch_slow_threshold = #{fetchSlowThreshold,jdbcType=BIGINT},
+      query_slow_threshold = #{querySlowThreshold,jdbcType=BIGINT},
+      refresh_interval = #{refreshInterval,jdbcType=TINYINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <select id="findUsedIndexVersionByIndexId" resultType="com.vip.pallas.mybatis.entity.IndexVersion">
+    select
+    <include refid="Base_Column_List" />
+    from index_version
+    where index_id = #{indexId,jdbcType=BIGINT} and is_used = 1
+  </select>
+  
+</mapper>

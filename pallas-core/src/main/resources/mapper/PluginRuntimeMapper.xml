@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vip.pallas.mybatis.repository.PluginRuntimeRepository">
+
+  <resultMap id="resultListMap" type="com.vip.pallas.mybatis.entity.PluginRuntime">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="cluster_id" jdbcType="BIGINT" property="clusterId" />
+    <result column="node_ip" jdbcType="VARCHAR" property="nodeIp" />
+    <result column="node_host" jdbcType="VARCHAR" property="nodeHost" />
+    <result column="plugin_name" jdbcType="VARCHAR" property="pluginName" />
+    <result column="plugin_version" jdbcType="VARCHAR" property="pluginVersion" />
+    <result column="es_version" jdbcType="VARCHAR" property="esVersion" />
+    <result column="plugin_type" jdbcType="TINYINT" property="pluginType" />
+    <result column="available_versions" jdbcType="VARCHAR" property="availableVersions" />
+    <result column="note" jdbcType="VARCHAR" property="note" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+
+  <select id="selectAll" resultMap="resultListMap">
+    select * from `plugin_runtime` order by id desc;
+  </select>
+
+  <select id="selectDistictNodeIPsByClusterId" resultType="java.lang.String">
+    select DISTINCT node_ip from `plugin_runtime` where cluster_id = #{clusterId};
+  </select>
+
+  <select id="findByClusterAndPluginName" resultMap="resultListMap">
+    select * from `plugin_runtime` where cluster_id = #{clusterId} and plugin_name = #{pluginName};
+  </select>
+
+  <select id="findByClusterAndPluginNameAndNodeIp" resultMap="resultListMap">
+    select * from `plugin_runtime` where cluster_id = #{clusterId} and plugin_name = #{pluginName} and node_ip = #{nodeIp};
+  </select>
+
+  <select id="findByClusterAndPluginNameAndNodeIpAndPluginVersion" resultMap="resultListMap">
+    select * from `plugin_runtime` where cluster_id = #{clusterId} and plugin_name = #{pluginName} and node_ip = #{nodeIp} and plugin_version = #{pluginVersion};
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from `plugin_runtime` where id = #{id}
+  </delete>
+  <insert id="insert" parameterType="com.vip.pallas.mybatis.entity.PluginRuntime">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
+      SELECT LAST_INSERT_ID() as id
+    </selectKey>
+    insert into `plugin_runtime`
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="clusterId != null">
+        cluster_id,
+      </if>
+      <if test="nodeIp != null">
+        node_ip,
+      </if>
+      <if test="nodeHost != null">
+        node_host,
+      </if>
+      <if test="pluginName != null">
+        plugin_name,
+      </if>
+      <if test="pluginVersion != null">
+        plugin_version,
+      </if>
+      <if test="esVersion != null">
+        es_version,
+      </if>
+      <if test="pluginType != null">
+        plugin_type,
+      </if>
+      <if test="availableVersions != null">
+        available_versions,
+      </if>
+      <if test="note != null">
+        note,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="clusterId != null">
+          #{clusterId},
+       </if>
+      <if test="nodeIp != null">
+        #{nodeIp},
+      </if>
+      <if test="nodeHost != null">
+        #{nodeHost},
+      </if>
+      <if test="pluginName != null">
+        #{pluginName},
+      </if>
+      <if test="pluginVersion != null">
+        #{pluginVersion},
+      </if>
+      <if test="esVersion != null">
+        #{esVersion},
+      </if>
+      <if test="pluginType != null">
+        #{pluginType},
+      </if>
+      <if test="availableVersions != null">
+        #{availableVersions},
+      </if>
+      <if test="note != null">
+        #{note},
+      </if>
+      <if test="createTime != null">
+        #{createTime},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="update" parameterType="com.vip.pallas.mybatis.entity.PluginRuntime">
+    update `plugin_runtime`
+    <set>
+      <if test="pluginVersion != null">
+        plugin_version = #{pluginVersion},
+      </if>
+      <if test="availableVersions != null">
+        available_versions = #{availableVersions},
+      </if>
+      <if test="nodeHost != null">
+        node_host = #{nodeHost},
+      </if>
+    </set>
+    where id = #{id}
+  </update>
+
+</mapper>

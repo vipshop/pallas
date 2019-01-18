@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vip.pallas.mybatis.repository.ClusterRepository">
+  <resultMap id="BaseResultMap" type="com.vip.pallas.mybatis.entity.Cluster">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="cluster_id" jdbcType="VARCHAR" property="clusterId" />
+    <result column="http_address" jdbcType="VARCHAR" property="httpAddress" />
+    <result column="client_address" jdbcType="VARCHAR" property="clientAddress" />
+    <result column="real_clusters" jdbcType="VARCHAR" property="realClusters" />
+    <result column="accessible_ps" jdbcType="VARCHAR" property="accessiblePs" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.vip.pallas.mybatis.entity.Cluster">
+    <result column="description" jdbcType="LONGVARCHAR" property="description" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, cluster_id, http_address, client_address, real_clusters, accessible_ps
+  </sql>
+  <sql id="Blob_Column_List">
+    description
+  </sql>
+  
+  <select id="selectByVersionId" parameterType="java.lang.Long" resultMap="ResultMapWithBLOBs">
+    select
+    c.id, c.cluster_id, http_address, client_address, real_clusters, accessible_ps
+    , c.
+    <include refid="Blob_Column_List" />
+   	from index_version v JOIN cluster c on c.id = v.real_cluster_id and v.id = #{versionId,jdbcType=BIGINT}
+  </select>
+  
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from cluster
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <select id="selectByClusterName" parameterType="java.lang.String" resultMap="ResultMapWithBLOBs">
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from cluster
+    where cluster_id = #{clusterId,jdbcType=VARCHAR}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from cluster
+  </select>
+  
+  <select id='selectAllPhysicalClusters' resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from cluster c where c.real_clusters = ''
+  </select>
+  
+    
+  <select id='selectPhysicalClustersByIndexId' resultMap="BaseResultMap">
+    select c2.* from `index` i, cluster c1, cluster c2 where (i.cluster_name = c1.cluster_id and i.id = #{0} and c1.real_clusters !='' and FIND_IN_SET(c2.id,c1.real_clusters)) 
+		or (c2.real_clusters = '' and c2.cluster_id = i.cluster_name and i.id = #{0} and c1.id = c2.id);
+  </select>
+  
+  <select id="selectPage" parameterType="com.vip.pallas.mybatis.entity.Page" resultMap="ResultMapWithBLOBs">
+  select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from cluster
+    where true
+    <if test="params.clusterId != null and params.clusterId !=''">  
+        and cluster_id like concat('%', #{params.clusterId}, '%')
+    </if>
+    <if test="params.clusterId != null and params.clusterId !=''">  
+        or description like concat('%', #{params.clusterId}, '%')
+    </if>
+    order by update_time desc
+  </select>  
+  
+  <delete id="deleteByClusterId" parameterType="java.lang.String">
+    delete from cluster
+    where cluster_id = #{clusterId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.vip.pallas.mybatis.entity.Cluster">
+    insert into cluster (cluster_id, http_address, client_address, 
+      real_clusters, accessible_ps, description, create_time)
+    values (#{clusterId,jdbcType=VARCHAR}, #{httpAddress,jdbcType=VARCHAR}, #{clientAddress,jdbcType=VARCHAR}, 
+      #{realClusters,jdbcType=VARCHAR}, #{accessiblePs,jdbcType=VARCHAR}, #{description,jdbcType=LONGVARCHAR}), #{createTime, jdbcType=TIMESTAMP}
+  </insert>
+  <insert id="insertSelective" parameterType="com.vip.pallas.mybatis.entity.Cluster">
+    insert into cluster
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="clusterId != null">
+        cluster_id,
+      </if>
+      <if test="httpAddress != null">
+        http_address,
+      </if>
+      <if test="clientAddress != null">
+        client_address,
+      </if>
+      <if test="realClusters != null">
+        real_clusters,
+      </if>
+      <if test="accessiblePs != null">
+        accessible_ps,
+      </if>
+      <if test="description != null">
+        description,
+      </if>
+      <if test="createTime != null">
+        create_time
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="clusterId != null">
+        #{clusterId,jdbcType=VARCHAR},
+      </if>
+      <if test="httpAddress != null">
+        #{httpAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="clientAddress != null">
+        #{clientAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="realClusters != null">
+        #{realClusters,jdbcType=VARCHAR},
+      </if>
+      <if test="accessiblePs != null">
+        #{accessiblePs,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null">
+        #{description,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime, jdbcType=TIMESTAMP}
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.vip.pallas.mybatis.entity.Cluster">
+    update cluster
+    <set>
+      <if test="httpAddress != null">
+        http_address = #{httpAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="clientAddress != null">
+        client_address = #{clientAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="realClusters != null">
+        real_clusters = #{realClusters,jdbcType=VARCHAR},
+      </if>
+      <if test="accessiblePs != null">
+        accessible_ps = #{accessiblePs,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null">
+        description = #{description,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime, jdbcType=TIMESTAMP}
+      </if>
+    </set>
+    where cluster_id = #{clusterId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.vip.pallas.mybatis.entity.Cluster">
+    update cluster
+    set http_address = #{httpAddress,jdbcType=VARCHAR},
+      client_address = #{clientAddress,jdbcType=VARCHAR},
+      real_clusters = #{realClusters,jdbcType=VARCHAR},
+      accessible_ps = #{accessiblePs,jdbcType=VARCHAR},
+      description = #{description,jdbcType=LONGVARCHAR}
+    where cluster_id = #{clusterId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.vip.pallas.mybatis.entity.Cluster">
+    update cluster
+    set http_address = #{httpAddress,jdbcType=VARCHAR},
+      client_address = #{clientAddress,jdbcType=VARCHAR},
+      real_clusters = #{realClusters,jdbcType=VARCHAR},
+      accessible_ps = #{accessiblePs,jdbcType=VARCHAR}
+    where cluster_id = #{clusterId,jdbcType=VARCHAR}
+  </update>
+</mapper>

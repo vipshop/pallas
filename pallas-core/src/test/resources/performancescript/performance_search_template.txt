@@ -1,0 +1,285 @@
+{
+  "_source":["id","channel_id","sale_style","merchandise_v_spu_id","merchandise_name","merchandise_small_image","brand_name","brand_id","goods_cate_id_3","pc_show_from","pc_show_to","mobile_show_from","mobile_show_to","m_size_ids","m_size_names","m_size_id_names","m_image","brand_store_name","brand_name_clean","brand_fore_word","brand_store_name_eng","brand_level_name","brand_type","sale_status","brand_city_codes","sku_vipshop_price","sku_market_price","sku_agio","sku_vipshop_price_suff","sku_agio_suff","vipshop_price","market_price","agio","sku_prices","sku_info_min","sku_info_max","size_name_skuids_min","size_name_skuids_max","sku_vipshop_widetable_min","sku_vipshop_widetable_max","sku_agios_widetable_min","sku_agios_widetable_max","merchandise_buy_num_min","merchandise_buy_num_max","merchandise_is_prepay","sell_brand_style","salecount","stocktotal","prepay_time_from","prepay_time_to","sku_id_max","sku_id_min","brand_store_sn","vendor_product_image_url","brandstore_amt"],
+  
+  {{#from}}
+  "from":{{from}},
+  {{/from}}
+  
+  {{#size}}
+  "size": {{size}},
+  {{/size}}
+
+  "query": {
+    "bool": {
+	  "must":[
+		{{#keyword}}
+		{
+		  "query_string": {
+			"fields":{{^fields}}["text"]{{/fields}}{{#fields}}{{#toJson}}fields.list{{/toJson}}{{/fields}},
+			"query": "{{keyword}}"
+		  }
+		}
+		{{/keyword}}
+	  ],
+      "filter": [
+          
+			##__filter_common_mobile__##
+			
+			##__filter_static_mobile__##
+
+		]
+    }
+  },
+  {{^orderby}}
+	  "rescore":{ 
+	    
+	    {{#rescore_size}}
+		"window_size" : {{rescore_size}},
+		{{/rescore_size}}
+		
+		{{^rescore_size}}
+		"window_size" : 2000,
+		{{/rescore_size}}
+		
+		"query" : {
+		 "rescore_query" : {
+			"function_score" : {
+			  "script_score": {
+				"script": {
+				  "inline": "word_rank_stock",
+				  "lang": "native",
+				  "params": {
+					"terms":"{{keyword}}",
+					"scorePlus":10000
+				  }
+				}
+			  }
+			}
+		 }
+		}
+	  }
+  {{/orderby}}
+  {{#orderby}}
+  {{#orderby.sku_price}}
+	  {{^m_size_name_trans}}
+	  "rescore": {
+	      
+		{{#rescore_size}}
+		"window_size" : {{rescore_size}},
+		{{/rescore_size}}
+		
+		{{^rescore_size}}
+		"window_size" : 2000,
+		{{/rescore_size}}
+		
+		"query": {
+			 "rescore_query": {
+				"function_score": {
+				  "boost": 1,
+				  "boost_mode": "replace",
+				  "score_mode":"sum",
+				  "functions": [
+					{
+						"script_score" : {
+							"script" : {
+							  "lang": "painless",
+							  {{#orderby.asc}}
+							  "inline": "1000000 - doc['sku_vipshop_price'].value"
+							  {{/orderby.asc}}
+							  {{^orderby.asc}}
+							  "inline": "doc['sku_vipshop_price'].value"
+							  {{/orderby.asc}}
+							}
+						}
+					}
+				  ]
+				}
+			}
+		  }
+	  }
+	  {{/m_size_name_trans}}
+	  
+	  {{#m_size_name_trans}}
+	   "rescore": {
+	       
+		{{#rescore_size}}
+		"window_size" : {{rescore_size}},
+		{{/rescore_size}}
+		
+		{{^rescore_size}}
+		"window_size" : 2000,
+		{{/rescore_size}}
+		"query": {
+			 "rescore_query": {
+			  "nested" : {
+				  "path" : "sku_size_price_agio_stock",
+				  "score_mode": "max",
+				  "query" : {
+					"function_score": {
+					  "boost": 1,
+					  "boost_mode": "replace",
+					  "score_mode":"sum",
+					  "query": {
+						  "constant_score": {
+							"query":{
+								"bool" : {
+								  "filter": [
+									{"terms" : {"sku_size_price_agio_stock.size":{{#toJson}}m_size_name_trans.list{{/toJson}} } }							  
+									{{#price}},{ "range" : {"sku_size_price_agio_stock.price_min" : { "gte" : {{price.min}}{{^price.min}}0{{/price.min}}{{#price.max}},"lte": {{price.max}}{{/price.max}} }} }{{/price}}
+								  ]
+								}
+							},
+							"boost": 0
+						  }
+					  },
+					  "functions": [
+						{
+							"script_score" : {
+								"script" : {
+								  "lang": "painless",
+								  {{#orderby.asc}}
+								  "inline": "1000000 - doc['sku_size_price_agio_stock.price_min'].value"
+								  {{/orderby.asc}}
+								  {{^orderby.asc}}
+								  "inline": "doc['sku_size_price_agio_stock.price_min'].value"
+								  {{/orderby.asc}}
+								}
+							}
+						}
+					  ]
+					}
+				  }
+				}
+			}
+		  }
+	  }
+	  {{/m_size_name_trans}}  
+  {{/orderby.sku_price}}
+  {{#orderby.agio}}
+	{{#m_size_name_trans}}
+	  "rescore": {
+	      
+		{{#rescore_size}}
+		"window_size" : {{rescore_size}},
+		{{/rescore_size}}
+		
+		{{^rescore_size}}
+		"window_size" : 2000,
+		{{/rescore_size}}
+	
+		"query": {
+			 "rescore_query": {
+			  "nested" : {
+				  "path" : "sku_size_price_agio_stock",
+				  "score_mode": "max",
+				  "query" : {
+					"function_score": {
+					  "boost": 1,
+					  "boost_mode": "replace",
+					  "score_mode":"sum",
+					  "query": {
+						  "constant_score": {
+							"filter": {"terms" : {"sku_size_price_agio_stock.size":{{#toJson}}m_size_name_trans.list{{/toJson}} } },
+							"boost": 0
+						  }
+					  },
+					  "functions": [
+						{
+							"script_score" : {
+								"script" : {
+								  "lang": "painless",
+								  {{#orderby.asc}}
+								  "inline": "1000 - doc['sku_size_price_agio_stock.agio_max'].value"
+								  {{/orderby.asc}}
+								  {{^orderby.asc}}
+								  "inline": "doc['sku_size_price_agio_stock.agio_max'].value"
+								  {{/orderby.asc}}
+								}
+							}
+						}
+					  ]
+					}
+				  }
+				}
+			}
+		  }
+	  }
+	{{/m_size_name_trans}}
+	
+	{{^m_size_name_trans}}
+	  "rescore": {
+	      
+		{{#rescore_size}}
+		"window_size" : {{rescore_size}},
+		{{/rescore_size}}
+		
+		{{^rescore_size}}
+		"window_size" : 2000,
+		{{/rescore_size}}
+		"query": {
+			 "rescore_query": {
+				"function_score": {
+				  "boost": 1,
+				  "boost_mode": "replace",
+				  "score_mode":"sum",
+				  "functions": [
+					{
+						"script_score" : {
+							"script" : {
+							  "lang": "painless",
+							  {{#orderby.asc}}
+							  "inline": "1000 - doc['sku_agio'].value"
+							  {{/orderby.asc}}
+							  {{^orderby.asc}}
+							  "inline": "doc['sku_agio'].value"
+							  {{/orderby.asc}}
+							}
+						}
+					}
+				  ]
+				}
+			}
+		  }
+	  }
+	{{/m_size_name_trans}}	
+  {{/orderby.agio}}
+  
+  {{#orderby.salecount}}
+  "rescore": {
+      
+	{{#rescore_size}}
+	"window_size" : {{rescore_size}},
+	{{/rescore_size}}
+	
+	{{^rescore_size}}
+	"window_size" : 2000,
+	{{/rescore_size}}
+	
+	"query": {
+		 "rescore_query": {
+			"function_score": {
+			  "boost": 1,
+			  "boost_mode": "replace",
+			  "score_mode":"sum",
+			  "functions": [
+				{
+					"script_score" : {
+						"script": {
+						  "inline": "sales_rank",
+						  "lang": "native"
+						  {{#orderby.asc}}
+						  ,"params": {
+							"scorePlus":10000000
+						  }
+						  {{/orderby.asc}}
+						}
+					}
+				}
+			  ]
+			}
+		}
+	  }
+  }
+  {{/orderby.salecount}}
+  {{/orderby}}
+}

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vip.pallas.mybatis.repository.SearchTemplateRepository">
+
+  <resultMap id="resultListMap" type="com.vip.pallas.mybatis.entity.SearchTemplate">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="index_id" jdbcType="BIGINT" property="indexId" />
+    <result column="template_name" jdbcType="VARCHAR" property="templateName" />
+    <result column="description" jdbcType="VARCHAR" property="description" />
+    <result column="content" jdbcType="LONGVARCHAR" property="content" />
+    <result column="params" jdbcType="LONGVARCHAR" property="params" />
+    <result column="type" jdbcType="INTEGER" property="type" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="timeout" jdbcType="INTEGER" property="timeout" />
+    <result column="retry" jdbcType="INTEGER" property="retry" />
+  </resultMap>
+  
+  <resultMap id="TemplateWithTimeoutRetryMap" type="com.vip.pallas.mybatis.entity.TemplateWithTimeoutRetry">
+    <result column="index_name" jdbcType="VARCHAR" property="indexName" />
+    <result column="template_name" jdbcType="VARCHAR" property="templateName" />
+    <result column="cluster_name" jdbcType="VARCHAR" property="clusterName" />
+    <result column="timeout" jdbcType="INTEGER" property="timeout" />
+    <result column="retry" jdbcType="INTEGER" property="retry" />
+    <result column="index_id" jdbcType="BIGINT" property="indexId" />
+    <result column="template_id" jdbcType="BIGINT" property="templateId" />
+  </resultMap>
+  
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="resultListMap">
+    select * from `search_template` where id = #{id}
+  </select>
+  <select id="selectByNameAndIndexId" resultMap="resultListMap">
+    select * from `search_template` where index_id = #{1} and template_name = #{0}
+  </select>
+  <select id="selectAllByIndexId" resultMap="resultListMap">
+    select * from `search_template` where index_id = #{indexId}
+  </select>
+  <select id="selectByIndexIdAndTemplateIds" resultMap="resultListMap">
+    select *
+    from `search_template` where index_id = #{indexId} and id in
+    <foreach item="item" index="index" collection="templateIds" open="(" separator="," close=")">
+      #{item}
+    </foreach>
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from `search_template` where id = #{id}
+  </delete>
+  <delete id="deleteByNameAndIndexId">
+    delete from `search_template` where template_name = #{0} and index_id = #{1}
+  </delete>
+  <insert id="insert" parameterType="com.vip.pallas.mybatis.entity.SearchTemplate">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
+      SELECT LAST_INSERT_ID() as id
+    </selectKey>
+    insert into `search_template` (id, index_id, template_name, description, content, params,`type`)
+    values (#{id}, #{indexId}, #{templateName}, #{description}, #{content}, #{params}, #{type})
+  </insert>
+  <select id="findAllRetryTimeOutConfig" resultMap="TemplateWithTimeoutRetryMap">
+    select case when t.timeout > 0 then t.timeout 
+						else i.timeout 
+			 end as timeout,
+			 case when t.timeout > 0 then t.retry 
+						else i.retry 
+			 end as retry,
+		i.index_name, t.template_name, t.id as template_id, i.id as index_id, i.cluster_name
+		from search_template t right join `index` i on t.index_id = i.id and (t.timeout !=0 || i.timeout !=0)
+  </select>
+  <update id="updateByPrimaryKey" parameterType="com.vip.pallas.mybatis.entity.SearchTemplate">
+    update `search_template`
+    <set>
+      <if test="description != null">
+        description = #{description},
+      </if>
+      <if test="content != null">
+        content = #{content},
+      </if>
+      <if test="params != null">
+        params = #{params},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+	  <if test="timeout != null">
+        timeout = #{timeout,jdbcType=INTEGER},
+      </if>
+      <if test="retry != null">
+        retry = #{retry,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id}
+  </update>
+
+</mapper>

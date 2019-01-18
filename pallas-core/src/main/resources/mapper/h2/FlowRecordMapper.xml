@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vip.pallas.mybatis.repository.FlowRecordRepository">
+  <resultMap id="BaseResultMap" type="com.vip.pallas.mybatis.entity.FlowRecord">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="index_id" jdbcType="BIGINT" property="indexId" />
+    <result column="template_id" jdbcType="BIGINT" property="templateId" />
+    <result column="sample_rate" jdbcType="DECIMAL" property="sampleRate" />
+    <result column="limit" jdbcType="BIGINT" property="limit" />
+    <result column="start_time" jdbcType="TIMESTAMP" property="startTime" />
+    <result column="end_time" jdbcType="TIMESTAMP" property="endTime" />
+    <result column="config_id" jdbcType="BIGINT" property="configId" />
+    <result column="total" jdbcType="BIGINT" property="total" />
+    <result column="state" jdbcType="INTEGER" property="state" />
+    <result column="note" jdbcType="VARCHAR" property="note" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="is_deleted" jdbcType="BIT" property="isDeleted" />
+  </resultMap>
+
+  <resultMap id="FlowRecordResultMap" type="com.vip.pallas.mybatis.entity.FlowRecord">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="index_id" jdbcType="BIGINT" property="indexId" />
+    <result column="template_id" jdbcType="BIGINT" property="templateId" />
+    <result column="sample_rate" jdbcType="DECIMAL" property="sampleRate" />
+    <result column="limit" jdbcType="BIGINT" property="limit" />
+    <result column="start_time" jdbcType="TIMESTAMP" property="startTime" />
+    <result column="end_time" jdbcType="TIMESTAMP" property="endTime" />
+    <result column="config_id" jdbcType="BIGINT" property="configId" />
+    <result column="total" jdbcType="BIGINT" property="total" />
+    <result column="state" jdbcType="INTEGER" property="state" />
+    <result column="note" jdbcType="VARCHAR" property="note" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="is_deleted" jdbcType="BIT" property="isDeleted" />
+
+    <association property="flowRecordConfig" resultMap="FlowRecordConfigResultMap" />
+  </resultMap>
+
+  <resultMap id="FlowRecordConfigResultMap" type="com.vip.pallas.mybatis.entity.FlowRecordConfig">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="index_id" jdbcType="BIGINT" property="indexId" />
+    <result column="template_id" jdbcType="BIGINT" property="templateId" />
+    <result column="sample_rate" jdbcType="DOUBLE" property="sampleRate" />
+    <result column="limit" jdbcType="BIGINT" property="limit" />
+    <result column="start_time" jdbcType="TIMESTAMP" property="startTime" />
+    <result column="end_time" jdbcType="TIMESTAMP" property="endTime" />
+    <result column="is_enable" jdbcType="BIT" property="isEnable" />
+    <result column="note" jdbcType="VARCHAR" property="note" />
+    <result column="create_user" jdbcType="VARCHAR" property="createUser" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="is_deleted" jdbcType="BIT" property="isDeleted" />
+
+    <association property="index" resultMap="IndexResultMap" />
+    <association property="template" resultMap="TemplateResultMap" />
+    <association property="cluster" resultMap="ClusterResultMap" />
+  </resultMap>
+
+  <resultMap id="IndexResultMap" type="com.vip.pallas.mybatis.entity.Index">
+    <id column="_index_id" jdbcType="BIGINT" property="id" />
+    <result column="index_name" jdbcType="VARCHAR" property="indexName" />
+    <result column="cluster_name" jdbcType="VARCHAR" property="clusterName" />
+  </resultMap>
+
+  <resultMap id="TemplateResultMap" type="com.vip.pallas.mybatis.entity.SearchTemplate">
+    <id column="_template_id" jdbcType="BIGINT" property="id" />
+    <result column="template_name" jdbcType="VARCHAR" property="templateName" />
+  </resultMap>
+
+  <resultMap id="ClusterResultMap" type="com.vip.pallas.mybatis.entity.Cluster">
+    <id column="_cluster_id" jdbcType="BIGINT" property="id" />
+    <result column="_cluster_name" jdbcType="VARCHAR" property="clusterId" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    id, index_id, template_id, sample_rate, `limit`, start_time, end_time, config_id, total,
+    state, note, create_time, update_time, is_deleted
+  </sql>
+
+  <select id="selectAll" resultMap="BaseResultMap">
+      select
+      <include refid="Base_Column_List" />
+      from `flow_record` order by update_time desc
+  </select>
+
+  <select id="selectByClusterAndIndex" resultMap="BaseResultMap">
+      select
+      <include refid="Base_Column_List" />
+      from `flow_record` fr,`flow_record_config` frc where fr.cluster_name = #{0} and fr.index_name = #{1} and frc.id = fr.config_id order by fr.update_time desc
+  </select>
+
+  <select id="selectFlowRecordByPage" parameterType="com.vip.pallas.mybatis.entity.Page" resultMap="FlowRecordResultMap">
+    select record.*, config.*, i.id _index_id, i.*, t.id _template_id, t.*, cluster.id _cluster_id, cluster.cluster_id _cluster_name, cluster.*
+    from `flow_record` record
+    inner join `flow_record_config` config on record.config_id = config.id
+    inner join `index` i on config.index_id = i.id
+    inner join `cluster` cluster on i.cluster_name = cluster.cluster_id
+    left join `search_template` t on config.template_id = t.id
+    where config.index_id = #{params.indexId}
+    and record.is_deleted = 0
+    order by record.update_time desc
+  </select>
+
+  <select id="selectFlowRecordByConfig" parameterType="com.vip.pallas.mybatis.entity.Page" resultMap="FlowRecordResultMap">
+    select record.*, config.*, i.id _index_id, i.*, t.id _template_id, t.*, cluster.id _cluster_id, cluster.cluster_id _cluster_name, cluster.*
+    from `flow_record` record
+    inner join `flow_record_config` config on record.config_id = config.id
+    inner join `index` i on config.index_id = i.id
+    inner join `cluster` cluster on i.cluster_name = cluster.cluster_id
+    left join `search_template` t on config.template_id = t.id
+    where config.index_id = #{params.indexId}
+    and config.id = #{params.configId}
+    and record.is_deleted = 0
+    order by record.update_time desc
+  </select>
+
+  <select id="selectAllRecording" resultMap="FlowRecordResultMap">
+    select record.*, config.*, i.id _index_id, i.*, t.id _template_id, t.*, cluster.id _cluster_id, cluster.cluster_id _cluster_name, cluster.*
+    from `flow_record` record
+    inner join `flow_record_config` config on record.config_id = config.id
+    inner join `index` i on config.index_id = i.id
+    inner join `cluster` cluster on i.cluster_name = cluster.cluster_id
+    left join `search_template` t on config.template_id = t.id
+    where record.state in (0, 1)
+    and record.is_deleted = 0
+    order by record.update_time desc
+  </select>
+
+  <select id="selectRecordingByConfigId" parameterType="java.lang.Long" resultMap="FlowRecordResultMap">
+    select record.*, config.*, i.id _index_id, i.*, t.id _template_id, t.*, cluster.id _cluster_id, cluster.cluster_id _cluster_name, cluster.*
+    from `flow_record` record
+    inner join `flow_record_config` config on record.config_id = config.id
+    inner join `index` i on config.index_id = i.id
+    inner join `cluster` cluster on i.cluster_name = cluster.cluster_id
+    left join `search_template` t on config.template_id = t.id
+    where record.state in (0, 1)
+    and record.is_deleted = 0
+    and record.config_id = #{configId,jdbcType=BIGINT}
+    order by record.update_time desc
+  </select>
+
+  <select id="selectFlowRecordById" parameterType="java.lang.Long" resultMap="FlowRecordResultMap">
+    select record.*, config.*, i.id _index_id, i.*, t.id _template_id, t.*, cluster.id _cluster_id, cluster.cluster_id _cluster_name, cluster.*
+    from `flow_record` record
+    inner join `flow_record_config` config on record.config_id = config.id
+    inner join `index` i on config.index_id = i.id
+    inner join `cluster` cluster on i.cluster_name = cluster.cluster_id
+    left join `search_template` t on config.template_id = t.id
+    where record.id = #{params.id} order by record.update_time desc
+  </select>
+
+  <update id="increRecordTotal">
+    update flow_record
+    set total = total + #{increment,jdbcType=BIGINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from flow_record
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from flow_record
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.vip.pallas.mybatis.entity.FlowRecord">
+    insert into flow_record (id, index_id, template_id,
+      sample_rate, `limit`, start_time,
+      end_time, config_id, total,
+      state, note, create_time,
+      update_time, is_deleted)
+    values (#{id,jdbcType=BIGINT}, #{indexId,jdbcType=BIGINT}, #{templateId,jdbcType=BIGINT},
+      #{sampleRate,jdbcType=DECIMAL}, #{limit,jdbcType=BIGINT}, #{startTime,jdbcType=TIMESTAMP},
+      #{endTime,jdbcType=TIMESTAMP}, #{configId,jdbcType=BIGINT}, #{total,jdbcType=BIGINT},
+      #{state,jdbcType=INTEGER}, #{note,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{updateTime,jdbcType=TIMESTAMP}, #{isDeleted,jdbcType=BIT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.vip.pallas.mybatis.entity.FlowRecord">
+    insert into flow_record
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="indexId != null">
+        index_id,
+      </if>
+      <if test="templateId != null">
+        template_id,
+      </if>
+      <if test="sampleRate != null">
+        sample_rate,
+      </if>
+      <if test="limit != null">
+        `limit`,
+      </if>
+      <if test="startTime != null">
+        start_time,
+      </if>
+      <if test="endTime != null">
+        end_time,
+      </if>
+      <if test="configId != null">
+        config_id,
+      </if>
+      <if test="total != null">
+        total,
+      </if>
+      <if test="state != null">
+        state,
+      </if>
+      <if test="note != null">
+        note,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+      <if test="isDeleted != null">
+        is_deleted,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="indexId != null">
+        #{indexId,jdbcType=BIGINT},
+      </if>
+      <if test="templateId != null">
+        #{templateId,jdbcType=BIGINT},
+      </if>
+      <if test="sampleRate != null">
+        #{sampleRate,jdbcType=DECIMAL},
+      </if>
+      <if test="limit != null">
+        #{limit,jdbcType=BIGINT},
+      </if>
+      <if test="startTime != null">
+        #{startTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endTime != null">
+        #{endTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="configId != null">
+        #{configId,jdbcType=BIGINT},
+      </if>
+      <if test="total != null">
+        #{total,jdbcType=BIGINT},
+      </if>
+      <if test="state != null">
+        #{state,jdbcType=INTEGER},
+      </if>
+      <if test="note != null">
+        #{note,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDeleted != null">
+        #{isDeleted,jdbcType=BIT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.vip.pallas.mybatis.entity.FlowRecord">
+    update flow_record
+    <set>
+      <if test="indexId != null">
+        index_id = #{indexId,jdbcType=BIGINT},
+      </if>
+      <if test="templateId != null">
+        template_id = #{templateId,jdbcType=BIGINT},
+      </if>
+      <if test="sampleRate != null">
+        sample_rate = #{sampleRate,jdbcType=DECIMAL},
+      </if>
+      <if test="limit != null">
+        `limit` = #{limit,jdbcType=BIGINT},
+      </if>
+      <if test="startTime != null">
+        start_time = #{startTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endTime != null">
+        end_time = #{endTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="configId != null">
+        config_id = #{configId,jdbcType=BIGINT},
+      </if>
+      <if test="total != null">
+        total = #{total,jdbcType=BIGINT},
+      </if>
+      <if test="state != null">
+        state = #{state,jdbcType=INTEGER},
+      </if>
+      <if test="note != null">
+        note = #{note,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDeleted != null">
+        is_deleted = #{isDeleted,jdbcType=BIT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.vip.pallas.mybatis.entity.FlowRecord">
+    update flow_record
+    set index_id = #{indexId,jdbcType=BIGINT},
+      template_id = #{templateId,jdbcType=BIGINT},
+      sample_rate = #{sampleRate,jdbcType=DECIMAL},
+      `limit` = #{limit,jdbcType=BIGINT},
+      start_time = #{startTime,jdbcType=TIMESTAMP},
+      end_time = #{endTime,jdbcType=TIMESTAMP},
+      config_id = #{configId,jdbcType=BIGINT},
+      total = #{total,jdbcType=BIGINT},
+      state = #{state,jdbcType=INTEGER},
+      note = #{note,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      is_deleted = #{isDeleted,jdbcType=BIT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

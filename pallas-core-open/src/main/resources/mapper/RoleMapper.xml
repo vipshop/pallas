@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.vip.pallas.mybatis.repository.RoleRepository" >
+  <resultMap id="BaseResultMap" type="com.vip.pallas.mybatis.entity.Role" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="role_name" property="roleName" jdbcType="VARCHAR" />
+    <result column="description" property="description" jdbcType="VARCHAR" />
+    <result column="created_by" property="createdBy" jdbcType="VARCHAR" />
+    <result column="last_updated_by" property="lastUpdatedBy" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="is_deleted" property="isDeleted" jdbcType="BIT" />
+  </resultMap>
+
+ <sql id="Base_Column_List" >
+   `id`,
+   `role_name`,
+   `description`,
+   `created_by`,
+   `last_updated_by`,
+   `create_time`,
+   `update_time`,
+   `is_deleted`
+ </sql>
+  
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from role
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  
+  <update id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    update role 
+    set `is_deleted` = 1
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <insert id="insert" parameterType="com.vip.pallas.mybatis.entity.Role" >
+    insert into role ( 
+     `id`,
+     `role_name`,
+     `description`,
+     `created_by`,
+     `last_updated_by`,
+     `create_time`,
+     `update_time`,
+     `is_deleted`
+    )
+    values (
+     #{id,jdbcType=BIGINT},
+     #{roleName,jdbcType=VARCHAR},
+     #{description,jdbcType=VARCHAR},
+     #{createdBy,jdbcType=VARCHAR},
+     #{lastUpdatedBy,jdbcType=VARCHAR},
+     #{createTime,jdbcType=TIMESTAMP},
+     #{updateTime,jdbcType=TIMESTAMP},
+     #{isDeleted,jdbcType=BIT}
+ )
+  </insert>
+  
+  
+  
+  <insert id="insertSelective" parameterType="com.vip.pallas.mybatis.entity.Role" >
+    insert into role
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        `id`,
+      </if>
+      <if test="roleName != null" >
+        `role_name`,
+      </if>
+      <if test="description != null" >
+        `description`,
+      </if>
+      <if test="createdBy != null" >
+        `created_by`,
+      </if>
+      <if test="lastUpdatedBy != null" >
+        `last_updated_by`,
+      </if>
+      <if test="createTime != null" >
+        `create_time`,
+      </if>
+      <if test="updateTime != null" >
+        `update_time`,
+      </if>
+      <if test="isDeleted != null" >
+        `is_deleted`,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="roleName != null" >
+        #{roleName,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null" >
+        #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="createdBy != null" >
+        #{createdBy,jdbcType=VARCHAR},
+      </if>
+      <if test="lastUpdatedBy != null" >
+        #{lastUpdatedBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDeleted != null" >
+        #{isDeleted,jdbcType=BIT},
+      </if>
+    </trim>
+  </insert>
+  
+  <update id="updateByPrimaryKeySelective" parameterType="com.vip.pallas.mybatis.entity.Role" >
+    update role
+	  <set>
+       <if test="roleName != null" >
+        `role_name`= #{roleName,jdbcType=VARCHAR},
+       </if>
+       <if test="description != null" >
+        `description`= #{description,jdbcType=VARCHAR},
+       </if>
+       <if test="createdBy != null" >
+        `created_by`= #{createdBy,jdbcType=VARCHAR},
+       </if>
+       <if test="lastUpdatedBy != null" >
+        `last_updated_by`= #{lastUpdatedBy,jdbcType=VARCHAR},
+       </if>
+       <if test="createTime != null" >
+        `create_time`= #{createTime,jdbcType=TIMESTAMP},
+       </if>
+       <if test="updateTime != null" >
+        `update_time`= #{updateTime,jdbcType=TIMESTAMP},
+       </if>
+       <if test="isDeleted != null" >
+        `is_deleted`= #{isDeleted,jdbcType=BIT},
+       </if>
+          </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <update id="updateByPrimaryKey" parameterType="com.vip.pallas.mybatis.entity.Role" >
+    update role
+    set 
+       `role_name` = #{roleName,jdbcType=VARCHAR},
+       `description` = #{description,jdbcType=VARCHAR},
+       `created_by` = #{createdBy,jdbcType=VARCHAR},
+       `last_updated_by` = #{lastUpdatedBy,jdbcType=VARCHAR},
+       `create_time` = #{createTime,jdbcType=TIMESTAMP},
+       `update_time` = #{updateTime,jdbcType=TIMESTAMP},
+       `is_deleted` = #{isDeleted,jdbcType=BIT}
+     where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <select id="selectRoleByKeyword" parameterType="com.vip.pallas.mybatis.entity.Page" resultMap="BaseResultMap">
+    select
+        <include refid="Base_Column_List"></include>
+    from
+        role
+    where
+        is_deleted = 0
+        <if test="params.keywords != null and params.keywords !=''">
+          AND role_name like concat('%', #{params.keywords}, '%')
+        </if>
+  </select>
+  
+  <select id="selectByRoleName" resultMap="BaseResultMap">
+    select
+      <include refid="Base_Column_List"></include>
+    from
+        role
+    where
+        is_deleted = 0
+        and role_name = #{roleName,jdbcType=VARCHAR}
+  </select>
+ </mapper>
+  
+
+  
+	

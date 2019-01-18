@@ -1,0 +1,143 @@
+{
+  "item": {
+    "dynamic": "false",
+    "include_in_all": false,
+    "properties": {
+      "_source_": {
+        "type": "keyword"
+      },
+      "approval_time": {
+        "type": "date",
+        "format": "yyyy-MM-dd'T'HH:mm:ssZ||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss'.0'||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd||epoch_millis"
+      },
+      "approval_user": {
+        "type": "keyword"
+      },
+      "author_name": {
+        "type": "keyword"
+      },
+      "author_uid": {
+        "type": "long"
+      },
+      "avatar": {
+        "type": "keyword"
+      },
+      "brand_name": {
+        "type": "keyword"
+      },
+      "brand_sn": {
+        "type": "long"
+      },
+      "cat3_id": {
+        "type": "long"
+      },
+      "content": {
+        "type": "text",
+        "analyzer": "literally_analyzer"
+      },
+      "create_time": {
+        "type": "date",
+        "format": "yyyy-MM-dd'T'HH:mm:ssZ||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss'.0'||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd||epoch_millis"
+      },
+      "extend_info": {
+        "type": "keyword"
+      },
+      "goods_id": {
+        "type": "long"
+      },
+      "goods_name": {
+        "type": "keyword"
+      },
+      "id": {
+        "type": "long"
+      },
+      "image_count": {
+        "type": "integer"
+      },
+      "impresses": {
+        "type": "keyword"
+      },
+      "index_desc": {
+        "type": "short"
+      },
+      "is_anonymous": {
+        "type": "short"
+      },
+      "is_essence": {
+        "type": "short"
+      },
+      "is_nlpmark": {
+        "type": "short"
+      },
+      "is_satisfied": {
+        "type": "short"
+      },
+      "is_top": {
+        "type": "short"
+      },
+      "nlp_class": {
+        "type": "keyword"
+      },
+      "nlp_keyword_show": {
+        "type": "keyword"
+      },
+      "nlp_score": {
+        "type": "integer"
+      },
+      "order_sn": {
+        "type": "keyword"
+      },
+      "post_time": {
+        "type": "date",
+        "format": "yyyy-MM-dd'T'HH:mm:ssZ||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss'.0'||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd||epoch_millis"
+      },
+      "rep_source": {
+        "type": "short"
+      },
+      "reply_count": {
+        "type": "integer"
+      },
+      "schedule_id": {
+        "type": "long"
+      },
+      "sku_id": {
+        "type": "long"
+      },
+      "spu_id": {
+        "type": "long"
+      },
+      "status": {
+        "type": "short"
+      },
+      "store_id": {
+        "type": "keyword"
+      },
+      "third_rep_source": {
+        "type": "short"
+      },
+      "update_time": {
+        "type": "date",
+        "format": "yyyy-MM-dd'T'HH:mm:ssZ||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss'.0'||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd||epoch_millis"
+      },
+      "useful": {
+        "type": "integer",
+        "index": false
+      },
+      "vendor_id": {
+        "type": "integer"
+      },
+      "video_length": {
+        "type": "integer"
+      },
+      "video_thumbnail": {
+        "type": "keyword"
+      },
+      "video_url": {
+        "type": "keyword"
+      },
+      "vip_bill_count": {
+        "type": "integer"
+      }
+    }
+  }
+}

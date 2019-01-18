@@ -1,0 +1,49 @@
+{
+    "versionId": {versionId},
+    "indexId": "{indexId}",
+    "shardNum": 1,
+    "replicationNum": 2,
+    "vdpQueue": "queue.vdp.q_cis_atom_202.inventory_soul.2075831462097858",
+    "routingKey": "agio",
+    "idField": "id",
+    "updateTimeField": "update_time",
+    "preferExecutor": "",
+    "allocationNodes": "",
+    "vdp":1,
+    "dynamic":false,
+    "schema": [
+        {
+            "dbFieldName": "agio",
+            "dbFieldType": "INTEGER",
+            "fieldName": "agio",
+            "fieldType": "integer",
+            "multi": false,
+            "search": true,
+            "docValue": true,
+            "dynamic":false,
+            "children": []
+        },
+        {
+            "dbFieldName": "brand_agio",
+            "dbFieldType": "VARCHAR",
+            "fieldName": "brand_agio",
+            "fieldType": "keyword",
+            "multi": false,
+            "search": false,
+            "docValue": false,
+            "dynamic":false,
+            "children": []
+        },
+        {
+            "dbFieldName": "brand_brand_story",
+            "dbFieldType": "VARCHAR",
+            "fieldName": "brand_brand_story",
+            "fieldType": "keyword",
+            "multi": false,
+            "search": false,
+            "docValue": false,
+            "dynamic":false,
+            "children": []
+        }
+    ]
+}

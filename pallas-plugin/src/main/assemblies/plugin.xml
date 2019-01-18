@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<assembly>
+    <id>plugin</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <includeBaseDirectory>true</includeBaseDirectory>
+    <baseDirectory>pallas-plugin-1.0.0</baseDirectory>
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>/</outputDirectory>
+            <useProjectArtifact>true</useProjectArtifact>
+            <useTransitiveFiltering>true</useTransitiveFiltering>
+            <excludes>
+                <exclude>org.elasticsearch:elasticsearch</exclude>
+                <exclude>org.apache.lucene:*</exclude>
+                <exclude>log4j:log4j</exclude>
+                <exclude>org.apache.log4j:*</exclude>
+                <exclude>org.aspectj:*</exclude>
+                <exclude>c3p0:*</exclude>
+            </excludes>
+        </dependencySet>
+    </dependencySets>
+    <fileSets>
+        <fileSet>
+            <directory>src/main/resources</directory>
+            <outputDirectory>/</outputDirectory>
+            <filtered>true</filtered>
+            <includes>
+                <include>plugin-descriptor.properties</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+</assembly>

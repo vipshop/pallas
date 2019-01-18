@@ -1,0 +1,24 @@
+{
+   "background": {
+      "scripts": [ "src/background.js" ]
+   },
+   "browser_action": {
+      "default_icon": {
+         "19": "icons/logo19.png",
+         "38": "icons/logo38.png"
+      }
+   },
+   "content_security_policy": "script-src 'self' https://ssl.google-analytics.com 'unsafe-eval';object-src 'self';",
+   "description": "A JSON aware developer console to ElasticSearch.",
+   "icons": {
+      "128": "icons/logo128.png",
+      "16": "icons/logo16.png",
+      "48": "icons/logo48.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjnQGmgiOIvv9YJzPJKjBUqZUCO+ukxOa+REnfNn9Ka4Rv+zS07eFHt8Kj7bFhJDI2vZdaD+g2k5EAGxbWBhQH4HTBK1122OHPx4kjywzWHxPA9hKPxMhZyVgwTZBU75E3bvRUUdTR6+jP66HzMnANfzVnsy5KoqRRqOJHJHhU9PYxaBfQWA9WONCJgdFDhul8Ft6T/68C/8x9uHM10laCRWhbmy6aAaYhPDjvRN6DmDJ+x5CvGIbry/zvIZUDQHJhCq2kcA51INhwHXueCum80DoP81AfDU4aLDzrvicPL6oFLfjOZ2vQ8G2+zGPaXFm4F9f2R4C8k0uHDReKH2u8wIDAQAB",
+   "manifest_version": 2,
+   "name": "Sense (Beta)",
+   "permissions": [ "tabs", "clipboardWrite", "http://*/*", "https://*/*", "storage", "webRequest", "webRequestBlocking" ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "0.9.3"
+}

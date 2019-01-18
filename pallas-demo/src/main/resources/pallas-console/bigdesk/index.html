@@ -1,0 +1,66 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Pallas集群状态监控</title>
+    <meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <!-- css reset -->
+    <link rel="stylesheet" href="css/reset.css">
+
+    <!-- css grid -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+
+<body>
+<div class="container">
+    <form style="visibility: hidden;width:0px;height: 0px;"> 
+    <div class="row connectionPanel" >
+
+        <div style="visibility: hidden;width:0px;height: 0px;">
+            <span class="connectionPanelSectionWithoutDecoration">
+                <input id="restEndPoint" type="text" size="40" value="http://localhost:9200" />
+                <input id="clusterNameDom" type="hidden" size="40" value="to_be_set" />
+            </span>
+        </div>
+        <div class="sixcol last">
+            <span class="connectionPanelSection">
+            刷新频率：
+            <select id="refreshInterval">
+                <option value="1000" label="1 sec">1 秒</option>
+                <option value="2000" label="2 sec" selected="selected">2 秒</option>
+                <option value="3000" label="3 sec">3 秒</option>
+                <option value="5000" label="5 sec">5 秒</option>
+                <option value="10000" label="10 sec">10 秒</option>
+                <option value="30000" label="30 sec">30 秒</option>
+            </select>
+            </span>
+            <span class="connectionPanelSection">
+               保留时长:
+                <select id="storeSize">
+                    <option value="10000" label="10 sec">10 秒</option>
+                    <option value="30000" label="30 sec">30 秒</option>
+                    <option value="60000" label="1 min">1分钟</option>
+                    <option value="180000" label="3 min">3分钟</option>
+                    <option value="300000" label="5 min" selected="selected">5分钟</option>
+                    <option value="600000" label="10 min">10分钟</option>
+                    <option value="900000" label="15 min">15分钟</option>
+                    <option value="1800000" label="30 min">30分钟</option>
+                    <option value="3600000" label="1 hr">1小时</option>
+                </select>
+            </span>
+            <span class="connectionPanelSectionWithoutDecoration"  style="visibility: hidden;width:0px;height: 0px;">
+                <input id="connectButton" type="button" value="Connect"/>
+            </span>
+            <span id="ajaxIndicator">&nbsp;&nbsp;&nbsp;</span>
+        </div>
+    </div>
+    </form>
+    <div id="selectedViewDetail"></div>
+</div>
+<script type="text/javascript">
+    document.write('<script type="text/javascript" src="js/loader.js?r=' + Math.random() + '"><\/script>');
+</script>   
+</body>
+</html>

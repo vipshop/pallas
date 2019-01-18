@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vip.pallas.mybatis.repository.ApproveRepository">
+  <resultMap id="BaseResultMap" type="com.vip.pallas.mybatis.entity.Approve">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="title" jdbcType="VARCHAR" property="title" />
+    <result column="relate_id" jdbcType="BIGINT" property="relateId" />
+    <result column="approve_type" jdbcType="TINYINT" property="approveType" />
+    <result column="approve_state" jdbcType="TINYINT" property="approveState" />
+    <result column="apply_user" jdbcType="VARCHAR" property="applyUser" />
+    <result column="apply_time" jdbcType="TIMESTAMP" property="applyTime" />
+    <result column="approve_user" jdbcType="VARCHAR" property="approveUser" />
+    <result column="approve_time" jdbcType="TIMESTAMP" property="approveTime" />
+    <result column="approve_opinion" jdbcType="VARCHAR" property="approveOpinion" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="is_deleted" jdbcType="BIT" property="isDeleted" />
+
+    <result column="template_name" jdbcType="BIT" property="templateName" />
+    <result column="index_id" jdbcType="BIGINT" property="indexId" />
+    <result column="index_name" jdbcType="VARCHAR" property="indexName" />
+    <result column="cluster_id" jdbcType="VARCHAR" property="clusterId" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.vip.pallas.mybatis.entity.Approve">
+    <result column="note" jdbcType="LONGVARCHAR" property="note" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, title, relate_id, approve_type, approve_state, apply_user, apply_time, approve_user,
+    approve_time, approve_opinion, create_time, update_time, is_deleted
+  </sql>
+  <sql id="Blob_Column_List">
+    note
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="ResultMapWithBLOBs">
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from approve
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from approve
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+
+  <select id="selectAll" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from approve order by update_time desc
+  </select>
+  <select id="selectApplyPage" parameterType="com.vip.pallas.mybatis.entity.Page" resultMap="BaseResultMap">
+    select a.*, t.template_name, i.index_name, i.id index_id, cluster.cluster_id from approve a, search_template t, `index` i, `cluster` cluster where a.relate_id = t.id and i.id = t.index_id
+    and i.cluster_name = cluster.cluster_id
+    and a.approve_state != 3
+
+    <if test="params.applyUser != null and params.applyUser !=''">
+      and a.apply_user = #{params.applyUser}
+    </if>
+
+    <if test="params.state != null and params.state !=''">
+      and a.approve_state = #{params.state}
+    </if>
+
+    <if test="params.conditions != null and params.conditions !=''">
+      and (i.index_name like concat('%', #{params.conditions}, '%') or t.template_name like concat('%', #{params.conditions}, '%'))
+    </if>
+
+    <if test="params.clusterId != null and params.clusterId !=''">
+      and cluster.cluster_id = #{params.clusterId}
+    </if>
+
+    order by a.approve_state, a.update_time desc
+  </select>
+  <select id="selectApprovePage" parameterType="com.vip.pallas.mybatis.entity.Page" resultMap="BaseResultMap">
+    select a.*, t.template_name, i.index_name, i.id index_id, cluster.cluster_id from approve a, search_template t, `index` i, `cluster` cluster where a.relate_id = t.id and i.id = t.index_id
+    and i.cluster_name = cluster.cluster_id
+    and a.approve_state != 3
+
+    <if test="params.state != null and params.state !=''">
+      and a.approve_state = #{params.state}
+    </if>
+
+    <if test="params.conditions != null and params.conditions !=''">
+      and (i.index_name like concat('%', #{params.conditions}, '%') or t.template_name like concat('%', #{params.conditions}, '%') or a.apply_user like concat('%', #{params.conditions}, '%'))
+    </if>
+
+    <if test="params.clusterId != null and params.clusterId !=''">
+      and cluster.cluster_id = #{params.clusterId}
+    </if>
+
+    order by a.approve_state, a.update_time desc
+  </select>
+  <select id="getCountByTemplateIdAndState" resultType="java.lang.Integer">
+    select count(*) from `approve` where relate_id = #{0} and approve_state = #{1}
+  </select>
+
+  <insert id="insert" parameterType="com.vip.pallas.mybatis.entity.Approve">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
+      SELECT LAST_INSERT_ID() as id
+    </selectKey>
+    insert into approve (id, title, relate_id,
+      approve_type, approve_state, apply_user,
+      apply_time, approve_user, approve_time,
+      approve_opinion, create_time, update_time,
+      is_deleted, note)
+    values (#{id,jdbcType=BIGINT}, #{title,jdbcType=VARCHAR}, #{relateId,jdbcType=BIGINT},
+      #{approveType,jdbcType=TINYINT}, #{approveState,jdbcType=TINYINT}, #{applyUser,jdbcType=VARCHAR},
+      #{applyTime,jdbcType=TIMESTAMP}, #{approveUser,jdbcType=VARCHAR}, #{approveTime,jdbcType=TIMESTAMP},
+      #{approveOpinion,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP},
+      #{isDeleted,jdbcType=BIT}, #{note,jdbcType=LONGVARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.vip.pallas.mybatis.entity.Approve">
+    insert into approve
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="title != null">
+        title,
+      </if>
+      <if test="relateId != null">
+        relate_id,
+      </if>
+      <if test="approveType != null">
+        approve_type,
+      </if>
+      <if test="approveState != null">
+        approve_state,
+      </if>
+      <if test="applyUser != null">
+        apply_user,
+      </if>
+      <if test="applyTime != null">
+        apply_time,
+      </if>
+      <if test="approveUser != null">
+        approve_user,
+      </if>
+      <if test="approveTime != null">
+        approve_time,
+      </if>
+      <if test="approveOpinion != null">
+        approve_opinion,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+      <if test="isDeleted != null">
+        is_deleted,
+      </if>
+      <if test="note != null">
+        note,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="title != null">
+        #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="relateId != null">
+        #{relateId,jdbcType=BIGINT},
+      </if>
+      <if test="approveType != null">
+        #{approveType,jdbcType=TINYINT},
+      </if>
+      <if test="approveState != null">
+        #{approveState,jdbcType=TINYINT},
+      </if>
+      <if test="applyUser != null">
+        #{applyUser,jdbcType=VARCHAR},
+      </if>
+      <if test="applyTime != null">
+        #{applyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="approveUser != null">
+        #{approveUser,jdbcType=VARCHAR},
+      </if>
+      <if test="approveTime != null">
+        #{approveTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="approveOpinion != null">
+        #{approveOpinion,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDeleted != null">
+        #{isDeleted,jdbcType=BIT},
+      </if>
+      <if test="note != null">
+        #{note,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.vip.pallas.mybatis.entity.Approve">
+    update approve
+    <set>
+      <if test="title != null">
+        title = #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="relateId != null">
+        relate_id = #{relateId,jdbcType=BIGINT},
+      </if>
+      <if test="approveType != null">
+        approve_type = #{approveType,jdbcType=TINYINT},
+      </if>
+      <if test="approveState != null">
+        approve_state = #{approveState,jdbcType=TINYINT},
+      </if>
+      <if test="applyUser != null">
+        apply_user = #{applyUser,jdbcType=VARCHAR},
+      </if>
+      <if test="applyTime != null">
+        apply_time = #{applyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="approveUser != null">
+        approve_user = #{approveUser,jdbcType=VARCHAR},
+      </if>
+      <if test="approveTime != null">
+        approve_time = #{approveTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="approveOpinion != null">
+        approve_opinion = #{approveOpinion,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDeleted != null">
+        is_deleted = #{isDeleted,jdbcType=BIT},
+      </if>
+      <if test="note != null">
+        note = #{note,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.vip.pallas.mybatis.entity.Approve">
+    update approve
+    set title = #{title,jdbcType=VARCHAR},
+    relate_id = #{relateId,jdbcType=BIGINT},
+    approve_type = #{approveType,jdbcType=TINYINT},
+    approve_state = #{approveState,jdbcType=TINYINT},
+    apply_user = #{applyUser,jdbcType=VARCHAR},
+    apply_time = #{applyTime,jdbcType=TIMESTAMP},
+    approve_user = #{approveUser,jdbcType=VARCHAR},
+    approve_time = #{approveTime,jdbcType=TIMESTAMP},
+    approve_opinion = #{approveOpinion,jdbcType=VARCHAR},
+    create_time = #{createTime,jdbcType=TIMESTAMP},
+    update_time = #{updateTime,jdbcType=TIMESTAMP},
+    is_deleted = #{isDeleted,jdbcType=BIT},
+    note = #{note,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.vip.pallas.mybatis.entity.Approve">
+    update approve
+    set title = #{title,jdbcType=VARCHAR},
+      relate_id = #{relateId,jdbcType=BIGINT},
+      approve_type = #{approveType,jdbcType=TINYINT},
+      approve_state = #{approveState,jdbcType=TINYINT},
+      apply_user = #{applyUser,jdbcType=VARCHAR},
+      apply_time = #{applyTime,jdbcType=TIMESTAMP},
+      approve_user = #{approveUser,jdbcType=VARCHAR},
+      approve_time = #{approveTime,jdbcType=TIMESTAMP},
+      approve_opinion = #{approveOpinion,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      is_deleted = #{isDeleted,jdbcType=BIT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

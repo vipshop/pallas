@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vip.pallas.mybatis.repository.IndexRoutingTargetGroupRepository">
+
+  <resultMap id="resultListMap" type="com.vip.pallas.mybatis.entity.IndexRoutingTargetGroup">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="index_id" jdbcType="BIGINT" property="indexId" />
+    <result column="index_name" jdbcType="VARCHAR" property="indexName" />
+    <result column="type" jdbcType="VARCHAR" property="type" />
+    <result column="nodes_info" jdbcType="VARCHAR" property="nodesInfo" />
+    <result column="clusters_info" jdbcType="VARCHAR" property="clustersInfo" />
+    <result column="state" jdbcType="INTEGER" property="state" />
+    <result column="cluster_level" jdbcType="INTEGER" property="clusterLevel" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+
+  <select id="selectByIndexId" parameterType="com.vip.pallas.mybatis.entity.IndexRoutingTargetGroup" resultMap="resultListMap">
+    select * from `index_routing_target_group` where index_id=#{indexId} and type='index' order by id desc
+  </select>
+
+  <select id="selectByClusterId" parameterType="com.vip.pallas.mybatis.entity.IndexRoutingTargetGroup" resultMap="resultListMap">
+    select * from `index_routing_target_group` where index_id=#{clusterId} and type='cluster' order by id desc
+  </select>
+
+  <select id="selectAll" resultMap="resultListMap">
+    select * from `index_routing_target_group` order by id desc;
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from `index_routing_target_group` where id = #{id}
+  </delete>
+
+  <update id="update" parameterType="com.vip.pallas.mybatis.entity.IndexRoutingTargetGroup" >
+    update `index_routing_target_group`
+    <set>
+      <if test="name != null">
+        name = #{name},
+      </if>
+      <if test="nodesInfo != null">
+        nodes_info = #{nodesInfo},
+      </if>
+      <if test="clustersInfo != null">
+        clusters_info = #{clustersInfo},
+      </if>
+      <if test="state != null">
+        state = #{state},
+      </if>
+      <if test="clusterLevel != null">
+        cluster_level = #{clusterLevel},
+      </if>
+    </set>
+    where id = #{id}
+  </update>
+  <insert id="insert" parameterType="com.vip.pallas.mybatis.entity.IndexRoutingTargetGroup">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
+      SELECT LAST_INSERT_ID() as id
+    </selectKey>
+    insert into `index_routing_target_group`
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+    <if test="name != null">
+      name,
+    </if>
+      <if test="indexId != null">
+        index_id,
+      </if>
+    <if test="indexName != null">
+      index_name,
+    </if>
+    <if test="nodesInfo != null">
+      nodes_info,
+    </if>
+      <if test="clustersInfo != null">
+        clusters_info,
+      </if>
+      <if test="state != null">
+        state,
+      </if>
+      <if test="type != null">
+        type,
+      </if>
+      <if test="clusterLevel != null">
+        cluster_level,
+      </if>
+    <if test="createTime != null">
+      create_time,
+    </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="name != null">
+        #{name},
+      </if>
+      <if test="indexId != null">
+        #{indexId},
+      </if>
+      <if test="indexName != null">
+        #{indexName},
+      </if>
+      <if test="nodesInfo != null">
+        #{nodesInfo},
+      </if>
+      <if test="clustersInfo != null">
+        #{clustersInfo},
+      </if>
+      <if test="state != null">
+        #{state},
+      </if>
+      <if test="type != null">
+        #{type},
+      </if>
+      <if test="clusterLevel != null">
+        #{clusterLevel},
+      </if>
+      <if test="createTime != null">
+        #{createTime},
+      </if>
+    </trim>
+    </insert>
+
+</mapper>

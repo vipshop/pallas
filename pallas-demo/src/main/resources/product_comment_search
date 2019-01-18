@@ -1,0 +1,83 @@
+{
+    "from": {{from}}{{^from}}0{{/from}},
+    "size": {{size}}{{^size}}30{{/size}},
+    "sort":[{"post_time": "desc"}],
+    "query": {
+        "bool": {
+            "filter" : [
+                {"match_all": {}}
+                {{#audit_start_time}}
+                  ,{"range":{"approval_time" : { "gte" : "{{audit_start_time}}" }}}
+                {{/audit_start_time}}
+                {{#audit_end_time}}
+                  ,{"range":{"approval_time" : { "lte" : "{{audit_end_time}}" }}}
+                {{/audit_end_time}}
+                {{#comment_start_time}}
+                  ,{"range":{"post_time" : { "gte" : "{{comment_start_time}}" }}}
+                {{/comment_start_time}}
+                {{#comment_end_time}}
+                  ,{"range":{"post_time" : { "lte" : "{{comment_end_time}}" }}}
+                {{/comment_end_time}}
+                {{#is_satisfied}}
+                    ,{"term": {  "is_satisfied": {{is_satisfied}}  }}
+                {{/is_satisfied}}
+                {{#spu_ids}}
+                    ,{"terms": {  "spu_id": {{spu_ids}}  }}
+                {{/spu_ids}}
+                {{#sku_id}}
+                    ,{"term": {  "sku_id": {{sku_id}}  }}
+                {{/sku_id}}
+                {{#id}}
+                    ,{"term": {  "id": {{id}}  }}
+                {{/id}}
+                {{#vendor_id}}
+                    ,{"term": {  "vendor_id": {{vendor_id}}  }}
+                {{/vendor_id}}
+                {{#approval_user}}
+                    ,{"term": {  "approval_user": "{{approval_user}}"  }}
+                {{/approval_user}}
+                {{#cat3_ids}}
+                    ,{"terms": {  "cat3_id": {{cat3_ids}}  }}
+                {{/cat3_ids}}
+                {{#status}}
+                    ,{"terms": {  "status": {{status}}  }}
+                {{/status}}
+                {{#is_nlpmark}}
+                    ,{"term": {  "is_nlpmark": {{is_nlpmark}}  }}
+                {{/is_nlpmark}}
+                {{#nlp_class}}
+                    ,{"term": {  "nlp_class": "{{nlp_class}}"  }}
+                {{/nlp_class}}
+                {{#rep_source}}
+                    ,{"term": {  "rep_source": {{rep_source}}  }}
+                {{/rep_source}}
+                {{#third_rep_source}}
+                    ,{"term": {  "third_rep_source": {{third_rep_source}}  }}
+                {{/third_rep_source}}
+                {{#is_top}}
+                    ,{"term": {  "is_top": {{is_top}}  }}
+                {{/is_top}}
+                {{#is_essence}}
+                    ,{"term": {  "is_essence": {{is_essence}}  }}
+                {{/is_essence}}
+                {{#no_show_video}}
+                    ,{"term": {  "video_url": "" }}
+                {{/no_show_video}}
+                {{#had_show_pic}}
+                    ,{"range": {  "image_count": {"gt":0}  }}
+                {{/had_show_pic}}
+                {{#no_show_pic}}
+                    ,{"range": {  "image_count": {"lte":0}  }}
+                {{/no_show_pic}}
+                {{#content}}
+                    ,{ "match_phrase": { "content": "{{content}}" }}
+                {{/content}}
+            ],
+            "must_not":[
+                {{#had_show_video}}
+                    {"term": {  "video_url": "" }}
+                {{/had_show_video}}
+            ]
+        }
+    }
+}

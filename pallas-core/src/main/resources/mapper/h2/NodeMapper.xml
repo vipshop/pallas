@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vip.pallas.mybatis.repository.NodeRepository">
+  <resultMap id="BaseResultMap" type="com.vip.pallas.mybatis.entity.Node">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="cluster_name" jdbcType="VARCHAR" property="clusterName" />
+    <result column="node_name" jdbcType="VARCHAR" property="nodeName" />
+    <result column="node_ip" jdbcType="VARCHAR" property="nodeIp" />
+    <result column="state" jdbcType="TINYINT" property="state" />
+    <result column="state_time" jdbcType="TIMESTAMP" property="stateTime" />
+    <result column="last_startup_time" jdbcType="TIMESTAMP" property="lastStartupTime" />
+    <result column="note" jdbcType="VARCHAR" property="note" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="is_deleted" jdbcType="BIT" property="isDeleted" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, cluster_name, node_name, node_ip, state, state_time, last_startup_time, note, create_time, update_time,
+    is_deleted
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from node
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+
+  <select id="selectByClusterName" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from `node`
+    where cluster_name = #{0}
+  </select>
+
+  <select id="getCount4Abnormal" resultType="java.lang.Integer">
+    select count(*) from `node` where cluster_name = #{0} and state != 4
+  </select>
+
+  <select id="selectAbnormalNodeList" resultMap="BaseResultMap">
+    select * from `node` where cluster_name = #{0} and state != 4
+  </select>
+
+  <select id="selectByClusterAndNodeIp" resultMap="BaseResultMap">
+    select * from `node` where cluster_name = #{0} and node_ip = #{1}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from node
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.vip.pallas.mybatis.entity.Node">
+    insert into node (id, cluster_name, node_name,
+    node_ip, state, state_time, last_startup_time,
+    note, create_time, update_time,
+    is_deleted)
+    values (#{id,jdbcType=BIGINT}, #{clusterName,jdbcType=VARCHAR}, #{nodeName,jdbcType=VARCHAR},
+    #{nodeIp,jdbcType=VARCHAR}, #{state,jdbcType=TINYINT}, #{stateTime,jdbcType=TIMESTAMP}, #{lastStartupTime,jdbcType=TIMESTAMP},
+    #{note,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP},
+    #{isDeleted,jdbcType=BIT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.vip.pallas.mybatis.entity.Node">
+    insert into node
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="clusterName != null">
+        cluster_name,
+      </if>
+      <if test="nodeName != null">
+        node_name,
+      </if>
+      <if test="nodeIp != null">
+        node_ip,
+      </if>
+      <if test="state != null">
+        state,
+      </if>
+      <if test="stateTime != null">
+        state_time,
+      </if>
+      <if test="lastStartupTime != null">
+        last_startup_time,
+      </if>
+      <if test="note != null">
+        note,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+      <if test="isDeleted != null">
+        is_deleted,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="clusterName != null">
+        #{clusterName,jdbcType=VARCHAR},
+      </if>
+      <if test="nodeName != null">
+        #{nodeName,jdbcType=VARCHAR},
+      </if>
+      <if test="nodeIp != null">
+        #{nodeIp,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null">
+        #{state,jdbcType=TINYINT},
+      </if>
+      <if test="stateTime != null">
+        #{stateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="lastStartupTime != null">
+        #{lastStartupTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="note != null">
+        #{note,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDeleted != null">
+        #{isDeleted,jdbcType=BIT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.vip.pallas.mybatis.entity.Node">
+    update node
+    <set>
+      <if test="clusterName != null">
+        cluster_name = #{clusterName,jdbcType=VARCHAR},
+      </if>
+      <if test="nodeName != null">
+        node_name = #{nodeName,jdbcType=VARCHAR},
+      </if>
+      <if test="nodeIp != null">
+        node_ip = #{nodeIp,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null">
+        state = #{state,jdbcType=TINYINT},
+      </if>
+      <if test="stateTime != null">
+        state_time = #{stateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="lastStartupTime != null">
+        last_startup_time = #{lastStartupTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="note != null">
+        note = #{note,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDeleted != null">
+        is_deleted = #{isDeleted,jdbcType=BIT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.vip.pallas.mybatis.entity.Node">
+    update node
+    set cluster_name = #{clusterName,jdbcType=VARCHAR},
+      node_name = #{nodeName,jdbcType=VARCHAR},
+      node_ip = #{nodeIp,jdbcType=VARCHAR},
+      state = #{state,jdbcType=TINYINT},
+      state_time = #{stateTime,jdbcType=TIMESTAMP},
+      last_startup_time = #{lastStartupTime,jdbcType=TIMESTAMP},
+      note = #{note,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      is_deleted = #{isDeleted,jdbcType=BIT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

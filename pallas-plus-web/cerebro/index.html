@@ -1,0 +1,27 @@
+<html lang="en" ng-app="cerebro">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
+        <meta http-equiv="Pragma" content="no-cache">
+        <meta http-equiv="Expires" content="0">
+        <title>Pallas集群控制台</title>
+        <link rel="icon" type="image/png" href="img/favicon.png">
+    </head>
+    <body>
+        <div ng-include src="'tpl/alerts.html'" ng-controller="AlertsController" class="alerts"></div>
+        <div ng-include src="'tpl/navbar.html'"></div>
+        <div class="container-fluid main main_content_box">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="content" ng-view onload="setup()"></div>
+                </div>
+            </div>
+        </div>
+        <div ng-include src="'tpl/modal.html?v=1'"></div>
+	
+	<script type="text/javascript">
+		document.write('<script type="text/javascript" src="js/loader.js?r=' + Math.random() + '"><\/script>');
+	</script>	
+    </body>
+</html>
