@@ -173,9 +173,11 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 				if (mapping.getDynamic()) {
 					prop.setDynamic(Boolean.TRUE);
 				}
-				prop.setType("nested");
-				prop.setDocValues(null);
-				prop.setIndex(null);
+				if (!"object".equals(mapping.getFieldType())) {
+					prop.setType("nested");
+					prop.setDocValues(null);
+					prop.setIndex(null);
+				}
 
 				prop.setProperties(nestedPropertieMap);
 				
