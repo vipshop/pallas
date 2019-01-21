@@ -35,6 +35,7 @@ public class IndexParam {
 	
 	private boolean multipleDataSource;
 	private String arrayFields;
+	private String esObjectFields;
 	private Long indexId;
     private int vdp;
     private boolean filterFields;
@@ -47,7 +48,15 @@ public class IndexParam {
 	public void setArrayFields(String arrayFields) {
 		this.arrayFields = arrayFields;
 	}
-	
+
+	public String getEsObjectFields() {
+		return esObjectFields;
+	}
+
+	public void setEsObjectFields(String esObjectFields) {
+		this.esObjectFields = esObjectFields;
+	}
+
 	public String getClusterName() {
 		return clusterName;
 	}
