@@ -40,7 +40,7 @@ public class IndexDsImportController {
 
         String jsonStr = IOUtils.toString(file.getInputStream(), StandardCharsets.UTF_8);
         response.setStatus(200);
-        response.setContentType("text/html");
+        response.setContentType("text/plain;charset=UTF-8");
         response.getWriter().write(jsonStr);
         response.flushBuffer();
     }
