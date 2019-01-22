@@ -380,7 +380,7 @@ export default {
           this.versionList.forEach((element) => {
             versionIdList.push(element.id);
           });
-          this.$http.post('/index/version/count.json', { indexName: this.indexName, versionIds: versionIdList }).then((countData) => {
+          this.$http.post('/index/version/count.json', { indexName: this.indexName, indexId: this.indexId, versionIds: versionIdList }).then((countData) => {
             this.versionList.forEach((ele) => {
               this.$set(ele, 'count', countData[ele.id]);
             });
