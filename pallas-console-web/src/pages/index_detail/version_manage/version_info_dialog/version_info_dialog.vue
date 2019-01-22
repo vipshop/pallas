@@ -1,8 +1,14 @@
   <template>
     <div class="version-info-dialog">
-        <el-dialog :title="versionInfoTitle" size="large" v-model="isVersionInfoVisible" :before-close="closeDialog" v-loading="loading" element-loading-text="请稍等···">
+        <el-dialog size="large" v-model="isVersionInfoVisible" :before-close="closeDialog" v-loading="loading" element-loading-text="请稍等···">
+            <span slot="title">
+              <span>{{versionInfoTitle}}</span>
+            </span>
             <el-form :model="versionInfo" :rules="rules" ref="versionInfo" label-position="left">
-                <div class="label-title"><span class="span-title">索引配置</span></div>
+                <div class="label-title">
+                  <span class="span-title">索引配置</span>
+                  <span v-if="isLogical" style="color: #C8C8C8;">（所属集群：{{clusterArray.join()}}）</span>
+                </div>
                 <div class="label-content">
                     <el-row :gutter="20">
                         <el-col :span="12">
@@ -18,7 +24,29 @@
                     </el-row>
                 </div>
                 <div class="label-content">
-                    <el-row :gutter="20">
+                    <el-row :gutter="20" v-if="isLogical">
+                        <el-col :span="24">
+                            <el-form-item label="所属节点" prop="nodes" label-width="120px">
+                                <el-select multiple filterable value-key="name" v-model="versionInfo.nodes" placeholder="请选择机器" :disabled="isEditable" style="width: 100%">
+                                    <el-option-group v-for="group in clusterGroups" :key="group.clusterId" :label="group.clusterId">
+                                        <el-option v-for="item in group.nodes" :key="item.name" :label="item.name" :value="item">
+                                            <span style="float: left">{{ item.name }}</span>
+                                            <el-tooltip placement="right">
+                                                <div slot="content">
+                                                    <div v-if="item.indicis.length > 0" style="width: 600px;">
+                                                        <el-col v-for="item1 in item.indicis" :key="item1" :span="8">{{item1}}</el-col>
+                                                    </div>
+                                                    <div v-else>暂无索引</div>
+                                                </div>
+                                                <el-tag style="float: left;margin-left: 10px;">{{ item.indicis.length }}</el-tag>
+                                            </el-tooltip>
+                                        </el-option>
+                                    </el-option-group>
+                                </el-select>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                    <el-row :gutter="20" v-else>
                         <el-col :span="12">
                             <el-form-item label="所属集群" prop="clusterId" label-width="120px" required>
                                 <el-select v-model="versionInfo.clusterId" placeholder="请选择集群" @change="clusterChange" :disabled="isEditable" style="width: 100%">
@@ -28,7 +56,7 @@
                         </el-col>
                         <el-col :span="12">
                             <el-form-item label="所属节点" prop="nodes" label-width="120px">
-                                <el-select multiple v-model="versionInfo.nodes" placeholder="请选择机器" :disabled="isEditable" style="width: 100%">
+                                <el-select multiple filterable v-model="versionInfo.nodes" placeholder="请选择机器" :disabled="isEditable" style="width: 100%">
                                     <el-option v-for="item in clusterNodes" :key="item.name" :label="item.name" :value="item.name">
                                         <span style="float: left">{{ item.name }}</span>
                                         <el-tooltip placement="right">
@@ -200,7 +228,7 @@ export default {
     'schema-child-dialog': SchemaChildDialog,
     'schema-import-dialog': SchemaImportDialog,
   },
-  props: ['versionOperation', 'versionInfo', 'versionInfoTitle', 'isMetaDataNull', 'clusters'],
+  props: ['versionOperation', 'versionInfo', 'versionInfoTitle', 'isMetaDataNull', 'clusters', 'isLogical'],
   data() {
     return {
       loading: false,
@@ -307,11 +335,30 @@ export default {
     exportSchema() {
       window.location.href = `/pallas/index/version/schema_export.json?versionId=${this.versionInfo.versionId}`;
     },
+    getLogicClusterAllocationNodes() {
+      const result = [];
+      this.clusterArray.forEach((ele) => {
+        const obj = {
+          cluster: ele,
+          nodes: this.versionInfo.nodes.filter(e => ele === e.parent).map(v => v.name),
+        };
+        result.push(obj);
+      });
+      let str = '';
+      result.forEach((element) => {
+        str += `${element.cluster}:${element.nodes.join()};`;
+      });
+      return str;
+    },
     submitVersionInfo() {
       this.$refs.versionInfo.validate((valid) => {
         if (valid) {
           if (this.isSchemaSelectSearch() && !this.isSchemaSelectError()) {
-            this.$set(this.versionInfo, 'allocationNodes', this.versionInfo.nodes.join(','));
+            if (this.isLogical) {
+              this.$set(this.versionInfo, 'allocationNodes', this.getLogicClusterAllocationNodes());
+            } else {
+              this.$set(this.versionInfo, 'allocationNodes', this.versionInfo.nodes.join(','));
+            }
             if (this.versionOperation === 'add' || this.versionOperation === 'copy') {
               this.loading = true;
               this.$http.post('/index/version/add.json', this.versionInfo).then(() => {
@@ -420,6 +467,10 @@ export default {
     },
   },
   computed: {
+    clusterArray() {
+      const arr = this.clusters.map(e => e.clusterId);
+      return arr;
+    },
     isEditable() {
       return this.versionOperation === 'view';
     },
@@ -440,6 +491,18 @@ export default {
         }
       });
       return arr;
+    },
+    clusterGroups() {
+      const result = this.clusters.map((obj) => {
+        const rObj = { ...obj };
+        rObj.nodes = obj.nodes.map((obj2) => {
+          const rObj2 = { ...obj2 };
+          rObj2.parent = obj.clusterId;
+          return rObj2;
+        });
+        return rObj;
+      });
+      return result;
     },
   },
 };
