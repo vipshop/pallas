@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>pallas-open</artifactId>
+        <groupId>com.vip.pallas</groupId>
+        <version>master-SNAPSHOT</version>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.vip.pallas</groupId>
-    <artifactId>pallas-plugin-archetype</artifactId>
-    <version>master-SNAPSHOT</version>
     <packaging>maven-archetype</packaging>
-
-    <name>pallas-plugin-archetype</name>
+    <artifactId>pallas-plugin-archetype</artifactId>
 
     <build>
         <extensions>
