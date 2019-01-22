@@ -34,7 +34,7 @@ public class SystemController {
         return ConfigReader.getProperty("pallas.version");
     }
 
-    @RequestMapping("/system/loginUser.json")
+    @RequestMapping("/system/user.json")
     public String loginUser(HttpServletRequest request) {
         String loginUser = SessionUtil.getLoginUser(request);
         return loginUser != null ? loginUser : "Unknown";
