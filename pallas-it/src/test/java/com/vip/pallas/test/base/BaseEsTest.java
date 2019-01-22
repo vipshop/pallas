@@ -48,7 +48,7 @@ public class BaseEsTest{
                 .withEsJavaOpts("-Xms256m -Xmx256m -Dfile.encoding=UTF-8")
                 .withSetting(PopularProperties.TRANSPORT_TCP_PORT, 9300)
                 .withIndex("product_comment", indexSettings)
-                .withStartTimeout(30, TimeUnit.SECONDS)
+                .withStartTimeout(120, TimeUnit.SECONDS)
                 .withDownloadDirectory(new File(System.getProperty("embedded.elasticsearch.download.directory")))
                 .withInstallationDirectory(new File(System.getProperty("java.io.tmpdir"), "embedded-elasticsearch-dir1"))
                 .build()
