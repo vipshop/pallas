@@ -903,6 +903,55 @@
                 </plugins>
             </build>
         </profile>
+
+		<profile>
+			<id>release</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>${maven-gpg-plugin.version}</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+
+			<distributionManagement>
+				<snapshotRepository>
+					<id>sonatype-nexus-snapshots</id>
+					<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+				</snapshotRepository>
+				<repository>
+					<id>sonatype-nexus-releases</id>
+					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+				</repository>
+			</distributionManagement>
+		</profile>
+
+		<profile>
+			<id>inner</id>
+			<distributionManagement>
+				<repository>
+					<id>releases</id>
+					<name>vipshop internal releases repository</name>
+					<url>http://mvn1.tools.inner.com/nexus/content/repositories/releases</url>
+				</repository>
+				<snapshotRepository>
+					<id>snapshots</id>
+					<name>vipshop internal snapshots repository</name>
+					<url>http://mvn1.tools.inner.com/nexus/content/repositories/snapshots</url>
+				</snapshotRepository>
+			</distributionManagement>
+		</profile>
 	</profiles>
 	
 	<repositories>
@@ -911,5 +960,39 @@
 			<name>in project repository of pallas</name>
 			<url>file://${project.basedir}/lib</url>
 		</repository>
+		<repository>
+			<id>sonatype</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+		</repository>
 	</repositories>
+
+	<url>https://github.com/vipshop/pallas</url>
+	<developers>
+		<developer>
+			<id>dylanxue</id>
+			<name>Xueke</name>
+			<email>dylan_xueke@hotmail.com.com</email>
+			<timezone>8</timezone>
+		</developer>
+	</developers>
+
+	<licenses>
+		<license>
+			<name>Apache License 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<scm>
+		<connection>scm:git:https://github.com/vipshop/pallas.git</connection>
+		<developerConnection>scm:git:git@github.com:dylanxue/vipshop/pallas.git</developerConnection>
+		<url>https://github.com/vipshop/pallas</url>
+	</scm>
 </project>
