@@ -40,6 +40,8 @@ public interface MappingRepository {
     int updateByPrimaryKey(Mapping record);
     
     List<String> selectMultiFieldsByVersionId(Long versionId);
+
+    List<String> selectEsObjectFieldsByVersionId(Long versionId);
     
     List<Mapping> selectByVersionId(Long versionId);
     
