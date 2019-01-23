@@ -17,10 +17,10 @@
 
 package com.vip.pallas.console.controller.cluster;
 
-import static java.util.stream.Collectors.toList;
-
-import java.util.*;
-import java.util.stream.Stream;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Min;
@@ -106,27 +106,6 @@ public class ClusterController {
     public List<Cluster> listAll() {
         List<Cluster> result = clusterService.findAll();
         return result;
-    }
-
-    @RequestMapping(value = "/all/physicals.json", method = RequestMethod.GET)
-    public Map<String, Object> getPhysicalsList() {
-        Map<String, Object> resultMap = new HashMap<>();
-        List<Cluster> allPhysicalList = new LinkedList<>();
-        Map<String, List<String>> logicMap = new HashMap<>();
-
-        for(Cluster c : clusterService.findAll()) {
-            if (c.isLogicalCluster()) {
-                List<String> list = Stream.of(c.getRealClusters().split(",")).collect(toList());
-                List<String> subPhysicals = allPhysicalList.stream().filter((Cluster cluster) -> list.contains("" + cluster.getId())).map(Cluster::getClusterId).collect(toList());
-                logicMap.putIfAbsent(c.getClusterId(), subPhysicals);
-            } else {
-                allPhysicalList.add(c);
-            }
-        }
-
-        resultMap.put("list", allPhysicalList);
-        resultMap.put("logic_physical_map", logicMap);
-        return resultMap;
     }
 
     @RequestMapping(value = "/id.json", method = RequestMethod.GET)

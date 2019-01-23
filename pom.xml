@@ -13,6 +13,7 @@
 		<module>pallas-core</module>
 		<module>pallas-core-open</module>
 		<module>pallas-console</module>
+		<module>pallas-console-web</module>
         <module>pallas-plugin</module>
 		<module>pallas-plugin-archetype</module>
 		<module>pallas-rest-client</module>

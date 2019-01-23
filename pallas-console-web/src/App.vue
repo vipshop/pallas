@@ -32,7 +32,7 @@ export default {
       }, 600000);
     },
     getLoginUser() {
-      return this.$http.get('/system/loginUser.json').then((data) => {
+      return this.$http.get('/system/user.json').then((data) => {
         this.$store.dispatch(SET_LOGIN_USER, data);
       });
     },

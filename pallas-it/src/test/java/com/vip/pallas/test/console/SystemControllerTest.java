@@ -37,7 +37,7 @@ public class SystemControllerTest extends BaseSpringEsTest {
 
     @Test
     public void test2LoginUser() throws Exception {
-        Map resultMap = callGetApi("/system/loginUser.json");
+        Map resultMap = callGetApi("/system/user.json");
         assertThat(resultMap).containsEntry("status", 200);
         assertThat(resultMap.get("data")).isNotNull();
     }

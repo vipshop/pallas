@@ -17,16 +17,24 @@
 
 package com.vip.pallas.console.controller.api.cluster;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vip.pallas.exception.BusinessLevelException;
+import com.vip.pallas.mybatis.entity.Cluster;
+import com.vip.pallas.service.ClusterService;
 import com.vip.pallas.service.NodeService;
 import com.vip.pallas.utils.ObjectMapTool;
 
@@ -37,6 +45,9 @@ public class ClusterApiController {
 
     @Autowired
     private NodeService nodeService;
+    
+    @Autowired
+    private ClusterService clusterService;
 
     @RequestMapping(value = "/abnormal_node/list.json")
     public Map<String, Object> list(@RequestBody Map<String, Object> params) {
@@ -51,4 +62,24 @@ public class ClusterApiController {
         return resultMap;
     }
     
+    @RequestMapping(value = "/all/physicals.json", method = RequestMethod.GET)
+    public Map<String, Object> getPhysicalsList() {
+        Map<String, Object> resultMap = new HashMap<>();
+        List<Cluster> allPhysicalList = new LinkedList<>();
+        Map<String, List<String>> logicMap = new HashMap<>();
+
+        for(Cluster c : clusterService.findAll()) {
+            if (c.isLogicalCluster()) {
+                List<String> list = Stream.of(c.getRealClusters().split(",")).collect(toList());
+                List<String> subPhysicals = allPhysicalList.stream().filter((Cluster cluster) -> list.contains("" + cluster.getId())).map(Cluster::getClusterId).collect(toList());
+                logicMap.putIfAbsent(c.getClusterId(), subPhysicals);
+            } else {
+                allPhysicalList.add(c);
+            }
+        }
+
+        resultMap.put("list", allPhysicalList);
+        resultMap.put("logic_physical_map", logicMap);
+        return resultMap;
+    }
 }

@@ -51,7 +51,7 @@
             </div>
         </div>
         <div v-if="isVersionInfoVisible">
-            <version-info-dialog :version-operation="versionOperation" :version-info-title="versionInfoTitle" :version-info="versionInfo" :clusters="clusters" :is-meta-data-null="isMetaDataNull" @close-dialog="closeDialog" @template-operate-success="templateOperateSuccess"></version-info-dialog>
+            <version-info-dialog :version-operation="versionOperation" :version-info-title="versionInfoTitle" :version-info="versionInfo" :is-logical="isLogical" :clusters="clusters" :is-meta-data-null="isMetaDataNull" @close-dialog="closeDialog" @template-operate-success="templateOperateSuccess"></version-info-dialog>
         </div>
         <div v-if="isViewConfigVisible">
             <json-content-dialog :content="configInfo" :title="configTitle" @close-dialog="closeViewConfigDialog"></json-content-dialog>
@@ -107,6 +107,7 @@ export default {
         refreshInterval: 60,
       },
       clusters: [],
+      isLogical: false,
     };
   },
   methods: {
@@ -182,7 +183,11 @@ export default {
           this.versionGetInfo.versionId = row.id;
         });
         this.$set(this.versionGetInfo, 'versionId', this.versionGetInfo.id);
-        this.$set(this.versionGetInfo, 'nodes', this.getNodesArray(this.versionGetInfo.allocationNodes));
+        if (this.isLogical) {
+          this.$set(this.versionGetInfo, 'nodes', this.getLogicClusterNodesArray(this.versionGetInfo.allocationNodes));
+        } else {
+          this.$set(this.versionGetInfo, 'nodes', this.getNodesArray(this.versionGetInfo.allocationNodes));
+        }
         this.versionInfo = JSON.parse(JSON.stringify(this.versionGetInfo));
         if (operation === 'edit') {
           this.versionInfoTitle = '编辑版本';
@@ -211,7 +216,11 @@ export default {
           this.versionGetInfo.versionId = row.id;
         });
         this.$set(this.versionGetInfo, 'versionId', this.versionGetInfo.id);
-        this.$set(this.versionGetInfo, 'nodes', this.getNodesArray(this.versionGetInfo.allocationNodes));
+        if (this.isLogical) {
+          this.$set(this.versionGetInfo, 'nodes', this.getLogicClusterNodesArray(this.versionGetInfo.allocationNodes));
+        } else {
+          this.$set(this.versionGetInfo, 'nodes', this.getNodesArray(this.versionGetInfo.allocationNodes));
+        }
         this.versionInfo = JSON.parse(JSON.stringify(this.versionGetInfo));
         this.versionInfoTitle = `复制版本(From ${row.id})`;
         this.versionOperation = operation;
@@ -231,6 +240,30 @@ export default {
         }
       }
       return arr;
+    },
+    getLogicClusterNodesArray(nodesStr) {
+      const resultArray = [];
+      if (nodesStr.indexOf(';') > -1) {
+        const clusterArr = nodesStr.split(';');
+        if (clusterArr) {
+          clusterArr.forEach((ele) => {
+            if (ele) {
+              const cluster = ele.split(':')[0];
+              const nodeStr = ele.split(':')[1];
+              if (nodeStr) {
+                nodeStr.split(',').forEach((ele2) => {
+                  const params = {
+                    parent: cluster,
+                    name: ele2,
+                  };
+                  resultArray.push(params);
+                });
+              }
+            }
+          });
+        }
+      }
+      return resultArray;
     },
     handleDelete(row) {
       this.$message.confirmMessage(`确定删除版本${row.id}吗?`, () => {
@@ -256,6 +289,7 @@ export default {
       this.loading = true;
       this.$http.post('/index/version/metadata.json', { indexId: this.indexId }).then((data) => {
         this.clusters = data.clusters;
+        this.isLogical = data.isLogical;
         if (data.list === null || data.list.length === 0) {
           this.versionAddInfo.schema = [];
           this.isMetaDataNull = true;
@@ -346,7 +380,7 @@ export default {
           this.versionList.forEach((element) => {
             versionIdList.push(element.id);
           });
-          this.$http.post('/index/version/count.json', { indexName: this.indexName, versionIds: versionIdList }).then((countData) => {
+          this.$http.post('/index/version/count.json', { indexName: this.indexName, indexId: this.indexId, versionIds: versionIdList }).then((countData) => {
             this.versionList.forEach((ele) => {
               this.$set(ele, 'count', countData[ele.id]);
             });
