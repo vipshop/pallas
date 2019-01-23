@@ -6,6 +6,7 @@ public class IndexBaseVO implements Serializable {
 
     private Long id;
     private String indexName;
+    private String clusterName;
 
     public Long getId() {
         return id;
@@ -21,5 +22,13 @@ public class IndexBaseVO implements Serializable {
 
     public void setIndexName(String indexName) {
         this.indexName = indexName;
+    }
+
+    public String getClusterName() {
+        return clusterName;
+    }
+
+    public void setClusterName(String clusterName) {
+        this.clusterName = clusterName;
     }
 }

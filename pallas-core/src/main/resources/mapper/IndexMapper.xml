@@ -17,6 +17,7 @@
   <resultMap id="SpecifiedFieldResultMap" type="com.vip.pallas.mybatis.entity.Index">
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="index_name" jdbcType="VARCHAR" property="indexName" />
+    <result column="cluster_name" jdbcType="VARCHAR" property="clusterName" />
   </resultMap>
 
   <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.vip.pallas.mybatis.entity.Index">
@@ -99,7 +100,7 @@
   </select>
 
   <select id="selectAllSpecificdFiled" resultMap="SpecifiedFieldResultMap">
-    select id, index_name
+    select id, index_name,cluster_name
     from `index` order by update_time desc
   </select>
 
