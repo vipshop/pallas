@@ -39,6 +39,8 @@
                 :key="item.id"
                 :label="item.indexName"
                 :value="item.id">
+                <span style="float: left">{{ item.indexName }}</span>
+                <span style="float: right; color: #B8B8B8; font-size: 13px">{{ item.clusterName }}</span>
               </el-option>
             </el-select>
             <el-transfer
