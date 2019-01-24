@@ -6,22 +6,31 @@
         <div class="content">
             <template>
                 <el-table :data="versionList" border style="width: 100%" v-loading="loading" element-loading-text="请稍等···">
-                    <el-table-column label="版本id" prop="id" width="100px"></el-table-column>
-                    <el-table-column label="所属集群" prop="clusterId" min-width="110">
+                    <el-table-column label="版本id" prop="id" width="150px"></el-table-column>
+                    <el-table-column label="所属集群" prop="realClusterIds">
                         <template scope="scope">
-                            <router-link tag="a" :to="{ name:'cluster_detail',query:{clusterId: getClusterName(scope.row.clusterId)} }">{{getClusterName(scope.row.clusterId)}}</router-link>
+                            <div class="condition-table" v-for="item in $array.strToArray(scope.row.realClusterIds)" :key="item">
+                                <span v-if="isLogical">{{getClusterName(item)}}</span>
+                                <router-link v-else tag="a" :to="{ name:'cluster_detail',query:{clusterId: getClusterName(item)} }">{{getClusterName(item)}}</router-link>
+                                <el-tooltip effect="dark" content="查看配置信息" placement="top">
+                                    <el-button type="text" @click="viewConfigInfo(scope.row, item)"><i class="fa fa-cog"></i></el-button>
+                                </el-tooltip>
+                            </div>
                         </template>
                     </el-table-column>
-                    <el-table-column label="数据量" prop="count" width="110px"></el-table-column>
-                    <el-table-column label="配置信息" width="120px">
+                    <!-- <el-table-column label="所属集群" prop="clusterId" min-width="110">
                         <template scope="scope">
-                            <el-button size="small" @click="viewConfigInfo(scope.row)" :disabled="!isAllPrivilege">查看配置信息</el-button>
+                        </template>
+                    </el-table-column> -->
+                    <el-table-column label="数据量" prop="count" width="150px">
+                        <template scope="scope">
+                            <div class="condition-table" v-for="item in scope.row.count" :key="item">{{item}}</div>
                         </template>
                     </el-table-column>
-                    <el-table-column label="创建时间" prop="createTime" min-width="110">
+                    <el-table-column label="创建时间" prop="createTime" width="200px">
                         <template scope="scope">{{scope.row.createTime | formatDate}}</template>
                     </el-table-column>
-                    <el-table-column label="是否启用" prop="isUsed" min-width="50">
+                    <el-table-column label="是否启用" prop="isUsed" width="150px">
                         <template scope="scope"> 
                             <el-tag :type="scope.row.isUsed ? 'success' : 'danger'" close-transition>{{scope.row.isUsed || false | translateIsUsed}}</el-tag>
                         </template>
@@ -114,7 +123,7 @@ export default {
     getClusterName(id) {
       let clusterName = '';
       this.clusters.some((ele) => {
-        if (ele.id === id) {
+        if (ele.id === Number(id)) {
           clusterName = ele.clusterId;
           return true;
         }
@@ -122,16 +131,17 @@ export default {
       });
       return clusterName;
     },
-    viewConfigInfo(row) {
+    viewConfigInfo(row, clusterId) {
       const params = {
         indexId: this.indexId,
         indexName: this.indexName,
         versionId: row.id,
+        cid: clusterId,
       };
       this.loading = true;
       this.$http.get('/index/version/info.json', params).then((data) => {
         this.configInfo = data;
-        this.configTitle = `${this.indexName}_${row.id}配置信息`;
+        this.configTitle = `${this.indexName}_${row.id}配置信息（集群：${this.getClusterName(clusterId)}）`;
         this.isViewConfigVisible = true;
       })
       .finally(() => {
@@ -354,25 +364,7 @@ export default {
         this.versionData = data;
         this.isAllPrivilege = data.allPrivilege;
         this.versionList = data.list.map((obj) => {
-          const rObj = {};
-          rObj.createTime = obj.createTime;
-          rObj.id = obj.id;
-          rObj.idField = obj.idField;
-          rObj.clusterId = obj.clusterId;
-          rObj.indexId = obj.indexId;
-          rObj.isSync = obj.isSync;
-          rObj.isUsed = obj.isUsed;
-          rObj.numOfReplication = obj.numOfReplication;
-          rObj.numOfShards = obj.numOfShards;
-          rObj.routingKey = obj.routingKey;
-          rObj.syncStat = obj.syncStat;
-          rObj.updateTime = obj.updateTime;
-          rObj.updateTimeField = obj.updateTimeField;
-          rObj.vdpQueue = obj.vdpQueue;
-          rObj.versionName = obj.versionName;
-          rObj.indexSlowThreshold = obj.indexSlowThreshold;
-          rObj.fetchSlowThreshold = obj.fetchSlowThreshold;
-          rObj.querySlowThreshold = obj.querySlowThreshold;
+          const rObj = { ...obj };
           return rObj;
         });
         const versionIdList = [];
@@ -380,9 +372,18 @@ export default {
           this.versionList.forEach((element) => {
             versionIdList.push(element.id);
           });
-          this.$http.post('/index/version/count.json', { indexName: this.indexName, indexId: this.indexId, versionIds: versionIdList }).then((countData) => {
+          this.$http.post('/index/version/count.json', { indexName: this.indexName, indexId: this.indexId, versionIds: versionIdList }).then((countList) => {
             this.versionList.forEach((ele) => {
-              this.$set(ele, 'count', countData[ele.id]);
+              const result = countList.filter(e => e.vid === ele.id);
+              const countResult = [];
+              if (result[0].data.length > 0) {
+                this.$array.strToArray(ele.realClusterIds).forEach((ele2) => {
+                  const count = result[0].data.filter(v => v.cid === Number(ele2))
+                  .map(m => m.count)[0];
+                  countResult.push(count);
+                });
+              }
+              this.$set(ele, 'count', countResult);
             });
           });
         }
