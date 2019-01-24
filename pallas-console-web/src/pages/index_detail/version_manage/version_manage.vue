@@ -10,18 +10,13 @@
                     <el-table-column label="所属集群" prop="realClusterIds">
                         <template scope="scope">
                             <div class="condition-table" v-for="item in $array.strToArray(scope.row.realClusterIds)" :key="item">
-                                <span v-if="isLogical">{{getClusterName(item)}}</span>
-                                <router-link v-else tag="a" :to="{ name:'cluster_detail',query:{clusterId: getClusterName(item)} }">{{getClusterName(item)}}</router-link>
+                                <router-link tag="a" :to="{ name:'cluster_detail',query:{clusterId: getClusterName(item)} }">{{getClusterName(item)}}</router-link>
                                 <el-tooltip effect="dark" content="查看配置信息" placement="top">
                                     <el-button type="text" @click="viewConfigInfo(scope.row, item)"><i class="fa fa-cog"></i></el-button>
                                 </el-tooltip>
                             </div>
                         </template>
                     </el-table-column>
-                    <!-- <el-table-column label="所属集群" prop="clusterId" min-width="110">
-                        <template scope="scope">
-                        </template>
-                    </el-table-column> -->
                     <el-table-column label="数据量" prop="count" width="150px">
                         <template scope="scope">
                             <div class="condition-table" v-for="item in scope.row.count" :key="item">{{item}}</div>
