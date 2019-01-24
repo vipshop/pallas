@@ -3,4 +3,5 @@
 - 提供统一的索引管理，索引配置，集群监控，索引数据同步，检索服务治理能力。
 
  
+[GitHub](https://github.com/vipshop/pallas)
 [1.X](zh-cn/1.x/)

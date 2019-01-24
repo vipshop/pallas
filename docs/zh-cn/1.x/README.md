@@ -87,6 +87,9 @@ java -Dfile.encoding=UTF-8 -jar pallas-demo.jar
 ```
 Click here for more details: [Quick Start](https://vipshop.github.io/pallas/#/zh-cn/1.x/tutorial)
 
+## Documents
+[Get Started](https://vipshop.github.io/pallas/#/zh-cn/1.x/tutorial)
+
 ## Team members
 * Architect & Dev Leader: Dylan Xue (dylan_xueke@hotmail.com)  
 * Developer: Chembo Huang (chemboking@qq.com)
