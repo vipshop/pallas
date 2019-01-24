@@ -23,8 +23,8 @@ var proxyTable = appConf.proxyTable
 var app = express()
 
 app.use('/cerebro', express.static(path.join(__dirname, '../../pallas-plus-web/cerebro/')))
-app.use('/bigdesk', express.static(path.join(__dirname, '../../../../../pallas-plus-web/bigdesk/')))
-app.use('/sense', express.static(path.join(__dirname, '../../../../../pallas-plus-web/sense/')))
+app.use('/bigdesk', express.static(path.join(__dirname, '../../pallas-plus-web/bigdesk/')))
+app.use('/sense', express.static(path.join(__dirname, '../../pallas-plus-web/sense/')))
 
 var compiler = webpack(webpackConfig)
 

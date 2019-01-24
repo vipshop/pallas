@@ -23,27 +23,28 @@ import java.util.Map;
 
 import org.elasticsearch.client.RestClient;
 
+import com.vip.pallas.mybatis.entity.Cluster;
+
 public interface ElasticSearchService {
 	
-	public String genMappingJsonByVersionId(Long versionId);
+	public String genMappingJsonByVersionIdAndClusterName(Long versionId, String clusterName);
 	
-	public String createIndex(String indexName, Long versionId) throws IOException;
+	public String createIndex(String indexName, Long indexId, Long versionId) throws IOException;
 	
-	public String deleteIndex(String indexName, Long versionId) throws IOException;
+	public String deleteIndex(String indexName, Long indexId, Long versionId) throws IOException;
 
 	public String deleteIndex(String clusterAddress, String fullIndexName);
 
-	public String createAliasIndex(String indexName, Long versionId) throws Exception;	
-	
-	public String deleteAliasIndex(Long indexId, String indexName, Long versionId, Long clusterId) throws Exception;
+	public String deleteAliasIndexByCluster(Long indexId, String indexName, Long versionId, Cluster cluster)
+			throws Exception;
 
-	String transferAliasIndex(Long indexId, String indexName, Long targetVersionId, Long clusterId) throws Exception;
+	String transferAliasIndex(Long indexId, String indexName, Long targetVersionId, Cluster targetCluster) throws Exception;
 	
-	public boolean isExistIndex(String indexName, Long versionId);
+	public boolean isExistIndex(String indexName, String clusterHttpAddress, Long versionId);
 	
-	public Long getDataCount(String indexName, Long versionId);
+	public Long getDataCount(String indexName, String httpAddress, Long versionId);
 	
-	public String getIndexInfo(String indexName, Long versionId);
+	public String getIndexInfo(String indexName, String httpAddress, Long versionId);
 
 	boolean excludeOneNode(String host, String nodeIp);
 	
@@ -93,4 +94,5 @@ public interface ElasticSearchService {
 	String executeSearchByDsl(Long versionId, String indexName, String dsl);
 
 	String cancelDeleteByQueryTask(Long versionId, String indexName, String lastMsg);
+
 }

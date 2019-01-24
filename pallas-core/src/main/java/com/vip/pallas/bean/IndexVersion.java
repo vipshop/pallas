@@ -34,7 +34,6 @@ public class IndexVersion {
     private Boolean filterFields;
     private Boolean checkSum;
     private String preferExecutor;
-    private Long clusterId;
     private String allocationNodes;
     private Boolean dynamic;
     private Boolean isSync;
@@ -44,6 +43,7 @@ public class IndexVersion {
 	private Long querySlowThreshold;
 
 	private Byte refreshInterval;
+	private String realClusterIds;
 
 
     public void addField(VersionField field){
@@ -121,6 +121,14 @@ public class IndexVersion {
 		public void setDynamic(boolean dynamic) {
 			this.dynamic = dynamic;
 		}
+	}
+
+	public String getRealClusterIds() {
+		return realClusterIds;
+	}
+
+	public void setRealClusterIds(String realClusterIds) {
+		this.realClusterIds = realClusterIds;
 	}
 
 	public Long getId() {
@@ -225,14 +233,6 @@ public class IndexVersion {
 
 	public void setPreferExecutor(String preferExecutor) {
 		this.preferExecutor = preferExecutor;
-	}
-
-	public Long getClusterId() {
-		return clusterId;
-	}
-
-	public void setClusterId(Long clusterId) {
-		this.clusterId = clusterId;
 	}
 
 	public String getAllocationNodes() {

@@ -43,21 +43,18 @@ public interface IndexVersionRepository {
     List<IndexVersion> selectPage(Page<IndexVersion> page);
     
     void updateSyncState(@Param("id")Long id, @Param("isSync")boolean isSync);
-    
-    void enableVersion(@Param("id")Long id);
 
-    //禁用Index下的所有version
-    void disableSameIndexVersion(@Param("indexId")Long indexId, @Param("clusterId")Long clusterId);
-    
     void disableVersion(@Param("id")Long id);
     
     void deleteVersion(@Param("id")Long id);
     
-    Long getUsedVersionByIndexIdAndClusterId(@Param("indexId")Long indexId, @Param("clusterId")Long clusterId);
-    
+	Long getUsedVersionByIndexId(@Param("indexId") Long indexId);
+
     List<IndexParam> selectUsed();
 
-    List<IndexVersion> findAllByClusterIdAndIndexId( @Param("clusterId")Long clusterId, @Param("indexId")Long indexId);
-
     IndexVersion findUsedIndexVersionByIndexId(@Param("indexId") Long indexId);
+
+	List<IndexVersion> findAllByIndexId(@Param("indexId") Long indexId);
+
+	void enableThisVersionAndDisableOthers(@Param("indexId") Long indexId, @Param("id") Long id);
 }

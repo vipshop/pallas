@@ -93,7 +93,7 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 	private IndexRepository indexRepository;
 
 	@Override
-	public String genMappingJsonByVersionId(Long versionId) {
+	public String genMappingJsonByVersionIdAndClusterName(Long versionId, String clusterName) {
 		List<Mapping> mappingList = mappingRepository.selectByVersionId(versionId);
 		IndexVersion indexVersion = indexVersionRepository.selectByPrimaryKey(versionId);
 		if(mappingList == null){
@@ -122,8 +122,8 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 		settings.put("search.slowlog.threshold.query.info", indexVersion.getQuerySlowThreshold() != -1 ? indexVersion.getQuerySlowThreshold() + "ms" : "-1");
 
 		//设置allocation nodes
-		String nodes = indexVersion.getAllocationNodes();
-		if (!StringUtils.isEmpty(nodes)) {
+		String nodes = extractAllocationNodes(indexVersion.getAllocationNodes(), clusterName);
+		if (StringUtils.isNotEmpty(nodes)) {
 			settings.put("index.routing.allocation.include._name", nodes);
 		}
 		esMappings.setSettings(settings);
@@ -208,6 +208,18 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 		return s;
 	}
 
+	// cluster_name1:node1,node2;cluster_name2:node4;
+	private static String extractAllocationNodes(String nodes, String clusterName) {
+		if (StringUtils.isNotEmpty(nodes)) {
+			if (nodes.indexOf(":") >= 0) { // logical cluster
+				return StringUtils.substringBetween(nodes, clusterName + ":", ";");
+			} else {
+				return nodes;
+			}
+		}
+		return null;
+	}
+
 	private void addAnalysisSettings(Map<String, Object> settings, boolean hasNgramAnalyzer, boolean hasNormalizedKeyword) {
 		Map<String, Object> analysisBody = new HashMap<>();
 
@@ -283,32 +295,36 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 	}
 
 	@Override
-	public String createIndex(String indexName, Long versionId) throws IOException {
-		if(this.isExistIndex(indexName, versionId)){
-			this.deleteIndex(indexName, versionId);
+	public String createIndex(String indexName, Long indexId, Long versionId) throws IOException {
+		StringBuilder result = new StringBuilder();
+		List<Cluster> clusters = clusterRepository.selectPhysicalClustersByIndexId(indexId);
+		for (Cluster cluster : clusters) {
+			try {
+				if (this.isExistIndex(indexName, cluster.getHttpAddress(), versionId)) {
+					this.deleteIndex(cluster.getHttpAddress(), indexName + "_" + versionId);
+				}
+				NStringEntity entity = new NStringEntity(genMappingJsonByVersionIdAndClusterName(versionId, cluster.getClusterId()),
+						ContentType.APPLICATION_JSON);
+				result.append(IOUtils.toString(ElasticRestClient.build(cluster.getHttpAddress())
+						.performRequest("PUT", "/" + indexName + "_" + versionId, Collections.emptyMap(), entity)
+						.getEntity().getContent())).append("\\n");
+			} catch (IOException e) {
+				logger.error(e.getClass() + " " + e.getMessage(), e);
+				throw e;
+			}
 		}
-		
-        try {
-            NStringEntity entity = new NStringEntity(genMappingJsonByVersionId(versionId), ContentType.APPLICATION_JSON);
-            return IOUtils.toString(ElasticRestClient.build(clusterRepository.selectByVersionId(versionId).getHttpAddress()).
-            		performRequest("PUT", "/" + indexName + "_" + versionId, Collections.emptyMap(), entity).getEntity().getContent());
-        } catch (IOException e) {
-        	logger.error(e.getClass() + " " + e.getMessage(), e);
-            throw e;
-        }
+		return result.toString();
+
 	}
 
 	@Override
-	public String deleteIndex(String indexName, Long versionId) {
-		try {
-            NStringEntity entity = new NStringEntity(genMappingJsonByVersionId(versionId), ContentType.APPLICATION_JSON);
-            return IOUtils.toString(ElasticRestClient.build(clusterRepository.selectByVersionId(versionId).getHttpAddress()).
-            		performRequest("DELETE", "/" + indexName + "_" + versionId, Collections.emptyMap(), entity).getEntity().getContent());
-        } catch (IOException e) {
-        	logger.error(e.getClass() + " " + e.getMessage(), e);
-        }
-		
-		return null;
+	public String deleteIndex(String indexName, Long indexId, Long versionId) {
+		StringBuilder result = new StringBuilder();
+		List<Cluster> clusters = clusterRepository.selectPhysicalClustersByIndexId(indexId);
+		for (Cluster cluster : clusters) {
+			result.append(deleteIndex(cluster.getHttpAddress(), indexName + "_" + versionId)).append("\\n");
+		}
+		return result.toString();
 	}
 
 	@Override
@@ -322,13 +338,11 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 		return null;
 	}
 
-	@Override
-	public String createAliasIndex(String indexName, Long versionId)
+	public String createAliasIndex(String indexName, String httpAddress, Long versionId, NStringEntity entity)
 			throws Exception {
 		try {
-            NStringEntity entity = new NStringEntity(genCreateAliasJson(indexName, versionId), ContentType.APPLICATION_JSON);
-            return IOUtils.toString(ElasticRestClient.build(clusterRepository.selectByVersionId(versionId).getHttpAddress()).
-            		performRequest("POST", "/_aliases", Collections.emptyMap(), entity).getEntity().getContent());
+			return IOUtils.toString(ElasticRestClient.build(httpAddress)
+					.performRequest("POST", "/_aliases", Collections.emptyMap(), entity).getEntity().getContent());
         } catch (IOException e) {
         	logger.error(e.getClass() + " " + e.getMessage(), e);
             throw e;
@@ -336,9 +350,9 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 	}
 
 	@Override
-	public String deleteAliasIndex(Long indexId, String indexName, Long versionId, Long clusterId)
+	public String deleteAliasIndexByCluster(Long indexId, String indexName, Long versionId, Cluster cluster)
 			throws Exception {
-		Long usedVersionId = indexVersionRepository.getUsedVersionByIndexIdAndClusterId(indexId, clusterId);
+		Long usedVersionId = indexVersionRepository.getUsedVersionByIndexId(indexId);
 		
 		if(usedVersionId != null){
 			String deleteAliasJson = genDeleteAliasJson(indexName, usedVersionId);
@@ -346,7 +360,8 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 			if(deleteAliasJson != null){
 				try {
 		            NStringEntity entity = new NStringEntity(deleteAliasJson, ContentType.APPLICATION_JSON);
-		            return IOUtils.toString(ElasticRestClient.build(clusterRepository.selectByVersionId(versionId).getHttpAddress()).
+					return IOUtils.toString(ElasticRestClient.build(cluster.getHttpAddress())
+							.
 		            		performRequest("POST", "/_aliases", Collections.emptyMap(), entity).getEntity().getContent());
 		        } catch (IOException e) {
 		        	logger.error(e.getClass() + " " + e.getMessage(), e);
@@ -358,23 +373,26 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 	}
 
 	@Override
-	public String transferAliasIndex(Long indexId, String indexName, Long targetVersionId, Long clusterId) throws Exception {
-		Long usedVersionId = indexVersionRepository.getUsedVersionByIndexIdAndClusterId(indexId, clusterId);
+	public String transferAliasIndex(Long indexId, String indexName, Long targetVersionId, Cluster targetCluster) throws Exception {
+		Long usedVersionId = indexVersionRepository.getUsedVersionByIndexId(indexId);
 		if (usedVersionId == null) {
-			return createAliasIndex(indexName, targetVersionId);
+			NStringEntity entity = new NStringEntity(genCreateAliasJson(indexName, targetVersionId),
+					ContentType.APPLICATION_JSON);
+			return createAliasIndex(indexName, targetCluster.getHttpAddress(), targetVersionId, entity);
 		}
-
+		String result = null;
 		String json = genCreateAndDeleteAliasJson(indexName, usedVersionId, targetVersionId);
 		if (json != null) {
 			try {
 				NStringEntity entity = new NStringEntity(json, ContentType.APPLICATION_JSON);
-				return IOUtils.toString(ElasticRestClient.build(clusterRepository.selectByVersionId(targetVersionId).getHttpAddress()).
-						performRequest("POST", "/_aliases", Collections.emptyMap(), entity).getEntity().getContent());
+				result = createAliasIndex(indexName, targetCluster.getHttpAddress(), targetVersionId, entity);
+				logger.info("transfer index alias {} from {} to {} in cluster {} done.", indexName, usedVersionId,
+						targetVersionId, targetCluster.getClusterId());
 			} catch (IOException e) {
 				logger.error(e.getClass() + " " + e.getMessage(), e);
 			}
 		}
-		return null;
+		return result;
 	}
 
 	private String genCreateAliasJson(String indexName, Long versionId) throws Exception{
@@ -434,11 +452,12 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 	}
 
 	@Override
-	public boolean isExistIndex(String indexName, Long versionId) {
+	public boolean isExistIndex(String indexName, String clusterHttpAddress, Long versionId) {
 		try {
-            NStringEntity entity = new NStringEntity(genMappingJsonByVersionId(versionId), ContentType.APPLICATION_JSON);
-            if(IOUtils.toString(ElasticRestClient.build(clusterRepository.selectByVersionId(versionId).getHttpAddress()).
-            		performRequest("GET", "/" + indexName + "_" + versionId + "/_mapping", Collections.emptyMap(), entity).getEntity().getContent()) != null){
+			if (IOUtils.toString(ElasticRestClient
+					.build(clusterHttpAddress).performRequest("GET",
+							"/" + indexName + "_" + versionId + "/_mapping", Collections.emptyMap(), (HttpEntity) null)
+					.getEntity().getContent()) != null) {
             	return true;
             }
         } catch (IOException e) {
@@ -449,11 +468,10 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 	}
 
 	@Override
-	public Long getDataCount(String indexName, Long versionId) {
+	public Long getDataCount(String indexName, String httpAddress, Long versionId) {
 		try {
 			String realIndexName = indexName + "_" + versionId;
-			Cluster cluster = clusterRepository.selectByVersionId(versionId);
-			return ElasticRestClient.getIndexDataCount(cluster.getHttpAddress(), realIndexName, "item");
+			return ElasticRestClient.getIndexDataCount(httpAddress, realIndexName, "item");
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -461,11 +479,10 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 	}
 
 	@Override
-	public String getIndexInfo(String indexName, Long versionId) {
+	public String getIndexInfo(String indexName, String httpAddress, Long versionId) {
 		try {
 			String realIndexName = indexName + "_" + versionId;
-			Cluster cluster = clusterRepository.selectByVersionId(versionId);
-			return ElasticRestClient.getIndexInfo(cluster.getHttpAddress(), realIndexName);
+			return ElasticRestClient.getIndexInfo(httpAddress, realIndexName);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}

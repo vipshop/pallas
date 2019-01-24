@@ -17,6 +17,32 @@
 
 package com.vip.pallas.console.controller.index.version;
 
+import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.constraints.Min;
+
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.ObjectUtils;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.vip.pallas.bean.IndexOperationEventName;
 import com.vip.pallas.bean.IndexOperationEventType;
 import com.vip.pallas.console.utils.AuditLogUtil;
@@ -27,34 +53,18 @@ import com.vip.pallas.console.vo.PageResultVO;
 import com.vip.pallas.console.vo.base.BaseIndexVersionOp;
 import com.vip.pallas.exception.BusinessLevelException;
 import com.vip.pallas.exception.PallasException;
+import com.vip.pallas.mybatis.entity.Cluster;
 import com.vip.pallas.mybatis.entity.Index;
 import com.vip.pallas.mybatis.entity.IndexOperation;
 import com.vip.pallas.mybatis.entity.IndexVersion;
 import com.vip.pallas.mybatis.entity.Page;
+import com.vip.pallas.service.ClusterService;
 import com.vip.pallas.service.ElasticSearchService;
 import com.vip.pallas.service.IndexOperationService;
 import com.vip.pallas.service.IndexService;
 import com.vip.pallas.service.IndexVersionService;
 import com.vip.pallas.utils.JsonUtil;
 import com.vip.pallas.utils.ObjectMapTool;
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.ObjectUtils;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.constraints.Min;
-import java.nio.charset.StandardCharsets;
-import java.sql.SQLException;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Validated
 @RestController
@@ -70,6 +80,8 @@ public class IndexVersionController {
 	private IndexService indexService;
 	@Autowired
 	private ElasticSearchService elasticSearchService;
+	@Autowired
+	private ClusterService clusterService;
 
 	@RequestMapping(value = "/page.json", method = RequestMethod.GET)
 	public PageResultVO<IndexVersion> page(@RequestParam Long indexId,
@@ -98,9 +110,10 @@ public class IndexVersionController {
 	}
 
 	@RequestMapping(value = "/count.json", method = RequestMethod.POST)
-	public Map<Long, Long> countDocuments(@RequestBody Map<String, Object> params) { // NOSONAR
+	public List<Map<String, Object>> countDocuments(@RequestBody Map<String, Object> params) { // NOSONAR
 		List<Long> versionIds = ObjectMapTool.getLongList(params, "versionIds");
 		String indexName = ObjectMapTool.getString(params, "indexName");
+		Long indexId = ObjectMapTool.getLong(params, "indexId");
 
 		if (ObjectUtils.isEmpty(versionIds)) {
 			throw new BusinessLevelException(500, "versionIds不能为空");
@@ -110,19 +123,34 @@ public class IndexVersionController {
 			throw new BusinessLevelException(500, "indexName不能为空");
 		}
 
-		Map<Long, Long> versionCountMap = versionIds.stream().collect(Collectors.toMap(Function.identity(), vId -> {
+		if (ObjectUtils.isEmpty(indexId)) {
+			throw new BusinessLevelException(500, "indexId不能为空");
+		}
+
+		List<Map<String, Object>> versionCountList = new ArrayList<>();
+		for (Long vid : versionIds) {
 			try {
-				com.vip.pallas.bean.IndexVersion iv = indexVersionService.findVersionById(vId);
+				com.vip.pallas.bean.IndexVersion iv = indexVersionService.findVersionById(vid);
 				if (iv != null && iv.getSync()) {
-					Long dataCount = elasticSearchService.getDataCount(indexName, vId);
-					return dataCount == null ? 0L : dataCount;
+					List<Map> oneVersionCount = new ArrayList<>();
+					List<Cluster> clusters = clusterService.selectPhysicalClustersByIndexId(indexId);
+					for (Cluster cluster : clusters) {
+						Long dataCount = elasticSearchService.getDataCount(indexName, cluster.getHttpAddress(), vid);
+						Map<String, Long> countMap = new HashMap<>();
+						countMap.put("cid", cluster.getId());
+						countMap.put("count", dataCount == null ? 0L : dataCount);
+						oneVersionCount.add(countMap);
+					}
+					Map<String, Object> result = new HashMap<>();
+					result.put("vid", vid);
+					result.put("data", oneVersionCount);
+					versionCountList.add(result);
 				}
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 			}
-			return 0L;
-		}));
-		return versionCountMap;
+		}
+		return versionCountList;
 	}
 
 	@RequestMapping(value = "/id.json", method = RequestMethod.GET)
@@ -144,11 +172,12 @@ public class IndexVersionController {
 		return indexVersionService.copyVersion(indexId, versionId);
 	}
 
-
 	@RequestMapping(value = "/info.json", method = RequestMethod.GET)
-	public String info(@RequestParam Long versionId, @RequestParam String indexName) throws Exception {
+	public String info(@RequestParam Long versionId, @RequestParam Long cid, @RequestParam String indexName)
+			throws Exception {
 		try {
-			String indexInfo = elasticSearchService.getIndexInfo(indexName, versionId);
+			Cluster cluster = clusterService.selectByPrimaryKey(cid);
+			String indexInfo = elasticSearchService.getIndexInfo(indexName, cluster.getHttpAddress(), versionId);
 			return indexInfo == null ? "该版本信息未在ES初始化,请先点击开始同步！" : indexInfo;
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
@@ -174,7 +203,7 @@ public class IndexVersionController {
 			throw new BusinessLevelException(500, "versionId不存在");
 		}
 
-		elasticSearchService.createIndex(index.getIndexName(), versionId);
+		elasticSearchService.createIndex(index.getIndexName(), indexId, versionId);
 
 		indexVersionService.updateSyncState(versionId, true);
 		try {

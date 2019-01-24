@@ -19,20 +19,19 @@ package com.vip.pallas.bean;
 
 import java.util.List;
 
+import com.vip.pallas.mybatis.entity.Cluster;
 import com.vip.pallas.mybatis.entity.DataSource;
 
 public class IndexParam {
 	
 	private Long versionId;
-	private String clusterName;
-	private String clusterIPList;
 	private String indexName;
 	private String routingField;
 	private String idField;
 	private String updateTimeField;
 	
 	private List<DataSource> dataSourceList;
-	
+	private List<Cluster> realClusters;
 	private boolean multipleDataSource;
 	private String arrayFields;
 	private String esObjectFields;
@@ -57,18 +56,6 @@ public class IndexParam {
 		this.esObjectFields = esObjectFields;
 	}
 
-	public String getClusterName() {
-		return clusterName;
-	}
-	public void setClusterName(String clusterName) {
-		this.clusterName = clusterName;
-	}
-	public String getClusterIPList() {
-		return clusterIPList;
-	}
-	public void setClusterIPList(String clusterIPList) {
-		this.clusterIPList = clusterIPList;
-	}
 	public String getIndexName() {
 		return indexName;
 	}
@@ -138,19 +125,22 @@ public class IndexParam {
 	public void setPreferExecutor(String preferExecutor) {
 		this.preferExecutor = preferExecutor;
 	}
+
+	public List<Cluster> getRealClusters() {
+		return realClusters;
+	}
+
+	public void setRealClusters(List<Cluster> realClusters) {
+		this.realClusters = realClusters;
+	}
+
 	@Override
 	public String toString() {
-		return "IndexParam [versionId=" + versionId + ", clusterName="
-				+ clusterName + ", clusterIPList=" + clusterIPList
-				+ ", indexName=" + indexName + ", routingField=" + routingField
-				+ ", idField=" + idField + ", updateTimeField="
-				+ updateTimeField + ", dataSourceList=" + dataSourceList
-				+ ", multipleDataSource=" + multipleDataSource
-				+ ", arrayFields=" + arrayFields + ", indexId=" + indexId
-				+ ", vdp=" + vdp + ", filterFields=" + filterFields
-				+ ", checkSum=" + checkSum + ", preferExecutor="
-				+ preferExecutor + "]";
+		return "IndexParam [versionId=" + versionId + ", indexName=" + indexName + ", routingField=" + routingField
+				+ ", idField=" + idField + ", updateTimeField=" + updateTimeField + ", dataSourceList=" + dataSourceList
+				+ ", realClusters=" + realClusters + ", multipleDataSource=" + multipleDataSource + ", arrayFields="
+				+ arrayFields + ", esObjectFields=" + esObjectFields + ", indexId=" + indexId + ", vdp=" + vdp
+				+ ", filterFields=" + filterFields + ", checkSum=" + checkSum + ", preferExecutor=" + preferExecutor
+				+ "]";
 	}
-	
-
 }

@@ -41,6 +41,7 @@ import com.vip.pallas.bean.DBSchema;
 import com.vip.pallas.bean.IndexParam;
 import com.vip.pallas.bean.IndexVersion.VersionField;
 import com.vip.pallas.exception.PallasException;
+import com.vip.pallas.mybatis.entity.Cluster;
 import com.vip.pallas.mybatis.entity.DataSource;
 import com.vip.pallas.mybatis.entity.Index;
 import com.vip.pallas.mybatis.entity.IndexVersion;
@@ -117,18 +118,19 @@ public abstract class IndexVersionService {
 
 		Index index = indexRepository.selectByid(indexVersion.getIndexId());
 		String indexName = index.getIndexName();
-
-		if (!elasticSearchService.isExistIndex(indexName, versionId)) {
-			throw new PallasException("ES索引:" + indexName + "_" + versionId + "不存在，请先同步索引版本");
-		}
-
+		List<Cluster> clusters = clusterRepository.selectPhysicalClustersByIndexId(index.getId());
 		try {
-			elasticSearchService.transferAliasIndex(index.getId(), indexName, versionId, indexVersion.getClusterId());
+			for (Cluster cluster : clusters) {
+				if (!elasticSearchService.isExistIndex(indexName, cluster.getHttpAddress(), versionId)) {
+					throw new PallasException("ES索引:" + indexName + "_" + versionId + "不存在，请先同步(创建)索引版本");
+				}
+				elasticSearchService.transferAliasIndex(index.getId(), indexName, versionId, cluster);
+			}
+			// update is_used
+			indexVersionRepository.enableThisVersionAndDisableOthers(indexVersion.getIndexId(), indexVersion.getId());
 		} catch (Exception e) {
 			logger.error(e.getClass() + " " + e.getMessage(), e);
 		}
-		indexVersionRepository.disableSameIndexVersion(indexVersion.getIndexId(), indexVersion.getClusterId());
-		indexVersionRepository.enableVersion(indexVersion.getId());
 	}
 	
 	public List<DBSchema> getMetaDataFromDB(Long indexId) throws SQLException, PallasException {
@@ -182,10 +184,11 @@ public abstract class IndexVersionService {
 
 		if (indexVersion != null) {
 			Index index = indexRepository.selectByid(indexVersion.getIndexId());
-			elasticSearchService.deleteAliasIndex(index.getId(), index.getIndexName(), versionId,
-					indexVersion.getClusterId());
-
-			elasticSearchService.deleteIndex(index.getIndexName(), versionId);
+			List<Cluster> clusters = clusterRepository.selectPhysicalClustersByIndexId(index.getId());
+			for (Cluster cluster : clusters) {
+				elasticSearchService.deleteAliasIndexByCluster(index.getId(), index.getIndexName(), versionId, cluster);
+				elasticSearchService.deleteIndex(cluster.getHttpAddress(), index.getIndexName() + "_" + versionId);
+			}
 			indexVersionRepository.disableVersion(versionId);
 		}
 	}
@@ -194,7 +197,7 @@ public abstract class IndexVersionService {
 	public void disableVersionSync(Long indexId, Long versionId) throws Exception {
 		Index index = indexService.findById(indexId);
 		if(index != null) {
-			elasticSearchService.deleteIndex(index.getIndexName(), versionId);
+			elasticSearchService.deleteIndex(index.getIndexName(), index.getId(), versionId);
 			updateSyncState(versionId, false);
 		}
 
@@ -271,7 +274,7 @@ public abstract class IndexVersionService {
 		version.setFilterFields(indexVersion.getFilterFields());
 		version.setPreferExecutor(indexVersion.getPreferExecutor());
 		version.setVdp(indexVersion.getVdp());
-		version.setClusterId(indexVersion.getClusterId());
+		version.setRealClusterIds(indexVersion.getRealClusterIds());
 		version.setAllocationNodes(indexVersion.getAllocationNodes());
 		version.setDynamic(indexVersion.getDynamic());
 		version.setSync(indexVersion.getIsSync());

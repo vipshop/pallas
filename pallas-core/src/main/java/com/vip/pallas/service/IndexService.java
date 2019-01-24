@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vip.pallas.bean.IndexParam;
 import com.vip.pallas.exception.PallasException;
+import com.vip.pallas.mybatis.entity.Cluster;
 import com.vip.pallas.mybatis.entity.DataSource;
 import com.vip.pallas.mybatis.entity.Index;
 import com.vip.pallas.mybatis.entity.Page;
@@ -56,6 +57,9 @@ public abstract class IndexService {
 
 	@Resource
 	private DataSourceRepository dataSourceRepository;
+
+	@Resource
+	private ClusterService clusterService;
 
 	@Autowired
 	private PrivilegeService privilegeService;
@@ -193,5 +197,11 @@ public abstract class IndexService {
 
 	public String decodePassword(String password) {
 		return password;
+	}
+
+	public boolean isLogicalIndex(Long indexId) {
+		Index index = findById(indexId);
+		Cluster cluster = clusterService.findByName(index.getClusterName());
+		return cluster.isLogicalCluster();
 	}
 }

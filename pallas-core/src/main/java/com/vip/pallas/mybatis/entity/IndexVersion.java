@@ -57,7 +57,7 @@ public class IndexVersion {
     
     private String preferExecutor;
     
-    private Long clusterId;
+	private String realClusterIds;
 
     private String allocationNodes;
 
@@ -217,13 +217,9 @@ public class IndexVersion {
 		this.checkSum = checkSum;
 	}
 
-	public Long getClusterId() {
-		return clusterId;
+	public Long getIndexSlowThreshold() {
+		return indexSlowThreshold;
 	}
-
-    public Long getIndexSlowThreshold() {
-        return indexSlowThreshold;
-    }
 
     public void setIndexSlowThreshold(Long indexSlowThreshold) {
         this.indexSlowThreshold = indexSlowThreshold;
@@ -244,10 +240,6 @@ public class IndexVersion {
     public void setQuerySlowThreshold(Long querySlowThreshold) {
         this.querySlowThreshold = querySlowThreshold;
     }
-
-    public void setClusterId(Long clusterId) {
-		this.clusterId = clusterId;
-	}
 
     public String getAllocationNodes() {
         return allocationNodes;
@@ -273,6 +265,14 @@ public class IndexVersion {
         this.refreshInterval = refreshInterval;
     }
 
+	public String getRealClusterIds() {
+		return realClusterIds;
+	}
+
+	public void setRealClusterIds(String realClusterIds) {
+		this.realClusterIds = realClusterIds;
+	}
+
     @Override
     public String toString() {
         return "IndexVersion{" +
@@ -294,7 +294,7 @@ public class IndexVersion {
                 ", filterFields=" + filterFields +
                 ", checkSum=" + checkSum +
                 ", preferExecutor='" + preferExecutor + '\'' +
-                ", clusterId=" + clusterId +
+				", realClusterIds=" + getRealClusterIds() +
                 ", allocationNodes='" + allocationNodes + '\'' +
                 ", dynamic=" + dynamic +
                 ", indexSlowThreshold=" + indexSlowThreshold +

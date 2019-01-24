@@ -71,6 +71,7 @@ public class IndexFindMetaDataController {
 		Map<String, Object> resultMap = new HashMap<>();
 		resultMap.put("list", indexVersionService.getMetaDataFromDB(indexId));
 		resultMap.put("clusters", getClusters(indexId));
+		resultMap.put("isLogical", indexService.isLogicalIndex(indexId));
 		return resultMap;
 	}
 

@@ -19,8 +19,8 @@
     <result column="vdp" jdbcType="BIT" property="vdp" />
     <result column="check_sum" jdbcType="BIT" property="checkSum" />
     <result column="filter_fields" jdbcType="BIT" property="filterFields" />
+    <result column="real_cluster_ids" jdbcType="VARCHAR" property="realClusterIds" />
     <result column="prefer_executor" jdbcType="VARCHAR" property="preferExecutor" />
-    <result column="real_cluster_id" jdbcType="BIGINT" property="clusterId" />
     <result column="allocation_nodes" jdbcType="BIGINT" property="allocationNodes" />
     <result column="dynamic" jdbcType="BIT" property="dynamic" />
     <result column="index_slow_threshold" jdbcType="BIGINT" property="indexSlowThreshold" />
@@ -30,8 +30,6 @@
   </resultMap>
   
   <resultMap id="IndexParam" type="com.vip.pallas.bean.IndexParam">
-    <result column="cluster_name" jdbcType="VARCHAR" property="clusterName" />
-    <result column="client_address" jdbcType="VARCHAR" property="clusterIPList" />
     <result column="index_name" jdbcType="VARCHAR" property="indexName" />
     <result column="routing_key" jdbcType="VARCHAR" property="routingField" />
     <result column="id_field" jdbcType="VARCHAR" property="idField" />
@@ -50,15 +48,15 @@
 		<result column="table_name" jdbcType="VARCHAR" property="tableName" />
 		<result column="username" jdbcType="VARCHAR" property="username" />
 		<result column="password" jdbcType="VARCHAR" property="password" />
-    	<result column="ip" jdbcType="VARCHAR" property="ip" />
-    	<result column="port" jdbcType="VARCHAR" property="port" />
+	 	<result column="ip" jdbcType="VARCHAR" property="ip" />
+	 	<result column="port" jdbcType="VARCHAR" property="port" />
 	</collection>
   </resultMap>
     
   <sql id="Base_Column_List">
     id, index_id, version_name, is_used, sync_stat, num_of_shards, num_of_replication, 
     vdp_queue, routing_key, create_time, update_time, id_field, update_time_field, is_sync,
-    vdp, filter_fields, prefer_executor, check_sum, real_cluster_id, allocation_nodes, dynamic,
+    vdp, filter_fields, prefer_executor, check_sum, allocation_nodes, dynamic,
     index_slow_threshold, fetch_slow_threshold, query_slow_threshold, refresh_interval
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
@@ -74,21 +72,24 @@
   </select>
   
    <select id="selectUsed"  resultMap="IndexParam">
-  SELECT v.id version_id,  v.index_id, c.cluster_id as cluster_name, c.client_address, i.index_name, ds.dbname, ds.table_name, routing_key, 
+  	SELECT v.id version_id,  v.index_id, c.cluster_id as cluster_name, c.client_address, i.index_name, ds.dbname, ds.table_name, routing_key, 
   	id_field, update_time_field, ds.ip, ds.port, ds.username, ds.password  FROM `index` i, cluster c, index_version v, data_source ds 
     WHERE i.id = v.index_id 
-    AND v.real_cluster_id = c.id
+    AND i.cluster_name = c.cluster_id
 	AND ds.index_id = v.index_id
 	AND v.is_used = 1
   </select>
   
   
   <select id="selectPage" parameterType="com.vip.pallas.mybatis.entity.Page" resultMap="BaseResultMap">
-  select 
-    <include refid="Base_Column_List" />
-    from index_version
-    where index_id = #{params.indexId,jdbcType=BIGINT}
-    ORDER BY id DESC
+	  select  <![CDATA[case when c.real_clusters = '' then c.id else c.real_clusters end as real_cluster_ids]]>,
+	    v.id, index_id, version_name, is_used, sync_stat, num_of_shards, num_of_replication, 
+	    vdp_queue, routing_key, v.create_time, v.update_time, id_field, update_time_field, is_sync,
+	    vdp, filter_fields, prefer_executor, check_sum, allocation_nodes, `dynamic`,
+	    index_slow_threshold, fetch_slow_threshold, query_slow_threshold, refresh_interval from index_version v  join 
+	    `index` i on v.index_id = i.id join cluster c on  c.cluster_id = i.cluster_name
+	    and index_id = #{params.indexId,jdbcType=BIGINT}
+	    ORDER BY v.id DESC
   </select>  
   
   <update id="updateSyncState" parameterType="java.lang.Boolean">
@@ -103,41 +104,36 @@
   
    <update id="deleteVersion">
     delete from index_version where id = #{id,jdbcType=BIGINT};
-  </update>  
-  
-  <update id="enableVersion">
-    update index_version set is_used = 1 where id = #{id,jdbcType=BIGINT};
   </update>
-
-  <update id="disableSameIndexVersion">
-    update index_version set is_used = 0 where index_id = #{indexId,jdbcType=BIGINT} and real_cluster_id = #{clusterId,jdbcType=BIGINT};
+  
+  <select id="getUsedVersionByIndexId" resultType="java.lang.Long">
+    select id 
+    from index_version
+    where is_used = 1
+    and index_id = #{indexId,jdbcType=BIGINT}
+    limit 0,1
+  </select>
+  
+  <update id="enableThisVersionAndDisableOthers">
+    update index_version set is_used = case when id = #{id,jdbcType=BIGINT} then 1 else 0 end where index_id = #{indexId,jdbcType=BIGINT}
   </update>
   
   <update id="disableVersion">
     update index_version set is_used = 0 where id = #{id,jdbcType=BIGINT}
-  </update>  
+  </update>
   
-  <select id="getUsedVersionByIndexIdAndClusterId" resultType="java.lang.Long">
-    select id 
-    from index_version
-    where is_used = 1
-    and index_id = #{indexId,jdbcType=BIGINT} and real_cluster_id = #{clusterId,jdbcType=BIGINT}
-    limit 0,1
-  </select>
-  
-  <select id="findAllByClusterIdAndIndexId" parameterType="com.vip.pallas.mybatis.entity.Page" resultMap="BaseResultMap">
-  select 
+  <select id="findAllByIndexId" parameterType="com.vip.pallas.mybatis.entity.Page" resultMap="BaseResultMap">
+  	select 
     <include refid="Base_Column_List" />
     from index_version
-    where index_id = #{indexId,jdbcType=BIGINT} and real_cluster_id = #{clusterId,jdbcType=BIGINT}
+    where index_id = #{indexId,jdbcType=BIGINT}
   </select>
  
-    <select id="selectIndexParamById" parameterType="java.lang.Long" resultMap="IndexParam">
-  	SELECT v.id version_id,  v.index_id, c.cluster_id as cluster_name, c.client_address, i.index_name, ds.dbname, ds.table_name, routing_key, 
+  <select id="selectIndexParamById" parameterType="java.lang.Long" resultMap="IndexParam">
+  	SELECT v.id version_id,  v.index_id, i.index_name, ds.dbname, ds.table_name, routing_key, 
   	id_field, update_time_field, ds.ip, ds.port, ds.username, ds.password , v.vdp, v.filter_fields, v.prefer_executor, v.check_sum
-  	FROM `index` i, cluster c, index_version v left join data_source ds on ds.index_id = v.index_id
-    WHERE i.id = v.index_id 
-    AND v.real_cluster_id = c.id
+  	FROM `index` i, index_version v left join data_source ds on ds.index_id = v.index_id
+    WHERE i.id = v.index_id
 	AND v.id = #{id,jdbcType=BIGINT}
   </select>
   
@@ -153,14 +149,14 @@
       is_used, sync_stat, num_of_shards, 
       num_of_replication, vdp_queue, routing_key, 
       create_time, update_time, id_field, 
-      update_time_field, is_sync, vdp, filter_fields, check_sum, real_cluster_id, allocation_nodes, dynamic, index_slow_threshold, fetch_slow_threshold,
+      update_time_field, is_sync, vdp, filter_fields, check_sum, allocation_nodes, dynamic, index_slow_threshold, fetch_slow_threshold,
       query_slow_threshold, refresh_interval)
     values (#{id,jdbcType=BIGINT}, #{indexId,jdbcType=BIGINT}, #{versionName,jdbcType=VARCHAR}, 
       #{isUsed,jdbcType=BIT}, #{syncStat,jdbcType=VARCHAR}, #{numOfShards,jdbcType=TINYINT}, 
       #{numOfReplication,jdbcType=TINYINT}, #{vdpQueue,jdbcType=VARCHAR}, #{routingKey,jdbcType=VARCHAR}, 
       #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{idField,jdbcType=VARCHAR}, 
       #{updateTimeField,jdbcType=VARCHAR}, #{isSync,jdbcType=BIT}, #{vdp,jdbcType=BIT}, #{filterFields,jdbcType=BIT},
-      #{checkSum,jdbcType=BIT}, #{clusterId,jdbcType=BIGINT}, #{allocationNodes,jdbcType=VARCHAR}, #{dynamic,jdbcType=BIT},
+      #{checkSum,jdbcType=BIT}, #{allocationNodes,jdbcType=VARCHAR}, #{dynamic,jdbcType=BIT},
       #{indexSlowThreshold,jdbcType=BIGINT}, #{fetchSlowThreshold,jdbcType=BIGINT},#{querySlowThreshold,jdbcType=BIGINT},
       #{refreshInterval,jdbcType=TINYINT})
   </insert>
@@ -208,9 +204,6 @@
       </if>
       <if test="isSync != null">
         is_sync,
-      </if>
-      <if test="clusterId != null">
-        real_cluster_id,
       </if>
       <if test="allocationNodes != null">
         allocation_nodes,
@@ -273,9 +266,6 @@
       </if>
       <if test="isSync != null">
         #{isSync,jdbcType=BIT},
-      </if>
-      <if test="clusterId != null">
-        #{clusterId,jdbcType=BIGINT},
       </if>
       <if test="allocationNodes != null">
         #{allocationNodes,jdbcType=VARCHAR},
@@ -348,9 +338,6 @@
       <if test="checkSum != null">
         check_sum = #{checkSum,jdbcType=BIT},
       </if>
-      <if test="clusterId != null">
-        real_cluster_id = #{clusterId,jdbcType=BIGINT},
-      </if>
       <if test="allocationNodes != null">
         allocation_nodes = #{allocationNodes,jdbcType=VARCHAR},
       </if>
@@ -387,7 +374,6 @@
       id_field = #{idField,jdbcType=VARCHAR},
       update_time_field = #{updateTimeField,jdbcType=VARCHAR},
       is_sync = #{isSync,jdbcType=BIT},
-      real_cluster_id = #{record.clusterId,jdbcType=BIGINT},
       allocation_nodes = #{allocationNodes,jdbcType=VARCHAR},
       dynamic = #{dynamic,jdbcType=BIT},
       index_slow_threshold = #{indexSlowThreshold,jdbcType=BIGINT},

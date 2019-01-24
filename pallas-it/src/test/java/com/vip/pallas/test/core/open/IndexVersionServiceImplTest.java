@@ -17,16 +17,14 @@
 
 package com.vip.pallas.test.core.open;
 
-import com.alibaba.fastjson.JSONArray;
-import com.vip.pallas.bean.DBSchema;
-import com.vip.pallas.bean.IndexParam;
-import com.vip.pallas.exception.PallasException;
-import com.vip.pallas.mybatis.entity.*;
-import com.vip.pallas.service.ClusterService;
-import com.vip.pallas.service.ElasticSearchService;
-import com.vip.pallas.service.IndexService;
-import com.vip.pallas.service.IndexVersionService;
-import com.vip.pallas.test.base.BaseSpringEsTest;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
@@ -35,13 +33,20 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import com.alibaba.fastjson.JSONArray;
+import com.vip.pallas.bean.DBSchema;
+import com.vip.pallas.bean.IndexParam;
+import com.vip.pallas.exception.PallasException;
+import com.vip.pallas.mybatis.entity.Cluster;
+import com.vip.pallas.mybatis.entity.DataSource;
+import com.vip.pallas.mybatis.entity.Index;
+import com.vip.pallas.mybatis.entity.IndexVersion;
+import com.vip.pallas.mybatis.entity.Page;
+import com.vip.pallas.service.ClusterService;
+import com.vip.pallas.service.ElasticSearchService;
+import com.vip.pallas.service.IndexService;
+import com.vip.pallas.service.IndexVersionService;
+import com.vip.pallas.test.base.BaseSpringEsTest;
 
 /**
  * Created by owen on 5/7/2017.
@@ -107,7 +112,6 @@ public class IndexVersionServiceImplTest extends BaseSpringEsTest {
         IndexVersion indexVersion = new IndexVersion();
 
         indexVersion.setIndexId(testIndex.getId());
-        indexVersion.setClusterId(testCluser.getId());
         indexVersion.setNumOfShards(Byte.valueOf("3"));
         indexVersion.setNumOfReplication(Byte.valueOf("1"));
         indexVersion.setVdpQueue("123");
@@ -167,8 +171,10 @@ public class IndexVersionServiceImplTest extends BaseSpringEsTest {
         IndexVersion db = indexVersionService.findById(indexVersion.getId());
         assertEquals(Byte.valueOf("2"), db.getNumOfReplication());
 
-        elasticSearchService.createIndex(TEST_INDEX_NAME, indexVersion.getId());
-        boolean isIndexExisted = elasticSearchService.isExistIndex(TEST_INDEX_NAME, indexVersion.getId());
+        elasticSearchService.createIndex(TEST_INDEX_NAME, testIndex.getId(), indexVersion.getId());
+        clusterService.findByName(testIndex.getClusterName());
+        
+        boolean isIndexExisted = elasticSearchService.isExistIndex(TEST_INDEX_NAME, testCluser.getHttpAddress(), indexVersion.getId());
 		assertThat(isIndexExisted).isEqualTo(true);
 		
         indexVersionService.enableVersion(db.getId());
@@ -180,8 +186,9 @@ public class IndexVersionServiceImplTest extends BaseSpringEsTest {
         iv = indexVersionService.findById(indexVersion.getId());
         assertThat(iv.getIsUsed()).isEqualTo(false);
         
-        elasticSearchService.deleteIndex(TEST_INDEX_NAME, indexVersion.getId());
-        isIndexExisted = elasticSearchService.isExistIndex(TEST_INDEX_NAME, indexVersion.getId());
+		elasticSearchService.deleteIndex(TEST_INDEX_NAME, testIndex.getId(), indexVersion.getId());
+		isIndexExisted = elasticSearchService.isExistIndex(TEST_INDEX_NAME, testCluser.getHttpAddress(),
+				indexVersion.getId());
 		assertThat(isIndexExisted).isEqualTo(false);
 		
 		

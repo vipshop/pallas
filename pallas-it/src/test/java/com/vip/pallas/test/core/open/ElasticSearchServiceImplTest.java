@@ -33,15 +33,12 @@ public class ElasticSearchServiceImplTest extends BaseSpringEsTest {
 	@Autowired
 	private ElasticSearchService elasticSearchService;
 	
-	private static final String INDEX_NAME = "product_comment";
-	private static Long versionId = 1l;
-	
 	@Test
 	public void testInterfaces() throws Exception {
-		Long dataCount = elasticSearchService.getDataCount(INDEX_NAME, versionId);
+		Long dataCount = elasticSearchService.getDataCount(INDEX_NAME, CLUSTER_HTTPADDRESS, VERSION_ID);
 		assertThat(dataCount).isGreaterThanOrEqualTo(0l);
 		
-		String mapping = elasticSearchService.genMappingJsonByVersionId(versionId);
+		String mapping = elasticSearchService.genMappingJsonByVersionIdAndClusterName(VERSION_ID, CLUSTER_NAME);
 		assertThat(mapping).isNotNull();
 		System.out.println(mapping);
 

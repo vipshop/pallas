@@ -71,6 +71,12 @@ public class BaseSpringEsTest extends BaseEsTest {
 	
 	private static TestRestTemplate restTemplate;
 
+	public static final String INDEX_NAME = "product_comment";
+	public static final String CLUSTER_NAME = "pallas-test-cluster";
+	public static final Long VERSION_ID = 1l;
+	public static final Long INDEX_ID = 1l;
+	public static final String CLUSTER_HTTPADDRESS = "127.0.0.1:9200";
+
 	@PostConstruct
 	public void onPostConstruct() {
 		restTemplate = this.template;
