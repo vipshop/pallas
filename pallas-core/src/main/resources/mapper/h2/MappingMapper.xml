@@ -33,7 +33,12 @@
   <select id="selectMultiFieldsByVersionId" parameterType="java.lang.Long" resultType="java.lang.String">
     select field_name from mapping where multi = 1
     and version_id = #{versionId,jdbcType=BIGINT}
-  </select>  
+  </select>
+
+  <select id="selectEsObjectFieldsByVersionId" parameterType="java.lang.Long" resultType="java.lang.String">
+    select field_name from mapping where field_type = 'object'
+    and version_id = #{versionId,jdbcType=BIGINT}
+  </select>
   
   <select id="selectByVersionId" parameterType="java.lang.Long" resultMap="BaseResultMap">
     select 
