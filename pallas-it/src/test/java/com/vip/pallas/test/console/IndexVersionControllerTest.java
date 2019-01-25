@@ -85,15 +85,14 @@ public class IndexVersionControllerTest extends BaseSpringEsTest {
 
     @Test
     public void test14Conut() throws Exception {
-        String requestBodyString = "{\"indexName\":\"" + indexVO.getIndexName() +"\",\"versionIds\":[" + indexVersionId + "]}";
+        String requestBodyString = "{\"indexName\":\"" + indexVO.getIndexName() +"\",\"indexId\":\"" + indexId +"\",\"versionIds\":[" + indexVersionId + "]}";
         Map map = callRestApi("/index/version/count.json", requestBodyString);
         assertThat(map).containsEntry("status", HttpStatus.OK.value());
     }
 
     @Test
     public void test15Info() throws Exception {
-
-        Map map  = callGetApi("/index/version/info.json?indexName=" + indexVO.getIndexName() + "&versionId=" + indexVersionId);
+        Map map  = callGetApi("/index/version/info.json?indexName=" + indexVO.getIndexName() + "&versionId=" + indexVersionId + "&cid=" + clusterId);
         assertThat(map.get("status")).isEqualTo(HttpStatus.OK.value());
         assertThat(map.get("data")).isNotNull().isEqualTo("该版本信息未在ES初始化,请先点击开始同步！");
     }
