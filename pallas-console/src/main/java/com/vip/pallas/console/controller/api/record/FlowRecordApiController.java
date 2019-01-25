@@ -39,7 +39,7 @@ import com.vip.pallas.service.FlowRecordService;
 
 @Validated
 @RestController
-@RequestMapping("/record/flow_record")
+@RequestMapping("/pallas/record/flow_record")
 public class FlowRecordApiController{
 
     @Autowired

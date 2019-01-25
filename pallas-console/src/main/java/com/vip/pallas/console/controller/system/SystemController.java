@@ -27,6 +27,7 @@ import com.vip.pallas.console.utils.SessionUtil;
 import com.vip.pallas.utils.ConfigReader;
 
 @RestController
+@RequestMapping("/pallas")
 public class SystemController {
 
     @RequestMapping("/system/getVersion.json")

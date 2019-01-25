@@ -68,7 +68,7 @@ import com.vip.pallas.utils.ObjectMapTool;
 
 @Validated
 @RestController
-@RequestMapping("/index/version")
+@RequestMapping("/pallas/index/version")
 public class IndexVersionController {
 
 	private static Logger logger = LoggerFactory.getLogger(IndexVersionController.class);

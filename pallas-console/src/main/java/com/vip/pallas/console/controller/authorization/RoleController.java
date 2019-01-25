@@ -39,7 +39,7 @@ import com.vip.pallas.service.RoleService;
 
 @Validated
 @RestController
-@RequestMapping(path="/authorization/role")
+@RequestMapping(path="/pallas/authorization/role")
 public class RoleController {
 
 	@Autowired

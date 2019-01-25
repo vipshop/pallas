@@ -66,7 +66,7 @@ import com.vip.pallas.utils.ObjectMapTool;
 
 
 @RestController
-@RequestMapping("/index_template/performance_script")
+@RequestMapping("/pallas/index_template/performance_script")
 public class PerformanceController extends PerformanceBaseController{
     private static Logger logger = LoggerFactory.getLogger(PerformanceController.class);
 

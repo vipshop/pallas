@@ -12,8 +12,8 @@ module.exports = {
        changeOrigin: true,
      },
   },
-  buildIndex: path.resolve(__dirname, '../../dist/index.html'),
-  buildRoot: path.resolve(__dirname, '../../dist'),
+  buildIndex: path.resolve(__dirname, '../../../pallas-console/src/main/resources/static/index.html'),
+  buildRoot: path.resolve(__dirname, '../../../pallas-console/src/main/resources/static'),
   // 关闭eslint
   eslintEnable: true,
   // 关闭babel(需要源码为非转换代码，并且eslint是正确配置才可以)

@@ -28,7 +28,7 @@ import com.vip.pallas.mybatis.entity.Index;
 import com.vip.pallas.service.IndexService;
 
 @RestController
-@RequestMapping("/index")
+@RequestMapping("/pallas/index")
 public class IndexApiController {
 
     @Autowired

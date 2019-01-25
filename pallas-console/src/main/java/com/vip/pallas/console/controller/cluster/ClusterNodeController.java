@@ -35,7 +35,7 @@ import com.vip.pallas.utils.ObjectMapTool;
 
 @Validated
 @RestController
-@RequestMapping("/cluster/node")
+@RequestMapping("/pallas/cluster/node")
 public class ClusterNodeController {
 
     @Autowired

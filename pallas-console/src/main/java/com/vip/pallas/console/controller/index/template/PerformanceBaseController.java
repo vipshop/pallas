@@ -28,6 +28,7 @@ import com.vip.pallas.service.SearchTemplateService;
 import com.vip.pallas.utils.ObjectMapTool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.annotation.Resource;
 import java.io.File;
@@ -38,6 +39,7 @@ import java.util.stream.Stream;
 
 import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
+@RequestMapping("/pallas")
 public class PerformanceBaseController{
 
     protected static final String DATA_CACHE_KEY = "performanceDataCache";

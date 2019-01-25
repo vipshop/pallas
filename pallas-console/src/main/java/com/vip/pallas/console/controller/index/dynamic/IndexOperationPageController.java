@@ -40,6 +40,7 @@ import java.util.*;
 
 @RestController
 @Validated
+@RequestMapping("/pallas")
 public class IndexOperationPageController{
 
     @Autowired

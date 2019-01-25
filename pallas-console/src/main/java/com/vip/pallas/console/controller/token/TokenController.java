@@ -52,7 +52,7 @@ import com.vip.pallas.service.SearchAuthorizationService;
 
 @Validated
 @RestController
-@RequestMapping("/token")
+@RequestMapping("/pallas/token")
 public class TokenController {
 
     private static Logger logger = LoggerFactory.getLogger(TokenController.class);

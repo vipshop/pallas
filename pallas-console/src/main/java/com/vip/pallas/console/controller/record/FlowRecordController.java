@@ -43,7 +43,7 @@ import java.util.List;
 
 @Validated
 @RestController
-@RequestMapping("/record/flow_record")
+@RequestMapping("/pallas/record/flow_record")
 public class FlowRecordController{
     private static Logger logger = LoggerFactory.getLogger(FlowRecordController.class);
 

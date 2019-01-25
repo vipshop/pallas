@@ -50,7 +50,7 @@ import java.util.*;
 
 @Validated
 @RestController
-@RequestMapping("/approve")
+@RequestMapping("/pallas/approve")
 public class ApproveController{
     private static Logger logger = LoggerFactory.getLogger(ApproveController.class);
 

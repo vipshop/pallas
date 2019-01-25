@@ -32,7 +32,7 @@ import com.vip.pallas.service.SearchTemplateHistoryService;
 import com.vip.pallas.service.SearchTemplateService;
 
 @RestController
-@RequestMapping("/record/index_template")
+@RequestMapping("/pallas/record/index_template")
 public class TemplateFindAllController {
 	
     @Resource

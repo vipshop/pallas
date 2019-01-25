@@ -39,6 +39,7 @@ import com.vip.pallas.service.IndexService;
 
 @Validated
 @RestController
+@RequestMapping("/pallas")
 public class IndexDsExportController {
 
     @Autowired
