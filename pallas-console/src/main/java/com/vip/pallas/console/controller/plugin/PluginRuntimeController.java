@@ -41,7 +41,7 @@ import static java.util.stream.Collectors.groupingBy;
 
 @Validated
 @RestController
-@RequestMapping("/pallas/plugin/runtime")
+@RequestMapping("/plugin/runtime")
 public class PluginRuntimeController {
 
     @Autowired

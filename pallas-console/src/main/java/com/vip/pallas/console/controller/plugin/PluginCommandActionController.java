@@ -48,7 +48,7 @@ import com.vip.pallas.service.ClusterService;
 import com.vip.pallas.service.PallasPluginService;
 
 @RestController
-@RequestMapping("/pallas/plugin")
+@RequestMapping("/plugin")
 public class PluginCommandActionController {
 
     @Autowired

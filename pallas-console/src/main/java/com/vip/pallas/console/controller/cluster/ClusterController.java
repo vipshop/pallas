@@ -55,7 +55,7 @@ import com.vip.pallas.service.NodeService;
 
 @Validated
 @RestController
-@RequestMapping("/pallas/cluster")
+@RequestMapping("/cluster")
 public class ClusterController {
 
     @Autowired

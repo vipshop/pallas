@@ -26,7 +26,6 @@ import javax.annotation.Resource;
 import java.util.List;
 
 @RestController
-@RequestMapping("/pallas")
 public class TemplateConfigApiController {
 
     @Resource

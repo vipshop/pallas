@@ -71,7 +71,7 @@ import com.vip.pallas.utils.ElasticRestClient;
 import com.vip.pallas.utils.ObjectMapTool;
 
 @RestController
-@RequestMapping("/pallas/index/routing")
+@RequestMapping("/index/routing")
 public class IndexRoutingController {
     private static Logger logger = LoggerFactory.getLogger(IndexRoutingController.class);
 

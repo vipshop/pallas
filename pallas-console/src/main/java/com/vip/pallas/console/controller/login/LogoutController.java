@@ -31,7 +31,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @RestController
-@RequestMapping(path = "/pallas")
 public class LogoutController {
 
     private static Logger logger = LoggerFactory.getLogger(LogoutController.class);

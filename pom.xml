@@ -13,7 +13,6 @@
 		<module>pallas-core</module>
 		<module>pallas-core-open</module>
 		<module>pallas-console</module>
-		<module>pallas-console-web</module>
         <module>pallas-plugin</module>
 		<module>pallas-plugin-archetype</module>
 		<module>pallas-rest-client</module>
@@ -139,6 +138,7 @@
 		
 		<vjtools-vjkit.version>1.0.6</vjtools-vjkit.version>
 		<elasticsearch-sql.version>5.5.2.0</elasticsearch-sql.version>
+		<maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
 	</properties>
 
 	<dependencyManagement>

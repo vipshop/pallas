@@ -46,7 +46,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
-@RequestMapping("/pallas/rest/plugin")
+@RequestMapping("/rest/plugin")
 public class PluginApiController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginApiController.class);

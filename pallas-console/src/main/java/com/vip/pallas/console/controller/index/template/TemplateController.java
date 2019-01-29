@@ -81,7 +81,7 @@ import com.vip.pallas.service.SearchTemplateService;
 
 @Validated
 @RestController
-@RequestMapping("/pallas/index_template")
+@RequestMapping("/index_template")
 public class TemplateController {
     private static Logger logger = LoggerFactory.getLogger(TemplateController.class);
 

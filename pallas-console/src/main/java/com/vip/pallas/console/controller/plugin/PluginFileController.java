@@ -45,7 +45,7 @@ import com.vip.pallas.processor.plugin.AbstractPluginFileProcessor;
 
 @Validated
 @RestController
-@RequestMapping("/pallas/plugin/upgrade")
+@RequestMapping("/plugin/upgrade")
 public class PluginFileController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginFileController.class);

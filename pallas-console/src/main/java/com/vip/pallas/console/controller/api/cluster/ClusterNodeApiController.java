@@ -32,7 +32,7 @@ import com.vip.pallas.utils.ObjectMapTool;
 
 @Validated
 @RestController
-@RequestMapping("/pallas/node")
+@RequestMapping("/node")
 public class ClusterNodeApiController {
 
     @Autowired

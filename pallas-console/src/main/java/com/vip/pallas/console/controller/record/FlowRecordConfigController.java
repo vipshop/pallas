@@ -53,7 +53,7 @@ import com.vip.pallas.service.IndexService;
 
 @Validated
 @RestController
-@RequestMapping("/pallas/record/flow_record_config")
+@RequestMapping("/record/flow_record_config")
 public class FlowRecordConfigController {
 
     @Autowired

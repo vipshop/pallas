@@ -55,7 +55,7 @@ import com.vip.pallas.utils.ObjectMapTool;
 
 @Validated
 @RestController
-@RequestMapping("/pallas/ss")
+@RequestMapping("/ss")
 public class ServerController {
     private static Logger logger = LoggerFactory.getLogger(ServerController.class);
 

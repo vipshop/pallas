@@ -65,7 +65,7 @@ import com.vip.pallas.service.IndexService;
 
 @Validated
 @RestController
-@RequestMapping("/pallas/index")
+@RequestMapping("/index")
 public class IndexController {
     private static Logger logger = LoggerFactory.getLogger(IndexController.class);
 

@@ -37,7 +37,7 @@ import com.vip.pallas.exception.BusinessLevelException;
 import com.vip.pallas.service.UserService;
 
 @RestController
-@RequestMapping(path = "/pallas/authorization")
+@RequestMapping(path = "/authorization")
 public class LoginController {
 
     private static Logger logger = LoggerFactory.getLogger(LoginController.class);

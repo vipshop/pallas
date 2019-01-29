@@ -48,7 +48,7 @@ import com.vip.vjtools.vjkit.collection.ListUtil;
 
 @Validated
 @RestController
-@RequestMapping(path="/pallas/authorization/user")
+@RequestMapping(path="/authorization/user")
 public class UserController {
 	
 	@Autowired

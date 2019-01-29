@@ -31,7 +31,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 
 @RestController
-@RequestMapping("/pallas")
 public class IndexDsImportController {
 
 

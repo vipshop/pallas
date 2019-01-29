@@ -47,7 +47,6 @@ import com.vip.pallas.service.IndexVersionService;
 import com.vip.pallas.utils.ObjectMapTool;
 
 @RestController
-@RequestMapping("/pallas")
 public class IndexFindMetaDataController {
 	
 	@Autowired	

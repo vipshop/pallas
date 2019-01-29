@@ -31,7 +31,6 @@ import com.vip.pallas.service.IndexRoutingService;
 import com.vip.pallas.service.SearchAuthorizationService;
 
 @RestController
-@RequestMapping("/pallas")
 public class RoutingApiController {
 
     @Resource

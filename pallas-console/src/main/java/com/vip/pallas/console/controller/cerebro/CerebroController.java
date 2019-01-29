@@ -50,7 +50,6 @@ import com.vip.pallas.utils.ElasticRestClient;
 import com.vip.pallas.utils.ObjectMapTool;
 
 @RestController
-@RequestMapping(path="/pallas")
 public class CerebroController {
 
 	@Autowired

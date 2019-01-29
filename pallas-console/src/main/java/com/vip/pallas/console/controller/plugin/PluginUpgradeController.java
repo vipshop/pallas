@@ -53,7 +53,7 @@ import com.vip.vjtools.vjkit.collection.ListUtil;
 
 @Validated
 @RestController
-@RequestMapping("/pallas/plugin/upgrade")
+@RequestMapping("/plugin/upgrade")
 public class PluginUpgradeController {
 
     @Autowired

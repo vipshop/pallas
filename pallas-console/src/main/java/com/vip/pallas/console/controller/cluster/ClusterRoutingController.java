@@ -66,7 +66,7 @@ import com.vip.pallas.utils.ObjectMapTool;
 
 @Validated
 @RestController
-@RequestMapping("/pallas/cluster/routing")
+@RequestMapping("/cluster/routing")
 public class ClusterRoutingController {
     private static Logger logger = LoggerFactory.getLogger(ClusterRoutingController.class);
     @Resource

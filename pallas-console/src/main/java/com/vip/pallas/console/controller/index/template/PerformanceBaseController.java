@@ -39,7 +39,6 @@ import java.util.stream.Stream;
 
 import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
-@RequestMapping("/pallas")
 public class PerformanceBaseController{
 
     protected static final String DATA_CACHE_KEY = "performanceDataCache";
