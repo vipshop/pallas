@@ -22,7 +22,7 @@ export default {
   },
   computed: {
     versionNumber() {
-      return `Pallas-Console-${this.versionNum} ©2017`;
+      return `Pallas-Console-${this.versionNum} ©2019`;
     },
   },
 };
