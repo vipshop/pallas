@@ -191,8 +191,7 @@ export default {
     },
     init() {
       this.loading = true;
-      Promise.all([this.getOperationList()]).then()
-      .finally(() => {
+      Promise.all([this.getOperationList()]).then(() => {
         this.loading = false;
       });
     },

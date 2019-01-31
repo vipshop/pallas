@@ -187,8 +187,7 @@ export default {
     },
     init() {
       this.loading = true;
-      Promise.all([this.getPluginUpgradeList()]).then()
-      .finally(() => {
+      Promise.all([this.getPluginUpgradeList()]).then(() => {
         this.loading = false;
       });
     },

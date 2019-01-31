@@ -190,8 +190,7 @@ export default {
     },
     init() {
       this.loading = true;
-      Promise.all([this.getApplyList(), this.getClusters()]).then()
-      .finally(() => {
+      Promise.all([this.getApplyList(), this.getClusters()]).then(() => {
         this.loading = false;
       });
     },

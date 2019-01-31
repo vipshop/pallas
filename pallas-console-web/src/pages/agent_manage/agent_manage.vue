@@ -259,8 +259,6 @@ export default {
       this.loading = true;
       Promise.all([this.getAgents(), this.getClusters()]).then(() => {
         this.heartbeat();
-      })
-      .finally(() => {
         this.loading = false;
       });
     },

@@ -200,8 +200,7 @@ export default {
     },
     init() {
       this.loading = true;
-      Promise.all([this.getApproveList()]).then()
-      .finally(() => {
+      Promise.all([this.getApproveList()]).then(() => {
         this.loading = false;
       });
     },

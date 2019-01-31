@@ -170,8 +170,7 @@ export default {
     },
     init() {
       this.loading = true;
-      Promise.all([this.getTemplateList(), this.getClusters()]).then()
-      .finally(() => {
+      Promise.all([this.getTemplateList(), this.getClusters()]).then(() => {
         this.loading = false;
       });
     },

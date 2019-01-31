@@ -252,8 +252,7 @@ export default {
     },
     init() {
       this.loading = true;
-      Promise.all([this.getIndexList(), this.getClusters()]).then()
-      .finally(() => {
+      Promise.all([this.getIndexList(), this.getClusters()]).then(() => {
         this.loading = false;
       });
     },

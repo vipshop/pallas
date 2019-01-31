@@ -40,8 +40,6 @@ export default {
       this.loading = true;
       Promise.all([this.getLoginUser()]).then(() => {
         this.heartbeat();
-      })
-      .finally(() => {
         this.initialized = true;
         this.loading = false;
       });

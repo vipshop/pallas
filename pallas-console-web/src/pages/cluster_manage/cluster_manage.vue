@@ -236,14 +236,10 @@ export default {
     },
     init() {
       this.loading = true;
-      Promise.all([this.getClusterList(), this.getPhysicals()]).then()
-      .finally(() => {
-        this.loading = false;
-      });
-      Promise.all([this.getClusterList(), this.getAllPallasSearchs()]).then()
-      .finally(() => {
-        this.loading = false;
-      });
+      Promise.all([this.getClusterList(), this.getPhysicals(),
+        this.getAllPallasSearchs()]).then(() => {
+          this.loading = false;
+        });
     },
   },
   components: {
