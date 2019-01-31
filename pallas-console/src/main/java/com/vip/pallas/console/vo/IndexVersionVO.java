@@ -22,6 +22,7 @@ import java.io.Serializable;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -73,6 +74,7 @@ public class IndexVersionVO implements Serializable {
 
     private Long querySlowThreshold;
 
+    @Positive(message = "refresh interval必须大于0")
     private Byte refreshInterval;
 
     public Long getId() {
@@ -208,6 +210,9 @@ public class IndexVersionVO implements Serializable {
     }
 
     public void setIndexSlowThreshold(Long indexSlowThreshold) {
+        if(indexSlowThreshold == 0){
+            indexSlowThreshold = -1L;
+        }
         this.indexSlowThreshold = indexSlowThreshold;
     }
 
@@ -216,6 +221,9 @@ public class IndexVersionVO implements Serializable {
     }
 
     public void setFetchSlowThreshold(Long fetchSlowThreshold) {
+        if(fetchSlowThreshold == 0){
+            fetchSlowThreshold = -1L;
+        }
         this.fetchSlowThreshold = fetchSlowThreshold;
     }
 
@@ -224,6 +232,9 @@ public class IndexVersionVO implements Serializable {
     }
 
     public void setQuerySlowThreshold(Long querySlowThreshold) {
+        if(querySlowThreshold == 0){
+            querySlowThreshold = -1L;
+        }
         this.querySlowThreshold = querySlowThreshold;
     }
 
