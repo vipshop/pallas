@@ -19,7 +19,11 @@
                     </el-table-column>
                     <el-table-column label="数据量" prop="count" width="150px">
                         <template scope="scope">
-                            <div class="condition-table" v-for="item in scope.row.count" :key="item">{{item}}</div>
+                            <div class="condition-table" v-for="(item, index) in scope.row.count" :key="item">{{item}}
+                                <el-tooltip effect="dark" content="快速查看数据" placement="top">
+                                    <el-button type="text" @click="retrieve(scope.row, $array.strToArray(scope.row.realClusterIds)[index])"><i class="fa fa-search-plus"></i></el-button>
+                                </el-tooltip>
+                            </div>
                         </template>
                     </el-table-column>
                     <el-table-column label="创建时间" prop="createTime" width="200px">
@@ -137,6 +141,23 @@ export default {
       this.$http.get('/index/version/info.json', params).then((data) => {
         this.configInfo = data;
         this.configTitle = `${this.indexName}_${row.id}配置信息（集群：${this.getClusterName(clusterId)}）`;
+        this.isViewConfigVisible = true;
+      })
+      .finally(() => {
+        this.loading = false;
+      });
+    },
+    retrieve(row, clusterId) {
+      const params = {
+        indexId: this.indexId,
+        indexName: this.indexName,
+        versionId: row.id,
+        cid: clusterId,
+      };
+      this.loading = true;
+      this.$http.get('/index/version/retrieve.json', params).then((data) => {
+        this.configInfo = data;
+        this.configTitle = `${this.indexName}_${row.id}索引数据（集群：${this.getClusterName(clusterId)}）`;
         this.isViewConfigVisible = true;
       })
       .finally(() => {

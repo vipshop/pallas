@@ -894,4 +894,15 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 		}
 		return lastMsg + "\n no (more) deleteByQuery for " + indexName + " found";
     }
+
+	@Override
+	public String retrieveIndex(String indexName, String httpAddress, Long versionId) {
+		try {
+			String realIndexName = indexName + "_" + versionId;
+			return ElasticRestClient.retrieveIndexData(httpAddress, realIndexName);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+		return null;
+	}
 }

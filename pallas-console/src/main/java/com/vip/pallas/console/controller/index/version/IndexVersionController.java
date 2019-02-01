@@ -185,6 +185,18 @@ public class IndexVersionController {
 		return null;
 	}
 
+	@RequestMapping(value = "/retrieve.json", method = RequestMethod.GET)
+	public String retrieve(@RequestParam Long versionId, @RequestParam Long cid, @RequestParam String indexName) {
+		try {
+			Cluster cluster = clusterService.selectByPrimaryKey(cid);
+			String indexInfo = elasticSearchService.retrieveIndex(indexName, cluster.getHttpAddress(), versionId);
+			return indexInfo == null ? "该版本信息未在ES初始化,请先点击开始同步！" : indexInfo;
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+		return null;
+	}
+
 	@RequestMapping(value = "/create_index.json")
 	public void createIndex(@RequestBody @Validated BaseIndexVersionOp params, HttpServletRequest request) throws Exception {
 		Long indexId = params.getIndexId();

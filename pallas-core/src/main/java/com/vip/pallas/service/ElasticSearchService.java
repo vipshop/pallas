@@ -95,4 +95,5 @@ public interface ElasticSearchService {
 
 	String cancelDeleteByQueryTask(Long versionId, String indexName, String lastMsg);
 
+	public String retrieveIndex(String indexName, String httpAddress, Long versionId);
 }

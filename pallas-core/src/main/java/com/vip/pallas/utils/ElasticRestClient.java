@@ -187,6 +187,24 @@ public class ElasticRestClient {
 		}
 		return null;
 	}
+
+	public static String retrieveIndexData(String address, String indexName) {
+		try {
+			RestClient restClient = build(address);
+			Response response = restClient.performRequest("GET", "/" + indexName + "/_search",
+					Collections.singletonMap("pretty", "true"));
+			String responseStr = IOUtils.toString(response.getEntity().getContent(), Charset.forName("UTF-8"));
+			return responseStr;
+		} catch (Exception e) {
+			if (e instanceof ResponseException) {
+				logger.info("get index: {} indexInfo error: {}, maybe it's not initialized and this's not an error.",
+						indexName, ((ResponseException) e).getResponse());
+			} else {
+				logger.error(e.getMessage(), e);
+			}
+		}
+		return null;
+	}
 	
 	public static void deleteById(String address, String indexName, String type, String id) {
 		try {
