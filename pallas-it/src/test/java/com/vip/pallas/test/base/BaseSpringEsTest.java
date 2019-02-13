@@ -102,7 +102,7 @@ public class BaseSpringEsTest extends BaseEsTest {
 	public static ResponseEntity<String> callRestApiAndReturn(String url, HttpHeaders headers, String requestBody) {
 		headers.setContentType(MediaType.valueOf(MediaType.APPLICATION_JSON_UTF8_VALUE));
 		headers.add("Accept", MediaType.APPLICATION_JSON.toString());
-		return restTemplate.postForEntity("/pallas" + url, new HttpEntity<>(requestBody, headers), String.class);
+		return restTemplate.postForEntity(url, new HttpEntity<>(requestBody, headers), String.class);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -120,7 +120,7 @@ public class BaseSpringEsTest extends BaseEsTest {
 		FileSystemResource resource = new FileSystemResource(new File(filePath));
 		MultiValueMap<String, Object> param = new LinkedMultiValueMap<>();
 		param.add("file", resource);
-		return JSON.parseObject(restTemplate.postForObject("/pallas" + url, param, String.class), Map.class);
+		return JSON.parseObject(restTemplate.postForObject(url, param, String.class), Map.class);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -147,7 +147,7 @@ public class BaseSpringEsTest extends BaseEsTest {
 	}
 
 	public static String callGetApiAsString(String url) throws IOException {
-		ResponseEntity<String> responseEntity = restTemplate.getForEntity("/pallas" + url, String.class);
+		ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
 		return responseEntity.getBody();
 	}
 
