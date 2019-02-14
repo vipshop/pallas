@@ -475,7 +475,7 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
-		return null;
+		return 0L;
 	}
 
 	@Override

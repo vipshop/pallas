@@ -131,7 +131,7 @@ public class IndexVersionController {
 		for (Long vid : versionIds) {
 			try {
 				com.vip.pallas.bean.IndexVersion iv = indexVersionService.findVersionById(vid);
-				if (iv != null && iv.getSync()) {
+				if (iv != null) {
 					List<Map> oneVersionCount = new ArrayList<>();
 					List<Cluster> clusters = clusterService.selectPhysicalClustersByIndexId(indexId);
 					for (Cluster cluster : clusters) {
