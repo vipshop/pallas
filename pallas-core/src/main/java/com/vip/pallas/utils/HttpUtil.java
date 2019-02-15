@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
@@ -38,7 +39,7 @@ public class HttpUtil {
 	private static Logger logger = LoggerFactory.getLogger(HttpUtil.class);
 
 	@SuppressWarnings("rawtypes")
-	private ResponseHandler<Map> urlCallback = (HttpResponse response) -> {
+	private static ResponseHandler<Map> urlCallback = (HttpResponse response) -> {
         Map<String, String> ret = null;
         if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
             String result = EntityUtils.toString(response.getEntity(), "utf-8");
@@ -63,7 +64,7 @@ public class HttpUtil {
     };
 
 	@SuppressWarnings("rawtypes")
-	private ResponseHandler<Map> jsonCallback = (HttpResponse response) -> {
+	private static ResponseHandler<Map> jsonCallback = (HttpResponse response) -> {
         Map<String, Object> ret = null;
         if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
             String result = EntityUtils.toString(response.getEntity(), "utf-8");
@@ -83,25 +84,35 @@ public class HttpUtil {
         return ret;
     };
 
-	public Map<String, Object> httpGet(String url, Map<String, Object> params, boolean json) throws Exception {
-		Set<String> keySet = params.keySet();
+	public static Map<String, Object> httpGet(String url, Map<String, Object> params, boolean json) throws Exception {
+		return httpGet(url, params, json, null);
+	}
 
+	public static Map<String, Object> httpGet(String url, Map<String, Object> params, boolean json, Header[] headers)
+			throws Exception {
 		String getUrl = url;
-		if (url.lastIndexOf('?') <= -1) {
-			getUrl += "?";
-		}
+		if (params != null) {
+			Set<String> keySet = params.keySet();
 
-		boolean flag = false;
-		for (String key : keySet) {
-			if (flag) {
-				getUrl += "&";
+			if (url.lastIndexOf('?') <= -1) {
+				getUrl += "?";
 			}
-			getUrl += key + "=";
-			getUrl += ObjectMapTool.getString(params, key);
-			flag = true;
+
+			boolean flag = false;
+			for (String key : keySet) {
+				if (flag) {
+					getUrl += "&";
+				}
+				getUrl += key + "=";
+				getUrl += ObjectMapTool.getString(params, key);
+				flag = true;
+			}
 		}
 		HttpGet request = new HttpGet(new URI(getUrl));
 		HttpClient httpClient = HttpClientUtil.getHttpClient();
+		if (headers != null) {
+			request.setHeaders(headers);
+		}
 		return httpClient.execute(request, json ? jsonCallback : urlCallback);
 	}
 }
