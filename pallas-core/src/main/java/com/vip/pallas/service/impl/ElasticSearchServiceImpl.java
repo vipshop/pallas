@@ -53,6 +53,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.google.gson.Gson;
 import com.vip.pallas.bean.ClusterSettings;
 import com.vip.pallas.bean.EsAliases;
@@ -490,34 +493,49 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 	}
 
 	@Override
-	public String executeDeleteByQueryDsl(Long versionId, String indexName, String dsl, int scrollSize) {
-		return executeDsl("GET", versionId, indexName, dsl,
+	public String executeDeleteByQueryDsl(Long indexId, Long versionId, String indexName, String dsl, int scrollSize) {
+		return executeDsl(indexId, "GET", versionId, indexName, dsl,
 				"/" + indexName + "_" + versionId
 						+ "/_delete_by_query?pretty&scroll_size=" + scrollSize
 						+ "&conflicts=proceed&wait_for_completion=false");
 	}
 
 	@Override
-	public String executeSearchByDsl(Long versionId, String indexName, String dsl) {
-		return executeDsl("GET", versionId, indexName, dsl, "/" + indexName + "_" + versionId + "/_search?pretty");
+	public String executeSearchByDsl(Long indexId, Long versionId, String indexName, String dsl) {
+		return executeDsl(indexId, "GET", versionId, indexName, dsl,
+				"/" + indexName + "_" + versionId + "/_search?pretty");
 	}
 
-	public String executeDsl(String method, Long versionId, String indexName, String dsl, String endPoint) {
+	private String executeDsl(Long indexId, String method, Long versionId, String indexName, String dsl,
+			String endPoint) {
 		try {
-			Response response = null;
-			RestClient client = ElasticRestClient
-					.build(clusterRepository.selectByVersionId(versionId).getHttpAddress());
-			if (dsl != null) {
-				NStringEntity entity = new NStringEntity(dsl, ContentType.APPLICATION_JSON);
-				response = client.performRequest(method, endPoint, Collections.emptyMap(), entity);
-			} else {
-				response = client.performRequest(method, endPoint, Collections.emptyMap());
+			List<Cluster> clusterList = clusterRepository.selectPhysicalClustersByIndexId(indexId);
+			JSONArray array = new JSONArray();
+			for (Cluster cluster : clusterList) {
+				JSONObject jsonObject = new JSONObject();
+				String resultStr = executeDslByCluster(method, dsl, endPoint, cluster);
+				JSONObject resultJsonObject = JSON.parseObject(resultStr);
+				jsonObject.put(cluster.getClusterId(), resultJsonObject);
+				array.add(jsonObject);
 			}
-			return IOUtils.toString(response.getEntity().getContent(), Charset.forName("UTF-8"));
+			return array.toJSONString();
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
+			return e.getMessage();
 		}
-		return null;
+	}
+
+	public String executeDslByCluster(String method, String dsl, String endPoint, Cluster cluster)
+			throws IOException {
+		Response response = null;
+		RestClient client = ElasticRestClient.build(cluster.getHttpAddress());
+		if (dsl != null) {
+			NStringEntity entity = new NStringEntity(dsl, ContentType.APPLICATION_JSON);
+			response = client.performRequest(method, endPoint, Collections.emptyMap(), entity);
+		} else {
+			response = client.performRequest(method, endPoint, Collections.emptyMap());
+		}
+		return IOUtils.toString(response.getEntity().getContent(), Charset.forName("UTF-8"));
 	}
 
 	@Override
@@ -865,34 +883,48 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
     }
 
 	@Override
-	public String cancelDeleteByQueryTask(Long versionId, String indexName, String lastMsg) {
-		String result = executeDsl("GET", versionId, indexName, null, "_tasks?detailed&actions=*byquery");
-		if (result != null && result.indexOf(indexName) >=0) {
-			String taskidAfter = StringUtils.substringAfter(result, "tasks\"");
-			if (taskidAfter == null) {
-				return lastMsg + "\n no more tasks";
-			}
-			String taskidBetweenBrace = StringUtils.substringBetween(taskidAfter, "{", "}");
-			if (taskidBetweenBrace == null) {
-				return lastMsg + "\n taskidBetweenBrace is null";
-			}
-			String taskid = StringUtils.substringBetween(taskidAfter, "\"", "\"");
-			if (taskid == null) {
-				return lastMsg + "\n taskid not found";
-			}
-			String cancelTaskEndpoint = "_tasks/" + taskid + "/_cancel";
-			logger.info("going to canel delete-by-query task, index: {}, endpoint: {}", indexName, cancelTaskEndpoint);
-			String cancelResult = executeDsl("POST", versionId, indexName, null, cancelTaskEndpoint);
-			logger.info("cancel task:{}, return {}", taskid, cancelResult);
+	public String cancelDeleteByQueryTask(Long versionId, String indexName) {
+		IndexVersion indexVersion = indexVersionRepository.selectByPrimaryKey(versionId);
+		List<Cluster> clusterList = clusterRepository.selectPhysicalClustersByIndexId(indexVersion.getIndexId());
+		String lastMsg = "";
+		for (Cluster cluster : clusterList) {
 			try {
-				TimeUnit.SECONDS.sleep(1);
+				String result = executeDslByCluster("GET", null, "_tasks?detailed&actions=*byquery", cluster);
+				if (result != null && result.indexOf(indexName) >=0) {
+					String taskidAfter = StringUtils.substringAfter(result, "tasks\"");
+					if (taskidAfter == null) {
+						lastMsg += "\n no more tasks on cluster: " + cluster.getClusterId();
+						continue;
+					}
+					String taskidBetweenBrace = StringUtils.substringBetween(taskidAfter, "{", "}");
+					if (taskidBetweenBrace == null) {
+						lastMsg += "\n taskidBetweenBrace is null on cluster: " + cluster.getClusterId();
+						continue;
+					}
+					String taskid = StringUtils.substringBetween(taskidAfter, "\"", "\"");
+					if (taskid == null) {
+						lastMsg += "\n taskid not found: " + cluster.getClusterId();
+						continue;
+					}
+					String cancelTaskEndpoint = "_tasks/" + taskid + "/_cancel";
+					logger.info("going to canel delete-by-query task, index: {}, endpoint: {}", indexName, cancelTaskEndpoint);
+					String cancelResult = executeDslByCluster("POST", null, cancelTaskEndpoint, cluster);
+					logger.info("cancel task:{}, return {}", taskid, cancelResult);
+					try {
+						TimeUnit.SECONDS.sleep(1);
+					} catch (Exception e) {
+						logger.error(e.getMessage(), e);
+					}
+					lastMsg += "\n cancel deleteByQuery : " + taskid + " on cluster " + cluster.getClusterId()
+							+ " successfully";
+				}
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
+				return e.getMessage();
 			}
-			return cancelDeleteByQueryTask(versionId, indexName,
-					lastMsg + "\n cancel deleteByQuery: " + taskid + " for " + indexName + " successfully");
 		}
-		return lastMsg + "\n no (more) deleteByQuery for " + indexName + " found";
+		return lastMsg;
+		
     }
 
 	@Override

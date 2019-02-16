@@ -89,11 +89,11 @@ public interface ElasticSearchService {
 
 	String setClusterFlushSynced(RestClient restClient) throws IOException;
 
-	String executeDeleteByQueryDsl(Long versionId, String indexName, String dsl, int scrollSize);
+	String executeDeleteByQueryDsl(Long indexId, Long versionId, String indexName, String dsl, int scrollSize);
 
-	String executeSearchByDsl(Long versionId, String indexName, String dsl);
+	String executeSearchByDsl(Long indexId, Long versionId, String indexName, String dsl);
 
-	String cancelDeleteByQueryTask(Long versionId, String indexName, String lastMsg);
+	String cancelDeleteByQueryTask(Long versionId, String indexName);
 
 	public String retrieveIndex(String indexName, String httpAddress, Long versionId);
 }

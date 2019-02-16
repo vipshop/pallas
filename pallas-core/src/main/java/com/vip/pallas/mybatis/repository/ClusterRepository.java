@@ -35,8 +35,6 @@ public interface ClusterRepository {
     Cluster selectByPrimaryKey(Long id);
 
     Cluster selectByClusterName(String clusterId);
-    
-    Cluster selectByVersionId(Long versionId);
 
     int updateByPrimaryKeySelective(Cluster record);
 

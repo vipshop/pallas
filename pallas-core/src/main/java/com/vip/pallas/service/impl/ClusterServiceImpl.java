@@ -23,10 +23,6 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
-import com.vip.pallas.exception.BusinessLevelException;
-import com.vip.pallas.exception.PallasException;
-import com.vip.pallas.mybatis.entity.IndexVersion;
-import com.vip.pallas.service.IndexVersionService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,10 +30,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.vip.pallas.exception.PallasException;
 import com.vip.pallas.mybatis.entity.Cluster;
 import com.vip.pallas.mybatis.entity.Page;
 import com.vip.pallas.mybatis.repository.ClusterRepository;
 import com.vip.pallas.service.ClusterService;
+import com.vip.pallas.service.IndexVersionService;
 import com.vip.pallas.service.PrivilegeService;
 
 @Service
@@ -119,16 +117,6 @@ public class ClusterServiceImpl implements ClusterService{
 	@Override
 	public List<Cluster> selectPhysicalClustersByIndexId(Long indexId) {
 		return clusterRepository.selectPhysicalClustersByIndexId(indexId);
-	}
-
-	@Override
-	public Cluster selectUsedPhysicalClustersByIndexId(Long indexId) {
-		IndexVersion indexVersion = indexVersionService.findUsedIndexVersionByIndexId(indexId);
-		if(indexVersion == null) {
-			throw new BusinessLevelException(500, "请先启用版本");
-		}
-
-		return clusterRepository.selectByVersionId(indexVersion.getId());
 	}
 
 	@Override

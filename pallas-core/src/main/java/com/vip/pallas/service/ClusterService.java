@@ -43,6 +43,4 @@ public interface ClusterService {
 	//根据indexId，得到所绑定集群对应的实际物理集群（如果Index绑定的是逻辑集群，此方法拿到的此逻辑对应的所有物理集群）
 	List<Cluster> selectPhysicalClustersByIndexId(Long indexId);
 
-	//根据indexId得到启用中的版本绑定的实际物理集群
-	Cluster selectUsedPhysicalClustersByIndexId(Long indexId);
 }
