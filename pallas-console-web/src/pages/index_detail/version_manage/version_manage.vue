@@ -209,6 +209,7 @@ export default {
           this.versionGetInfo.versionId = row.id;
         });
         this.$set(this.versionGetInfo, 'versionId', this.versionGetInfo.id);
+        this.$set(this.versionGetInfo, 'clusterId', this.clusters[0].id);
         if (this.isLogical) {
           this.$set(this.versionGetInfo, 'nodes', this.getLogicClusterNodesArray(this.versionGetInfo.allocationNodes));
         } else {
@@ -242,6 +243,7 @@ export default {
           this.versionGetInfo.versionId = row.id;
         });
         this.$set(this.versionGetInfo, 'versionId', this.versionGetInfo.id);
+        this.$set(this.versionGetInfo, 'clusterId', this.clusters[0].id);
         if (this.isLogical) {
           this.$set(this.versionGetInfo, 'nodes', this.getLogicClusterNodesArray(this.versionGetInfo.allocationNodes));
         } else {
