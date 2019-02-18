@@ -17,51 +17,17 @@
 
 package com.vip.pallas.bean;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.vip.pallas.utils.JsonUtil;
 
 public class EsAliases {
 	
 	private List<Map<String, Map<String, String>>> actions;
 
-	/*
-	public static void main(String[] args) throws Exception {
-		EsAliases esAliases = new EsAliases(); 
-		List<Map<String, Map<String, String>>> actions = new ArrayList<Map<String, Map<String, String>>>(2);
-		
-		Map<String, Map<String, String>> removeMap0 = new HashMap<String, Map<String, String>>();
-		Map<String, Map<String, String>> addMap0 = new HashMap<String, Map<String, String>>();
-		
-		Map<String, String> removeMap = new HashMap<String, String>();
-		Map<String, String> addMap = new HashMap<String, String>();
-		
-		removeMap.put("index", "vsearch11");
-		removeMap.put("alias", "msearch");
-		
-		addMap.put("index", "vsearch12");
-		addMap.put("alias", "msearch");
-		
-		removeMap0.put("remove", removeMap);
-		addMap0.put("add", addMap);
-		
-		actions.add(removeMap0);
-		actions.add(addMap0);
-		
-		esAliases.setActions(actions);
-		System.out.println(JsonUtil.toJson(esAliases));
-	}*/
-
-
 
 	public List<Map<String, Map<String, String>>> getActions() {
 		return actions;
 	}
-
-
 
 	public void setActions(List<Map<String, Map<String, String>>> actions) {
 		this.actions = actions;

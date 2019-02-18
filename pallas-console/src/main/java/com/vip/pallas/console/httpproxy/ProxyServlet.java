@@ -650,7 +650,14 @@ public class ProxyServlet extends HttpServlet {
         if (outBuf == null) {
           outBuf = new StringBuilder(in.length() + 5*3);
           outBuf.append(in,0,i);
-          formatter = new Formatter(outBuf);
+          try {
+            formatter = new Formatter(outBuf);
+          } finally {
+            if (formatter != null) {
+              formatter.flush();
+              formatter.close();
+            } 
+          }
         }
         //leading %, 0 padded, width 2, capital hex
         formatter.format("%%%02X",(int)c);//TODO

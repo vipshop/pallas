@@ -60,8 +60,7 @@ public class CerebroEmbed {
 	}
 
 	public static void unzip(File zip, File directory) throws ZipException, IOException {
-		ZipFile zipFile = new ZipFile(zip);
-		try {
+		try (ZipFile zipFile = new ZipFile(zip)){
 			Enumeration<? extends ZipEntry> entries = zipFile.entries();
 			while (entries.hasMoreElements()) {
 				ZipEntry zipEntry = entries.nextElement();
@@ -70,24 +69,35 @@ public class CerebroEmbed {
 					temp.mkdirs();
 					continue;
 				}
-				BufferedInputStream bis = new BufferedInputStream(zipFile.getInputStream(zipEntry));
-				File f = new File(directory + File.separator + zipEntry.getName());
-				File f_p = f.getParentFile();
-				if (f_p != null && !f_p.exists()) {
-					f_p.mkdirs();
-				}
-				BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(f));
-				int len = -1;
-				byte[] bs = new byte[2048];
-				while ((len = bis.read(bs, 0, 2048)) != -1) {
-					bos.write(bs, 0, len);
-				}
-				bos.flush();
-				bos.close();
-				bis.close();
+				unzip(directory,zipFile, zipEntry);
+			}
+		}
+	}
+	
+	private static void unzip(File directory, ZipFile zipFile, ZipEntry zipEntry) throws ZipException, IOException {
+		BufferedInputStream bis = null;
+		BufferedOutputStream bos = null;
+		try {
+			bis = new BufferedInputStream(zipFile.getInputStream(zipEntry));
+			File f = new File(directory + File.separator + zipEntry.getName());
+			File f_p = f.getParentFile();
+			if (f_p != null && !f_p.exists()) {
+				f_p.mkdirs();
+			}
+			bos = new BufferedOutputStream(new FileOutputStream(f));
+			int len = -1;
+			byte[] bs = new byte[2048];
+			while ((len = bis.read(bs, 0, 2048)) != -1) {
+				bos.write(bs, 0, len);
 			}
 		} finally {
-			zipFile.close();
+			if (bos != null) {
+				bos.flush();
+				bos.close();
+			}
+			if (bis != null) {
+				bis.close();
+			}
 		}
 	}
 
