@@ -885,6 +885,9 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 	@Override
 	public String cancelDeleteByQueryTask(Long versionId, String indexName) {
 		IndexVersion indexVersion = indexVersionRepository.selectByPrimaryKey(versionId);
+		if (indexVersion == null) {
+			return "can't find index by versionId: " + versionId;
+		}
 		List<Cluster> clusterList = clusterRepository.selectPhysicalClustersByIndexId(indexVersion.getIndexId());
 		String lastMsg = "";
 		for (Cluster cluster : clusterList) {

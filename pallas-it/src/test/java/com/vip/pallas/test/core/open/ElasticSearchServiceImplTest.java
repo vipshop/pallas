@@ -55,7 +55,7 @@ public class ElasticSearchServiceImplTest extends BaseSpringEsTest {
 	
 	@Test
 	public void testDeleteByQuery() {
-		System.out.println(elasticSearchService.cancelDeleteByQueryTask(103653l, "big_desk_103653"));
+		System.out.println(elasticSearchService.cancelDeleteByQueryTask(VERSION_ID, "big_desk_103653"));
 	}
 
 }
