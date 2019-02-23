@@ -5,17 +5,14 @@ import java.net.UnknownHostException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.vip.vjtools.vjkit.base.ObjectUtil;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.vip.pallas.search.model.Index;
-import com.vip.pallas.search.model.ServiceInfo;
 import com.vip.pallas.search.filter.common.SessionContext;
 import com.vip.pallas.search.http.PallasRequest;
+import com.vip.pallas.search.model.Index;
+import com.vip.pallas.search.model.ServiceInfo;
 import com.vip.pallas.search.service.PallasCacheFactory;
 import com.vip.pallas.search.utils.PallasSearchProperties;
 import com.vip.pallas.utils.PallasBasicProperties;
@@ -36,6 +33,8 @@ public class MonitorAccessLog {
 
 	private String http_host;
 	private String requestBody = null;
+
+	private String templateId;
 
 	private static InetAddress inetAddress = null;
 	private static String hostname = "-";
@@ -84,6 +83,7 @@ public class MonitorAccessLog {
 		http_user_agent = pallasRequest.getHeader(Names.USER_AGENT);
 		http_x_forwarded_for = pallasRequest.getHeader("X-FORWARDED-FOR");
 		http_host = pallasRequest.getHeader(Names.HOST);
+		templateId = pallasRequest.getTemplateId();
 
 	}
 
@@ -154,7 +154,8 @@ public class MonitorAccessLog {
 				.append("\tsr=").append(ctx.getTimestampServerChannelRead())
 				.append("\tss=").append(ctx.getTimestampServerResponseSend())
 				.append("\tcontent-length=").append(body_bytes_sent)
-				.append("(bytes)\t").append(wrapValue(http_referer))
+				.append("(bytes)\t").append("\ttemplateId=").append(templateId)
+				.append('\t').append(wrapValue(http_referer))
 				.append('\t').append(wrapValue(http_user_agent))
 				.append('\t').append(wrapValue(http_x_forwarded_for))
 				.append('\t').append(wrapValue(http_host))
