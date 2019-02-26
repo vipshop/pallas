@@ -121,6 +121,14 @@ public class IndexVersion {
 		public void setDynamic(boolean dynamic) {
 			this.dynamic = dynamic;
 		}
+
+		@Override
+		public String toString() {
+			return "VersionField{" +
+					"fieldName='" + fieldName + '\'' +
+					", dbFieldType='" + dbFieldType + '\'' +
+					'}';
+		}
 	}
 
 	public String getRealClusterIds() {
@@ -290,4 +298,6 @@ public class IndexVersion {
 	public void setRefreshInterval(Byte refreshInterval) {
 		this.refreshInterval = refreshInterval;
 	}
+
+
 }
