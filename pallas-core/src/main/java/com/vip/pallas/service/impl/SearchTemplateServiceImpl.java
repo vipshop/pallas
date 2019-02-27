@@ -42,8 +42,6 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
 
-import com.vip.pallas.bean.TemplateImport;
-import com.vip.pallas.bean.TemplateInfo;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.entity.ContentType;
@@ -63,6 +61,8 @@ import org.springframework.util.StringUtils;
 
 import com.vip.pallas.bean.ApproveState;
 import com.vip.pallas.bean.ApproveType;
+import com.vip.pallas.bean.TemplateImport;
+import com.vip.pallas.bean.TemplateInfo;
 import com.vip.pallas.exception.PallasException;
 import com.vip.pallas.mybatis.entity.Approve;
 import com.vip.pallas.mybatis.entity.Cluster;
@@ -570,7 +570,7 @@ public class SearchTemplateServiceImpl implements SearchTemplateService {
 	}
 
 	@Override
-	public List<Map<String, Object>> executeSql(Long indexId, String sql)
+	public List<Map<String, Object>> executeSql(Long indexId, String sql, Long dsId)
 			throws SQLException, PallasException, InstantiationException, IllegalAccessException {
 		Connection conn = null;
 		Statement stmt = null;
@@ -581,8 +581,12 @@ public class SearchTemplateServiceImpl implements SearchTemplateService {
 		if (dataSourceList == null || dataSourceList.size() == 0) {
 			return Collections.emptyList();
 		}
-		// get the first one as the schema source.
-		DataSource dataSource = dataSourceList.get(0);
+		DataSource dataSource = null;
+		for (DataSource ds : dataSourceList) {
+			if (ds.getId().equals(dsId)) {
+				dataSource = ds;
+			}
+		}
 
 		try {
 			conn = JdbcUtil.getConnection(

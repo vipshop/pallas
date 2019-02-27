@@ -38,6 +38,12 @@
                             </div>
                         </el-tab-pane>
                         <el-tab-pane label="sql parser" name="sql" :disabled="isMacroVisible || !isAllPrivilege">
+                              <div class="render-dblist">
+                                  <span>数据源：</span>
+                                  <el-select size="medium" v-model="datasourceId" placeholder="请选择数据源" style="margin-left: 5px;margin-bottom: 10px;width: 39%;" @change="initSql">
+                                      <el-option v-for="item in Object.entries(datasourceList)" :key="item[0]" :label="item[1]" :value="item[0]"></el-option>
+                                  </el-select>
+                              </div>
                               <el-row :gutter="2">
                                 <el-col :span="11">
                                     <el-input :rows="paneHeight.height/21" class="result-content" type="textarea" v-model="sql" placeholder="请输入sql"></el-input>
@@ -137,6 +143,8 @@ export default {
       isShowHistoryVersion: false,
       isVersionContentVisible: false,
       versionDiffInfo: {},
+      datasourceList: {},
+      datasourceId: '',
       sql: '',
       isEditSaveVisible: false,
       paneHeight: {
@@ -152,6 +160,10 @@ export default {
     };
   },
   methods: {
+    initSql(dsId) {
+      const tb = this.datasourceList[dsId].split('/')[2];
+      this.sql = `select * from ${tb}`;
+    },
     tabClick() {
       if (this.activeTab === 'api') {
         const params = {
@@ -205,6 +217,7 @@ export default {
       const dataParams = {
         indexId: this.indexId,
         sql: this.sql,
+        datasourceId: this.datasourceId,
       };
       this.loading = true;
       this.$http.post('/index_template/execute.json', dataParams).then((data) => {
@@ -343,11 +356,30 @@ export default {
         this.loading = false;
       });
     },
+
+    getDataSourceList() {
+      return this.$http.post('/index/loadDbList.json', { indexId: this.indexId }).then((data) => {
+        this.datasourceList = data;
+        if (this.datasourceList.size() !== 0) {
+          this.datasourceId = Object.entries(data)[0][0];
+        }
+      });
+    },
+    init() {
+      this.loading = true;
+      Promise.all([this.getDataSourceList()]).then(() => {
+      }).finally(() => {
+        this.loading = false;
+      });
+    },
   },
   components: {
     'template-test': TemplateTest,
     'template-save-edit-dialog': TemplateSaveEditDialog,
     'service-governance': ServiceGovernance,
+  },
+  created() {
+    this.init();
   },
   computed: {
     insertContent() {

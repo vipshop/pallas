@@ -17,20 +17,20 @@
 
 package com.vip.pallas.console.controller.index;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
-import com.vip.pallas.console.vo.IndexBaseVO;
-import com.vip.pallas.orika.OrikaBeanMapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
@@ -45,6 +45,7 @@ import com.vip.pallas.bean.IndexOperationEventType;
 import com.vip.pallas.console.utils.AuditLogUtil;
 import com.vip.pallas.console.utils.AuthorizeUtil;
 import com.vip.pallas.console.utils.SessionUtil;
+import com.vip.pallas.console.vo.IndexBaseVO;
 import com.vip.pallas.console.vo.IndexOp;
 import com.vip.pallas.console.vo.IndexVO;
 import com.vip.pallas.console.vo.PageResultVO;
@@ -58,10 +59,12 @@ import com.vip.pallas.mybatis.entity.IndexOperation;
 import com.vip.pallas.mybatis.entity.IndexRouting;
 import com.vip.pallas.mybatis.entity.IndexRoutingTargetGroup;
 import com.vip.pallas.mybatis.entity.Page;
+import com.vip.pallas.orika.OrikaBeanMapper;
 import com.vip.pallas.service.ClusterService;
 import com.vip.pallas.service.IndexOperationService;
 import com.vip.pallas.service.IndexRoutingService;
 import com.vip.pallas.service.IndexService;
+import com.vip.pallas.utils.ObjectMapTool;
 
 @Validated
 @RestController
@@ -175,6 +178,20 @@ public class IndexController {
 
         return null;
     }
+
+	@RequestMapping(value = "/loadDbList.json", method = RequestMethod.POST)
+	public Map loadDbList(@RequestBody Map<String, Object> params) throws SQLException, PallasException { // NOSONAR
+		Long indexId = ObjectMapTool.getLong(params, "indexId");
+		Index index = indexService.findById(indexId);
+		Map<Long, String> idDbTbMap = new HashMap<>();
+		if (index.getDataSourceList() != null) {
+			for (DataSource ds : index.getDataSourceList()) {
+				idDbTbMap.put(ds.getId(),
+						ds.getIp() + ":" + ds.getPort() + "/" + ds.getDbname() + "/" + ds.getTableName());
+			}
+		}
+		return idDbTbMap;
+	}
 
     @RequestMapping(value = "/update.json", method = RequestMethod.POST)
 	public String update(@RequestBody @Validated IndexVO params, HttpServletRequest request) throws Exception {

@@ -29,6 +29,7 @@ public class TemplateOp extends BaseTemplateOp implements Serializable {
     private  String content;
     private String historyDesc;
 	private String sql;
+	private Long datasourceId;
 
     public String getContent() {
         return content;
@@ -76,5 +77,13 @@ public class TemplateOp extends BaseTemplateOp implements Serializable {
 
 	public void setSql(String sql) {
 		this.sql = sql;
+	}
+
+	public Long getDatasourceId() {
+		return datasourceId;
+	}
+
+	public void setDatasourceId(Long datasourceId) {
+		this.datasourceId = datasourceId;
 	}
 }

@@ -74,6 +74,6 @@ public interface SearchTemplateService {
 
 	String parseSql(String sql, Long clusterId);
 
-	List<Map<String, Object>> executeSql(Long indexId, String sql)
+	List<Map<String, Object>> executeSql(Long indexId, String sql, Long dsId)
 			throws SQLException, PallasException, InstantiationException, IllegalAccessException;
 }

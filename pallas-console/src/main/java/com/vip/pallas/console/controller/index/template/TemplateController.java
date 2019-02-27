@@ -39,8 +39,6 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-import com.vip.pallas.bean.TemplateImport;
-import com.vip.pallas.bean.TemplateInfo;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -59,6 +57,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.vip.pallas.bean.IndexOperationEventName;
 import com.vip.pallas.bean.IndexOperationEventType;
+import com.vip.pallas.bean.TemplateImport;
+import com.vip.pallas.bean.TemplateInfo;
 import com.vip.pallas.console.utils.AuditLogUtil;
 import com.vip.pallas.console.utils.AuthorizeUtil;
 import com.vip.pallas.console.utils.SessionUtil;
@@ -188,8 +188,12 @@ public class TemplateController {
 	public List<Map<String, Object>> execute(@RequestBody TemplateOp params, HttpServletRequest request) throws Exception {
 		String sql = params.getSql();
 		Long indexId = params.getIndexId();
+		Long dsId = params.getDatasourceId();
 		if (ObjectUtils.isEmpty(indexId)){
 			throw new BusinessLevelException(500, "indexId不能为空");
+		}
+		if (ObjectUtils.isEmpty(dsId)) {
+			throw new BusinessLevelException(500, "数据源不能为空");
 		}
 		
 		Index index = indexService.findById(indexId);
@@ -211,7 +215,7 @@ public class TemplateController {
 		if (params.getSql().indexOf("where") < 0 && params.getSql().indexOf("limit") < 0) {
 			params.setSql(params.getSql() + " limit 10");
 		}
-		return templateService.executeSql(params.getIndexId(), params.getSql());
+		return templateService.executeSql(params.getIndexId(), params.getSql(), dsId);
 	}
 
     @RequestMapping(value = "/delete.json", method = RequestMethod.POST)
