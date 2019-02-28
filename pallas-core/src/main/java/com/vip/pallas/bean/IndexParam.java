@@ -26,8 +26,8 @@ public class IndexParam {
 	
 	private Long versionId;
 	private String indexName;
-	private String routingField;
-	private String idField;
+	private String routingField = "id";
+	private String idField = "id";
 	private String updateTimeField;
 	
 	private List<DataSource> dataSourceList;
