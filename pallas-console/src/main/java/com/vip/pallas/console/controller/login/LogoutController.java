@@ -19,7 +19,8 @@ package com.vip.pallas.console.controller.login;
 
 import com.vip.pallas.console.utils.AuditLogUtil;
 import com.vip.pallas.console.utils.SessionUtil;
-import com.vip.pallas.utils.ConfigReader;
+import com.vip.pallas.utils.PallasConsoleProperties;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,7 +47,7 @@ public class LogoutController {
 
     public void redirectToCasLogoutUrl(HttpServletRequest req, HttpServletResponse resp) {
         try {
-            resp.sendRedirect(ConfigReader.getProperty("pallas.login.url"));
+            resp.sendRedirect(PallasConsoleProperties.PALLAS_LOGIN_URL);
         } catch (IOException e) {
             logger.error(e.getClass() + " " + e.getMessage(), e);
         }
