@@ -44,7 +44,7 @@ import org.junit.Before;
 
 import com.vip.pallas.client.PallasRestClient;
 import com.vip.pallas.client.PallasRestClientBuilder;
-import com.vip.pallas.client.thread.QueryConsoleTask;
+import com.vip.pallas.client.env.LoadEnv;
 
 public class MockHttpService extends LocalServerTestBase {
 
@@ -109,7 +109,7 @@ public class MockHttpService extends LocalServerTestBase {
 		});
 		target = start();
         serverBootstrap.setSocketConfig(SocketConfig.custom().setSoTimeout(61000).build());
-		QueryConsoleTask.consoleQueryUrl = "http://localhost:" + target.getPort() + "/getPsListAndEsDomain";
+		LoadEnv.consoleQueryUrl = "http://localhost:" + target.getPort() + "/getPsListAndEsDomain";
         String serverUrl = "http://localhost:" + target.getPort();
         System.out.println("server listen at: " + serverUrl);
 	}

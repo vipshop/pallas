@@ -30,6 +30,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.vip.pallas.client.PallasRestClientBuilder;
+import com.vip.pallas.client.env.LoadEnv;
 import com.vip.pallas.client.util.HttpClient;
 import com.vip.pallas.utils.IPUtils;
 
@@ -38,9 +39,6 @@ public class QueryConsoleTask implements Runnable {
 	private static final Logger log = LoggerFactory.getLogger(QueryConsoleTask.class);
 
 	private static final String PARAMS = "{\"token\":\"%s\", \"ip\":\"" + IPUtils.localIp4Str() + "\"}";
-
-	public static String consoleQueryUrl = System.getProperty("VIP_PALLAS_CONSOLE_QUERY_URL",
-			"http://localhost:8080/pallas/ss/query_pslist_and_domain.json");
 
 	public static volatile Map<String, String> esDomainMap = new ConcurrentHashMap<>();
 
@@ -59,7 +57,7 @@ public class QueryConsoleTask implements Runnable {
 			try {
 				String token = iterator.next();
 				JSONObject jsonObject = JSON.parseObject(
-						HttpClient.httpPost(consoleQueryUrl,
+						HttpClient.httpPost(LoadEnv.consoleQueryUrl,
 								String.format(PARAMS, token)));
 				if (jsonObject != null) {
 					JSONObject data = jsonObject.getJSONObject("data");
