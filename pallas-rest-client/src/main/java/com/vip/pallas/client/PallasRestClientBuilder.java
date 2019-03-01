@@ -42,7 +42,6 @@ import org.elasticsearch.client.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vip.pallas.client.env.LoadEnv;
 import com.vip.pallas.client.thread.CleanRestClientTask;
 import com.vip.pallas.client.thread.QueryConsoleTask;
 
@@ -138,7 +137,7 @@ public class PallasRestClientBuilder {
 		while (QueryConsoleTask.getPsListByToken(clientToken) == null && retryCount-- > 0) {
 			TimeUnit.SECONDS.sleep(1);
 			log.error("can't get a valid pallas-search list from {} with token: {}, init pallas-client failed.",
-					LoadEnv.consoleQueryUrl, clientToken);
+					QueryConsoleTask.consoleQueryUrl, clientToken);
 		}
 		PallasRestClient pallasRestClient;
 		List<HttpHost> psHostList = null;

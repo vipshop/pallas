@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,8 +31,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.vip.pallas.client.PallasRestClientBuilder;
-import com.vip.pallas.client.env.LoadEnv;
 import com.vip.pallas.client.util.HttpClient;
+import com.vip.pallas.client.util.PallasRestClientProperties;
 import com.vip.pallas.utils.IPUtils;
 
 public class QueryConsoleTask implements Runnable {
@@ -39,12 +40,24 @@ public class QueryConsoleTask implements Runnable {
 	private static final Logger log = LoggerFactory.getLogger(QueryConsoleTask.class);
 
 	private static final String PARAMS = "{\"token\":\"%s\", \"ip\":\"" + IPUtils.localIp4Str() + "\"}";
+	
+	public static final String QUERY_URL_SUFFIX = "/pallas/ss/query_pslist_and_domain.json";
+	
+	public static String consoleQueryUrl = addSuffixIfNecessary(PallasRestClientProperties.PALLAS_CONSOLE_QUERY_URL);
 
 	public static volatile Map<String, String> esDomainMap = new ConcurrentHashMap<>();
 
 	public static volatile Map<String, List<String>> psListMap = new ConcurrentHashMap<>();
 
 	private HashSet<String> tokenSet;
+	
+	public static String addSuffixIfNecessary(String consoleQueryUrl) {
+		if (!consoleQueryUrl.endsWith(".json")) {
+			consoleQueryUrl += consoleQueryUrl.endsWith("/") ? StringUtils.substringAfter(QUERY_URL_SUFFIX, "/") : QUERY_URL_SUFFIX;
+		}
+		log.warn("console url located to: {}", consoleQueryUrl);
+		return consoleQueryUrl;
+	}
 
 	public QueryConsoleTask(HashSet<String> tokenSet) {
 		this.tokenSet = tokenSet;
@@ -57,7 +70,7 @@ public class QueryConsoleTask implements Runnable {
 			try {
 				String token = iterator.next();
 				JSONObject jsonObject = JSON.parseObject(
-						HttpClient.httpPost(LoadEnv.consoleQueryUrl,
+						HttpClient.httpPost(consoleQueryUrl,
 								String.format(PARAMS, token)));
 				if (jsonObject != null) {
 					JSONObject data = jsonObject.getJSONObject("data");

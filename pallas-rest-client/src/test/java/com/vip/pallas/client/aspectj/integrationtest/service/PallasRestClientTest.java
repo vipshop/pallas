@@ -40,7 +40,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.vip.pallas.client.PallasRestClient;
-import com.vip.pallas.client.env.LoadEnv;
 import com.vip.pallas.client.thread.QueryConsoleTask;
 
 public class PallasRestClientTest extends LocalServerTestBase {
@@ -49,7 +48,7 @@ public class PallasRestClientTest extends LocalServerTestBase {
 
 	static {
 		try {
-			System.setProperty("VIP_PALLAS_QUERY_INTERVAL_SECONDS", "2");
+			System.setProperty("PALLAS_QUERY_INTERVAL_SECONDS", "2");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -99,7 +98,7 @@ public class PallasRestClientTest extends LocalServerTestBase {
 		});
 		target = start();
         serverBootstrap.setSocketConfig(SocketConfig.custom().setSoTimeout(61000).build());
-		LoadEnv.consoleQueryUrl = "http://localhost:" + target.getPort() + "/getPsListAndEsDomain";
+		QueryConsoleTask.consoleQueryUrl = "http://localhost:" + target.getPort() + "/getPsListAndEsDomain";
         String serverUrl = "http://localhost:" + target.getPort();
         System.out.println("server listen at: " + serverUrl);
 	}
