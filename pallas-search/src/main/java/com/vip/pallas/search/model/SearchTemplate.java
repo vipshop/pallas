@@ -1,10 +1,13 @@
 package com.vip.pallas.search.model;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
 import java.util.Date;
 
 /**
  * Created by Owen.LI on 4/5/2017.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SearchTemplate {
 
 	public final static int TYPE_MACRO = 0;

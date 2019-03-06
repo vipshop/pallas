@@ -1,7 +1,10 @@
 package com.vip.pallas.search.model;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
 import java.util.Date;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class FlowRecord {
     private Long id;
 
