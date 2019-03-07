@@ -25,4 +25,7 @@ public class PallasRestClientProperties extends PallasBasicProperties {
 	public static final String PALLAS_CONSOLE_QUERY_URL = processor.getString(NAME_CONSOLE_QUERY_URL,
 			"http://localhost:8080");
 	
+	public static final String NAME_QUERY_INTERVAL_SECONDS = "pallas.query.interval.seconds";
+	public static final int PALLAS_QUERY_INTERVAL_SECONDS = processor.getInteger(NAME_QUERY_INTERVAL_SECONDS, 10);
+	
 }

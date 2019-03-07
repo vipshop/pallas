@@ -20,6 +20,8 @@ package com.vip.pallas.client;
 import com.vip.pallas.client.exception.PallasTimeoutException;
 import com.vip.pallas.client.lz4.PallasHttpAsyncResponseConsumerFactory;
 import com.vip.pallas.client.thread.QueryConsoleTask;
+import com.vip.pallas.client.util.PallasRestClientProperties;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -52,8 +54,7 @@ public class PallasRestClient {
 	private static final QueryConsoleTask QUERY_CONSOLE_TASK = new QueryConsoleTask(TOKEN_SET);
 	private RestClient restClient;
 	private String clientToken;
-	public static final String QUERY_CONSOLE_INTERVAL_SECONDS = System.getProperty("VIP_PALLAS_QUERY_INTERVAL_SECONDS",
-			"10");
+	
 	private static final ScheduledExecutorService CONSOLE_VISITOR_EXECUTOR = Executors
 			.newSingleThreadScheduledExecutor(new ThreadFactory() {
 				@Override
@@ -66,7 +67,7 @@ public class PallasRestClient {
 
 	static {
 		CONSOLE_VISITOR_EXECUTOR.scheduleAtFixedRate(QUERY_CONSOLE_TASK, 1,
-				Long.parseLong(QUERY_CONSOLE_INTERVAL_SECONDS), TimeUnit.SECONDS);
+				PallasRestClientProperties.PALLAS_QUERY_INTERVAL_SECONDS, TimeUnit.SECONDS);
 		logger.info("pallas console visitor started.");
 	}
 
