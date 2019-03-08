@@ -20,3 +20,4 @@ Vue.component('Version-footer', VersionFooter);
 Vue.component('json-content-dialog', JsonContentDialog);
 Vue.component('json-diff', JsonDiff);
 Vue.component('Panel', Panel);
+Vue.component('log-monitor', { template: '<div></div>' });

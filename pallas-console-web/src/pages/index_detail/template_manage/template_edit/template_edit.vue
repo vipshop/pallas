@@ -360,9 +360,11 @@ export default {
 
     getDataSourceList() {
       return this.$http.post('/index/loadDbList.json', { indexId: this.indexId }).then((data) => {
-        this.datasourceList = data;
-        if (this.datasourceList.size() !== 0) {
-          this.datasourceId = Object.entries(data)[0][0];
+        if (data) {
+          this.datasourceList = data;
+          if (this.datasourceList.length !== 0) {
+            this.datasourceId = Object.entries(data)[0][0];
+          }
         }
       });
     },
