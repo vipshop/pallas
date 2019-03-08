@@ -96,4 +96,6 @@ public interface ElasticSearchService {
 	String cancelDeleteByQueryTask(Long versionId, String indexName);
 
 	public String retrieveIndex(String indexName, String httpAddress, Long versionId);
+
+	String runDsl(String httpAddress, String endPoint) throws IOException;
 }

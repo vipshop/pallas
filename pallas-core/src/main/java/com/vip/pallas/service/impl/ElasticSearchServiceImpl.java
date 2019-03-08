@@ -940,4 +940,11 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 		}
 		return null;
 	}
+
+	@Override
+	public String runDsl(String httpAddress, String endPoint) throws IOException {
+		RestClient client = ElasticRestClient.build(httpAddress);
+		Response response = client.performRequest("GET", endPoint);
+		return IOUtils.toString(response.getEntity().getContent());
+	}
 }

@@ -96,6 +96,8 @@ public class HttpUtil {
 
 			if (url.lastIndexOf('?') <= -1) {
 				getUrl += "?";
+			} else {
+				getUrl += "&";
 			}
 
 			boolean flag = false;
@@ -108,6 +110,7 @@ public class HttpUtil {
 				flag = true;
 			}
 		}
+		logger.info("httpGet {}", getUrl);
 		HttpGet request = new HttpGet(new URI(getUrl));
 		HttpClient httpClient = HttpClientUtil.getHttpClient();
 		if (headers != null) {
