@@ -390,10 +390,6 @@ export default {
           this.$message.errorMessage('字段名不允许为空！');
           return true;
         }
-        if (element.fieldName === this.versionInfo.idField && element.fieldType !== 'long') {
-          this.$message.errorMessage(`Id列名 ${element.fieldName} 的ES类型必须为long！`);
-          return true;
-        }
         if (element.fieldName === this.versionInfo.updateTimeField && element.fieldType !== 'date') {
           this.$message.errorMessage(`Update Time列名 ${element.fieldName} 的ES类型必须为date！`);
           return true;
