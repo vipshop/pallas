@@ -143,7 +143,7 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 		constructMappings(mappingList, firstLayerList, mappingMap);
 		
 		addSourceField(firstLayerList);
-		addIdField(firstLayerList);
+		// addIdField(firstLayerList);
 		
 		boolean hasNgramAnalyzer = false;
 		boolean hasNormalizedKeyword = false;
