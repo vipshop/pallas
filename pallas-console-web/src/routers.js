@@ -12,12 +12,12 @@ import CronDelete from './pages/index_detail/cron_delete/cron_delete_manage';
 import RouteManage from './pages/index_detail/route_manage/route_manage';
 import ServiceManage from './pages/index_detail/service_manage/service_manage';
 import ClusterManage from './pages/cluster_manage/cluster_manage';
-import ClustersMonitorOverview from './pages/cluster_manage/clusters_monitor/overview';
-import ClusterMonitor from './pages/cluster_manage/clusters_monitor/cluster_monitor';
-import IndicesMonitor from './pages/cluster_manage/clusters_monitor/indices_monitor';
-import IndiceMonitorDetail from './pages/cluster_manage/clusters_monitor/indice_detail';
-import NodesMonitor from './pages/cluster_manage/clusters_monitor/nodes_monitor';
-import NodeMonitorDetail from './pages/cluster_manage/clusters_monitor/node_detail';
+import MonitorOverview from './pages/cluster_manage/monitor/overview';
+import ClusterMonitor from './pages/cluster_manage/monitor/cluster_monitor';
+import IndicesMonitor from './pages/cluster_manage/monitor/indices_monitor';
+import IndiceMonitorDetail from './pages/cluster_manage/monitor/indice_detail';
+import NodesMonitor from './pages/cluster_manage/monitor/nodes_monitor';
+import NodeMonitorDetail from './pages/cluster_manage/monitor/node_detail';
 import ClusterRouteManage from './pages/cluster_manage/cluster_route_manage/cluster_route_manage';
 import ClusterNodeRestart from './pages/cluster_manage/cluster_node_restart/cluster_node_restart';
 import ClusterDetail from './pages/cluster_detail/cluster_detail';
@@ -63,8 +63,8 @@ export default new Router({
       name: 'cluster_manage',
       component: ClusterManage,
     }, {
-      path: RouterMapper.GetPath('clustersMonitorOverview'),
-      component: ClustersMonitorOverview,
+      path: RouterMapper.GetPath('monitorOverview'),
+      component: MonitorOverview,
       children: [
         { path: '', redirect: 'cluster_monitor' },
         { name: 'cluster_monitor', path: RouterMapper.GetPath('clusterMonitor'), component: ClusterMonitor },

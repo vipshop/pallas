@@ -136,7 +136,7 @@ export default {
   },
   methods: {
     handleMonitor(row) {
-      this.$router.push({ path: 'clusters_monitor', query: { clusterId: row.clusterId } });
+      this.$router.push({ path: 'cluster_monitor', query: { clusterId: row.clusterId } });
     },
     handleRouteSetting(row) {
       this.$router.push({ path: 'cluster_route_manage', query: { clusterId: row.clusterId } });
