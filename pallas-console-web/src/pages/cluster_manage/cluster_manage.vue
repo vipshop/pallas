@@ -88,6 +88,7 @@
                         <el-dropdown-item v-if="scope.row.hasPrivilege"><a @click="handleEdit(scope.row)"><span><i class="fa fa-pencil-square-o"></i>编辑</span></a></el-dropdown-item>
                         <el-dropdown-item v-if="scope.row.hasPrivilege && !scope.row.logicalCluster"><a @click="handleRouteSetting(scope.row)"><span><i class="fa fa-cog"></i>路由配置</span></a></el-dropdown-item>
                         <el-dropdown-item v-if="scope.row.hasPrivilege && !scope.row.logicalCluster"><a @click="handleManage(scope.$index, scope.row)"><span><i class="fa fa-bars"></i>管理</span></a></el-dropdown-item>
+                        <el-dropdown-item v-if="scope.row.hasPrivilege && !scope.row.logicalCluster"><a @click="handleMonitor(scope.row)"><span><i class="fa fa-bar-chart"></i>监控</span></a></el-dropdown-item>
                         <el-dropdown-item v-if="scope.row.hasPrivilege && !scope.row.logicalCluster"><a @click="handleRestart(scope.row)"><span><i class="fa fa-undo"></i>重启</span></a></el-dropdown-item>
                         <el-dropdown-item v-if="scope.row.hasPrivilege"><a @click="handleDelete(scope.row)"><span><i class="fa fa-trash"></i>删除</span></a></el-dropdown-item>
                       </el-dropdown-menu>
@@ -134,6 +135,9 @@ export default {
     };
   },
   methods: {
+    handleMonitor(row) {
+      this.$router.push({ path: 'clusters_monitor', query: { clusterId: row.clusterId } });
+    },
     handleRouteSetting(row) {
       this.$router.push({ path: 'cluster_route_manage', query: { clusterId: row.clusterId } });
     },

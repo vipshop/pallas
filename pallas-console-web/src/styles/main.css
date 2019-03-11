@@ -130,3 +130,9 @@ pre {
 .text-danger {
     color: #FF4949;
 }
+
+@media only screen and (min-width: 1920px) {
+    .chart-auto-size {
+        width: 50%;
+    }
+}

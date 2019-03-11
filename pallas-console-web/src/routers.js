@@ -12,6 +12,12 @@ import CronDelete from './pages/index_detail/cron_delete/cron_delete_manage';
 import RouteManage from './pages/index_detail/route_manage/route_manage';
 import ServiceManage from './pages/index_detail/service_manage/service_manage';
 import ClusterManage from './pages/cluster_manage/cluster_manage';
+import ClustersMonitorOverview from './pages/cluster_manage/clusters_monitor/overview';
+import ClusterMonitor from './pages/cluster_manage/clusters_monitor/cluster_monitor';
+import IndicesMonitor from './pages/cluster_manage/clusters_monitor/indices_monitor';
+import IndiceMonitorDetail from './pages/cluster_manage/clusters_monitor/indice_detail';
+import NodesMonitor from './pages/cluster_manage/clusters_monitor/nodes_monitor';
+import NodeMonitorDetail from './pages/cluster_manage/clusters_monitor/node_detail';
 import ClusterRouteManage from './pages/cluster_manage/cluster_route_manage/cluster_route_manage';
 import ClusterNodeRestart from './pages/cluster_manage/cluster_node_restart/cluster_node_restart';
 import ClusterDetail from './pages/cluster_detail/cluster_detail';
@@ -56,6 +62,17 @@ export default new Router({
       path: RouterMapper.GetPath('clusterManage'),
       name: 'cluster_manage',
       component: ClusterManage,
+    }, {
+      path: RouterMapper.GetPath('clustersMonitorOverview'),
+      component: ClustersMonitorOverview,
+      children: [
+        { path: '', redirect: 'cluster_monitor' },
+        { name: 'cluster_monitor', path: RouterMapper.GetPath('clusterMonitor'), component: ClusterMonitor },
+        { name: 'indices_monitor', path: RouterMapper.GetPath('indicesMonitor'), component: IndicesMonitor },
+        { name: 'indice_monitor_detail', path: RouterMapper.GetPath('indiceMonitorDetail'), component: IndiceMonitorDetail },
+        { name: 'nodes_monitor', path: RouterMapper.GetPath('nodesMonitor'), component: NodesMonitor },
+        { name: 'node_monitor_detail', path: RouterMapper.GetPath('nodeMonitorDetail'), component: NodeMonitorDetail },
+      ],
     }, {
       path: RouterMapper.GetPath('clusterRouteManage'),
       name: 'cluster_route_manage',

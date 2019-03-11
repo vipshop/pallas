@@ -10,6 +10,14 @@ const routermapperlist = [
     { name: 'routeManage', path: '/index_detail/route_manage' },
     { name: 'serviceManage', path: '/index_detail/service_manage' },
     { name: 'clusterManage', path: '/cluster_manage' },
+
+    { name: 'clustersMonitorOverview', path: '/clusters_monitor' },
+    { name: 'clusterMonitor', path: '/clusters_monitor/cluster_monitor' },
+    { name: 'indicesMonitor', path: '/clusters_monitor/indices_monitor' },
+    { name: 'indiceMonitorDetail', path: '/clusters_monitor/indice_monitor_detail' },
+    { name: 'nodesMonitor', path: '/clusters_monitor/nodes_monitor' },
+    { name: 'nodeMonitorDetail', path: '/clusters_monitor/node_monitor_detail' },
+
     { name: 'clusterRouteManage', path: '/cluster_route_manage' },
     { name: 'clusterNodeRestart', path: '/cluster_node_restart' },
     { name: 'clusterDetail', path: '/cluster_detail' },

@@ -13,6 +13,7 @@
     "babel-polyfill": "^6.26.0",
     "brace": "^0.10.0",
     "diff-match-patch": "^1.0.4",
+    "echarts": "^4.1.0",
     "element-ui": "1.4.10",
     "font-awesome": "^4.7.0",
     "moment": "^2.18.1",
