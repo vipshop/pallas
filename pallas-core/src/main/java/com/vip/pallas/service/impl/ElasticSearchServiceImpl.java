@@ -73,6 +73,7 @@ import com.vip.pallas.mybatis.repository.IndexRepository;
 import com.vip.pallas.mybatis.repository.IndexVersionRepository;
 import com.vip.pallas.mybatis.repository.MappingRepository;
 import com.vip.pallas.service.ElasticSearchService;
+import com.vip.pallas.utils.DevideShards;
 import com.vip.pallas.utils.ElasticRestClient;
 import com.vip.pallas.utils.ElasticSearchStub;
 import com.vip.pallas.utils.JsonUtil;
@@ -946,5 +947,37 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 		RestClient client = ElasticRestClient.build(httpAddress);
 		Response response = client.performRequest("GET", endPoint);
 		return IOUtils.toString(response.getEntity().getContent());
+	}
+
+	@Override
+	public Map<Integer, List<String>> loadShardDistributionMap(String indexAliasName, String httpAddress)
+			throws IOException {
+
+		return null;
+	}
+
+	@Override
+	public List<HashSet<String>> dynamicDevideShards2Group(String indexAliasName, String httpAddress)
+			throws IOException {
+		try {
+			String result = runDsl(httpAddress, "/_cat/shards/" + indexAliasName + "?h=shard,ip");
+			HashSet<String> nodes = new HashSet<>();
+			Map<Integer, List<String>> shardDistributionMap = new HashMap<>();
+			if (result != null) {
+				for (String oneLine : result.split(System.lineSeparator())) {
+					String[] shardAndIp = oneLine.split("\\s+");
+					shardDistributionMap.computeIfAbsent(Integer.valueOf(shardAndIp[0]), k -> {
+						return new ArrayList<>();
+					}).add(shardAndIp[1]);
+					nodes.add(shardAndIp[1]);
+				}
+			}
+			if (!shardDistributionMap.isEmpty()) {
+				return DevideShards.devideShards2Group(shardDistributionMap, shardDistributionMap.get(0).size(), nodes);
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+		return emptyList();
 	}
 }

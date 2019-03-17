@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,10 +39,12 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.ObjectNode;
 import org.elasticsearch.client.Response;
@@ -167,7 +170,7 @@ public class IndexRoutingController {
                             Map<String, Object> map = new LinkedHashMap<>();
                             map.put("cluster", c);
                             map.put("name", c);
-                            map.put("address", c);
+							map.put("address", getAddress(c));
                             map.put("children", getNodeList(c));
                             treeNodes.add(map);
                         }
@@ -175,7 +178,11 @@ public class IndexRoutingController {
         return treeNodes;
     }
 
-    @RequestMapping(value = "/rule/update.json")
+	private String getAddress(String clusterName) {
+		return clusterService.findByName(clusterName).getHttpAddress();
+	}
+
+	@RequestMapping(value = "/rule/update.json")
     public void updateRule(@RequestBody Map<String, Object> params, HttpServletRequest request) throws Exception { // NOSONAR
         Long indexId =  ObjectMapTool.getLong(params, "indexId");
 
@@ -238,21 +245,25 @@ public class IndexRoutingController {
         fac.setClusterLevel(g.getClusterLevel());
         fac.setState(g.getState());
 
-        if(g.isClusterLevel0() || g.isShardLevel()){
-            fac.setClusters(IndexRoutingTargetGroup.fromXContent(g.getClustersInfo())
+		if (g.isClusterLevel0() || g.isShardLevel() || g.isGroupLevel()) {
+			fac.setClusters(IndexRoutingTargetGroup.fromXContent(g.getClustersInfo()).stream().map(n -> n.getName())
+					.collect(Collectors.toList()));
+			if (g.isShardLevel()) {
+				fac.setNodes(getShardNodesByIndex(g.getIndexName(), fac.getClusters()));
+			} else if (g.isGroupLevel()) {
+				String httpAddress = StringUtils.substringBetween(g.getClustersInfo(), "address\":\"", "\"");
+				List<HashSet<String>> devideShards2Group = elasticSearchService
+						.dynamicDevideShards2Group(g.getIndexName(), httpAddress);
+				fac.setNodes(Stream.iterate(1, i -> i + 1).limit(devideShards2Group.size()).map(i -> {
+					return "group " + i + ": " + devideShards2Group.get(i - 1);
+				}).collect(Collectors.toList()));
+			}
+		} else if (g.isNormalLevel()) {
+			fac.setNodes(IndexRoutingTargetGroup.fromXContent(g.getNodesInfo())
                     .stream()
                     .map(n -> n.getName())
                     .collect(Collectors.toList()));
-
-            if (g.isShardLevel()){
-                fac.setNodes(getShardNodesByIndex(g.getIndexName(), fac.getClusters()));
-            }
-        } else if (g.isNormalLevel()){
-            fac.setNodes(IndexRoutingTargetGroup.fromXContent(g.getNodesInfo())
-                    .stream()
-                    .map(n -> n.getName())
-                    .collect(Collectors.toList()));
-        }
+		}
 
         return fac;
     }
@@ -299,7 +310,7 @@ public class IndexRoutingController {
         String jsonStr = null;
 
         try {
-            if (g.isClusterLevel0() || g.isShardLevel()) {
+			if (g.isClusterLevel0() || g.isShardLevel() || g.isGroupLevel()) {
                 ArrayNode nodes = ObjectMapTool.getObject(params,"clusters", ArrayNode.class);
                 if (ObjectUtils.isEmpty(nodes)){
                     throw new BusinessLevelException(500, "clusters不能为空");

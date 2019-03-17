@@ -10,6 +10,7 @@
                     <el-tag v-if="targetGroupItemInfo.clusterLevel === 2" type="warning">分片动态绑定</el-tag>
                     <el-tag v-if="targetGroupItemInfo.clusterLevel === 3" type="warning">集群级别(主分片优先)</el-tag>
                     <el-tag v-if="targetGroupItemInfo.clusterLevel === 4" type="warning">集群级别(复制分片优先)</el-tag>
+                    <el-tag v-if="targetGroupItemInfo.clusterLevel === 5" type="warning">动态分组</el-tag>
                 </div>
             </div>
             <div class="pull-right" v-if="privilege">
@@ -62,6 +63,9 @@ export default {
       }, {
         label: '分片动态绑定',
         value: 2,
+      }, {
+        label: '动态分组',
+        value: 5,
       }],
       editable: false,
     };
@@ -176,8 +180,8 @@ export default {
     },
     renderContent(h, { data }) {
       if (this.targetGroupItemInfo.clusterLevel === 1
-      || this.targetGroupItemInfo.clusterLevel === 3
-      || this.targetGroupItemInfo.clusterLevel === 4) {
+        || this.targetGroupItemInfo.clusterLevel === 3
+        || this.targetGroupItemInfo.clusterLevel === 4) {
         return h(
           'span',
           [
@@ -195,6 +199,18 @@ export default {
           [
             h('span', { style: { 'font-size': '14px', 'margin-right': '5px' } }, this.selectedShowTreeInfo === 'name' ? data.name : data.address),
             h('span', { class: { 'el-tag': data.state === 1, 'el-tag--danger': data.state === 1 } }, data.state === 1 ? '离线' : ''),
+          ],
+        );
+      } else if (this.targetGroupItemInfo.clusterLevel === 5) {
+        return h(
+          'span',
+          [
+            h('el-popover', { props: { placement: 'right', trigger: 'hover', disabled: data.cluster !== this.targetGroupItemInfo.clusters[0] } },
+              [
+                h('div', this.targetGroupItemInfo.nodes.map(item => h('div', item))),
+                h('span', { slot: 'reference', style: { 'font-size': '14px', 'margin-right': '5px' } }, this.selectedShowTreeInfo === 'name' ? data.name : data.address),
+              ],
+            ),
           ],
         );
       }
