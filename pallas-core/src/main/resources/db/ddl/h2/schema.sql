@@ -1,5 +1,7 @@
 -- H2 syntax referred from : https://www.jianshu.com/p/b3671e148366
 
+CREATE ALIAS IF NOT EXISTS FIND_IN_SET FOR "com.vip.pallas.utils.H2DBFunctions.find_in_set";
+
 CREATE TABLE IF NOT EXISTS `approve` (
   `id` bigint(15) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增ID',
   `title` varchar(256)  NOT NULL DEFAULT '' COMMENT '标题',
