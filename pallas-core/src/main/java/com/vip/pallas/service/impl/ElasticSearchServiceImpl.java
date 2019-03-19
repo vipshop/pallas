@@ -947,4 +947,12 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 		Response response = client.performRequest("GET", endPoint);
 		return IOUtils.toString(response.getEntity().getContent());
 	}
+
+	@Override
+	public String queryByDsl(String queryString, String endPoint, Cluster cluster) throws IOException{
+		RestClient restClient = ElasticRestClient.build(cluster.getHttpAddress());
+		NStringEntity entity = new NStringEntity(queryString, ContentType.APPLICATION_JSON);
+		Response response = restClient.performRequest("POST", endPoint, Collections.emptyMap(),entity);
+		return IOUtils.toString(response.getEntity().getContent());
+	}
 }

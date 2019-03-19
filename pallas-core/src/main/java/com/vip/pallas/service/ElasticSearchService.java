@@ -98,4 +98,7 @@ public interface ElasticSearchService {
 	public String retrieveIndex(String indexName, String httpAddress, Long versionId);
 
 	String runDsl(String httpAddress, String endPoint) throws IOException;
+
+	String queryByDsl(String queryString, String endPoint, Cluster cluster) throws IOException;
+
 }
