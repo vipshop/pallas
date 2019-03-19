@@ -18,6 +18,7 @@
 package com.vip.pallas.service;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -100,5 +101,9 @@ public interface ElasticSearchService {
 	String runDsl(String httpAddress, String endPoint) throws IOException;
 
 	String queryByDsl(String queryString, String endPoint, Cluster cluster) throws IOException;
+
+	Map<Integer, List<String>> loadShardDistributionMap(String indexAliasName, String httpAddress) throws IOException;
+
+	List<HashSet<String>> dynamicDevideShards2Group(String indexAliasName, String httpAddress) throws IOException;
 
 }

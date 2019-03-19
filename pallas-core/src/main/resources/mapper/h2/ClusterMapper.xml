@@ -55,7 +55,7 @@
   
     
   <select id='selectPhysicalClustersByIndexId' resultMap="BaseResultMap">
-    select c2.* from `index` i, cluster c1, cluster c2 where (i.cluster_name = c1.cluster_id and i.id = #{0} and c1.real_clusters !='' and c2.id in (FIND_IN_SET(c1.real_clusters)) )
+    select c2.* from `index` i, cluster c1, cluster c2 where (i.cluster_name = c1.cluster_id and i.id = #{0} and c1.real_clusters !='' and FIND_IN_SET(c2.id,c1.real_clusters)) 
 		or (c2.real_clusters = '' and c2.cluster_id = i.cluster_name and i.id = #{0} and c1.id = c2.id);
   </select>
   

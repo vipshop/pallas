@@ -50,6 +50,9 @@ export default {
       }, {
         label: '分片动态绑定',
         value: 2,
+      }, {
+        label: '动态分组',
+        value: 5,
       }],
     };
   },

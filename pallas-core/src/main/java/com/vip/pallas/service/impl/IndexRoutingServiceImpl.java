@@ -17,20 +17,22 @@
 
 package com.vip.pallas.service.impl;
 
-import com.vip.pallas.mybatis.entity.IndexRouting;
-import com.vip.pallas.mybatis.entity.IndexRoutingSecurity;
-import com.vip.pallas.mybatis.entity.IndexRoutingTargetGroup;
-import com.vip.pallas.mybatis.repository.IndexRoutingSecurityRepository;
-import com.vip.pallas.mybatis.repository.IndexRoutingRepository;
-import com.vip.pallas.mybatis.repository.IndexRoutingTargetGroupRepository;
-import com.vip.pallas.service.IndexRoutingService;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import com.vip.pallas.mybatis.entity.IndexRouting;
+import com.vip.pallas.mybatis.entity.IndexRoutingSecurity;
+import com.vip.pallas.mybatis.entity.IndexRoutingTargetGroup;
+import com.vip.pallas.mybatis.repository.IndexRoutingRepository;
+import com.vip.pallas.mybatis.repository.IndexRoutingSecurityRepository;
+import com.vip.pallas.mybatis.repository.IndexRoutingTargetGroupRepository;
+import com.vip.pallas.service.IndexRoutingService;
 
 /**
  * Created by owen on 06/11/2017.
@@ -39,7 +41,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class IndexRoutingServiceImpl implements IndexRoutingService {
 
     private static final Logger logger = LoggerFactory.getLogger(IndexRoutingServiceImpl.class);
-
 
     @Resource
     private IndexRoutingRepository routingRepo;

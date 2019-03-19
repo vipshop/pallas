@@ -17,18 +17,25 @@
 
 package com.vip.pallas.utils;
 
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.common.base.Splitter;
+
 public class H2DBFunctions {
-    public static Long[] getClusterIds(String str) {
-        if(StringUtils.isBlank(str)) {
-            return new Long[]{-1L};
-        }
-        String[] strArrs = str.split(",");
-        Long[] idArrs = new Long[strArrs.length];
-        for(int i=0; i<strArrs.length; i++) {
-            idArrs[i] = Long.valueOf(strArrs[i]);
-        }
-        return idArrs;
+	
+    public static int find_in_set(String str, String s) {
+    	int result = 0;
+    	if (StringUtils.isNotEmpty(s)) {
+    		List<String> strlist = Splitter.on(",").trimResults().omitEmptyStrings().splitToList(s);
+    		for (int i = 0; i < strlist.size(); i++) {
+				if (strlist.get(i).equals(str)) {
+					result = i;
+					break;
+				}
+			}
+    	}
+    	return result;
     }
 }
