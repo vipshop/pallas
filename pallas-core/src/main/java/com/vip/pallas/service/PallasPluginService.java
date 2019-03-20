@@ -65,5 +65,5 @@ public interface PallasPluginService {
 
     void deletePluginRuntime(String clusterId, String pluginName, String nodeIp, String pluginVersion);
 
-
+    List<PluginRuntime> getPluginsByCluster(String clusterId);
 }

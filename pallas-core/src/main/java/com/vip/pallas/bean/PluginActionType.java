@@ -22,7 +22,8 @@ public enum PluginActionType {
 	DOWNLOAD("DOWNLOAD", 1),
 	ENABLE("ENABLE", 2),
 	REMOVE("REMOVE", 3),
-	RESTART("RESTART", 4);
+	RESTART("RESTART", 4),
+	DOWN_AND_ENABLE("DOWN_AND_ENABLE", 5);
 
 	private String desc;
 	private int value;

@@ -47,4 +47,6 @@ public interface PluginRuntimeRepository {
     void update(PluginRuntime runtime);
 
     List<String> selectDistictNodeIPsByClusterId(@Param("clusterId") String clusterId);
+
+    List<PluginRuntime> selectPluginsByCluster(@Param("clusterId") String clusterId);
 }

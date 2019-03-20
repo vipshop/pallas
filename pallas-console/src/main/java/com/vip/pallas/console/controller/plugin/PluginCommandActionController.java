@@ -17,25 +17,11 @@
 
 package com.vip.pallas.console.controller.plugin;
 
-import static com.vip.pallas.mybatis.entity.PluginUpgrade.UPGRADE_STATUS_CANCEL;
-import static com.vip.pallas.mybatis.entity.PluginUpgrade.UPGRADE_STATUS_DENY;
-import static com.vip.pallas.mybatis.entity.PluginUpgrade.UPGRADE_STATUS_DONE;
-import static com.vip.pallas.mybatis.entity.PluginUpgrade.UPGRADE_STATUS_DOWNLOAD;
-import static com.vip.pallas.mybatis.entity.PluginUpgrade.UPGRADE_STATUS_NEED_APPROVAL;
-import static com.vip.pallas.mybatis.entity.PluginUpgrade.UPGRADE_STATUS_REMOVE;
-import static com.vip.pallas.mybatis.entity.PluginUpgrade.UPGRADE_STATUS_UPGRADE;
-
-import java.util.Date;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import com.alibaba.fastjson.JSONObject;
+import com.vip.pallas.bean.PluginActionType;
+import com.vip.pallas.bean.PluginCommands;
+import com.vip.pallas.bean.PluginStates;
+import com.vip.pallas.bean.PluginType;
 import com.vip.pallas.console.utils.AuditLogUtil;
 import com.vip.pallas.console.utils.AuthorizeUtil;
 import com.vip.pallas.console.utils.SessionUtil;
@@ -43,9 +29,27 @@ import com.vip.pallas.console.vo.PluginAction;
 import com.vip.pallas.console.vo.RemovePlugin;
 import com.vip.pallas.exception.BusinessLevelException;
 import com.vip.pallas.mybatis.entity.PluginCommand;
+import com.vip.pallas.mybatis.entity.PluginRuntime;
 import com.vip.pallas.mybatis.entity.PluginUpgrade;
 import com.vip.pallas.service.ClusterService;
 import com.vip.pallas.service.PallasPluginService;
+import com.vip.pallas.utils.JsonUtil;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.vip.pallas.mybatis.entity.PluginUpgrade.*;
 
 @RestController
 @RequestMapping("/plugin")
@@ -89,6 +93,57 @@ public class PluginCommandActionController {
         if(pUpgrade.getState() != nextState) {
             pluginService.setUppgradeState(SessionUtil.getLoginUser(request), pUpgrade.getId(), nextState);
         }
+    }
+
+    @RequestMapping(value = "/sync.json", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+    public Map<String, Object> pluginSyncAction(@RequestBody JSONObject jsonParam) throws Exception {
+        Map<String, Object> resultMap = new HashMap<>();
+
+        PluginStates pluginStates = JsonUtil.readValue(jsonParam.toJSONString(), PluginStates.class);
+        List<PluginStates.Plugin> pluginList = pluginStates.getPlugins();
+        List<PluginRuntime> plugins = pluginService.getPluginsByCluster(pluginStates.getClusterId());
+
+        if(plugins != null && !plugins.isEmpty()){
+            PluginCommands pluginCommands = new PluginCommands();
+            pluginCommands.setClusterId(pluginStates.getClusterId());
+
+            PluginCommands.Action downAndEnableAction = new PluginCommands.Action();
+            downAndEnableAction.setActionType(PluginActionType.DOWN_AND_ENABLE);
+
+            for (PluginRuntime runtime : plugins) {
+                boolean isExists = false;
+
+                String pluginName = runtime.getPluginName();
+                String pluginVersion = runtime.getPluginVersion();
+
+                if(pluginList != null){
+                    for (PluginStates.Plugin plugin: pluginList) {
+                        if(StringUtils.isNotBlank(pluginName) && pluginName.equals(plugin.getName())
+                                && StringUtils.isNotBlank(pluginVersion) && pluginVersion.equals(plugin.getVersion())
+                                && runtime.getPluginType() == plugin.getType().getValue()){
+                            isExists = true;
+                        }
+                    }
+                }
+
+                if(!isExists && StringUtils.isNotBlank(pluginName) && StringUtils.isNotBlank(pluginVersion)){
+                    PluginCommands.Plugin plugin = new PluginCommands.Plugin();
+                    plugin.setName(pluginName);
+                    plugin.setVersion(pluginVersion);
+                    plugin.setType(PluginType.getPluginTypeByValue(runtime.getPluginType()));
+                    downAndEnableAction.addPlugin(plugin);
+                }
+            }
+
+            if(CollectionUtils.isNotEmpty(downAndEnableAction.getPlugins())){
+                pluginCommands.addAction(downAndEnableAction);
+            }
+
+            resultMap.put("response", pluginCommands);
+            resultMap.put("status", 0);
+        }
+
+        return resultMap;
     }
     
     private int doUpgradeAction(String action, PluginUpgrade pUpgrade) {

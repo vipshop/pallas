@@ -88,7 +88,7 @@ public class PluginKeepaliveJob implements Job {
         }
     }
 
-    private PluginStates collectState(){
+    public static PluginStates collectState(){
         PluginStates pluginStates = new PluginStates();
 
         pluginStates.setClusterId(PallasPlugin.clusterName);
@@ -108,7 +108,7 @@ public class PluginKeepaliveJob implements Job {
         return pluginStates;
     }
 
-    private void collectWorkingState(PluginStates pluginStates, PluginType pluginType, List<String> pluginDirList) {
+    private static void collectWorkingState(PluginStates pluginStates, PluginType pluginType, List<String> pluginDirList) {
         if (pluginDirList != null) {
             for (String dirName : pluginDirList) {
                 PluginStates.Plugin plugin = new PluginStates.Plugin();
@@ -126,7 +126,7 @@ public class PluginKeepaliveJob implements Job {
         }
     }
 
-    private void collectDownloadState(PluginStates pluginStates, PluginType pluginType, List<String> downloadDirList, List<String> pluginDirList){
+    private static void collectDownloadState(PluginStates pluginStates, PluginType pluginType, List<String> downloadDirList, List<String> pluginDirList){
         if(downloadDirList != null){
             for(String dirName : downloadDirList){
                 boolean isNew = true;
@@ -160,7 +160,7 @@ public class PluginKeepaliveJob implements Job {
         }
     }
 
-    private String[] parseNameAndVersion(String dirName){
+    private static String[] parseNameAndVersion(String dirName){
         String name;
         String version;
 
@@ -193,7 +193,7 @@ public class PluginKeepaliveJob implements Job {
         }
     }
 
-    private List<String> listDirs(String path){
+    private static List<String> listDirs(String path){
         File[] files = new File(path).listFiles();
         if(files != null){
             List<String> list = new ArrayList<>();
@@ -208,7 +208,7 @@ public class PluginKeepaliveJob implements Job {
         return null;
     }
 
-    private List<String> listFiles(String path){
+    private static List<String> listFiles(String path){
         File[] files = new File(path).listFiles();
         if(files != null){
             List<String> list = new ArrayList<>();
@@ -223,7 +223,7 @@ public class PluginKeepaliveJob implements Job {
         return null;
     }
 
-    private void deleteFilesByPrefix(String path, String prefix){
+    private static void deleteFilesByPrefix(String path, String prefix){
         File[] files = new File(path).listFiles();
         if(files != null){
             for (File f : files){
@@ -234,7 +234,7 @@ public class PluginKeepaliveJob implements Job {
         }
     }
 
-    private boolean isExistsDownloadedPackage(PluginCommands.Plugin plugin){
+    private static boolean isExistsDownloadedPackage(PluginCommands.Plugin plugin){
         List<String> packages = listFiles(PluginDictionary.DOWNLOAD_DIR);
 
         if(packages != null){
@@ -244,7 +244,7 @@ public class PluginKeepaliveJob implements Job {
         return false;
     }
 
-    private void parseCommand(PluginCommands pluginCommands) {
+    public static void parseCommand(PluginCommands pluginCommands) {
         if(pluginCommands != null){
             List<PluginCommands.Action> actionList = pluginCommands.getActions();
 
@@ -295,19 +295,35 @@ public class PluginKeepaliveJob implements Job {
                                 LOGGER.error(e.toString(), e);
                             }
                         });
+                    } else if(actionType == PluginActionType.DOWN_AND_ENABLE){
+                        for (PluginCommands.Plugin plugin : action.getPlugins()){
+                            try {
+                                downloadPackage(pluginCommands.getClusterId(), plugin);
+                                LOGGER.info("download plugin: {} successed", plugin.getName());
+                            } catch (Exception e) {
+                                LOGGER.error("download plugin: {} failed", plugin.getName(), e);
+                            }
+
+                            try {
+                                enablePlugin(plugin);
+                                LOGGER.info("enable plugin: {} successed", plugin.getName());
+                            } catch (Exception e) {
+                                LOGGER.error("download plugin: {} failed", plugin.getName(), e);
+                            }
+                        }
                     }
                 }
             }
         }
     }
 
-    private void downloadPackage(String clusterId, PluginCommands.Plugin plugin) throws Exception {
+    private static void downloadPackage(String clusterId, PluginCommands.Plugin plugin) throws Exception {
         File file = new File(plugin.getFullZipFileName());
         String downloadUrl = PallasBasicProperties.PALLAS_CONSOLE_REST_URL + "/plugin/upgrade/fileDownload.json?clusterId=" + clusterId + "&pluginName=" + plugin.getName() + "&pluginVersion=" + plugin.getVersion();
-        FileUtils.copyURLToFile(new URL(downloadUrl), file, 10_000, 10_000);
+        FileUtils.copyURLToFile(new URL(downloadUrl), file, 15_000, 15_000);
     }
 
-    private void enablePlugin(PluginCommands.Plugin plugin) {
+    private static void enablePlugin(PluginCommands.Plugin plugin) {
         String pluginName = plugin.getName();
 
         if(isExistsDownloadedPackage(plugin)){
@@ -326,7 +342,7 @@ public class PluginKeepaliveJob implements Job {
         }
     }
 
-    private void removePlugin(PluginCommands.Plugin plugin) throws Exception {
+    private static void removePlugin(PluginCommands.Plugin plugin) throws Exception {
         String pluginName = plugin.getName();
         String version = plugin.getVersion();
 
@@ -341,7 +357,7 @@ public class PluginKeepaliveJob implements Job {
         deleteFilesByPrefix(PluginDictionary.DOWNLOAD_DIR, pluginName);
     }
 
-    private void removePlugin0(PluginCommands.Plugin plugin, File file) throws Exception {
+    private static void removePlugin0(PluginCommands.Plugin plugin, File file) throws Exception {
         if(plugin.isPallasPlugin()){
             List<String> list = FileHelper.listConfigPlugins(file.getPath());
 
@@ -355,7 +371,7 @@ public class PluginKeepaliveJob implements Job {
         FileUtils.deleteQuietly(file);
     }
 
-    private void restartNode() {
+    private static void restartNode() {
 		ScriptExecutor.execute(PALLAS_ES_RESTART_COMMAND);
     }
 }

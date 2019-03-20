@@ -37,6 +37,10 @@
     select * from `plugin_runtime` where cluster_id = #{clusterId} and plugin_name = #{pluginName} and node_ip = #{nodeIp} and plugin_version = #{pluginVersion};
   </select>
 
+  <select id="selectPluginsByCluster" resultMap="resultListMap">
+    select plugin_name,plugin_version,plugin_type from `plugin_runtime` where cluster_id = #{clusterId} and is_deleted = 0 group by plugin_name,plugin_version,plugin_type;
+  </select>
+
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
     delete from `plugin_runtime` where id = #{id}
   </delete>

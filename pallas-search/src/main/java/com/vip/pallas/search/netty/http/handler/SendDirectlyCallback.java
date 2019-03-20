@@ -178,6 +178,7 @@ public class SendDirectlyCallback implements FutureCallback<HttpResponse> {
 	}
 
 	protected void handleFailed(Exception ex, int httpCode) {
+		logger.error(ex.toString(), ex);
 		TimeoutRetryController.notifyGovernor();
 		initEndUpstreamTimeInMonitorAccessLog();
 		sessionContext.setHttpCode(httpCode);

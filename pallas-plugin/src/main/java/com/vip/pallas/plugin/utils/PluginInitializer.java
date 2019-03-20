@@ -17,20 +17,8 @@
 
 package com.vip.pallas.plugin.utils;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.elasticsearch.common.logging.ESLoggerFactory;
-import org.quartz.CronScheduleBuilder;
-import org.quartz.CronTrigger;
-import org.quartz.JobBuilder;
-import org.quartz.JobDetail;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerFactory;
-import org.quartz.TriggerBuilder;
-import org.quartz.impl.StdSchedulerFactory;
-
 import com.vip.pallas.bean.NodeState;
+import com.vip.pallas.bean.PluginCommands;
 import com.vip.pallas.plugin.PallasPlugin;
 import com.vip.pallas.plugin.listen.PluginListener;
 import com.vip.pallas.plugin.upgrade.NodeHeartbeatJob;
@@ -39,7 +27,12 @@ import com.vip.pallas.utils.HttpClient;
 import com.vip.pallas.utils.IPUtils;
 import com.vip.pallas.utils.JsonUtil;
 import com.vip.pallas.utils.PallasBasicProperties;
-import com.vip.pallas.utils.PallasConsoleProperties;
+import org.elasticsearch.common.logging.ESLoggerFactory;
+import org.quartz.*;
+import org.quartz.impl.StdSchedulerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class PluginInitializer {
 
@@ -52,12 +45,41 @@ public class PluginInitializer {
         new PluginListener().monitor();
 
         try {
+            LOGGER.info("begin to sync plugin from console...");
+            syncPlugin();
+            LOGGER.info("end to sync plugin from console");
+
             initKeepaliveScheduler();
             initHeartbeatScheduler();
             postNodeState(NodeState.STARTED);
             LOGGER.info("initKeepaliveScheduler successed.");
         } catch (Exception e) {
             LOGGER.error("init keepaliveScheduler error cause by: {}", e.toString(), e);
+        }
+    }
+
+    /**
+     * ES启动时同步Pallas插件
+     */
+    public static void syncPlugin() throws Exception {
+        String request = JsonUtil.toJson(PluginKeepaliveJob.collectState());
+
+        LOGGER.info("begin to sync plugin with request : {}", request);
+
+        String commands = HttpClient.httpPost(PallasBasicProperties.PALLAS_CONSOLE_REST_URL + "/plugin/sync.json", request);
+
+        LOGGER.info("sync plugin response : {}", commands);
+
+        Map<String, Object> resultMap = JsonUtil.readValue(commands, Map.class);
+
+        if((int)resultMap.get("status") == 0){
+            Object data = resultMap.get("data");
+            if(data != null){
+                Object resp = ((Map) data).get("response");
+                if(resp != null){
+                    PluginKeepaliveJob.parseCommand(JsonUtil.readValue(JsonUtil.toJson(resp), PluginCommands.class));
+                }
+            }
         }
     }
 
@@ -72,7 +94,7 @@ public class PluginInitializer {
             inputMap.put("isRestart", System.getProperty("pallas.node.restart"));
         }
 
-        HttpClient.httpPost(PallasBasicProperties.PALLAS_CONSOLE_REST_URL + "/node/state.json", JsonUtil.toJson(inputMap));
+        //HttpClient.httpPost(PallasBasicProperties.PALLAS_CONSOLE_REST_URL + "/node/state.json", JsonUtil.toJson(inputMap));
     }
 
     public static void initKeepaliveScheduler()throws Exception

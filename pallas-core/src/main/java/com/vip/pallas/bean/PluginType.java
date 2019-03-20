@@ -19,8 +19,8 @@ package com.vip.pallas.bean;
 
 public enum PluginType {
 
-	NATIVE("NATIVE", 0),
 	PALLAS("PALLAS", 0),
+	NATIVE("NATIVE", 0),
 	ES("ES", 1);
 
 	private String desc;

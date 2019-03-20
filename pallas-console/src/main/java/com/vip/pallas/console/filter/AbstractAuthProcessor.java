@@ -40,6 +40,7 @@ public abstract class AbstractAuthProcessor {
 		"/record/flow_record/update_num",
 		"/record/flow_record/export",
 		"/rest/plugin/keepalive",
+		"/plugin/sync",
 		"/plugin/upgrade/fileDownload",
 		"/ss/query_pslist_and_domain",
 		"/ss/upsert"

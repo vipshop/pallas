@@ -200,6 +200,11 @@ public class PallasPluginServiceImpl implements PallasPluginService {
         }
     }
 
+    @Override
+    public List<PluginRuntime> getPluginsByCluster(String clusterId) {
+        return runtimeRepository.selectPluginsByCluster(clusterId);
+    }
+
     private void checkRuntimeListNodesAvailable(PluginUpgrade upgrade) {
         String clusterId = upgrade.getClusterId();
         String pluginName = upgrade.getPluginName();
