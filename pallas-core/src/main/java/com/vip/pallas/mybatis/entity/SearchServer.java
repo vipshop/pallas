@@ -40,6 +40,11 @@ public class SearchServer implements Serializable {
     private String cluster;
 
     /**
+     * search 节点集
+     */
+    private String pools;
+
+    /**
      * 记录生成时间
      */
     private Date createTime;
@@ -86,7 +91,15 @@ public class SearchServer implements Serializable {
         this.cluster = cluster;
     }
 
-    public Date getCreateTime() {
+	public String getPools() {
+		return pools;
+	}
+
+	public void setPools(String pools) {
+		this.pools = pools;
+	}
+
+	public Date getCreateTime() {
         return createTime;
     }
 

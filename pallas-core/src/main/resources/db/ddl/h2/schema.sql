@@ -391,6 +391,7 @@ CREATE TABLE IF NOT EXISTS `search_server` (
   `id` bigint(15) NOT NULL AUTO_INCREMENT COMMENT '自增id',
   `ipport` varchar(32) NOT NULL DEFAULT '' COMMENT 'pallas search节点ip与port',
   `cluster` varchar(128) NOT NULL DEFAULT '' COMMENT '所属集群',
+  `pools` varchar(255) NOT NULL DEFAULT '["default"]' COMMENT '节点集',
   `info` varchar(20000) NOT NULL DEFAULT '' COMMENT '节点上报信息，json格式',
   `create_time` timestamp NOT NULL DEFAULT '1980-01-01 01:01:01' COMMENT '记录生成时间',
   `update_time` timestamp NOT NULL DEFAULT '1980-01-01 01:01:01' COMMENT '记录更新时间',

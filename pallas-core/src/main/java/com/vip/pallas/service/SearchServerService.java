@@ -18,7 +18,10 @@
 package com.vip.pallas.service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import com.vip.pallas.mybatis.entity.SearchAuthorization.Pool;
 import com.vip.pallas.mybatis.entity.SearchServer;
 import com.vip.pallas.mybatis.entity.SearchServerExample;
 
@@ -51,4 +54,6 @@ public interface SearchServerService {
 	List<SearchServer> selectHealthyServersByCluster(Long healthyInterval, String cluster);
 
 	void setTakeTraffic(Long id, Boolean taleTraffic);
+	
+	Map<String, Set<Pool>> getHealthyServersPools();
 }

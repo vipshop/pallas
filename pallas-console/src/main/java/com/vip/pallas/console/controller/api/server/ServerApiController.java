@@ -17,12 +17,12 @@
 
 package com.vip.pallas.console.controller.api.server;
 
-import static java.util.stream.Collectors.toList;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -36,14 +36,20 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.base.Splitter;
 import com.vip.pallas.mybatis.entity.Cluster;
 import com.vip.pallas.mybatis.entity.SearchAuthorization;
+import com.vip.pallas.mybatis.entity.SearchAuthorization.AuthorizationItem;
+import com.vip.pallas.mybatis.entity.SearchAuthorization.Pool;
 import com.vip.pallas.mybatis.entity.SearchServer;
 import com.vip.pallas.service.ClusterService;
 import com.vip.pallas.service.SearchAuthorizationService;
 import com.vip.pallas.service.SearchServerService;
 import com.vip.pallas.utils.IPUtils;
 import com.vip.pallas.utils.ObjectMapTool;
+import com.vip.vjtools.vjkit.collection.ListUtil;
+import com.vip.vjtools.vjkit.collection.MapUtil;
+import com.vip.vjtools.vjkit.collection.SetUtil;
 
 @Validated
 @RestController
@@ -66,6 +72,7 @@ public class ServerApiController {
         String ipport = ObjectMapTool.getString(params, "ipport");
         String cluster = ObjectMapTool.getString(params, "cluster");
         String takeTrafficStr = ObjectMapTool.getString(params, "takeTraffic");
+        Set<String> poolSet = ObjectMapTool.getStringSet(params, "pools");
         SearchServer ss = new SearchServer();
         ss.setCluster(cluster);
         ss.setIpport(ipport);
@@ -74,7 +81,7 @@ public class ServerApiController {
             logger.info("server {} 's takeTraffic property is set to {}", ipport, takeTraffic);
             ss.setTakeTraffic(takeTraffic);
         }
-        if (infoJson != null) {
+		if (infoJson != null) {
 			// info-parse-error should not affect the heart beat of ps.
 			String info = infoJson.toString() + " to json error: ";
 			try {
@@ -84,7 +91,9 @@ public class ServerApiController {
 				logger.error(e.getMessage(), e);
 			}
 			ss.setInfo(info);
-        }
+		}
+        
+        ss.setPools(Pool.toPoolsConetent(poolSet));
         searchServerService.upsertByIpAndCluster(ss);
     }
 
@@ -95,35 +104,35 @@ public class ServerApiController {
         String token = ObjectMapTool.getString(params, "token");
         // find esDomain by token
         SearchAuthorization authorization = searchAuthorizationService.findByToken(token);
-        String domain;
+        AuthorizationItem authorizationItem = null;
         if (authorization != null && authorization.getAuthorizationItemList() != null
                 && !authorization.getAuthorizationItemList().isEmpty()) {
-            domain = authorization.getAuthorizationItemList().get(0).getName();
-            resultMap.put("domain", domain);
+        	authorizationItem = authorization.getAuthorizationItemList().get(0);
+            resultMap.put("domain", authorizationItem.getName());
         } else {
             throw new IllegalArgumentException("no domain matched by this token " + token);
         }
         if (!authorization.isEnabled()) { // access es directly.
-            List<String> healthyPsList = genRealEsClusterDomainList(domain);
+            List<String> healthyPsList = genRealEsClusterDomainList(authorizationItem.getName());
             resultMap.put("psList", healthyPsList);
             return resultMap;
         }
         // find pallasSearch ipList by ip(the same dc first)
-        Cluster cluster = clusterService.findByName(domain);
+        Cluster cluster = clusterService.findByName(authorizationItem.getName());
         if (cluster == null) {
             throw new IllegalArgumentException(
-                    "could not found cluster by domain: " + domain + " and token: " + token);
+                    "could not found cluster by domain: " + authorizationItem.getName() + " and token: " + token);
         }
 
         if (StringUtils.isEmpty(cluster.getAccessiblePs())) {
-            throw new IllegalArgumentException(
-                    "accessible ps not configured, domain: " + domain + " not found, ip: " + ip);
+			throw new IllegalArgumentException(
+					"accessible ps not configured, domain: " + authorizationItem.getName() + " not found, ip: " + ip);
         }
-        List<String> healthyPsList = findAccessibleHealthyPsList(cluster.getAccessiblePs(), ip);
+        List<String> healthyPsList = findAccessibleHealthyPsList(cluster.getAccessiblePs(), authorizationItem.getPools(), ip);
         if (healthyPsList.isEmpty()) {
-            logger.error("healthy servers allow to access this domain " + domain + " not found, ip:" + ip
-                    + ", now return the es-domain which the client can make the direct accest to.");
-            healthyPsList = genRealEsClusterDomainList(domain);
+            logger.error("healthy servers allow to access this domain :" + authorizationItem.getName() + " not found, "
+                    + "ip:" + ip  +" now return the es-domain which the client can make the direct accest to.");
+            healthyPsList = genRealEsClusterDomainList(authorizationItem.getName());
         }
         resultMap.put("psList", healthyPsList);
         return resultMap;
@@ -144,23 +153,61 @@ public class ServerApiController {
         }
         return healthyPsList;
     }
+    
+	private List<String> findAccessibleHealthyPsList(String accessiblePs, Set<Pool> pools, String ip) {
+		Set<String> ipSet = SetUtil.newHashSet();
+		pools = CollectionUtils.isEmpty(pools) ? SearchAuthorization.DEFAULT_POOLS : pools;
+		List<String> domains = Splitter.on(",").trimResults().omitEmptyStrings().splitToList(accessiblePs);
+		// 初始化所有可能需要返回标签的结构，同时考虑某一search sever下无存活服务的可能
+		Map<String, Set<String>> poolIpMap = MapUtil.newHashMap();
+		for (Pool pool : pools) {
+			if (!poolIpMap.containsKey(pool.genUniqueKey())) {
+				poolIpMap.put(pool.genUniqueKey(), SetUtil.newHashSet());
+			}
+		}
+		int targetPrefix = IPUtils.IPV42PrefixInteger(ip);
+		List<SearchServer> sameDcSsList = ListUtil.newArrayList(), remoteDcSsList = ListUtil.newArrayList(),
+				ipSsList = ListUtil.newArrayList();
+		for (String domain : domains) {
+			List<SearchServer> ssList = searchServerService
+					.selectHealthyServersByCluster(SearchServerService.HEALTHY_UPLOAD_INTERVAL_TOLERANCE, domain);
+			// if one ip of the cluster match the-same-dc rule, the rest shall be the same.
+			ssList = ssList.stream().filter(SearchServer::getTakeTraffic).collect(Collectors.toList());
+			if (CollectionUtils.isNotEmpty(ssList)
+					&& targetPrefix == IPUtils.IPV42PrefixInteger(ssList.get(0).getIpport())) {
+				sameDcSsList.addAll(ssList);
+			}
+			// if the-same-dc-pslist not found, return all of them.
+			remoteDcSsList.addAll(ssList);
+		}
 
-    private List<String> findAccessibleHealthyPsList(String accessiblePs, String ip) {
-        List<String> ipList = new ArrayList<>();
-        List<String> theSameDcNotFoundList = new ArrayList<>();
-        String[] domainArray = accessiblePs.split(",");
-        int targetPrefix = IPUtils.IPV42PrefixInteger(ip);
-        for (String domain : domainArray) {
-            List<SearchServer> ssList = searchServerService
-                    .selectHealthyServersByCluster(SearchServerService.HEALTHY_UPLOAD_INTERVAL_TOLERANCE, domain);
-            // if one ip of the cluster match the-same-dc rule, the rest shall be the same.
-            if (CollectionUtils.isNotEmpty(ssList)
-                    && targetPrefix == IPUtils.IPV42PrefixInteger(ssList.get(0).getIpport())) {
-                ipList.addAll(ssList.stream().filter(SearchServer::getTakeTraffic).map(SearchServer::getIpport).collect(toList()));
-            }
-            // if the-same-dc-pslist not found, return all of them.
-            theSameDcNotFoundList.addAll(ssList.stream().filter(SearchServer::getTakeTraffic).map(SearchServer::getIpport).collect(toList()));
-        }
-        return ipList.isEmpty() ? theSameDcNotFoundList : ipList;
+		ipSsList = sameDcSsList.isEmpty() ? remoteDcSsList : sameDcSsList;
+
+		// 处理search server注册回来的所有的pool,并分组聚合search server，同时兼容处理可能的历史数据
+		for (SearchServer server : ipSsList) {
+			poolIpMap.get(Pool.DEFAULT_UNIQUE_KEY).add(server.getIpport());
+			Set<String> poolSet = Pool.DEFAULT_POOL_ARR;
+			try {
+				poolSet = Pool.fromPoolsContent(server.getPools());
+			} catch (Exception e) {
+				logger.error("Pools illegal", e);
+			}
+			for (String pool : poolSet) {
+				String poolKey = Pool.getUniqueKey(pool, server.getCluster());
+				if (poolIpMap.containsKey(poolKey)) {
+					poolIpMap.get(poolKey).add(server.getIpport());
+				}
+			}
+		}
+
+		poolIpMap.forEach((k, v) -> {
+			if (!Pool.DEFAULT_UNIQUE_KEY.equals(k)) {
+				ipSet.addAll(v);
+			}
+		});
+
+		// 某pool下无任何存活search server时，返回default
+		return ListUtil.newArrayList(CollectionUtils.isEmpty(ipSet) ? 
+				poolIpMap.get(Pool.DEFAULT_UNIQUE_KEY) : ipSet);
     }
 }

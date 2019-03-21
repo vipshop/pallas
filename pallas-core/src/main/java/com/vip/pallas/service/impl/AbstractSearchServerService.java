@@ -18,24 +18,26 @@
 package com.vip.pallas.service.impl;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
+import com.vip.pallas.mybatis.entity.SearchAuthorization.Pool;
 import com.vip.pallas.mybatis.entity.SearchServer;
 import com.vip.pallas.mybatis.entity.SearchServerExample;
 import com.vip.pallas.mybatis.entity.SearchServerExample.Criteria;
 import com.vip.pallas.mybatis.repository.SearchServerRepository;
 import com.vip.pallas.service.SearchServerService;
 
-@Service
-public class SearchServerServiceImpl implements SearchServerService {
+public abstract class AbstractSearchServerService implements SearchServerService {
 
-	private static Logger logger = LoggerFactory.getLogger(SearchServerServiceImpl.class);
+	private static Logger logger = LoggerFactory.getLogger(AbstractSearchServerService.class);
 	@Autowired
 	private SearchServerRepository searchServerRepository;
 
@@ -55,6 +57,7 @@ public class SearchServerServiceImpl implements SearchServerService {
 			SearchServer searchServer = list.get(0);
 			searchServer.setInfo(record.getInfo());
 			searchServer.setCluster(record.getCluster());
+			searchServer.setPools(record.getPools());
 			searchServer.setTakeTraffic(record.getTakeTraffic());
 			searchServerRepository.updateByPrimaryKeySelective(searchServer);
 		}
@@ -140,4 +143,28 @@ public class SearchServerServiceImpl implements SearchServerService {
 
 	}
 
+	@Override
+	public Map<String, Set<Pool>> getHealthyServersPools() {
+		List<SearchServer> servers = this.selectAllHealthyServer();
+		Map<String, Set<Pool>> pools = new HashMap<>();
+		for (SearchServer searchServer : servers) {
+			Set<String> poolSet = null;
+			String poolStr = searchServer.getPools();
+			String clusterName = searchServer.getCluster();
+			try {
+				poolSet = Pool.fromPoolsContent(poolStr);
+			} catch (Exception e) {
+				poolSet = Pool.DEFAULT_POOL_ARR;
+				logger.error("Pools illegal", e);
+			}
+			Set<Pool> sPoolSet = poolSet.stream().map((s) -> { 
+				return new Pool(s, clusterName);}).collect(Collectors.toSet());
+			if (pools.containsKey(clusterName)) {
+				pools.get(clusterName).addAll(sPoolSet);
+			} else {
+				pools.put(clusterName, sPoolSet);
+			}
+		}
+		return pools;
+	}
 }

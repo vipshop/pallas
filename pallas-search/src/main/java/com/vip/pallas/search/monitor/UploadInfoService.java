@@ -9,18 +9,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.vip.pallas.search.model.SearchServer;
 import com.vip.pallas.search.netty.http.server.PallasNettyServer;
 import com.vip.pallas.search.utils.HttpClient;
+import com.vip.pallas.search.utils.JsonUtil;
 import com.vip.pallas.search.utils.PallasSearchProperties;
-import com.vip.pallas.utils.IPUtils;
 
 public class UploadInfoService {
 
 	private static Logger logger = LoggerFactory.getLogger(UploadInfoService.class);
 	private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(
 			new ThreadFactoryBuilder().setNameFormat("Pallas-Search-upload-info").build());
-	private static String localIpport = IPUtils.localIp4Str() + ":" + PallasSearchProperties.PALLAS_SEARCH_PORT;
-	private static String cluster = PallasSearchProperties.PALLAS_SEARCH_CLUSTER;
 	private static String upsertUrl = PallasSearchProperties.CONSOLE_UPLOAD_URL;
 	private ServerWatch serverWatch;
 
@@ -49,13 +48,11 @@ public class UploadInfoService {
 
 	public static void internalUpload(String info, boolean takeTraffic) {
 		try {
-			if (info != null) {
-				HttpClient.httpPost(upsertUrl, "{\"cluster\":\"" + cluster + "\",\"ipport\":\"" + localIpport + "\", \"info\":" + info + "}");
-			} else {
-				HttpClient.httpPost(upsertUrl, "{\"cluster\":\"" + cluster + "\",\"ipport\":\"" + localIpport
-						+ "\", \"takeTraffic\":\"" + takeTraffic + "\"}");
-				logger.warn("server {} 's takeTraffic property is set to {}", localIpport, takeTraffic);
+			if (info == null) {
+				logger.warn("server {} 's takeTraffic property is set to {}", "localIpport", takeTraffic);
 			}
+			String serverInfo = JsonUtil.toJson(new SearchServer(true, info));
+			HttpClient.httpPost(upsertUrl, serverInfo);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}

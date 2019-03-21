@@ -28,6 +28,12 @@
             <el-table-column label="ID" prop="id"></el-table-column>
             <el-table-column label="IP端口" prop="ipport"></el-table-column>
             <el-table-column label="代理集群" prop="cluster"></el-table-column>
+            <el-table-column label="节点集">
+                <template scope="scope">
+                    <el-tag :type="'success'" :key="item" v-if="!scope.row.pools" close-transition class="target-group-item">default</el-tag>
+                    <el-tag :type="'success'" :key="item" v-if="scope.row.pools" v-for="item in (JSON.parse(scope.row.pools))" close-transition class="target-group-item">{{item}}</el-tag>
+                </template>
+            </el-table-column>
             <el-table-column label="节点状态" width="80px">
                 <template scope="scope"> 
                     <el-tag :type="scope.row.healthy ? 'success' : 'danger'" close-transition>{{scope.row.healthy | translateState}}</el-tag>

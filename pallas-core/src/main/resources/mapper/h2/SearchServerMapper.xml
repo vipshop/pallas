@@ -5,6 +5,7 @@
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="ipport" jdbcType="VARCHAR" property="ipport" />
     <result column="cluster" jdbcType="VARCHAR" property="cluster" />
+    <result column="pools" jdbcType="VARCHAR" property="pools" />
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
     <result column="take_traffic" jdbcType="TINYINT" property="takeTraffic" />
@@ -80,7 +81,7 @@
     </where>
   </sql>
   <sql id="Base_Column_List">
-    id, ipport, cluster, create_time, update_time, take_traffic
+    id, ipport, cluster, pools, create_time, update_time, take_traffic
   </sql>
 
   <select id="deleteNDaysOldServer" resultMap="BaseResultMap">
@@ -89,10 +90,10 @@
   </select>
   
   <select id="selectHealthyServers" resultMap="BaseResultMap">
-    <![CDATA[select id, ipport, cluster, create_time, update_time, take_traffic from search_server where TIMESTAMPDIFF(SECOND,update_time,now()) < #{0}]]>
+    <![CDATA[select id, ipport, cluster, pools, create_time, update_time, take_traffic from search_server where TIMESTAMPDIFF(SECOND,update_time,now()) < #{0}]]>
   </select>
   <select id="selectHealthyServersByCluster" resultMap="BaseResultMap">
-    <![CDATA[select id, ipport, cluster, create_time, update_time, take_traffic from search_server where TIMESTAMPDIFF(SECOND,update_time,now()) < #{0} and cluster = #{1}]]>
+    <![CDATA[select id, ipport, cluster, pools, create_time, update_time, take_traffic from search_server where TIMESTAMPDIFF(SECOND,update_time,now()) < #{0} and cluster = #{1}]]>
   </select>
   
   <sql id="Blob_Column_List">
@@ -166,10 +167,10 @@
     <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
       SELECT LAST_INSERT_ID()
     </selectKey>
-    insert into search_server (ipport, cluster, create_time, 
+    insert into search_server (ipport, cluster, pools, create_time, 
       update_time, info)
-    values (#{ipport,jdbcType=VARCHAR}, #{cluster,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, 
-      #{updateTime,jdbcType=TIMESTAMP}, #{info,jdbcType=LONGVARCHAR})
+    values (#{ipport,jdbcType=VARCHAR}, #{cluster,jdbcType=VARCHAR}, #{pools,jdbcType=VARCHAR}, 
+    #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{info,jdbcType=LONGVARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.vip.pallas.mybatis.entity.SearchServer">
     <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
@@ -185,6 +186,9 @@
       </if>
       <if test="cluster != null">
         cluster,
+      </if>
+      <if test="pools != null">
+        pools,
       </if>
       <if test="createTime != null">
         create_time,
@@ -206,6 +210,9 @@
       </if>
       <if test="cluster != null">
         #{cluster,jdbcType=VARCHAR},
+      </if>
+      <if test="pools != null">
+        #{pools,jdbcType=VARCHAR},
       </if>
       <if test="createTime != null">
         #{createTime,jdbcType=TIMESTAMP},
@@ -237,6 +244,9 @@
       <if test="record.cluster != null">
         cluster = #{record.cluster,jdbcType=VARCHAR},
       </if>
+      <if test="record.pools != null">
+        pools = #{record.pools,jdbcType=VARCHAR},
+      </if>
       <if test="record.createTime != null">
         create_time = #{record.createTime,jdbcType=TIMESTAMP},
       </if>
@@ -259,6 +269,7 @@
     set id = #{record.id,jdbcType=BIGINT},
       ipport = #{record.ipport,jdbcType=VARCHAR},
       cluster = #{record.cluster,jdbcType=VARCHAR},
+      pools = #{record.pools,jdbcType=VARCHAR},
       create_time = #{record.createTime,jdbcType=TIMESTAMP},
       update_time = #{record.updateTime,jdbcType=TIMESTAMP},
       info = #{record.info,jdbcType=LONGVARCHAR}
@@ -271,6 +282,7 @@
     set id = #{record.id,jdbcType=BIGINT},
       ipport = #{record.ipport,jdbcType=VARCHAR},
       cluster = #{record.cluster,jdbcType=VARCHAR},
+      pools = #{record.pools,jdbcType=VARCHAR},
       create_time = #{record.createTime,jdbcType=TIMESTAMP},
       update_time = #{record.updateTime,jdbcType=TIMESTAMP}
     <if test="_parameter != null">
@@ -285,6 +297,9 @@
       </if>
       <if test="cluster != null">
         cluster = #{cluster,jdbcType=VARCHAR},
+      </if>
+      <if test="pools != null">
+        pools = #{pools,jdbcType=VARCHAR},
       </if>
       <if test="createTime != null">
         create_time = #{createTime,jdbcType=TIMESTAMP},
@@ -303,6 +318,7 @@
     update search_server
     set ipport = #{ipport,jdbcType=VARCHAR},
       cluster = #{cluster,jdbcType=VARCHAR},
+      pools = #{pools,jdbcType=VARCHAR},
       create_time = #{createTime,jdbcType=TIMESTAMP},
       update_time = now(),
       info = #{info,jdbcType=LONGVARCHAR}
@@ -312,6 +328,7 @@
     update search_server
     set ipport = #{ipport,jdbcType=VARCHAR},
       cluster = #{cluster,jdbcType=VARCHAR},
+      pools = #{pools,jdbcType=VARCHAR},
       create_time = #{createTime,jdbcType=TIMESTAMP},
       update_time = now()
     where id = #{id,jdbcType=BIGINT}

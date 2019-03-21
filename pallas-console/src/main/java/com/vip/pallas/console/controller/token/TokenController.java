@@ -20,15 +20,20 @@ package com.vip.pallas.console.controller.token;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,15 +45,21 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.common.base.Splitter;
 import com.vip.pallas.console.utils.AuthorizeUtil;
+import com.vip.pallas.console.vo.AuthorizationItemVO;
 import com.vip.pallas.console.vo.TokenPrivilegeVO;
 import com.vip.pallas.exception.BusinessLevelException;
 import com.vip.pallas.mybatis.entity.Cluster;
 import com.vip.pallas.mybatis.entity.Index;
 import com.vip.pallas.mybatis.entity.SearchAuthorization;
+import com.vip.pallas.mybatis.entity.SearchAuthorization.AuthorizationItem;
+import com.vip.pallas.mybatis.entity.SearchAuthorization.Pool;
 import com.vip.pallas.service.ClusterService;
 import com.vip.pallas.service.IndexService;
 import com.vip.pallas.service.SearchAuthorizationService;
+import com.vip.pallas.service.SearchServerService;
+import com.vip.vjtools.vjkit.collection.SetUtil;
 
 @Validated
 @RestController
@@ -65,6 +76,9 @@ public class TokenController {
     
     @Autowired
     private IndexService indexServcie;
+    
+    @Autowired
+    private SearchServerService searchServerService;
     
     @RequestMapping(path="/list.json", method={RequestMethod.GET, RequestMethod.POST})
     public List<SearchAuthorization> queryTokens(HttpServletRequest request){
@@ -113,38 +127,51 @@ public class TokenController {
     }
     
     @RequestMapping(path="/token_privileges.json", method={RequestMethod.GET, RequestMethod.POST})
-    public List<SearchAuthorization.AuthorizationItem> privileges(HttpServletRequest request, 
+    public List<AuthorizationItemVO> privileges(HttpServletRequest request, 
             @RequestParam(required = false) @NotNull(message = "id不能为空") @Min(value = 1, message = "id必须为正数") Long id) {
     	if (!AuthorizeUtil.authorizeTokenPrivilege(request, null)) {
         	throw new BusinessLevelException(403, "无权限操作");
         }
-
-        List<SearchAuthorization.AuthorizationItem> privileges = new LinkedList<>();
+        List<AuthorizationItemVO> privileges = new LinkedList<>();
         SearchAuthorization sa = authService.findById(id);
         if (sa != null) {
             List<Cluster> clusters = clusterService.findAll();
             List<Index> indices = indexServcie.findAll();
+            Map<String, Set<Pool>> clusterPools = searchServerService.getHealthyServersPools();
             List<SearchAuthorization.AuthorizationItem> authItems = sa.getAuthorizationItemList();
             for(Cluster c : clusters) {
-                privileges.add(parseClusterPrivilege(c, indices, authItems));
+                privileges.add(parseClusterPrivilege(c, clusterPools, indices, authItems));
             }
 
         }
         return privileges;
     }
     
-    private SearchAuthorization.AuthorizationItem parseClusterPrivilege(Cluster c, List<Index> indices,
-            List<SearchAuthorization.AuthorizationItem> authItems) {
-        SearchAuthorization.AuthorizationItem clusterItem = authItems.stream()
-                .filter((SearchAuthorization.AuthorizationItem i) -> i.getId().equals(c.getId())).findAny()
-                .orElseGet(() -> {
-                    SearchAuthorization.AuthorizationItem newObj = new SearchAuthorization.AuthorizationItem();
-                    newObj.setId(c.getId());
-                    newObj.setName(c.getClusterId());
-                    newObj.setPrivileges(new HashMap<>());
-                    newObj.setIndexPrivileges(new LinkedList<>());
-                    return newObj;
-                });
+    private AuthorizationItemVO parseClusterPrivilege(Cluster c, Map<String, Set<Pool>> clusterPools, 
+    		List<Index> indices, List<SearchAuthorization.AuthorizationItem> authItems) {
+        AuthorizationItemVO clusterItem = null;
+        if (CollectionUtils.isNotEmpty(authItems)) {
+        	for (AuthorizationItem authorizationItem : authItems) {
+        		if (authorizationItem.getId().equals(c.getId())) {
+        			clusterItem = new AuthorizationItemVO(authorizationItem);
+        		}
+        	}
+        }
+        if (clusterItem == null) {
+        	clusterItem = new AuthorizationItemVO(c.getId(), c.getClusterId());
+        }
+        
+        Set<Pool> serverPools = SetUtil.newHashSet();
+        if (StringUtils.isNoneEmpty(c.getAccessiblePs())) {
+			List<String> accessiblePs = Splitter.on(",").trimResults().omitEmptyStrings()
+					.splitToList(c.getAccessiblePs());
+			for (String ps : accessiblePs) {
+				if (clusterPools.containsKey(ps)) {
+					serverPools.addAll(clusterPools.getOrDefault(ps, SetUtil.newHashSet()));
+				}
+			}
+        }
+        clusterItem.setServerPools(serverPools);
         List<SearchAuthorization.AuthorizationItem> indexItems = clusterItem.getIndexPrivileges();
         for(Index index : indices) {
             if (!index.getClusterName().equals(c.getClusterId())) {
@@ -158,6 +185,7 @@ public class TokenController {
                 newObj.setId(index.getId());
                 newObj.setName(index.getIndexName());
                 newObj.setPrivileges(new HashMap<>());
+                newObj.setPools(Collections.emptySet());
                 indexItems.add(newObj);
             }
         }

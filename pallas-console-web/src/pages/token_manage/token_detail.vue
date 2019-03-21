@@ -1,19 +1,29 @@
 <template>
     <div class="token-detail" v-loading="loading" element-loading-text="请稍等···">
-        <el-row :gutter="20">
+        <el-row :gutter="20" class="mrg-top-15">
             <el-col :span="10">
+                <div >
+                  <div class="token-title">
+                        当前选择Token : <span class="token-name-span">{{tokenInfo.title}}</span></br>
+                  </div>
+                </div>
                 <div class="token-cluster">
-                    <div class="token-title">
-                        当前选择Token : <span class="token-name-span">{{tokenInfo.title}}</span>
-                    </div>
                     <div class="mrg-top-15">
                         <span class="title-span">集群列表<small style="color:gray">(一个token只能绑定一个集群)</small></span>
-                        <el-tree class="token-cluster-tree" :style="clusterTreeHeight" :data="clusterList" :render-content="renderCluster" highlight-current node-key="id" @node-click="handleNodeClick"></el-tree>
+                        <el-tree class="token-cluster-tree" :style="clusterTokenHeight" :data="clusterList" :render-content="renderCluster" highlight-current node-key="id" @node-click="handleNodeClick"></el-tree>
+                    </div>
+                </div>
+                
+                <div class="token-pool">
+                    <div class="mrg-top-15">
+                        <span class="title-span">代理集群节点集<small style="color:gray">((默认为整个集群))</small></span>
+                        <el-tree class="token-cluster-tree" :style="clusterPoolHeight" :data="psClusterList" :render-content="renderPsCluster" ref="psPoolTree" show-checkbox
+                          highlight-current default-expand-all check-strictly @check-change="handlePsNodeClick" :default-checked-keys="tokenClusterInfo.checkedPools" node-key="id"></el-tree>
                     </div>
                 </div>
             </el-col>
             <el-col :span="14">
-                <token-index :token-cluster-info="tokenClusterInfo" :cluster-tree-height="clusterTreeHeight" @update-token-cluster="updateTokenCluster"></token-index>
+                <token-index :token-cluster-info="tokenClusterInfo" :cluster-tree-height="clusterIndexHeight" @update-token-cluster="updateTokenCluster"></token-index>
             </el-col>
         </el-row>
     </div>
@@ -27,13 +37,20 @@ export default {
     return {
       loading: false,
       clusterList: [],
+      psClusterList: [],
       clusterList2update: [],
       tokenClusterInfo: {},
     };
   },
   computed: {
-    clusterTreeHeight() {
-      return { height: this.tokenHeight.height + 15 };
+    clusterPoolHeight() {
+      return { height: (this.tokenHeight.height * (3 / 5)) - 48 };
+    },
+    clusterTokenHeight() {
+      return { height: this.tokenHeight.height * (2 / 5) };
+    },
+    clusterIndexHeight() {
+      return { height: this.tokenHeight.height };
     },
   },
   methods: {
@@ -58,6 +75,14 @@ export default {
           }
         });
         this.$set(clusterParams, 'indexPrivileges', this.tokenClusterInfo.myIndexPrivilegeArr);
+      }
+      if (this.tokenClusterInfo.pools.length === 0) {
+        this.$set(clusterParams, 'pools', []);
+      } else {
+        this.tokenClusterInfo.pools.forEach((ele) => {
+          Object.assign(ele, { aliasName: '' });
+        });
+        this.$set(clusterParams, 'pools', this.tokenClusterInfo.pools);
       }
       this.clusterList.some((ele, index) => {
         if (ele.id === clusterParams.id) {
@@ -100,7 +125,19 @@ export default {
           }
         });
       }
+      if (Object.keys(data.pools).length === 0) {
+        this.$set(tokenClusterData, 'pools', []);
+      } else {
+        this.$set(tokenClusterData, 'pools', data.pools);
+      }
+      this.$set(tokenClusterData, 'serverPools', data.serverPools);
       this.$set(tokenClusterData, 'myIndexPrivilegeArr', data.indexPrivileges);
+      this.psClusterList = this.getPsServerPoolJsonTree(data.serverPools);
+      const checkedPools = [];
+      tokenClusterData.pools.forEach((ele) => {
+        checkedPools.push(this.genPsNodeKey(ele));
+      });
+      this.$set(tokenClusterData, 'checkedPools', checkedPools);
       this.tokenClusterInfo = JSON.parse(JSON.stringify(tokenClusterData));
     },
     getTokenDetail() {
@@ -152,6 +189,55 @@ export default {
       );
       return renderHtml;
     },
+    renderPsCluster(h, { data }) {
+      let renderHtml = '';
+      if (data.aliasName) {
+        renderHtml = h(
+          'span',
+          [
+            h('span', { style: { 'margin-left': '10px', 'font-size': '14px' } }, data.name),
+            h('span', { style: { 'margin-left': '5px', color: 'gray', 'font-size': '14px' } }, `( ${data.aliasName} )`),
+          ],
+        );
+      } else {
+        renderHtml = h(
+          'span',
+          [
+            h('span', { style: { 'margin-left': '10px', 'font-size': '14px' } }, data.name),
+          ],
+        );
+      }
+      return renderHtml;
+    },
+    handlePsNodeClick() {
+      if (Object.keys(this.tokenClusterInfo).length === 0) {
+        this.$set(this.tokenClusterInfo, 'pools', []);
+      } else {
+        this.$set(this.tokenClusterInfo, 'pools', this.$refs.psPoolTree.getCheckedNodes());
+      }
+    },
+    getPsServerPoolJsonTree(data) {
+      const groups = {};
+      data.forEach((ele) => {
+        const group = ele.psClusterName;
+        const newEle = Object.assign({}, ele, { id: this.genPsNodeKey(ele) });
+        groups[group] = groups[group] || [];
+        groups[group].push(newEle);
+      });
+      const tree = [];
+      Object.keys(groups).forEach((key) => {
+        const node = {
+          name: key,
+          children: groups[key],
+          disabled: true,
+        };
+        tree.push(node);
+      });
+      return tree;
+    },
+    genPsNodeKey(ele) {
+      return `${ele.name}:${ele.psClusterName}`;
+    },
   },
   created() {
     this.getTokenDetail();
@@ -170,6 +256,9 @@ export default {
 .token-cluster {
     margin-top: 5px;
     overflow: auto;
+}
+.token-pool {
+    margin-top: 5px;
 }
 .token-index {
     margin-top: 5px;
