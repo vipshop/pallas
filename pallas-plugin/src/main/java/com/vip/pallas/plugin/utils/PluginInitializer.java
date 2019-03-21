@@ -94,7 +94,7 @@ public class PluginInitializer {
             inputMap.put("isRestart", System.getProperty("pallas.node.restart"));
         }
 
-        //HttpClient.httpPost(PallasBasicProperties.PALLAS_CONSOLE_REST_URL + "/node/state.json", JsonUtil.toJson(inputMap));
+        HttpClient.httpPost(PallasBasicProperties.PALLAS_CONSOLE_REST_URL + "/node/state.json", JsonUtil.toJson(inputMap));
     }
 
     public static void initKeepaliveScheduler()throws Exception
