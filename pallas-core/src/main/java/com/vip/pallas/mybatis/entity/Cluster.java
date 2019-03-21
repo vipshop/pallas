@@ -48,6 +48,20 @@ public class Cluster {
 	private Date createTime;
 	private Date updateTime;
 
+	private String monitorLevel;
+
+	public void setLogicalCluster(boolean logicalCluster) {
+		this.logicalCluster = logicalCluster;
+	}
+
+	public String getMonitorLevel() {
+		return monitorLevel;
+	}
+
+	public void setMonitorLevel(String monitorLevel) {
+		this.monitorLevel = monitorLevel;
+	}
+
 	public Date getCreateTime() {
 		return createTime;
 	}

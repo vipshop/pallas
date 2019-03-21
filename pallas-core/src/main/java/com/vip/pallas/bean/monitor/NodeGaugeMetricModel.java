@@ -8,6 +8,7 @@ import java.io.Serializable;
 public class NodeGaugeMetricModel implements Serializable {
 
     private String nodeName;
+    private String transportAddress;
     private Double jvmHeapUsage;
     /*available disk space: byte*/
     private Long availableFS;
@@ -16,16 +17,70 @@ public class NodeGaugeMetricModel implements Serializable {
     /*document disk store:byte*/
     private Long documentStore;
     /*index count*/
-    private Long indexCount;
+    private Integer indexCount;
     /*shard count*/
-    private Long shardCount;
-    //private String update; // 类型再议
-    private String type;
-    /**/
+    private Integer shardCount;
+
+    private Long uptime_in_ms;
+
+    private String nodeRole;
+
     private String status;
 
-    public Long getFsFree() {
-        return availableFS;
+    private Double processCpuPercent;
+
+    private Double osCpuPercent;
+
+    private Double load_1m;
+
+    private boolean isMaster;
+
+    public Long getUptime_in_ms() {
+        return uptime_in_ms;
+    }
+
+    public void setUptime_in_ms(Long uptime_in_ms) {
+        this.uptime_in_ms = uptime_in_ms;
+    }
+
+    public boolean isMaster() {
+        return isMaster;
+    }
+
+    public void setMaster(boolean master) {
+        isMaster = master;
+    }
+
+    public Double getLoad_1m() {
+        return load_1m;
+    }
+
+    public void setLoad_1m(Double load_1m) {
+        this.load_1m = load_1m;
+    }
+
+    public Double getOsCpuPercent() {
+        return osCpuPercent;
+    }
+
+    public void setOsCpuPercent(Double osCpuPercent) {
+        this.osCpuPercent = osCpuPercent;
+    }
+
+    public String getTransportAddress() {
+        return transportAddress;
+    }
+
+    public void setTransportAddress(String transportAddress) {
+        this.transportAddress = transportAddress;
+    }
+
+    public Double getProcessCpuPercent() {
+        return processCpuPercent;
+    }
+
+    public void setProcessCpuPercent(Double processCpuPercent) {
+        this.processCpuPercent = processCpuPercent;
     }
 
     public String getNodeName() {
@@ -68,28 +123,28 @@ public class NodeGaugeMetricModel implements Serializable {
         this.documentStore = documentStore;
     }
 
-    public Long getIndexCount() {
+    public Integer getIndexCount() {
         return indexCount;
     }
 
-    public void setIndexCount(Long indexCount) {
+    public void setIndexCount(Integer indexCount) {
         this.indexCount = indexCount;
     }
 
-    public Long getShardCount() {
+    public Integer getShardCount() {
         return shardCount;
     }
 
-    public void setShardCount(Long shardCount) {
+    public void setShardCount(Integer shardCount) {
         this.shardCount = shardCount;
     }
 
-    public String getType() {
-        return type;
+    public String getNodeRole() {
+        return nodeRole;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setNodeRole(String nodeRole) {
+        this.nodeRole = nodeRole;
     }
 
     public String getStatus() {

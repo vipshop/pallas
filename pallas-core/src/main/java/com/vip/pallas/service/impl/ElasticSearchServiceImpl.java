@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import com.vip.pallas.bean.monitor.ShardInfoModel;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -810,6 +811,16 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 		});
 	}
 
+	@Override
+	public List<String[]> getNodesInfos(String clusterName) throws Exception {
+		return ElasticSearchStub.performRequest(getHttpAddressByClusterName(clusterName), "/_cat/nodes", (String line, List<String[]> list) -> {
+			String[] infos = line.split("\\s+");
+			if (infos.length > 9) {
+				list.add(infos);
+			}
+		});
+	}
+
     @Override
     // indexName, nodeIp, nodeName
     public List<String[]> getShards(String clusterName) throws Exception {
@@ -818,10 +829,90 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
             if(infos.length > 6 && ("STARTED".equals(infos[3]) || "RELOCATING".equals(infos[3]))){
                 list.add(new String[]{infos[0], infos[6], infos[7]});
             }
+
         });
     }
 
-    public RestClient getRestClientByClusterName(String clusterName){
+	@Override
+	public List<String[]> getIndexInfos(String clusterName) throws Exception {
+
+		return ElasticSearchStub.performRequest(getHttpAddressByClusterName(clusterName), "/_cat/indices/", (String line, List<String[]> list) ->{
+			String[] infos = line.split("\\s+");
+			if(infos.length > 9){
+				list.add(infos);
+			}
+		});
+	}
+
+	@Override
+	public Map<String, ShardInfoModel> getShardsNode(String clusterName) throws Exception {
+
+		Map<String, ShardInfoModel> result = new HashMap<>();
+		List<String[]> shardNodeInfos = ElasticSearchStub.performRequest(getHttpAddressByClusterName(clusterName), "/_cat/shards/", (String line, List<String[]> list) ->{
+			String[] infos = line.split("\\s+");
+			if(infos.length > 6 && ("STARTED".equals(infos[3]) || "RELOCATING".equals(infos[3]))){
+				list.add(infos);
+			}
+
+		});
+		if(null == shardNodeInfos || shardNodeInfos.size() == 0) {
+			return result;
+		}
+
+		Map<String, Set<String>> indexMap = new HashMap<>();
+		Map<String, Integer> shardMap = new HashMap<>();
+
+		shardNodeInfos.forEach((info) -> {
+			if(!shardMap.containsKey(info[7])){
+				shardMap.put(info[7], 0);
+			}
+			shardMap.put(info[7], shardMap.get(info[7]) + 1);
+			if(!indexMap.containsKey(info[7])){
+				indexMap.put(info[7], new HashSet<>());
+			}
+			indexMap.get(info[7]).add(info[0]);
+		});
+
+		shardMap.forEach((k, v) -> {
+			ShardInfoModel infoModel = new ShardInfoModel();
+			infoModel.setTotalShards(v);
+			result.put(k, infoModel);
+		});
+
+		indexMap.forEach((k, v) -> {
+			result.get(k).setIndexCount(v.size());
+		});
+
+		return result;
+	}
+
+	@Override
+	public Map<String, ShardInfoModel> getShardsIndex(String clusterName) throws Exception {
+		Map<String, ShardInfoModel> result = new HashMap<>();
+		List<String[]> shardIndexInfos = ElasticSearchStub.performRequest(getHttpAddressByClusterName(clusterName), "/_cat/shards/", (String line, List<String[]> list) ->{
+			String[] infos = line.split("\\s+");
+			if(infos.length > 3 &&  ("UNASSIGNED".equals(infos[3]))){
+				list.add(infos);
+			}
+
+		});
+
+		if(null == shardIndexInfos || shardIndexInfos.size() == 0) {
+			return result;
+		}
+
+
+		shardIndexInfos.forEach((info) -> {
+			if(!result.containsKey(info[0])) {
+				result.put(info[0], new ShardInfoModel());
+			}
+			result.get(info[0]).setUnassignedShards(result.get(info[0]).getUnassignedShards() + 1);
+		});
+		return result;
+	}
+
+
+	public RestClient getRestClientByClusterName(String clusterName){
 		return ElasticSearchStub.getElasticRestClient(getHttpAddressByClusterName(clusterName));
 	}
 

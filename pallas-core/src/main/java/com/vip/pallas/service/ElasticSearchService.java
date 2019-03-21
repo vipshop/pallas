@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import com.vip.pallas.bean.monitor.ShardInfoModel;
 import org.elasticsearch.client.RestClient;
 
 import com.vip.pallas.mybatis.entity.Cluster;
@@ -68,7 +69,16 @@ public interface ElasticSearchService {
 
 	List<String[]> getNodes(String clusterName) throws Exception;
 
+	List<String[]> getNodesInfos(String clusterName) throws Exception;
+
 	List<String[]> getShards(String clusterName) throws Exception;
+
+	// _cat/indices
+	List<String[]> getIndexInfos(String clusterName) throws Exception;
+
+	Map<String/*nodeName*/, ShardInfoModel> getShardsNode(String clusterName) throws Exception;
+
+	Map<String/*IndexName*/, ShardInfoModel> getShardsIndex(String clusterName) throws Exception;
 
 	List<String[]> getActualIndexs(String clusterHttpAddress);
 

@@ -12,6 +12,24 @@ public class ClusterGaugeMetricModel implements Serializable {
     private Long documentCount;
     private Long document_store_byte;
     private String health;
+    private String version;
+    private Long max_uptime_in_ms;
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public Long getMax_uptime_in_millis() {
+        return max_uptime_in_ms;
+    }
+
+    public void setMax_uptime_in_millis(Long max_uptime_in_millis) {
+        this.max_uptime_in_ms = max_uptime_in_millis;
+    }
 
     public Integer getNodeCount() {
         return nodeCount;
