@@ -236,6 +236,7 @@ export default {
       });
     },
     getClusters() {
+      this.clusters = [];
       return this.$http.get('/cluster/all.json').then((data) => {
         const logicClusters = [];
         const physicalClusters = [];
