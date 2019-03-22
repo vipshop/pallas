@@ -57,6 +57,14 @@
                     </el-form-item>
                 </el-col>
             </el-row>
+            <el-row>
+                <el-col :span="22">
+                    <el-form-item label="监控级别">
+                        <span style="margin-right: 20px;"><span style="color: #fff;">集群：</span><el-switch v-model="clusterInfo.monitorLevelModel.cluster" :on-value="1" :off-value="0"></el-switch></span>
+                        <span style="color: #fff;">索引：</span><el-switch v-model="clusterInfo.monitorLevelModel.index" :on-value="1" :off-value="0"></el-switch>
+                    </el-form-item>
+                </el-col>
+            </el-row>
         </el-form>
         <div slot="footer" class="dialog-footer">    
            <el-button @click="closeDialog()">取消</el-button>

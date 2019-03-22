@@ -129,6 +129,10 @@ export default {
         realClustersArr: [],
         logicalCluster: false,
         accessiblePs: [],
+        monitorLevelModel: {
+          cluster: 0,
+          index: 0,
+        },
       },
       allPhysicals: [],
       allPallasSearchs: [],

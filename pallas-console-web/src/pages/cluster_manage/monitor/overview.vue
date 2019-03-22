@@ -1,5 +1,5 @@
 <template>
-    <div class="page-content">
+    <div class="page-content" v-loading="loading" element-loading-text="请稍等···">
         <div class="my-breadcrumb">
             <el-breadcrumb separator="/" class="my-breadcrumb-content">
                 <el-breadcrumb-item :to="{ name:'cluster_manage' }"><i class="fa fa-home"></i>ES集群管理</el-breadcrumb-item>
@@ -14,13 +14,14 @@
                     <span slot="label"><i class="fa fa-cube"></i>集群</span>
                 </el-tab-pane>
                 <el-tab-pane name="indices_monitor">
-                    <span slot="label"><i class="fa fa-search"></i>索引 (120)</span>
+                    <span slot="label"><i class="fa fa-search"></i>索引 ({{indicesNum}})</span>
                 </el-tab-pane>
                 <el-tab-pane name="nodes_monitor">
-                    <span slot="label"><i class="fa fa-cubes"></i>节点 (3)</span>
+                    <span slot="label"><i class="fa fa-cubes"></i>节点 ({{nodesNum}})</span>
                 </el-tab-pane>
             </el-tabs>
-            <router-view></router-view>
+
+            <router-view :nodes="nodes" :indices="indices"></router-view>
         </div>
     </div>
 </template>
@@ -30,7 +31,12 @@
 export default {
   data() {
     return {
+      loading: false,
       activeTab: 'cluster_monitor',
+      nodes: [],
+      nodesNum: 0,
+      indices: [],
+      indicesNum: 0,
     };
   },
   methods: {
@@ -53,6 +59,31 @@ export default {
           this.activeTab = str;
         }
       }
+    },
+    getIndices() {
+      return this.$http.post('/monitor/indices/info.json', { clusterName: this.clusterId }).then((data) => {
+        if (data) {
+          this.indices = data;
+          this.indicesNum = data.length;
+          this.$emit('get-indices-num', this.indicesNum);
+        }
+      });
+    },
+    getNodes() {
+      return this.$http.post('/monitor/nodes/info.json', { clusterName: this.clusterId }).then((data) => {
+        if (data) {
+          this.nodes = data;
+          this.nodesNum = data.length;
+          this.$emit('get-nodes-num', this.nodesNum);
+        }
+      });
+    },
+    init() {
+      this.loading = true;
+      Promise.all([this.getNodes(), this.getIndices()]).then()
+      .finally(() => {
+        this.loading = false;
+      });
     },
   },
   computed: {
@@ -85,6 +116,7 @@ export default {
   },
   created() {
     this.getActiveTab();
+    this.init();
   },
   watch: {
     $route: 'getActiveTab',
