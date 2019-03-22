@@ -87,6 +87,13 @@ java -Dfile.encoding=UTF-8 -jar pallas-demo.jar
 ```
 Click here for more details: [Quick Start](https://vipshop.github.io/pallas/#/zh-cn/1.x/tutorial)
 
+## Contributing
+Pallas官方微信讨论群，请搜索微信号viptech128(唯技术)，添加好友（备注Pallas开源交流）后加入。
+
+所有报Bug、建议与咨询，请在[Issue](https://github.com/vipshop/pallas/issues)发起；所有代码提交，请走[Pull Request](https://github.com/vipshop/pallas/pulls)流程。
+
+对于优秀的代码提交和建议，唯品会将不吝发挥电商本色，给予[vip.com](https://www.vip.com/)购物卡的奖励 ！！！
+
 ## Documents
 [Get Started](https://vipshop.github.io/pallas/#/zh-cn/1.x/tutorial)
 
