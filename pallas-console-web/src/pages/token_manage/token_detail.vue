@@ -196,7 +196,9 @@ export default {
           'span',
           [
             h('span', { style: { 'margin-left': '10px', 'font-size': '14px' } }, data.name),
-            h('span', { style: { 'margin-left': '5px', color: 'gray', 'font-size': '14px' } }, `( ${data.aliasName} )`),
+            h('el-popover', { props: { content: data.aliasName, trigger: 'hover' } }, [
+              h('span', { slot: 'reference', style: { 'margin-left': '5px', color: 'gray', 'font-size': '14px' } }, `( ${data.aliasName} )`),
+            ]),
           ],
         );
       } else {
