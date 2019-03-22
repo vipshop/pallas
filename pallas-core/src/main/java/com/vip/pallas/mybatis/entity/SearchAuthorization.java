@@ -358,6 +358,5 @@ public class SearchAuthorization {
 		public void setPsClusterName(String psClusterName) {
 			this.psClusterName = psClusterName;
 		}
-    }
-
+	}
 }
