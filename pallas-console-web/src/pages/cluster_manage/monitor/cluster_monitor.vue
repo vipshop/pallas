@@ -1,14 +1,7 @@
 <template>
-    <div class="my-tab-content">
+    <div class="my-tab-content" v-loading="loading" element-loading-text="请稍等···">
         <div>
             <el-row :gutter="10">
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
-                    <chart-container title="Search Rate(/s)" type="line">
-                        <div slot="chart">
-                            <MyLine id="searchRate" :option-info="searchRateInfo"></MyLine>
-                        </div>
-                    </chart-container>
-                </el-col>
                 <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
                     <chart-container title="Indexing Rate(/s)" type="line">
                         <div slot="chart">
@@ -24,28 +17,40 @@
 export default {
   data() {
     return {
+      loading: false,
       searchRateInfo: {},
       indexingRateInfo: {},
     };
   },
   methods: {
-    getSearchRate() {
+    getIndexingRate(indexingRateResp) {
       const optionInfo = {
-        xAxis: ['09:00', '09:10', '09:20', '09:30', '09:40', '09:50', '10:00', '10:10', '10:20'],
-        seriesData: [{ name: 'Search Rate', data: [2, 3, 5, 1, 3, 4, 7, 6, 4] }],
-        yAxisName: 's',
-      };
-      this.searchRateInfo = optionInfo;
-    },
-    getIndexingRate() {
-      const optionInfo = {
-        xAxis: ['09:00', '09:10', '09:20', '09:30', '09:40', '09:50', '10:00', '10:10', '10:20'],
+        xAxis: indexingRateResp.map(e => e.x),
         seriesData: [
-          { name: 'Total Shards', data: [2, 3, 5, 1, 3, 4, 7, 6, 4] },
-          { name: 'Primary Shards', data: [1, 4, 2, 4, 2, 3, 5, 2, 7] }],
+          { name: 'Indexing Rate', data: indexingRateResp.map(e => e.y) },
+        ],
         yAxisName: 's',
       };
       this.indexingRateInfo = optionInfo;
+    },
+    getClusterMonitor() {
+      const params = {
+        clusterName: this.clusterId,
+        from: new Date().getTime() - (60 * 60 * 1000),
+        to: new Date().getTime(),
+      };
+      return this.$http.post('/monitor/cluster.json', params).then((data) => {
+        if (data) {
+          this.getIndexingRate(data.indexingRate);
+        }
+      });
+    },
+    init() {
+      this.loading = true;
+      Promise.all([this.getClusterMonitor()]).then()
+      .finally(() => {
+        this.loading = false;
+      });
     },
   },
   computed: {
@@ -54,8 +59,7 @@ export default {
     },
   },
   created() {
-    this.getSearchRate();
-    this.getIndexingRate();
+    this.init();
   },
   watch: {
   },

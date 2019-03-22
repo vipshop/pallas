@@ -20,7 +20,6 @@
                     <span slot="label"><i class="fa fa-cubes"></i>节点 ({{nodesNum}})</span>
                 </el-tab-pane>
             </el-tabs>
-
             <router-view :nodes="nodes" :indices="indices"></router-view>
         </div>
     </div>

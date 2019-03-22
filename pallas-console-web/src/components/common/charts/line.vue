@@ -6,6 +6,7 @@
 
 <script>
 import echarts from 'echarts';
+import moment from 'moment';
 
 require('echarts/lib/chart/line');
 
@@ -34,6 +35,11 @@ export default {
           type: 'category',
           boundaryGap: false,
           data: [],
+          axisLabel: {
+            formatter(value) {
+              return `${moment(Number(value)).format('HH:mm:ss')}`;
+            },
+          },
         },
         yAxis: {
           type: 'value',
@@ -60,21 +66,21 @@ export default {
     drawLine() {
       const seriesArray = this.optionInfo.seriesData.map((obj) => {
         const rObj = { ...obj };
-        const itemStyle = {
-          normal: {
-            label: {
-              show: true,
-              position: 'top',
-              textStyle: {
-                fontWeight: 'bold',
-                color: '#eee',
-                fontSize: 11,
-              },
-            },
-          },
-        };
+        // const itemStyle = {
+        //   normal: {
+        //     label: {
+        //       show: true,
+        //       position: 'top',
+        //       textStyle: {
+        //         fontWeight: 'bold',
+        //         color: '#eee',
+        //         fontSize: 11,
+        //       },
+        //     },
+        //   },
+        // };
         this.$set(rObj, 'type', 'line');
-        this.$set(rObj, 'itemStyle', itemStyle);
+        // this.$set(rObj, 'itemStyle', itemStyle);
         return rObj;
       });
       this.option.xAxis.data = this.optionInfo.xAxis;
@@ -86,7 +92,7 @@ export default {
     },
   },
   mounted() {
-    this.drawLine();
+    // this.drawLine();
   },
 };
 </script>
