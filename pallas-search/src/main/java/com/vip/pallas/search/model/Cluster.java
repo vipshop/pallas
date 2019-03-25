@@ -1,9 +1,10 @@
 package com.vip.pallas.search.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.Date;
+
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class Cluster {
 
@@ -30,6 +31,8 @@ public class Cluster {
 
 	private Date createTime;
 	private Date updateTime;
+
+	private String monitorLevel;
 
 	public Date getCreateTime() {
 		return createTime;
@@ -115,10 +118,19 @@ public class Cluster {
 		this.accessiblePs = accessiblePs;
 	}
 
+	public String getMonitorLevel() {
+		return monitorLevel;
+	}
+
+	public void setMonitorLevel(String monitorLevel) {
+		this.monitorLevel = monitorLevel;
+	}
+
 	@Override
 	public String toString() {
 		return "Cluster [id=" + id + ", clusterId=" + clusterId + ", httpAddress=" + httpAddress + ", clientAddress="
 				+ clientAddress + ", description=" + description + ", hasPrivilege=" + hasPrivilege + ", realClusters="
-				+ realClusters + ", accessPsList=" + accessiblePs + ", logicalCluster=" + isLogicalCluster() + "]";
+				+ realClusters + ", accessiblePs=" + accessiblePs + ", logicalCluster=" + logicalCluster
+				+ ", createTime=" + createTime + ", updateTime=" + updateTime + ", monitorLevel=" + monitorLevel + "]";
 	}
 }
