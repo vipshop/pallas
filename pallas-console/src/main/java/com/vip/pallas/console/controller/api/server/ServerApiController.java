@@ -78,7 +78,7 @@ public class ServerApiController {
         ss.setIpport(ipport);
         if (takeTrafficStr != null) {
             Boolean takeTraffic = Boolean.valueOf(takeTrafficStr);
-            logger.info("server {} 's takeTraffic property is set to {}", ipport, takeTraffic);
+			// logger.info("server {} 's takeTraffic property is set to {}", ipport, takeTraffic);
             ss.setTakeTraffic(takeTraffic);
         }
 		if (infoJson != null) {
