@@ -1,12 +1,27 @@
 <template>
     <div class="page-content" v-loading="loading" element-loading-text="请稍等···">
-        <div class="my-breadcrumb">
-            <el-breadcrumb separator="/" class="my-breadcrumb-content">
-                <el-breadcrumb-item :to="{ name:'cluster_manage' }"><i class="fa fa-home"></i>ES集群管理</el-breadcrumb-item>
-                <el-breadcrumb-item :to="{ name:'cluster_detail', query: { clusterId } }">{{clusterId}}</el-breadcrumb-item>
-                <el-breadcrumb-item :to="{ name:'cluster_monitor', query: { clusterId } }">监控</el-breadcrumb-item>
-                <el-breadcrumb-item :to="item.route" v-for="(item, index) in breadcrumbs" :key="index">{{item.name}}</el-breadcrumb-item>
-            </el-breadcrumb>
+        <div class="my-breadcrumb" style="width: 100%">
+            <div class="pull-left" style="display: inline;">
+              <el-breadcrumb separator="/" class="my-breadcrumb-content">
+                  <el-breadcrumb-item :to="{ name:'cluster_manage' }"><i class="fa fa-home"></i>ES集群管理</el-breadcrumb-item>
+                  <el-breadcrumb-item :to="{ name:'cluster_detail', query: { clusterId } }">{{clusterId}}</el-breadcrumb-item>
+                  <el-breadcrumb-item :to="{ name:'cluster_monitor', query: { clusterId } }">监控</el-breadcrumb-item>
+                  <el-breadcrumb-item :to="item.route" v-for="(item, index) in breadcrumbs" :key="index">{{item.name}}</el-breadcrumb-item>
+              </el-breadcrumb>
+            </div>
+            <div class="pull-right" style="display: inline;margin-right: 10px;height: 30px;line-height: 30px;">
+                <el-dropdown trigger="click" @command="handleCommand">
+                  <span class="el-dropdown-link">
+                    <i class="fa fa-clock-o"></i>
+                    {{periodTimeMap[timeInterval]}}<i class="el-icon-caret-bottom el-icon--right"></i>
+                  </span>
+                  <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item command="15">最近15分钟</el-dropdown-item>
+                    <el-dropdown-item command="30">最近30分钟</el-dropdown-item>
+                    <el-dropdown-item command="60">最近1小时</el-dropdown-item>
+                  </el-dropdown-menu>
+              </el-dropdown>
+            </div>
         </div>
         <div class="page-tab">
             <el-tabs v-model="activeTab" @tab-click="onTabClick">
@@ -26,6 +41,9 @@
 </template>
 
 <script>
+import {
+  SET_MONITOR_TIME_INTERVAL,
+} from '../../../store/types';
 
 export default {
   data() {
@@ -36,9 +54,17 @@ export default {
       nodesNum: 0,
       indices: [],
       indicesNum: 0,
+      periodTimeMap: {
+        15: '最近15分钟',
+        30: '最近30分钟',
+        60: '最近1小时',
+      },
     };
   },
   methods: {
+    handleCommand(command) {
+      this.$store.dispatch(SET_MONITOR_TIME_INTERVAL, command);
+    },
     onTabClick() {
       this.$router.push({
         name: this.activeTab,
@@ -86,6 +112,9 @@ export default {
     },
   },
   computed: {
+    timeInterval() {
+      return this.$store.state.monitorTimeInterval;
+    },
     clusterId() {
       return this.$route.query.clusterId;
     },

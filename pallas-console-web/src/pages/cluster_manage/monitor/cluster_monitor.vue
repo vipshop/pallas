@@ -33,33 +33,32 @@ export default {
       };
       this.indexingRateInfo = optionInfo;
     },
-    getClusterMonitor() {
+    getClusterMonitor(interval) {
       const params = {
         clusterName: this.clusterId,
-        from: new Date().getTime() - (60 * 60 * 1000),
+        from: new Date().getTime() - (Number(interval) * 60 * 1000),
         to: new Date().getTime(),
       };
-      return this.$http.post('/monitor/cluster.json', params).then((data) => {
+      this.loading = true;
+      this.$http.post('/monitor/cluster.json', params).then((data) => {
         if (data) {
           this.getIndexingRate(data.indexingRate);
         }
-      });
-    },
-    init() {
-      this.loading = true;
-      Promise.all([this.getClusterMonitor()]).then()
+      })
       .finally(() => {
         this.loading = false;
       });
     },
   },
   computed: {
+    timeInterval() {
+      const interval = this.$store.state.monitorTimeInterval;
+      this.getClusterMonitor(interval);
+      return interval;
+    },
     clusterId() {
       return this.$route.query.clusterId;
     },
-  },
-  created() {
-    this.init();
   },
   watch: {
   },

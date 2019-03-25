@@ -47,12 +47,12 @@ pre {
     background: #373a3c;
     border-radius: 0.25rem;
     height: 30px;
-    padding-left: 15px;
 }
 
 .my-breadcrumb-content {
     line-height: 30px;
     font-size: 15px;
+    margin: 0 15px;
 }
 
 .pull-left {

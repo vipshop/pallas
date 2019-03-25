@@ -31,6 +31,9 @@ export default {
     },
   },
   computed: {
+    timeInterval() {
+      return this.$store.state.monitorTimeInterval;
+    },
     clusterId() {
       return this.$route.query.clusterId;
     },
