@@ -36,6 +36,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.google.common.collect.ImmutableSet;
 import com.vip.pallas.utils.JsonUtil;
+import com.vip.vjtools.vjkit.collection.ListUtil;
 import com.vip.vjtools.vjkit.collection.SetUtil;
 
 /**
@@ -303,6 +304,18 @@ public class SearchAuthorization {
 				pools = DEFAULT_POOL_ARR;
 			}
 			return JsonUtil.toJson(pools);
+		}
+		
+		public static void removeDefaultLable(Set<Pool> pools) {
+			if (CollectionUtils.isNotEmpty(pools)) {
+				List<Pool> defaultPools = ListUtil.newArrayList();
+				for (Pool pool : pools) {
+					if (DEFAULT_POOL_LABEL.equals(pool.getName())) {
+						defaultPools.add(pool);
+					}
+				}
+				pools.removeAll(defaultPools);
+			}
 		}
 		
 		@Override

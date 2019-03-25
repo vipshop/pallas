@@ -7,14 +7,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.google.common.base.Splitter;
 import com.vip.pallas.search.utils.PallasSearchProperties;
 import com.vip.pallas.utils.IPUtils;
 import com.vip.vjtools.vjkit.collection.SetUtil;
 
-@JsonInclude(value = Include.NON_EMPTY)
-@JsonSerialize(include=JsonSerialize.Inclusion.NON_EMPTY)
+
+@org.codehaus.jackson.annotate.JsonIgnoreProperties(ignoreUnknown = true)
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
+@JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SearchServer {
 	private static String localIpport = IPUtils.localIp4Str() + ":" + PallasSearchProperties.PALLAS_SEARCH_PORT;
 	private static String clusterName = PallasSearchProperties.PALLAS_SEARCH_CLUSTER;
@@ -28,9 +30,9 @@ public class SearchServer {
 	
 	private boolean takeTraffic;
 	
-	private String info;
+	private Object info;
 	
-	public SearchServer(boolean takeTraffic, String info) {
+	public SearchServer(boolean takeTraffic, Object info) {
 		super();
 		this.cluster = clusterName;
 		this.ipport = localIpport;
@@ -39,7 +41,7 @@ public class SearchServer {
 		this.info = info;
 	}
 	
-	public SearchServer(String cluster, String ipport, String pool, boolean takeTraffic, String info) {
+	public SearchServer(String cluster, String ipport, String pool, boolean takeTraffic, Object info) {
 		super();
 		this.cluster = cluster;
 		this.ipport = ipport;
@@ -52,14 +54,14 @@ public class SearchServer {
 		Set<String> poolSets = SetUtil.newHashSet();
 		if (StringUtils.isNotEmpty(poolName)) {
 			Iterator<String> iterator = Splitter.on(",").trimResults().
-					omitEmptyStrings().split(poolName).iterator();
-		    while (iterator.hasNext()) {
-		    	poolSets.add(iterator.next());
-		    }
+					omitEmptyStrings().split(poolName.toLowerCase()).iterator();
+			while (iterator.hasNext()) {
+				poolSets.add(iterator.next());
+			}
 		}
 		return poolSets;
 	}
-	
+
 	public String getCluster() {
 		return cluster;
 	}
@@ -91,12 +93,12 @@ public class SearchServer {
 	public void setTakeTraffic(boolean takeTraffic) {
 		this.takeTraffic = takeTraffic;
 	}
-
-	public String getInfo() {
+	
+	public Object getInfo() {
 		return info;
 	}
 
-	public void setInfo(String info) {
+	public void setInfo(Object info) {
 		this.info = info;
 	}
 }

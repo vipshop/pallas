@@ -8,13 +8,13 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.vip.pallas.search.model.SearchServer;
 import com.vip.pallas.search.netty.http.server.PallasNettyServer;
 import com.vip.pallas.search.utils.HttpClient;
 import com.vip.pallas.search.utils.JsonUtil;
 import com.vip.pallas.search.utils.PallasSearchProperties;
-import com.vip.pallas.utils.IPUtils;
 
 public class UploadInfoService {
 
@@ -42,17 +42,18 @@ public class UploadInfoService {
 			if (time % 10 != 3) {
 				return;
 			}
-			String info = serverWatch.buildAllInfo().toJSONString();
+			JSONObject info = serverWatch.buildAllInfo();
 			internalUpload(info, true);
 		};
 	}
 
-	public static void internalUpload(String info, boolean takeTraffic) {
+	public static void internalUpload(Object info, boolean takeTraffic) {
 		try {
-			if (info == null) {
-				logger.warn("server {} 's takeTraffic property is set to {}", IPUtils.localIp4Str(), takeTraffic);
+			SearchServer server = new SearchServer(true, info);
+			if (server.getInfo() == null) {
+				logger.warn("server {} 's takeTraffic property is set to {}", server.getIpport(), server.isTakeTraffic());
 			}
-			String serverInfo = JsonUtil.toJson(new SearchServer(takeTraffic, info));
+			String serverInfo = JsonUtil.toJson(server);
 			HttpClient.httpPost(upsertUrl, serverInfo);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
