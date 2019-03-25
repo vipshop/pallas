@@ -30,7 +30,7 @@
             <el-table-column label="代理集群" prop="cluster"></el-table-column>
             <el-table-column label="节点集">
                 <template scope="scope">
-                    <el-tag :type="'success'" v-if="!scope.row.pools || (JSON.parse(scope.row.pools)).length === 0" close-transition class="target-group-item">default</el-tag>
+                    <el-tag :type="'success'" v-if="!scope.row.pools || Object.keys(JSON.parse(scope.row.pools)).length === 0" close-transition class="target-group-item">default</el-tag>
                     <el-tag :type="'success'" :key="item" v-if="scope.row.pools" v-for="item in (JSON.parse(scope.row.pools))" close-transition class="target-group-item">{{item}}</el-tag>
                 </template>
             </el-table-column>
