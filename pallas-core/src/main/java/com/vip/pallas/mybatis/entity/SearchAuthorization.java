@@ -286,23 +286,24 @@ public class SearchAuthorization {
 		/**
 	     * [""]
 	     */
-	    public static Set<String> fromPoolsContent(String json) throws Exception {
-	    	if (StringUtils.isNotEmpty(json)) {
-	    		Set<String> poolSet = JsonUtil.readValue(json, new TypeReference<Set<String>>(){});
-	    		return poolSet;
-	    	}
-	    	return SetUtil.newHashSet();
-	    }
-	    
-	    /**
-	     *  [""]
-	     */
-	    public static String toPoolsConetent(Set<String> pools) throws Exception {
-	    	if (CollectionUtils.isEmpty(pools)) {
-	    		pools = DEFAULT_POOL_ARR;
-	    	}
-	    	return JsonUtil.toJson(pools);
-	    }
+		public static Set<String> fromPoolsContent(String json) throws Exception {
+			if (StringUtils.isNotEmpty(json)) {
+				Set<String> poolSet = JsonUtil.readValue(json, new TypeReference<Set<String>>() {
+				});
+				return poolSet;
+			}
+			return SetUtil.newHashSet();
+		}
+
+		/**
+		 * [""]
+		 */
+		public static String toPoolsConetent(Set<String> pools) throws Exception {
+			if (CollectionUtils.isEmpty(pools)) {
+				pools = DEFAULT_POOL_ARR;
+			}
+			return JsonUtil.toJson(pools);
+		}
 		
 		@Override
 		public int hashCode() {

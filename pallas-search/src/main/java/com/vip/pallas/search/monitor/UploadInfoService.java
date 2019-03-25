@@ -14,6 +14,7 @@ import com.vip.pallas.search.netty.http.server.PallasNettyServer;
 import com.vip.pallas.search.utils.HttpClient;
 import com.vip.pallas.search.utils.JsonUtil;
 import com.vip.pallas.search.utils.PallasSearchProperties;
+import com.vip.pallas.utils.IPUtils;
 
 public class UploadInfoService {
 
@@ -49,9 +50,9 @@ public class UploadInfoService {
 	public static void internalUpload(String info, boolean takeTraffic) {
 		try {
 			if (info == null) {
-				logger.warn("server {} 's takeTraffic property is set to {}", "localIpport", takeTraffic);
+				logger.warn("server {} 's takeTraffic property is set to {}", IPUtils.localIp4Str(), takeTraffic);
 			}
-			String serverInfo = JsonUtil.toJson(new SearchServer(true, info));
+			String serverInfo = JsonUtil.toJson(new SearchServer(takeTraffic, info));
 			HttpClient.httpPost(upsertUrl, serverInfo);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
