@@ -3,6 +3,7 @@ package com.vip.pallas.service;
 import com.vip.pallas.bean.monitor.*;
 import com.vip.pallas.exception.PallasException;
 
+import java.util.List;
 import java.util.Map;
 
 public interface MonitorService {
@@ -15,7 +16,7 @@ public interface MonitorService {
 
     ClusterGaugeMetricModel queryClusterInfo(MonitorQueryModel queryModel) throws Exception;
 
-    Map<String, NodeGaugeMetricModel> queryNodesInfo(MonitorQueryModel queryModel) throws Exception;
+    List<NodeGaugeMetricModel> queryNodesInfo(MonitorQueryModel queryModel) throws Exception;
 
-    Map<String, IndexGaugeMetricModel> queryIndicesInfo(MonitorQueryModel queryModel) throws Exception;
+    List<IndexGaugeMetricModel> queryIndicesInfo(MonitorQueryModel queryModel) throws Exception;
 }

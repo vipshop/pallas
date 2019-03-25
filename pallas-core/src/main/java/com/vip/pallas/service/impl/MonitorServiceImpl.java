@@ -57,7 +57,7 @@ public class MonitorServiceImpl implements MonitorService {
         dataMap.put("endTime", queryModel.getTo());
         dataMap.put("cluserName", queryModel.getClusterName());
         //for the moment
-        dataMap.put("interval_unit", "30s");
+        dataMap.put("interval_unit", "1m");
 
         return dataMap;
     }
@@ -66,9 +66,6 @@ public class MonitorServiceImpl implements MonitorService {
     public ClusterMetricInfoModel queryClusterMetrics(MonitorQueryModel queryModel) throws Exception{
         Configuration cfg = initTemplateConfiguration();
         Map<String, Object> dataMap = getDataMap(queryModel);
-
-        //guage
-        dataMap.put("type", ConstantUtil.TYPE_CLUSTER_HEALTH);
 
         Cluster cluster =  clusterService.findByName(queryModel.getClusterName());
         if(null == cluster) {
@@ -82,6 +79,7 @@ public class MonitorServiceImpl implements MonitorService {
         //derivative aggs
         dataMap.put("type", ConstantUtil.TYPE_INDICES_STATS);
         dataMap.put("isDerivative", true);
+        //除法也应该要put
 
         Template templateAggs = null;
         try {
@@ -93,6 +91,10 @@ public class MonitorServiceImpl implements MonitorService {
 
         clusterMetricInfoModel.setSearchRate(getClusterSearchRate(templateAggs, dataMap, "indices_stats.indices_all.total.search.query_total", cluster));
         clusterMetricInfoModel.setIndexingRate(getClusterIndexingRate(templateAggs, dataMap, "indices_stats.indices_all.total.indexing.index_total", cluster));
+        clusterMetricInfoModel.setSearchTime(getClusterSearchTime(templateAggs, dataMap, "indices_stats.indices_all.total.indexing.query_time_in_millis", cluster));
+        clusterMetricInfoModel.setIndexingTime(getClusterIndexingTime(templateAggs, dataMap, "indices_stats.indices_all.total.indexing.index_time_in_millis", cluster));
+        //setsearchLatency(clusterMetricInfoModel);
+        //setIndexingLatency(clusterMetricInfoModel);
 
         return clusterMetricInfoModel;
     }
@@ -113,7 +115,7 @@ public class MonitorServiceImpl implements MonitorService {
 
         NodeMetricInfoModel nodeMetricInfoModel = new NodeMetricInfoModel();
 
-        nodeMetricInfoModel.setGaugeMetric(queryNodesInfo(queryModel).get(queryModel.getNodeName()));
+        nodeMetricInfoModel.setGaugeMetric(queryNodesInfo(queryModel).get(0));
 
         //normal aggs
         Template templateAggs = null;
@@ -170,7 +172,7 @@ public class MonitorServiceImpl implements MonitorService {
 
         IndexMetricInfoModel indexMetricInfoModel = new IndexMetricInfoModel();
 
-        indexMetricInfoModel.setGaugeMetric(queryIndicesInfo(queryModel).get(queryModel.getIndexName()));
+        indexMetricInfoModel.setGaugeMetric(queryIndicesInfo(queryModel).get(0));
 
         Template templateAggs = null;
         try {
@@ -232,8 +234,10 @@ public class MonitorServiceImpl implements MonitorService {
     }
 
     @Override
-    public Map<String, NodeGaugeMetricModel> queryNodesInfo(MonitorQueryModel queryModel) throws Exception {
-        Map<String, NodeGaugeMetricModel>  result = new HashMap<>();
+    public List<NodeGaugeMetricModel> queryNodesInfo(MonitorQueryModel queryModel) throws Exception {
+        Map<String, NodeGaugeMetricModel>  haha = new HashMap<>();
+
+        List<NodeGaugeMetricModel> result = new ArrayList<>();
         Cluster cluster =  clusterService.findByName(queryModel.getClusterName());
         if(null == cluster) {
             throw new PallasException("集群不存在：" + queryModel.getClusterName());
@@ -241,7 +245,7 @@ public class MonitorServiceImpl implements MonitorService {
         //find all node by clusterName    /_cat/nodes
         List<String[]> nodeInfos = elasticSearchService.getNodesInfos(queryModel.getClusterName());
         if(null == nodeInfos || nodeInfos.size() == 0){
-            return new HashMap<>();
+            return new ArrayList<>();
         }
         //gauge metric group by nodeName
         Map<String/*nodeName*/, ShardInfoModel> shardInfoModelMap = elasticSearchService.getShardsNode(queryModel.getClusterName());
@@ -274,8 +278,9 @@ public class MonitorServiceImpl implements MonitorService {
             gaugeMetricModel.setDocumentStore(metricsJsonObj.getJSONObject(nodeName).getJSONObject("indices").getJSONObject("store").getLong("size_in_bytes"));
             gaugeMetricModel.setIndexCount(shardInfoModelMap.get(nodeName).getIndexCount());
             gaugeMetricModel.setShardCount(shardInfoModelMap.get(nodeName).getTotalShards());
+            gaugeMetricModel.setNodeName(nodeName);
 
-            result.put(nodeName, gaugeMetricModel);
+            result.add(gaugeMetricModel);
 
         }
 
@@ -283,10 +288,9 @@ public class MonitorServiceImpl implements MonitorService {
     }
 
     @Override
-    public Map<String, IndexGaugeMetricModel> queryIndicesInfo(MonitorQueryModel queryModel) throws Exception {
+    public List<IndexGaugeMetricModel> queryIndicesInfo(MonitorQueryModel queryModel) throws Exception {
 
-        Map<String, IndexGaugeMetricModel> result = new HashMap<>();
-
+        List<IndexGaugeMetricModel> result = new ArrayList<>();
         Cluster cluster =  clusterService.findByName(queryModel.getClusterName());
         if(null == cluster) {
             throw new PallasException("集群不存在：" + queryModel.getClusterName());
@@ -314,8 +318,8 @@ public class MonitorServiceImpl implements MonitorService {
             gaugeMetricModel.setReplicaShardCount(Integer.valueOf(indexInfo[5]));
             gaugeMetricModel.setTotalShardCount(gaugeMetricModel.getPrimaryShardCount() * (1 + gaugeMetricModel.getReplicaShardCount()));
             gaugeMetricModel.setUnassignedShardCount(shardInfoModelMap.get(indexName) == null ? 0: shardInfoModelMap.get(indexName).getUnassignedShards());
-
-            result.put(indexName, gaugeMetricModel);
+            gaugeMetricModel.setIndexName(indexName);
+            result.add(gaugeMetricModel);
 
         }
 
@@ -422,6 +426,49 @@ public class MonitorServiceImpl implements MonitorService {
 
     private List<MonitorMetricModel<Date, Double>> getClusterIndexingRate(Template template, Map<String, Object> dataMap,  String fieldName, Cluster cluster) throws PallasException {
         return getMonitorMetricModels(template, dataMap,fieldName, cluster);
+    }
+
+    private List<MonitorMetricModel<Date, Double>> getClusterSearchTime(Template template, Map<String, Object> dataMap,  String fieldName, Cluster cluster) throws PallasException {
+        return getMonitorMetricModels(template, dataMap,fieldName, cluster);
+    }
+
+    private List<MonitorMetricModel<Date, Double>> getClusterIndexingTime(Template template, Map<String, Object> dataMap,  String fieldName, Cluster cluster) throws PallasException {
+        return getMonitorMetricModels(template, dataMap,fieldName, cluster);
+    }
+
+    private void setIndexingLatency(ClusterMetricInfoModel model) {
+        List<MonitorMetricModel<Date, Double>> indexingRate = model.getIndexingRate();
+        List<MonitorMetricModel<Date, Double>> indexingTime = model.getIndexingTime();
+        if(indexingRate!= null && indexingRate.size() > 0 && indexingTime != null && indexingTime.size() > 0) {
+            if(indexingRate.size() != indexingTime.size()) {
+                logger.error("latency error: size not equals");
+                return;
+            }
+            model.setIndexingLatency(getResult(indexingTime, indexingRate));
+        }
+    }
+
+    private void setsearchLatency(ClusterMetricInfoModel model) {
+        List<MonitorMetricModel<Date, Double>> searchRate = model.getSearchRate();
+        List<MonitorMetricModel<Date, Double>> searchTime = model.getSearchTime();
+        if(searchRate!= null && searchRate.size() > 0 && searchTime != null && searchTime.size() > 0) {
+            if(searchRate.size() != searchTime.size()) {
+                logger.error("latency error: size not equals");
+                return;
+            }
+            model.setSearchLatency(getResult(searchTime, searchRate));
+        }
+    }
+
+    private List<MonitorMetricModel<Date, Double>> getResult(List<MonitorMetricModel<Date, Double>> a, List<MonitorMetricModel<Date, Double>> b) {
+        List<MonitorMetricModel<Date, Double>> result = new ArrayList<>();
+        for(int i=0; i<a.size(); i++) {
+            MonitorMetricModel<Date, Double> metricModel = new MonitorMetricModel<Date, Double>();
+            metricModel.setX(a.get(i).getX());
+            //error
+            metricModel.setY(a.get(i).getY() / b.get(i).getY());
+        }
+        return result;
     }
 
     /**

@@ -1,5 +1,7 @@
 package com.vip.pallas.bean.monitor;
 
+import com.google.common.collect.Collections2;
+
 import java.util.List;
 
 import java.io.Serializable;
@@ -9,9 +11,27 @@ public class ClusterMetricInfoModel implements Serializable {
     private ClusterGaugeMetricModel gaugeMetric;
 
     private List<MonitorMetricModel<Date, Double>> searchRate;
-    private List<MonitorMetricModel<Date, Double>> searchLatency;
+    private List<MonitorMetricModel<Date, Double>> searchTime;
+    private List<MonitorMetricModel<Date, Double>> indexingTime;
     private List<MonitorMetricModel<Date, Double>> indexingRate;
+    private List<MonitorMetricModel<Date, Double>> searchLatency;
     private List<MonitorMetricModel<Date, Double>> indexingLatency;
+
+    public List<MonitorMetricModel<Date, Double>> getSearchTime() {
+        return searchTime;
+    }
+
+    public void setSearchTime(List<MonitorMetricModel<Date, Double>> searchTime) {
+        this.searchTime = searchTime;
+    }
+
+    public List<MonitorMetricModel<Date, Double>> getIndexingTime() {
+        return indexingTime;
+    }
+
+    public void setIndexingTime(List<MonitorMetricModel<Date, Double>> indexingTime) {
+        this.indexingTime = indexingTime;
+    }
 
     public ClusterGaugeMetricModel getGaugeMetric() {
         return gaugeMetric;
@@ -51,5 +71,8 @@ public class ClusterMetricInfoModel implements Serializable {
 
     public void setIndexingLatency(List<MonitorMetricModel<Date, Double>> indexingLatency) {
         this.indexingLatency = indexingLatency;
+
     }
+
+
 }

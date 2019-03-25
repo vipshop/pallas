@@ -17,6 +17,8 @@
 
 package com.vip.pallas.console.vo;
 
+import com.vip.pallas.bean.monitor.MonitorLevelModel;
+
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
@@ -38,6 +40,16 @@ public class ClusterVO implements Serializable {
 
     @NotEmpty(message = "代理集群不能为空")
     private String accessiblePs;
+
+    private MonitorLevelModel monitorLevelModel;
+
+    public MonitorLevelModel getMonitorLevelModel() {
+        return monitorLevelModel;
+    }
+
+    public void setMonitorLevelModel(MonitorLevelModel monitorLevelModel) {
+        this.monitorLevelModel = monitorLevelModel;
+    }
 
     public Long getId() {
         return id;

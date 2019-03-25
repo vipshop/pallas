@@ -3,6 +3,7 @@ package com.vip.pallas.bean.monitor;
 import java.io.Serializable;
 
 public class IndexGaugeMetricModel implements Serializable {
+    private String indexName;
     private Long documentCount;
     private String document_store_byte_total;  //primary + replica
     private String document_store_byte_primary;
@@ -12,6 +13,14 @@ public class IndexGaugeMetricModel implements Serializable {
     private Integer unassignedShardCount;
     private String health;
     private String status;
+
+    public String getIndexName() {
+        return indexName;
+    }
+
+    public void setIndexName(String indexName) {
+        this.indexName = indexName;
+    }
 
     public String getHealth() {
         return health;

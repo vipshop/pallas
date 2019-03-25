@@ -17,9 +17,12 @@
 
 package com.vip.pallas.mybatis.entity;
 
+import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.vip.pallas.bean.monitor.MonitorLevelModel;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.management.monitor.Monitor;
 import java.util.Date;
 
 public class Cluster {
@@ -49,6 +52,24 @@ public class Cluster {
 	private Date updateTime;
 
 	private String monitorLevel;
+
+	private MonitorLevelModel monitorLevelModel;
+
+	public MonitorLevelModel getMonitorLevelModel() {
+		return monitorLevelModel;
+	}
+
+	public void setMonitorLevelModel(MonitorLevelModel monitorLevelModel) {
+		this.monitorLevelModel = monitorLevelModel;
+	}
+
+	public void setMonitorLevelModel() {
+		if(StringUtils.isNotEmpty(monitorLevel)) {
+			this.monitorLevelModel = JSON.parseObject(monitorLevel, MonitorLevelModel.class);
+		} else {
+			this.monitorLevelModel = MonitorLevelModel.getDefaultModel();
+		}
+	}
 
 	public void setLogicalCluster(boolean logicalCluster) {
 		this.logicalCluster = logicalCluster;

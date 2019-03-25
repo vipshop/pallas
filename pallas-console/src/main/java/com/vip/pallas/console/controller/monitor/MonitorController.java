@@ -1,7 +1,7 @@
 package com.vip.pallas.console.controller.monitor;
 
+
 import com.vip.pallas.bean.monitor.*;
-import com.vip.pallas.exception.PallasException;
 import com.vip.pallas.service.MonitorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/monitor")
@@ -22,7 +22,7 @@ public class MonitorController {
     @Autowired
     private MonitorService monitorService;
 
-    @RequestMapping("/cluster")
+    @RequestMapping("/cluster.json")
     @ResponseBody
     public ClusterMetricInfoModel cluserMoniror(@RequestBody MonitorQueryModel queryModel) throws Exception {
 
@@ -30,14 +30,14 @@ public class MonitorController {
         return clusterMetricInfoModel;
     }
 
-    @RequestMapping("/node")
+    @RequestMapping("/node.json")
     @ResponseBody
     public NodeMetricInfoModel nodeMonitor(@RequestBody MonitorQueryModel queryModel)throws Exception {
         NodeMetricInfoModel nodeMetricInfoModel =  monitorService.queryNodeMetrics(queryModel);
         return nodeMetricInfoModel;
     }
 
-    @RequestMapping("/index")
+    @RequestMapping("/index.json")
     @ResponseBody
     public IndexMetricInfoModel indexMonitor(@RequestBody MonitorQueryModel queryModel) throws Exception{
 
@@ -45,17 +45,17 @@ public class MonitorController {
         return indexMetricInfoModel;
     }
 
-    @RequestMapping("/nodes/info")
+    @RequestMapping("/nodes/info.json")
     @ResponseBody
-    public Map<String, NodeGaugeMetricModel> getGenericNodeInfos(@RequestBody MonitorQueryModel queryModel) throws Exception{
-        Map<String, NodeGaugeMetricModel> result = monitorService.queryNodesInfo(queryModel);
+    public List<NodeGaugeMetricModel> getGenericNodeInfos(@RequestBody MonitorQueryModel queryModel) throws Exception{
+        List<NodeGaugeMetricModel> result = monitorService.queryNodesInfo(queryModel);
         return result;
     }
 
-    @RequestMapping("/indices/info")
+    @RequestMapping("/indices/info.json")
     @ResponseBody
-    public Map<String, IndexGaugeMetricModel>  getGenericIndexInfos(@RequestBody MonitorQueryModel queryModel) throws Exception{
-        Map<String, IndexGaugeMetricModel> result = monitorService.queryIndicesInfo(queryModel);
+    public List<IndexGaugeMetricModel> getGenericIndexInfos(@RequestBody MonitorQueryModel queryModel) throws Exception{
+        List<IndexGaugeMetricModel> result = monitorService.queryIndicesInfo(queryModel);
         return result;
     }
 

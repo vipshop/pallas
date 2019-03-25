@@ -79,21 +79,32 @@ public class ClusterServiceImpl implements ClusterService{
 
 	@Override
 	public Cluster findByName(String name) {
-		return clusterRepository.selectByClusterName(name);
+		Cluster cluster = clusterRepository.selectByClusterName(name);
+		if(null != cluster) {
+			cluster.setMonitorLevelModel();
+		}
+		return cluster;
 	}
 
 	@Override
 	public List<Cluster> findAll() {
-		return clusterRepository.selectAll();
+		List<Cluster> result = clusterRepository.selectAll();
+		return result;
 	}
 
 	@Override
 	public List<Cluster> findPage(Page<Cluster> page, String clusterId) {
 		Map<String, Object> params = new HashMap<String, Object>();  
 		params.put("clusterId", clusterId);
-        page.setParams(params);  
-        
-		return clusterRepository.selectPage(page);
+        page.setParams(params);
+		List<Cluster> result = clusterRepository.selectPage(page);
+		if(null != result && result.size() > 0) {
+			result.forEach((cluster) -> {
+				cluster.setMonitorLevelModel();
+			});
+
+		}
+		return result;
 	}
 
 	@Override

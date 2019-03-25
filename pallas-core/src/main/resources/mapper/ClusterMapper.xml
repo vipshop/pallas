@@ -160,10 +160,10 @@
         description = #{description,jdbcType=LONGVARCHAR},
       </if>
       <if test="updateTime != null">
-        update_time = #{updateTime, jdbcType=TIMESTAMP}
+        update_time = #{updateTime, jdbcType=TIMESTAMP},
       </if>
       <if test="monitorLevel != null">
-        monitor_level = #{monitorLevel,jdbcType=VARCHAR},
+        monitor_level = #{monitorLevel,jdbcType=VARCHAR}
       </if>
     </set>
     where cluster_id = #{clusterId,jdbcType=VARCHAR}

@@ -214,6 +214,7 @@ public class ClusterController {
 
         Cluster cluster = new Cluster();
         BeanUtils.copyProperties(params, cluster);
+        cluster.setMonitorLevel(params.getMonitorLevelModel().toString());
         return cluster;
     }
 }
