@@ -2,10 +2,16 @@ package com.vip.pallas.search.model;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 
+@org.codehaus.jackson.annotate.JsonIgnoreProperties(ignoreUnknown = true)
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
+@JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Cluster {
 
     private Long id;
@@ -31,8 +37,8 @@ public class Cluster {
 
 	private Date createTime;
 	private Date updateTime;
-
 	private String monitorLevel;
+
 
 	public Date getCreateTime() {
 		return createTime;
