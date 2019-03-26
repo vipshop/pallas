@@ -132,7 +132,7 @@ export default {
       }
       this.$set(tokenClusterData, 'serverPools', data.serverPools);
       this.$set(tokenClusterData, 'myIndexPrivilegeArr', data.indexPrivileges);
-      this.psClusterList = this.getPsServerPoolJsonTree(data.serverPools);
+      this.psClusterList = this.getPsServerPoolJsonTree(data.serverPools, data.pools);
       const checkedPools = [];
       tokenClusterData.pools.forEach((ele) => {
         checkedPools.push(this.genPsNodeKey(ele));
@@ -146,6 +146,9 @@ export default {
         this.$http.get(`/token/token_privileges.json?id=${this.tokenInfo.id}`).then((data) => {
           this.clusterList = data;
           this.sortTokenCluster();
+          if (Object.keys(data).length >= 0) {
+            this.handleNodeClick(data[0]);
+          }
         })
         .finally(() => {
           this.loading = false;
@@ -195,7 +198,9 @@ export default {
         renderHtml = h(
           'span',
           [
-            h('span', { style: { 'margin-left': '10px', 'font-size': '14px' } }, data.name),
+            h('el-popover', { props: { content: `代理节点集 ${data.name} 已下线`, trigger: 'hover', disabled: !data.offline } }, [
+              h('span', { slot: 'reference', style: { 'margin-left': '10px', 'font-size': '14px' }, attrs: { class: `${this.renderPoolOffline(data.offline)}` } }, data.name),
+            ]),
             h('el-popover', { props: { content: data.aliasName, trigger: 'hover' } }, [
               h('span', { slot: 'reference', style: { 'margin-left': '5px', color: 'gray', 'font-size': '14px' } }, `( ${data.aliasName} )`),
             ]),
@@ -205,7 +210,9 @@ export default {
         renderHtml = h(
           'span',
           [
-            h('span', { style: { 'margin-left': '10px', 'font-size': '14px' } }, data.name),
+            h('el-popover', { props: { content: `代理节点集 ${data.name} 已下线`, trigger: 'hover', disabled: !data.offline } }, [
+              h('span', { slot: 'reference', style: { 'margin-left': '10px', 'font-size': '14px' }, attrs: { class: `${this.renderPoolOffline(data.offline)}` } }, data.name),
+            ]),
           ],
         );
       }
@@ -218,13 +225,27 @@ export default {
         this.$set(this.tokenClusterInfo, 'pools', this.$refs.psPoolTree.getCheckedNodes());
       }
     },
-    getPsServerPoolJsonTree(data) {
+    getPsServerPoolJsonTree(serverPools, pools) {
       const groups = {};
-      data.forEach((ele) => {
+      serverPools.forEach((ele) => {
         const group = ele.psClusterName;
         const newEle = Object.assign({}, ele, { id: this.genPsNodeKey(ele) });
         groups[group] = groups[group] || [];
         groups[group].push(newEle);
+      });
+      pools.forEach((ele) => {
+        let theSame = false;
+        const group = ele.psClusterName;
+        groups[group] = groups[group] || [];
+        groups[group].forEach((e) => {
+          if (e.id === this.genPsNodeKey(ele)) {
+            theSame = true;
+          }
+        });
+        if (!theSame) {
+          const newEle = Object.assign({}, ele, { id: this.genPsNodeKey(ele), offline: true });
+          groups[group].push(newEle);
+        }
       });
       const tree = [];
       Object.keys(groups).forEach((key) => {
@@ -239,6 +260,9 @@ export default {
     },
     genPsNodeKey(ele) {
       return `${ele.name}:${ele.psClusterName}`;
+    },
+    renderPoolOffline(status) {
+      return status ? 'pool-offline' : '';
     },
   },
   created() {
@@ -273,5 +297,9 @@ export default {
   margin-top: 10px;
   position: relative;
   overflow: auto;
+}
+.pool-offline {
+  text-decoration: line-through;
+  color: #ff4949;
 }
 </style>
