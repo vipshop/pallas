@@ -50,7 +50,7 @@ export default {
       };
       this.$http.post('/monitor/index.json', params).then((data) => {
         if (data) {
-          this.gaugeMetricData.push(data.gaugeMetric);
+          this.gaugeMetricData = [data.gaugeMetric];
         }
       });
     },

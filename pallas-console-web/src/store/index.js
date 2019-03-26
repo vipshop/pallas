@@ -11,7 +11,11 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     loginUser: '',
-    monitorTimeInterval: '30',
+    monitorTimeInterval: {
+      command: '30',
+      from: new Date().getTime() - (30 * 60 * 1000),
+      to: new Date().getTime(),
+    },
   },
   getters: {
   },
@@ -19,16 +23,16 @@ export default new Vuex.Store({
     [SET_LOGIN_USER](state, loginUser) {
       state.loginUser = loginUser;
     },
-    [SET_MONITOR_TIME_INTERVAL](state, timeInterval) {
-      state.monitorTimeInterval = timeInterval;
+    [SET_MONITOR_TIME_INTERVAL](state, timeInterinfo) {
+      state.monitorTimeInterval = { ...timeInterinfo };
     },
   },
   actions: {
     [SET_LOGIN_USER]({ commit }, loginUser) {
       commit(SET_LOGIN_USER, loginUser);
     },
-    [SET_MONITOR_TIME_INTERVAL]({ commit }, timeInterval) {
-      commit(SET_MONITOR_TIME_INTERVAL, timeInterval);
+    [SET_MONITOR_TIME_INTERVAL]({ commit }, timeInterinfo) {
+      commit(SET_MONITOR_TIME_INTERVAL, timeInterinfo);
     },
   },
 });

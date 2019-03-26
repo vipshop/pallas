@@ -11,14 +11,15 @@
             </div>
             <div class="pull-right" style="display: inline;margin-right: 10px;height: 30px;line-height: 30px;">
                 <el-dropdown trigger="click" @command="handleCommand">
-                  <span class="el-dropdown-link">
+                  <span class="el-dropdown-link" :title="timeInterval.command === 'custom' ? `${formatDate(timeInterval.from, 'MM-DD HH:mm')} - ${formatDate(timeInterval.to, 'MM-DD HH:mm')}` : ''">
                     <i class="fa fa-clock-o"></i>
-                    {{periodTimeMap[timeInterval]}}<i class="el-icon-caret-bottom el-icon--right"></i>
+                    {{periodTimeMap[timeInterval.command]}}<i class="el-icon-caret-bottom el-icon--right"></i>
                   </span>
                   <el-dropdown-menu slot="dropdown">
                     <el-dropdown-item command="15">最近15分钟</el-dropdown-item>
                     <el-dropdown-item command="30">最近30分钟</el-dropdown-item>
                     <el-dropdown-item command="60">最近1小时</el-dropdown-item>
+                    <el-dropdown-item divided command="custom">自定义时间</el-dropdown-item>
                   </el-dropdown-menu>
               </el-dropdown>
             </div>
@@ -37,15 +38,23 @@
             </el-tabs>
             <router-view></router-view>
         </div>
+        <div v-if="customTimeVisible">
+          <custom-time-dialog @set-custom-time="setCustomTime" @close-dialog="closeCustomTimeDialog"></custom-time-dialog>
+        </div>
     </div>
 </template>
 
 <script>
+import Moment from 'moment';
 import {
   SET_MONITOR_TIME_INTERVAL,
 } from '../../../store/types';
+import CustomTimeDialog from './custom_time_dialog';
 
 export default {
+  components: {
+    'custom-time-dialog': CustomTimeDialog,
+  },
   data() {
     return {
       loading: false,
@@ -56,12 +65,35 @@ export default {
         15: '最近15分钟',
         30: '最近30分钟',
         60: '最近1小时',
+        custom: '自定义时间',
       },
+      customTimeVisible: false,
     };
   },
   methods: {
+    formatDate(time, format) {
+      const date = new Date(time);
+      const formatTime = Moment(date).format(format);
+      return formatTime;
+    },
     handleCommand(command) {
-      this.$store.dispatch(SET_MONITOR_TIME_INTERVAL, command);
+      if (command !== 'custom') {
+        const params = {
+          command,
+          from: new Date().getTime() - (Number(command) * 60 * 1000),
+          to: new Date().getTime(),
+        };
+        this.$store.dispatch(SET_MONITOR_TIME_INTERVAL, params);
+      } else {
+        this.customTimeVisible = true;
+      }
+    },
+    setCustomTime(params) {
+      this.$store.dispatch(SET_MONITOR_TIME_INTERVAL, params);
+      this.closeCustomTimeDialog();
+    },
+    closeCustomTimeDialog() {
+      this.customTimeVisible = false;
     },
     onTabClick() {
       this.$router.push({

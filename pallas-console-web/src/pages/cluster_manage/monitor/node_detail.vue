@@ -70,7 +70,7 @@ export default {
       };
       this.$http.post('/monitor/node.json', params).then((data) => {
         if (data) {
-          this.gaugeMetricData.push(data.gaugeMetric);
+          this.gaugeMetricData = [data.gaugeMetric];
           this.getgcCount(data.gcCountOld, data.gcCountYoung);
         }
       });

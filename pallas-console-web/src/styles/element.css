@@ -789,3 +789,7 @@
 .el-loading-spinner .path {
     stroke: #bfcbd9;
 }
+
+.el-dropdown-menu__item--divided:before {
+    height: 0;
+}

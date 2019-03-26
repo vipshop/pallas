@@ -120,13 +120,12 @@ export default {
     },
     getClusterMonitor() {
       const params = {
+        ...this.timeInterval,
         clusterName: this.clusterId,
-        from: new Date().getTime() - (Number(this.timeInterval) * 60 * 1000),
-        to: new Date().getTime(),
       };
       this.$http.post('/monitor/cluster.json', params).then((data) => {
         if (data) {
-          this.gaugeMetricData.push(data.gaugeMetric);
+          this.gaugeMetricData = [data.gaugeMetric];
           this.getIndexingRate(data.indexingRate);
           this.getSearchRate(data.searchRate);
           this.getIndexingLatency(data.indexingLatency);
