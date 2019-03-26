@@ -14,9 +14,9 @@
       <div>
             <el-row :gutter="10">
                 <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
-                    <chart-container title="Index Memory(B)" type="line">
+                    <chart-container title="gc Count" type="line">
                         <div slot="chart">
-                            <MyLine id="indexMemory" :option-info="indexMemoryInfo"></MyLine>
+                            <MyLine id="gcCount" :option-info="gcCountInfo"></MyLine>
                         </div>
                     </chart-container>
                 </el-col>
@@ -30,8 +30,7 @@ export default {
     return {
       loading: false,
       gaugeMetricData: [],
-      gcCountOldInfo: {},
-      gcCountYoungInfo: {},
+      gcCountInfo: {},
       gc_duration_old_ms_info: {},
       gc_duration_young_ms_info: {},
       jvm_heap_max_byte_info: {},
@@ -51,8 +50,16 @@ export default {
     };
   },
   methods: {
-    getgcCountOld() {
-
+    getgcCount(gcCountOld, gcCountYoung) {
+      const optionInfo = {
+        xAxis: gcCountOld.map(e => e.x),
+        seriesData: [
+          { name: 'gc Count Old', data: gcCountOld.map(e => e.y) },
+          { name: 'gc Count Young', data: gcCountYoung.map(e => e.y) },
+        ],
+        yAxisName: 's',
+      };
+      this.gcCountInfo = optionInfo;
     },
     getNodeMonitor() {
       const params = {
@@ -64,6 +71,7 @@ export default {
       this.$http.post('/monitor/node.json', params).then((data) => {
         if (data) {
           this.gaugeMetricData.push(data.gaugeMetric);
+          this.getgcCount(data.gcCountOld, data.gcCountYoung);
         }
       });
     },

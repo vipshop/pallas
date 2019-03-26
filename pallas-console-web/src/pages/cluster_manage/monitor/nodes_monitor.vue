@@ -6,10 +6,10 @@
                     <el-form :inline="true" class="demo-form-inline">
                         <input type="text" v-show="false"/>
                         <el-form-item label="">
-                            <el-input placeholder="请搜索节点" v-model="nodeForSearch" @keyup.enter.native=""></el-input>
+                            <el-input placeholder="请搜索节点" v-model="nodeForSearch" @keyup.enter.native="nodesFilter"></el-input>
                         </el-form-item>
                         <el-form-item class="filter-search">
-                            <el-button type="primary" icon="search" @click="">查询</el-button>
+                            <el-button type="primary" icon="search" @click="nodesFilter">查询</el-button>
                         </el-form-item>
                     </el-form>
                 </div>
@@ -17,7 +17,7 @@
         </div>
         <div class="content">
             <template>
-                <el-table :data="nodes" border style="width: 100%" v-loading="loading" element-loading-text="请稍等···">
+                <el-table :data="nodesList" border style="width: 100%" v-loading="loading" element-loading-text="请稍等···">
                     <el-table-column label="Name" prop="nodeName">
                         <template scope="scope">
                             <router-link tag="a" :to="{ path: 'node_monitor_detail', query: {clusterId, node: scope.row.nodeName} }">{{scope.row.nodeName}}</router-link>
@@ -36,14 +36,37 @@
 </template>
 <script>
 export default {
-  props: ['nodes'],
+  props: [],
   data() {
     return {
       loading: false,
       nodeForSearch: '',
+      nodesList: [],
+      nodes: [],
     };
   },
   methods: {
+    nodesFilter() {
+      let filtered = this.nodes.slice();
+      filtered = filtered.filter(e => e.nodeName.indexOf(this.nodeForSearch) > -1);
+      this.nodesList = filtered;
+    },
+    getNodes() {
+      return this.$http.post('/monitor/nodes/info.json', { clusterName: this.clusterId }).then((data) => {
+        if (data) {
+          this.nodes = data;
+          this.nodesNum = data.length;
+          this.nodesFilter();
+        }
+      });
+    },
+    init() {
+      this.loading = true;
+      Promise.all([this.getNodes()]).then()
+      .finally(() => {
+        this.loading = false;
+      });
+    },
   },
   computed: {
     clusterId() {
@@ -51,8 +74,7 @@ export default {
     },
   },
   created() {
-  },
-  watch: {
+    this.init();
   },
 };
 </script>

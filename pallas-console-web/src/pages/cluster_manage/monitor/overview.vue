@@ -35,7 +35,7 @@
                     <span slot="label"><i class="fa fa-cubes"></i>节点 ({{nodesNum}})</span>
                 </el-tab-pane>
             </el-tabs>
-            <router-view :nodes="nodes" :indices="indices"></router-view>
+            <router-view></router-view>
         </div>
     </div>
 </template>
@@ -50,9 +50,7 @@ export default {
     return {
       loading: false,
       activeTab: 'cluster_monitor',
-      nodes: [],
       nodesNum: 0,
-      indices: [],
       indicesNum: 0,
       periodTimeMap: {
         15: '最近15分钟',
@@ -85,27 +83,23 @@ export default {
         }
       }
     },
-    getIndices() {
-      return this.$http.post('/monitor/indices/info.json', { clusterName: this.clusterId }).then((data) => {
+    getIndicesNum() {
+      return this.$http.get('/monitor/indices/count.json', { clusterName: this.clusterId }).then((data) => {
         if (data) {
-          this.indices = data;
-          this.indicesNum = data.length;
-          this.$emit('get-indices-num', this.indicesNum);
+          this.indicesNum = data;
         }
       });
     },
-    getNodes() {
-      return this.$http.post('/monitor/nodes/info.json', { clusterName: this.clusterId }).then((data) => {
+    getNodesNum() {
+      return this.$http.get('/monitor/nodes/count.json', { clusterName: this.clusterId }).then((data) => {
         if (data) {
-          this.nodes = data;
-          this.nodesNum = data.length;
-          this.$emit('get-nodes-num', this.nodesNum);
+          this.nodesNum = data;
         }
       });
     },
     init() {
       this.loading = true;
-      Promise.all([this.getNodes(), this.getIndices()]).then()
+      Promise.all([this.getIndicesNum(), this.getNodesNum()]).then()
       .finally(() => {
         this.loading = false;
       });

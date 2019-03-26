@@ -6,10 +6,10 @@
                     <el-form :inline="true" class="demo-form-inline">
                         <input type="text" v-show="false"/>
                         <el-form-item label="">
-                            <el-input placeholder="请搜索索引" v-model="indiceForSearch" @keyup.enter.native=""></el-input>
+                            <el-input placeholder="请搜索索引" v-model="indiceForSearch" @keyup.enter.native="indicesFilter"></el-input>
                         </el-form-item>
                         <el-form-item class="filter-search">
-                            <el-button type="primary" icon="search" @click="">查询</el-button>
+                            <el-button type="primary" icon="search" @click="indicesFilter">查询</el-button>
                         </el-form-item>
                     </el-form>
                 </div>
@@ -17,7 +17,7 @@
         </div>
         <div class="content">
             <template>
-                <el-table :data="indices" border style="width: 100%" v-loading="loading" element-loading-text="请稍等···">
+                <el-table :data="indicesList" border style="width: 100%" v-loading="loading" element-loading-text="请稍等···">
                     <el-table-column label="Name" prop="indexName">
                         <template scope="scope">
                             <router-link tag="a" :to="{ path: 'indice_monitor_detail', query: {clusterId, indice: scope.row.indexName} }">{{scope.row.indexName}}</router-link>
@@ -36,14 +36,37 @@
 </template>
 <script>
 export default {
-  props: ['indices'],
+  props: [],
   data() {
     return {
       loading: false,
       indiceForSearch: '',
+      indicesList: [],
+      indices: [],
     };
   },
   methods: {
+    indicesFilter() {
+      let filtered = this.indices.slice();
+      filtered = filtered.filter(e => e.indexName.indexOf(this.indiceForSearch) > -1);
+      this.indicesList = filtered;
+    },
+    getIndices() {
+      return this.$http.post('/monitor/indices/info.json', { clusterName: this.clusterId }).then((data) => {
+        if (data) {
+          this.indices = data;
+          this.indicesNum = data.length;
+          this.indicesFilter();
+        }
+      });
+    },
+    init() {
+      this.loading = true;
+      Promise.all([this.getIndices()]).then()
+      .finally(() => {
+        this.loading = false;
+      });
+    },
   },
   computed: {
     timeInterval() {
@@ -54,8 +77,7 @@ export default {
     },
   },
   created() {
-  },
-  watch: {
+    this.init();
   },
 };
 </script>
