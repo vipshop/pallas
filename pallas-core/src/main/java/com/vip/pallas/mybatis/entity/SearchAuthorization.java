@@ -291,6 +291,7 @@ public class SearchAuthorization {
 			if (StringUtils.isNotEmpty(json)) {
 				Set<String> poolSet = JsonUtil.readValue(json, new TypeReference<Set<String>>() {
 				});
+				Pool.removeDefaultLabel(poolSet);
 				return poolSet;
 			}
 			return SetUtil.newHashSet();
@@ -303,10 +304,17 @@ public class SearchAuthorization {
 			if (CollectionUtils.isEmpty(pools)) {
 				pools = DEFAULT_POOL_ARR;
 			}
+			Pool.removeDefaultLabel(pools);
 			return JsonUtil.toJson(pools);
 		}
 		
-		public static void removeDefaultLable(Set<Pool> pools) {
+		public static void removeDefaultLabel(Set<String> pools) {
+			if (CollectionUtils.isNotEmpty(pools)) {
+				pools.remove(Pool.DEFAULT_POOL_LABEL);
+			}
+		}
+		
+		public static void removeDefaultPool(Set<Pool> pools) {
 			if (CollectionUtils.isNotEmpty(pools)) {
 				List<Pool> defaultPools = ListUtil.newArrayList();
 				for (Pool pool : pools) {

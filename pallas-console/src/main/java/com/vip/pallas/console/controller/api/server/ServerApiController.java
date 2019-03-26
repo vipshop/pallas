@@ -18,7 +18,10 @@
 package com.vip.pallas.console.controller.api.server;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -92,10 +95,10 @@ public class ServerApiController {
 			}
 			ss.setInfo(info);
 		}
-        
-        ss.setPools(Pool.toPoolsConetent(poolSet));
-        searchServerService.upsertByIpAndCluster(ss);
-    }
+
+		ss.setPools(Pool.toPoolsConetent(poolSet));
+		searchServerService.upsertByIpAndCluster(ss);
+	}
 
     @RequestMapping("/query_pslist_and_domain.json")
     public Map<String, Object> queryPsListAndDomain(@RequestBody Map<String, Object> params) {
@@ -153,61 +156,48 @@ public class ServerApiController {
         }
         return healthyPsList;
     }
-    
+
 	private List<String> findAccessibleHealthyPsList(String accessiblePs, Set<Pool> pools, String ip) {
-		Set<String> ipSet = SetUtil.newHashSet();
-		pools = CollectionUtils.isEmpty(pools) ? SearchAuthorization.DEFAULT_POOLS : pools;
+		pools = CollectionUtils.isEmpty(pools) ? Collections.emptySet() : pools;
 		List<String> domains = Splitter.on(",").trimResults().omitEmptyStrings().splitToList(accessiblePs);
-		// 初始化所有可能需要返回标签的结构，同时考虑某一search sever下无存活服务的可能
-		Map<String, Set<String>> poolIpMap = MapUtil.newHashMap();
-		for (Pool pool : pools) {
-			if (!poolIpMap.containsKey(pool.genUniqueKey())) {
-				poolIpMap.put(pool.genUniqueKey(), SetUtil.newHashSet());
-			}
-		}
-		int targetPrefix = IPUtils.IPV42PrefixInteger(ip);
-		List<SearchServer> sameDcSsList = ListUtil.newArrayList(), remoteDcSsList = ListUtil.newArrayList(),
-				ipSsList = ListUtil.newArrayList();
+		Set<String> globalIpSet = SetUtil.newHashSet();
+		// initialize the pool map to store the ipport for every pool.
+		Map<String, Set<String>> poolIpMap = pools.stream()
+				.collect(Collectors.toMap(Pool::genUniqueKey, p -> SetUtil.newHashSet(), (key1, key2) -> key1));
+		
 		for (String domain : domains) {
 			List<SearchServer> ssList = searchServerService
 					.selectHealthyServersByCluster(SearchServerService.HEALTHY_UPLOAD_INTERVAL_TOLERANCE, domain);
-			// if one ip of the cluster match the-same-dc rule, the rest shall be the same.
-			ssList = ssList.stream().filter(SearchServer::getTakeTraffic).collect(Collectors.toList());
-			if (CollectionUtils.isNotEmpty(ssList)
-					&& targetPrefix == IPUtils.IPV42PrefixInteger(ssList.get(0).getIpport())) {
-				sameDcSsList.addAll(ssList);
-			}
-			// if the-same-dc-pslist not found, return all of them.
-			remoteDcSsList.addAll(ssList);
-		}
 
-		ipSsList = sameDcSsList.isEmpty() ? remoteDcSsList : sameDcSsList;
-
-		// 处理search server注册回来的所有的pool,并分组聚合search server，同时兼容处理可能的历史数据
-		for (SearchServer server : ipSsList) {
-			poolIpMap.get(Pool.DEFAULT_UNIQUE_KEY).add(server.getIpport());
-			Set<String> poolSet = Pool.DEFAULT_POOL_ARR;
-			try {
-				poolSet = Pool.fromPoolsContent(server.getPools());
-			} catch (Exception e) {
-				logger.error("Pools illegal", e);
-			}
-			for (String pool : poolSet) {
-				String poolKey = Pool.getUniqueKey(pool, server.getCluster());
-				if (poolIpMap.containsKey(poolKey)) {
-					poolIpMap.get(poolKey).add(server.getIpport());
+			ssList.stream().filter(SearchServer::getTakeTraffic).forEach(server -> {
+				globalIpSet.add(server.getIpport());
+				Set<String> poolSet = Pool.DEFAULT_POOL_ARR;
+				try {
+					poolSet = Pool.fromPoolsContent(server.getPools());
+				} catch (Exception e) {
+					logger.error("Pools illegal", e);
 				}
-			}
+				for (String pool : poolSet) {
+					String poolKey = Pool.getUniqueKey(pool, server.getCluster());
+					if (poolIpMap.containsKey(poolKey)) {
+						poolIpMap.get(poolKey).add(server.getIpport());
+					}
+				}
+			});
 		}
-
-		poolIpMap.forEach((k, v) -> {
-			if (!Pool.DEFAULT_UNIQUE_KEY.equals(k)) {
-				ipSet.addAll(v);
+		int targetPrefix = IPUtils.IPV42PrefixInteger(ip);
+		
+		Set<String> poolIpSet = SetUtil.newHashSet(), ssIpSet = SetUtil.newHashSet();
+		poolIpMap.values().forEach(v -> {
+			Iterator<String> i = v.iterator();
+			// if one ip of the pool match the-same-dc rule, the rest shall be the same.
+			if (i.hasNext() && targetPrefix == IPUtils.IPV42PrefixInteger(i.next())) {
+				poolIpSet.addAll(v);
 			}
+			ssIpSet.addAll(v);
 		});
-
-		// 某pool下无任何存活search server时，返回default
-		return ListUtil.newArrayList(CollectionUtils.isEmpty(ipSet) ? 
-				poolIpMap.get(Pool.DEFAULT_UNIQUE_KEY) : ipSet);
-    }
+		
+		return ListUtil.newArrayList(CollectionUtils.isNotEmpty(poolIpSet) ? poolIpSet
+				: CollectionUtils.isNotEmpty(ssIpSet) ? ssIpSet : globalIpSet);
+	}
 }

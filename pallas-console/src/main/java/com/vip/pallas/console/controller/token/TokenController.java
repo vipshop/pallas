@@ -171,7 +171,7 @@ public class TokenController {
 				}
 			}
         }
-        Pool.removeDefaultLable(serverPools);
+        Pool.removeDefaultPool(serverPools);
         clusterItem.setServerPools(serverPools);
         List<SearchAuthorization.AuthorizationItem> indexItems = clusterItem.getIndexPrivileges();
         for(Index index : indices) {
