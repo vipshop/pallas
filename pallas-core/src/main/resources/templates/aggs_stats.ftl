@@ -51,12 +51,6 @@
         "aggs_1_value": {
           "max": {
             "field": "${fieldName}"
-<#if type == 'indices_stats'>
-             ,
-             "script":{
-                  "inline": "_value/60"
-              }
-</#if>
           }
         }
 <#if isDerivative == true>

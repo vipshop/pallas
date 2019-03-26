@@ -28,15 +28,53 @@
                 </el-col>
             </el-row>
         </div>
+        <div>
+            <el-row :gutter="10">
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
+                    <chart-container title="Search Rate(/s)" type="line">
+                        <div slot="chart">
+                            <MyLine id="searchRate" :option-info="searchRateInfo"></MyLine>
+                        </div>
+                    </chart-container>
+                </el-col>
+            </el-row>
+        </div>
+        <div>
+            <el-row :gutter="10">
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
+                    <chart-container title="Indexing Latentcy" type="line">
+                        <div slot="chart">
+                            <MyLine id="indexingLatency" :option-info="indexingLatencyInfo"></MyLine>
+                        </div>
+                    </chart-container>
+                </el-col>
+            </el-row>
+        </div>  
+        <div>
+            <el-row :gutter="10">
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
+                    <chart-container title="search Latentcy" type="line">
+                        <div slot="chart">
+                            <MyLine id="searchLatency" :option-info="searchLatencyInfo"></MyLine>
+                        </div>
+                    </chart-container>
+                </el-col>
+            </el-row>
+        </div>               
     </div>
 </template>
 <script>
 export default {
   data() {
     return {
+
       loading: false,
       gaugeMetricData: [],
       indexingRateInfo: {},
+      searchRateInfo: {},
+      searchLatencyInfo: {},
+      indexingLatencyInfo: {},
+
     };
   },
   methods: {
@@ -50,6 +88,36 @@ export default {
       };
       this.indexingRateInfo = optionInfo;
     },
+    getSearchRate(searchRateResp) {
+      const optionInfo = {
+        xAxis: searchRateResp.map(e => e.x),
+        seriesData: [
+          { name: 'Search Rate', data: searchRateResp.map(e => e.y) },
+        ],
+        yAxisName: 's',
+      };
+      this.searchRateInfo = optionInfo;
+    },
+    getSearchLatency(searchLatencyResp) {
+      const optionInfo = {
+        xAxis: searchLatencyResp.map(e => e.x),
+        seriesData: [
+          { name: 'Search Latency', data: searchLatencyResp.map(e => e.y) },
+        ],
+        yAxisName: 's',
+      };
+      this.searchLatencyInfo = optionInfo;
+    },
+    getIndexingLatency(indexingLatencyResp) {
+      const optionInfo = {
+        xAxis: indexingLatencyResp.map(e => e.x),
+        seriesData: [
+          { name: 'Indexing Latency', data: indexingLatencyResp.map(e => e.y) },
+        ],
+        yAxisName: 's',
+      };
+      this.indexingLatencyInfo = optionInfo;
+    },
     getClusterMonitor() {
       const params = {
         clusterName: this.clusterId,
@@ -60,6 +128,9 @@ export default {
         if (data) {
           this.gaugeMetricData.push(data.gaugeMetric);
           this.getIndexingRate(data.indexingRate);
+          this.getSearchRate(data.searchRate);
+          this.getIndexingLatency(data.indexingLatency);
+          this.getSearchLatency(data.searchLatency);
         }
       });
     },

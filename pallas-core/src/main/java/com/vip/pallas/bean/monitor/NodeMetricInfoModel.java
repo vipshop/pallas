@@ -1,9 +1,6 @@
 package com.vip.pallas.bean.monitor;
 
 
-import com.vip.pallas.bean.monitor.MonitorMetricModel;
-import com.vip.pallas.bean.monitor.NodeGaugeMetricModel;
-
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
