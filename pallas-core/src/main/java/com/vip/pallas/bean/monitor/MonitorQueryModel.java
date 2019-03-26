@@ -1,14 +1,19 @@
 package com.vip.pallas.bean.monitor;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 
 public class MonitorQueryModel implements Serializable {
 
+    @NotBlank(message = "clusterName不能为空")
     private String clusterName;
     private String nodeName;
     private String indexName;
+    @NotNull(message = "查询起止时间不能为空")
     private Long from;
+    @NotNull(message = "查询起止时间不能为空")
     private Long to;
 
     public String getClusterName() {

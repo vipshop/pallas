@@ -13,14 +13,47 @@
       <div>
         <el-row :gutter="10">
           <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
-            <chart-container title="Index Memory(B)" type="line">
+            <chart-container title="Index Memory" type="line">
               <div slot="chart">
                <MyLine id="indexMemory" :option-info="indexMemoryInfo"></MyLine>
               </div>
             </chart-container>
           </el-col>
          </el-row>
-        </div>
+      </div>
+      <div>  
+        <el-row :gutter="10">
+          <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
+            <chart-container title="Index Disk" type="line">
+              <div slot="chart">
+               <MyLine id="indexDisk" :option-info="indexDiskInfo"></MyLine>
+              </div>
+            </chart-container>
+          </el-col>
+         </el-row>
+      </div>
+      <div>  
+        <el-row :gutter="10">
+          <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
+            <chart-container title="Segment Count" type="line">
+              <div slot="chart">
+               <MyLine id="segmentCount" :option-info="segmentCountInfo"></MyLine>
+              </div>
+            </chart-container>
+          </el-col>
+         </el-row>
+      </div>
+      <div>
+        <el-row :gutter="10">
+          <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
+            <chart-container title="Document Count" type="line">
+              <div slot="chart">
+               <MyLine id="documentCount" :option-info="documentCountInfo"></MyLine>
+              </div>
+            </chart-container>
+          </el-col>
+         </el-row>
+      </div>
     </div>
 </template>
 <script>
@@ -30,27 +63,68 @@ export default {
       loading: false,
       gaugeMetricData: [],
       indexMemoryInfo: {},
+      indexDiskInfo: {},
+      segmentCountInfo: {},
+      documentCountInfo: {},
     };
   },
   methods: {
-    getIndexMemory() {
+    getIndexMemory(lucencTotal, terms) {
       const optionInfo = {
-        xAxis: ['09:00', '09:10', '09:20', '09:30', '09:40', '09:50', '10:00', '10:10', '10:20'],
-        seriesData: [{ name: 'Index Memory', data: [2, 3, 5, 1, 3, 4, 7, 6, 4] }],
-        yAxisName: 'B',
+        xAxis: lucencTotal.map(e => e.x),
+        seriesData: [
+          { name: 'index memory lucenc total', data: lucencTotal.map(e => e.y) },
+          { name: 'index memory terms', data: terms.map(e => e.y) },
+        ],
+        yAxisName: 'mb',
       };
       this.indexMemoryInfo = optionInfo;
+    },
+    getIndexDisk(total, primary) {
+      const optionInfo = {
+        xAxis: total.map(e => e.x),
+        seriesData: [
+          { name: 'disk-total', data: total.map(e => e.y) },
+          { name: 'disk-primary', data: primary.map(e => e.y) },
+        ],
+        yAxisName: 'gb',
+      };
+      this.indexDiskInfo = optionInfo;
+    },
+    getSegmentCount(segmentCount) {
+      const optionInfo = {
+        xAxis: segmentCount.map(e => e.x),
+        seriesData: [
+          { name: 'segment count', data: segmentCount.map(e => e.y) },
+        ],
+        yAxisName: '',
+      };
+      this.segmentCountInfo = optionInfo;
+    },
+    getDocumentCount(documentCount) {
+      const optionInfo = {
+        xAxis: documentCount.map(e => e.x),
+        seriesData: [
+          { name: 'document count', data: documentCount.map(e => e.y) },
+        ],
+        yAxisName: '',
+      };
+      this.documentCountInfo = optionInfo;
     },
     getIndexMonitor() {
       const params = {
         clusterName: this.clusterId,
         indexName: this.indice,
-        from: new Date().getTime() - (Number(this.timeInterval) * 60 * 1000),
-        to: new Date().getTime(),
+        ...this.timeInterval,
       };
       this.$http.post('/monitor/index.json', params).then((data) => {
         if (data) {
           this.gaugeMetricData = [data.gaugeMetric];
+          this.getIndexMemory(data.index_memory_lucenc_total_in_byte.metricModel,
+           data.index_memory_terms_in_byte.metricModel);
+          this.getIndexDisk(data.index_disk_total.metricModel, data.index_disk_primary.metricModel);
+          this.getSegmentCount(data.segmentCount.metricModel);
+          this.getDocumentCount(data.documentCount.metricModel);
         }
       });
     },

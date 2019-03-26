@@ -19,4 +19,8 @@ public interface MonitorService {
     List<NodeGaugeMetricModel> queryNodesInfo(MonitorQueryModel queryModel) throws Exception;
 
     List<IndexGaugeMetricModel> queryIndicesInfo(MonitorQueryModel queryModel) throws Exception;
+
+    Integer getNodeCount(String clusterName) throws Exception;
+
+    Integer getIndexCount(String clusterName) throws Exception;
 }

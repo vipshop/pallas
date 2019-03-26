@@ -22,6 +22,94 @@
                 </el-col>
             </el-row>
       </div>
+      <div>
+            <el-row :gutter="10">
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
+                    <chart-container title="gc Duration" type="line">
+                        <div slot="chart">
+                            <MyLine id="gcDuration" :option-info="gcDurationInfo"></MyLine>
+                        </div>
+                    </chart-container>
+                </el-col>
+            </el-row>
+      </div>
+      <div>
+            <el-row :gutter="10">
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
+                    <chart-container title="jvm heap" type="line">
+                        <div slot="chart">
+                            <MyLine id="jvmHeap" :option-info="jvmHeapInfo"></MyLine>
+                        </div>
+                    </chart-container>
+                </el-col>
+            </el-row>
+      </div>
+      <div>
+            <el-row :gutter="10">
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
+                    <chart-container title="cpu percent" type="line">
+                        <div slot="chart">
+                            <MyLine id="cpuPercent" :option-info="cpuPercentInfo"></MyLine>
+                        </div>
+                    </chart-container>
+                </el-col>
+            </el-row>
+      </div>
+      <div>
+            <el-row :gutter="10">
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
+                    <chart-container title="index memory" type="line">
+                        <div slot="chart">
+                            <MyLine id="indexMemory" :option-info="indexMemoryInfo"></MyLine>
+                        </div>
+                    </chart-container>
+                </el-col>
+            </el-row>
+       </div>
+       <div>
+            <el-row :gutter="10">
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
+                    <chart-container title="threadpool Queue" type="line">
+                        <div slot="chart">
+                            <MyLine id="threadpoolQueue" :option-info="threadpoolQueueInfo"></MyLine>
+                        </div>
+                    </chart-container>
+                </el-col>
+            </el-row>
+      </div>
+      <div>
+            <el-row :gutter="10">
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
+                    <chart-container title="threadpool Reject" type="line">
+                        <div slot="chart">
+                            <MyLine id="threadpoolReject" :option-info="threadpoolRejectInfo"></MyLine>
+                        </div>
+                    </chart-container>
+                </el-col>
+            </el-row>
+      </div>
+      <div>
+            <el-row :gutter="10">
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
+                    <chart-container title="segment count" type="line">
+                        <div slot="chart">
+                            <MyLine id="segmentCount" :option-info="segmentCountInfo"></MyLine>
+                        </div>
+                    </chart-container>
+                </el-col>
+            </el-row>
+      </div>
+      <div>
+            <el-row :gutter="10">
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
+                    <chart-container title="http open current" type="line">
+                        <div slot="chart">
+                            <MyLine id="httpOpenCurrent" :option-info="httpOpenCurrentInfo"></MyLine>
+                        </div>
+                    </chart-container>
+                </el-col>
+            </el-row>
+      </div>
     </div>
 </template>
 <script>
@@ -31,21 +119,13 @@ export default {
       loading: false,
       gaugeMetricData: [],
       gcCountInfo: {},
-      gc_duration_old_ms_info: {},
-      gc_duration_young_ms_info: {},
-      jvm_heap_max_byte_info: {},
-      jvm_heap_used_byte_info: {},
-      cpuNodePercentInfo: {},
-      cpuProcessPerentInfo: {},
-      index_memory_lucenc_total_byte_info: {},
-      index_memory_terms_bytes_info: {},
+      gcDurationInfo: {},
+      jvmHeapInfo: {},
+      cpuPercentInfo: {},
+      indexMemoryInfo: {},
       segmentCountInfo: {},
-      searchThreadpoolQueueInfo: {},
-      searchThreadpoolRejectInfo: {},
-      indexThreadpoolQueueInfo: {},
-      indexThreadpoolRejectInfo: {},
-      bulkThreadpoolQueueInfo: {},
-      bulkThreadpoolRejectInfo: {},
+      threadpoolQueueInfo: {},
+      threadpoolRejectInfo: {},
       httpOpenCurrentInfo: {},
     };
   },
@@ -61,17 +141,116 @@ export default {
       };
       this.gcCountInfo = optionInfo;
     },
+    getgcDuration(gcDurationOld, gcDurationYoung) {
+      const optionInfo = {
+        xAxis: gcDurationOld.map(e => e.x),
+        seriesData: [
+          { name: 'gc Duration Old', data: gcDurationOld.map(e => e.y) },
+          { name: 'gc Duration Young', data: gcDurationYoung.map(e => e.y) },
+        ],
+        yAxisName: 'ms',
+      };
+      this.gcDurationInfo = optionInfo;
+    },
+    getJVMHeap(jvmHeapMax, jvmHeapUsed) {
+      const optionInfo = {
+        xAxis: jvmHeapMax.map(e => e.x),
+        seriesData: [
+          { name: 'jvm heap max', data: jvmHeapMax.map(e => e.y) },
+          { name: 'jvm heap used', data: jvmHeapUsed.map(e => e.y) },
+        ],
+        yAxisName: 'mb',
+      };
+      this.jvmHeapInfo = optionInfo;
+    },
+    getCpuPercent(cpuNodePercent, cpuProcessPerent) {
+      const optionInfo = {
+        xAxis: cpuNodePercent.map(e => e.x),
+        seriesData: [
+          { name: 'cpu node percent', data: cpuNodePercent.map(e => e.y) },
+          { name: 'cpu process percent', data: cpuProcessPerent.map(e => e.y) },
+        ],
+        yAxisName: '%',
+      };
+      this.cpuPercentInfo = optionInfo;
+    },
+    getIndexMemory(indexMemoryLucencTotal, indexMemoryTerms) {
+      const optionInfo = {
+        xAxis: indexMemoryLucencTotal.map(e => e.x),
+        seriesData: [
+          { name: 'index memory Lucenc total', data: indexMemoryLucencTotal.map(e => e.y) },
+          { name: 'index memory terms', data: indexMemoryTerms.map(e => e.y) },
+        ],
+        yAxisName: 'mb',
+      };
+      this.indexMemoryInfo = optionInfo;
+    },
+    getTheadPoolQueue(search, indexing, bulk) {
+      const optionInfo = {
+        xAxis: search.map(e => e.x),
+        seriesData: [
+          { name: 'queue-search', data: search.map(e => e.y) },
+          { name: 'queue-indexing', data: indexing.map(e => e.y) },
+          { name: 'queue-bulk', data: bulk.map(e => e.y) },
+        ],
+        yAxisName: '',
+      };
+      this.threadpoolQueueInfo = optionInfo;
+    },
+    getThreadPoolReject(search, indexing, bulk) {
+      const optionInfo = {
+        xAxis: search.map(e => e.x),
+        seriesData: [
+          { name: 'reject-search', data: search.map(e => e.y) },
+          { name: 'reject-indexing', data: indexing.map(e => e.y) },
+          { name: 'reject-bulk', data: bulk.map(e => e.y) },
+        ],
+        yAxisName: '',
+      };
+      this.threadpoolRejectInfo = optionInfo;
+    },
+    getSegmentCount(segmentCount) {
+      const optionInfo = {
+        xAxis: segmentCount.map(e => e.x),
+        seriesData: [
+          { name: 'segment count', data: segmentCount.map(e => e.y) },
+        ],
+        yAxisName: '',
+      };
+      this.segmentCountInfo = optionInfo;
+    },
+    getHttpOpenCount(httpOpenCurrent) {
+      const optionInfo = {
+        xAxis: httpOpenCurrent.map(e => e.x),
+        seriesData: [
+          { name: 'http open current', data: httpOpenCurrent.map(e => e.y) },
+        ],
+        yAxisName: '',
+      };
+      this.httpOpenCurrentInfo = optionInfo;
+    },
     getNodeMonitor() {
       const params = {
         clusterName: this.clusterId,
         nodeName: this.node,
-        from: new Date().getTime() - (Number(this.timeInterval) * 60 * 1000),
-        to: new Date().getTime(),
+        ...this.timeInterval,
       };
       this.$http.post('/monitor/node.json', params).then((data) => {
         if (data) {
           this.gaugeMetricData = [data.gaugeMetric];
-          this.getgcCount(data.gcCountOld, data.gcCountYoung);
+          this.getgcCount(data.gcCountOld.metricModel, data.gcCountYoung.metricModel);
+          this.getgcDuration(data.gc_duration_old_ms.metricModel,
+           data.gc_duration_young_ms.metricModel);
+          this.getJVMHeap(data.jvm_heap_max_byte.metricModel, data.jvm_heap_used_byte.metricModel);
+          this.getCpuPercent(data.cpuNodePercent.metricModel, data.cpuProcessPerent.metricModel);
+          this.getIndexMemory(data.index_memory_lucenc_total_byte.metricModel,
+           data.index_memory_terms_bytes.metricModel);
+          this.getTheadPoolQueue(data.searchThreadpoolQueue.metricModel,
+           data.indexThreadpoolQueue.metricModel, data.bulkThreadpoolQueue.metricModel);
+          this.getThreadPoolReject(data.searchThreadpoolReject.metricModel,
+           data.indexThreadpoolReject.metricModel, data.bulkThreadpoolReject.metricModel);
+          this.getSegmentCount(data.segmentCount.metricModel);
+          this.getHttpOpenCount(data.httpOpenCurrent.metricModel);
         }
       });
     },

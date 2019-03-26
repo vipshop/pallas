@@ -13,4 +13,8 @@
     </context:component-scan>
 
 	<import resource="classpath:spring/applicationContext-dao-${pallas.db.type:h2}.xml" />
+
+	<bean id="freeMarkerConfigurationFactoryBean" class="org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean">
+		<property name="templateLoaderPath" value="classpath:/templates"></property>
+	</bean>
 </beans>

@@ -12,7 +12,11 @@
                 <el-table-column prop="totalShardCount" label="Total Shards"></el-table-column>
                 <el-table-column prop="unassignedShardCount" label="Unassigned Shards"></el-table-column>
                 <el-table-column prop="documentCount" label="Documents"></el-table-column>
-                <el-table-column prop="document_store_byte" label="Data"></el-table-column>
+                <el-table-column label="Data">
+                    <template scope="scope">
+                        {{bytesToSize(scope.row.document_store_byte)}}
+                    </template>
+                </el-table-column>
                 <el-table-column prop="version" label="Version"></el-table-column>
                 <el-table-column prop="health" label="Health"></el-table-column>
             </el-table>
@@ -126,13 +130,22 @@ export default {
       this.$http.post('/monitor/cluster.json', params).then((data) => {
         if (data) {
           this.gaugeMetricData = [data.gaugeMetric];
-          this.getIndexingRate(data.indexingRate);
-          this.getSearchRate(data.searchRate);
-          this.getIndexingLatency(data.indexingLatency);
-          this.getSearchLatency(data.searchLatency);
+          this.getIndexingRate(data.indexingRate.metricModel);
+          this.getSearchRate(data.searchRate.metricModel);
+          this.getIndexingLatency(data.indexingLatency.metricModel);
+          this.getSearchLatency(data.searchLatency.metricModel);
         }
       });
     },
+    bytesToSize(bytes) {
+      if (bytes === 0) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      const j = (bytes / (k ** i)).toFixed(2);
+      return `${j} ${sizes[i]}`;
+    },
+
   },
   computed: {
     timeInterval() {

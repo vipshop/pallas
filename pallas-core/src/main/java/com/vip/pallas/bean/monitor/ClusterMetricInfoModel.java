@@ -10,28 +10,12 @@ import java.util.Date;
 public class ClusterMetricInfoModel implements Serializable {
     private ClusterGaugeMetricModel gaugeMetric;
 
-    private List<MonitorMetricModel<Date, Double>> searchRate;
-    private List<MonitorMetricModel<Date, Double>> searchTime;
-    private List<MonitorMetricModel<Date, Double>> indexingTime;
-    private List<MonitorMetricModel<Date, Double>> indexingRate;
-    private List<MonitorMetricModel<Date, Double>> searchLatency;
-    private List<MonitorMetricModel<Date, Double>> indexingLatency;
-
-    public List<MonitorMetricModel<Date, Double>> getSearchTime() {
-        return searchTime;
-    }
-
-    public void setSearchTime(List<MonitorMetricModel<Date, Double>> searchTime) {
-        this.searchTime = searchTime;
-    }
-
-    public List<MonitorMetricModel<Date, Double>> getIndexingTime() {
-        return indexingTime;
-    }
-
-    public void setIndexingTime(List<MonitorMetricModel<Date, Double>> indexingTime) {
-        this.indexingTime = indexingTime;
-    }
+    private MonitorMetricModel<Date, Double> searchRate;
+    private MonitorMetricModel<Date, Double> searchTime;
+    private MonitorMetricModel<Date, Double> indexingTime;
+    private MonitorMetricModel<Date, Double> indexingRate;
+    private MonitorMetricModel<Date, Double> searchLatency;
+    private MonitorMetricModel<Date, Double> indexingLatency;
 
     public ClusterGaugeMetricModel getGaugeMetric() {
         return gaugeMetric;
@@ -41,37 +25,52 @@ public class ClusterMetricInfoModel implements Serializable {
         this.gaugeMetric = gaugeMetric;
     }
 
-    public List<MonitorMetricModel<Date, Double>> getSearchRate() {
+    public MonitorMetricModel<Date, Double> getSearchRate() {
         return searchRate;
     }
 
-    public void setSearchRate(List<MonitorMetricModel<Date, Double>> searchRate) {
+    public void setSearchRate(MonitorMetricModel<Date, Double> searchRate) {
         this.searchRate = searchRate;
     }
 
-    public List<MonitorMetricModel<Date, Double>> getSearchLatency() {
-        return searchLatency;
+    public MonitorMetricModel<Date, Double> getSearchTime() {
+        return searchTime;
     }
 
-    public void setSearchLatency(List<MonitorMetricModel<Date, Double>> searchLatency) {
-        this.searchLatency = searchLatency;
+    public void setSearchTime(MonitorMetricModel<Date, Double> searchTime) {
+        this.searchTime = searchTime;
     }
 
-    public List<MonitorMetricModel<Date, Double>> getIndexingRate() {
+    public MonitorMetricModel<Date, Double> getIndexingTime() {
+        return indexingTime;
+    }
+
+    public void setIndexingTime(MonitorMetricModel<Date, Double> indexingTime) {
+        this.indexingTime = indexingTime;
+    }
+
+    public MonitorMetricModel<Date, Double> getIndexingRate() {
         return indexingRate;
     }
 
-    public void setIndexingRate(List<MonitorMetricModel<Date, Double>> indexingRate) {
+    public void setIndexingRate(MonitorMetricModel<Date, Double> indexingRate) {
         this.indexingRate = indexingRate;
     }
 
-    public List<MonitorMetricModel<Date, Double>> getIndexingLatency() {
+    public MonitorMetricModel<Date, Double> getSearchLatency() {
+        return searchLatency;
+    }
+
+    public void setSearchLatency(MonitorMetricModel<Date, Double> searchLatency) {
+        this.searchLatency = searchLatency;
+    }
+
+    public MonitorMetricModel<Date, Double> getIndexingLatency() {
         return indexingLatency;
     }
 
-    public void setIndexingLatency(List<MonitorMetricModel<Date, Double>> indexingLatency) {
+    public void setIndexingLatency(MonitorMetricModel<Date, Double> indexingLatency) {
         this.indexingLatency = indexingLatency;
-
     }
 
 
