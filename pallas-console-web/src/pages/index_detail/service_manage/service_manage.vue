@@ -6,8 +6,8 @@
                     <el-form-item label="超时时间(毫秒,需>=50ms)">
                         <el-input-number placeholder="超时时间(毫秒)" v-model="indexInfo.timeout" :min="0"></el-input-number>
                     </el-form-item>
-                    <el-form-item label="重试次数">
-                        <el-input-number placeholder="重试次数" v-model="indexInfo.retry" :min="0"></el-input-number>
+                    <el-form-item label="重试次数(上限1次)">
+                        <el-input-number placeholder="重试次数" v-model="indexInfo.retry" :min="0" :max="1"></el-input-number>
                     </el-form-item>
                     <el-form-item label="慢查询阈值(毫秒)">
                         <el-input-number placeholder="慢查询阈值(毫秒)" v-model="indexInfo.slowerThan" :min="0"></el-input-number>

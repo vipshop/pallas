@@ -3,9 +3,9 @@
         <div class="template_content" v-loading="loading" element-loading-text="请稍等···">
             <div class="template_tree">
                 <div v-show="isAllPrivilege">
-                  <el-button type="primary" size="small" @click="addTemplate">新增模板</el-button>
-                  <el-button type="primary" size="small" @click="exportTemplate">导出模板</el-button>
-                  <el-button type="primary" size="small" @click="importTemplate">导入模板</el-button>
+                  <el-button type="primary" size="small" @click="addTemplate">新增</el-button>
+                  <el-button type="primary" size="small" @click="exportTemplate">导出</el-button>
+                  <el-button type="primary" size="small" @click="importTemplate">导入</el-button>
                 </div>
                 <div class="mrg-top-10">
                   <el-tree node-key="id" :data="treeData" :props="defaultProps" default-expand-all :expand-on-click-node="false" highlight-current @node-click="handleNodeClick"></el-tree>
