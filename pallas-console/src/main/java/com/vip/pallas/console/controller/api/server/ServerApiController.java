@@ -158,9 +158,10 @@ public class ServerApiController {
     }
 
 	private List<String> findAccessibleHealthyPsList(String accessiblePs, Set<Pool> pools, String ip) {
+		int targetPrefix = IPUtils.IPV42PrefixInteger(ip);
 		pools = CollectionUtils.isEmpty(pools) ? Collections.emptySet() : pools;
 		List<String> domains = Splitter.on(",").trimResults().omitEmptyStrings().splitToList(accessiblePs);
-		Set<String> globalIpSet = SetUtil.newHashSet();
+		Set<String> globalSameDcIpSet = SetUtil.newHashSet(), globalIpSet = SetUtil.newHashSet();
 		// initialize the pool map to store the ipport for every pool.
 		Map<String, Set<String>> poolIpMap = pools.stream()
 				.collect(Collectors.toMap(Pool::genUniqueKey, p -> SetUtil.newHashSet(), (key1, key2) -> key1));
@@ -169,6 +170,13 @@ public class ServerApiController {
 			List<SearchServer> ssList = searchServerService
 					.selectHealthyServersByCluster(SearchServerService.HEALTHY_UPLOAD_INTERVAL_TOLERANCE, domain);
 
+			// if one ip of the domain match the-same-dc rule, the rest shall be the same.
+			if (CollectionUtils.isNotEmpty(ssList)
+					&& targetPrefix == IPUtils.IPV42PrefixInteger(ssList.get(0).getIpport())) {
+				globalSameDcIpSet.addAll(ssList.stream().filter(SearchServer::getTakeTraffic)
+						.map(SearchServer::getIpport).collect(Collectors.toSet()));
+			}
+			
 			ssList.stream().filter(SearchServer::getTakeTraffic).forEach(server -> {
 				globalIpSet.add(server.getIpport());
 				Set<String> poolSet = Pool.DEFAULT_POOL_ARR;
@@ -185,19 +193,20 @@ public class ServerApiController {
 				}
 			});
 		}
-		int targetPrefix = IPUtils.IPV42PrefixInteger(ip);
 		
-		Set<String> poolIpSet = SetUtil.newHashSet(), ssIpSet = SetUtil.newHashSet();
+		Set<String> poolSameDcIpSet = SetUtil.newHashSet(), poolIpSet = SetUtil.newHashSet();
 		poolIpMap.values().forEach(v -> {
+			poolIpSet.addAll(v);
 			Iterator<String> i = v.iterator();
 			// if one ip of the pool match the-same-dc rule, the rest shall be the same.
 			if (i.hasNext() && targetPrefix == IPUtils.IPV42PrefixInteger(i.next())) {
-				poolIpSet.addAll(v);
+				poolSameDcIpSet.addAll(v);
 			}
-			ssIpSet.addAll(v);
 		});
 		
-		return ListUtil.newArrayList(CollectionUtils.isNotEmpty(poolIpSet) ? poolIpSet
-				: CollectionUtils.isNotEmpty(ssIpSet) ? ssIpSet : globalIpSet);
+		return ListUtil.newArrayList(
+				CollectionUtils.isNotEmpty(poolSameDcIpSet) ? poolSameDcIpSet
+					: CollectionUtils.isNotEmpty(poolIpSet) ? poolIpSet
+						: CollectionUtils.isNotEmpty(globalSameDcIpSet) ? globalSameDcIpSet : globalIpSet);
 	}
 }

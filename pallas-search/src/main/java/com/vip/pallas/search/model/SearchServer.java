@@ -28,11 +28,11 @@ public class SearchServer {
 	
 	private Set<String> pools;
 	
-	private boolean takeTraffic;
+	private Boolean takeTraffic;
 	
 	private Object info;
 	
-	public SearchServer(boolean takeTraffic, Object info) {
+	public SearchServer(Boolean takeTraffic, Object info) {
 		super();
 		this.cluster = clusterName;
 		this.ipport = localIpport;
@@ -41,7 +41,7 @@ public class SearchServer {
 		this.info = info;
 	}
 	
-	public SearchServer(String cluster, String ipport, String pool, boolean takeTraffic, Object info) {
+	public SearchServer(String cluster, String ipport, String pool, Boolean takeTraffic, Object info) {
 		super();
 		this.cluster = cluster;
 		this.ipport = ipport;
@@ -86,14 +86,14 @@ public class SearchServer {
 		this.pools = pools;
 	}
 
-	public boolean isTakeTraffic() {
+	public Boolean getTakeTraffic() {
 		return takeTraffic;
 	}
 
-	public void setTakeTraffic(boolean takeTraffic) {
+	public void setTakeTraffic(Boolean takeTraffic) {
 		this.takeTraffic = takeTraffic;
 	}
-	
+
 	public Object getInfo() {
 		return info;
 	}
