@@ -16,7 +16,7 @@
                 
                 <div class="token-pool">
                     <div class="mrg-top-15">
-                        <span class="title-span">代理集群节点集<small style="color:gray">((默认为整个集群))</small></span>
+                        <span class="title-span">代理集群节点集<small style="color:gray">(默认为整个集群,不可取消)</small></span>
                         <el-tree class="token-cluster-tree" :style="clusterPoolHeight" :data="psClusterList" :render-content="renderPsCluster" ref="psPoolTree" show-checkbox
                           highlight-current default-expand-all check-strictly @check-change="handlePsNodeClick" :default-checked-keys="tokenClusterInfo.checkedPools" node-key="id"></el-tree>
                     </div>
@@ -198,7 +198,7 @@ export default {
         renderHtml = h(
           'span',
           [
-            h('el-popover', { props: { content: `代理节点集 ${data.name} 已下线`, trigger: 'hover', disabled: !data.offline } }, [
+            h('el-popover', { props: { content: `代理节点集 ${data.name} 因为下线或者删除该代理等原因已经无法访问`, trigger: 'hover', placement: 'right', disabled: !data.offline } }, [
               h('span', { slot: 'reference', style: { 'margin-left': '10px', 'font-size': '14px' }, attrs: { class: `${this.renderPoolOffline(data.offline)}` } }, data.name),
             ]),
             h('el-popover', { props: { content: data.aliasName, trigger: 'hover' } }, [
@@ -210,7 +210,7 @@ export default {
         renderHtml = h(
           'span',
           [
-            h('el-popover', { props: { content: `代理节点集 ${data.name} 已下线`, trigger: 'hover', disabled: !data.offline } }, [
+            h('el-popover', { props: { content: `代理节点集 ${data.name} 因为下线或者删除该代理等原因已经无法访问`, trigger: 'hover', placement: 'right', disabled: !data.offline } }, [
               h('span', { slot: 'reference', style: { 'margin-left': '10px', 'font-size': '14px' }, attrs: { class: `${this.renderPoolOffline(data.offline)}` } }, data.name),
             ]),
           ],
