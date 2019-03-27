@@ -43,15 +43,15 @@ public class UploadInfoService {
 				return;
 			}
 			JSONObject info = serverWatch.buildAllInfo();
-			internalUpload(info, true);
+			internalUpload(info, null);
 		};
 	}
 
-	public static void internalUpload(Object info, boolean takeTraffic) {
+	public static void internalUpload(Object info, Boolean takeTraffic) {
 		try {
-			SearchServer server = new SearchServer(true, info);
+			SearchServer server = new SearchServer(takeTraffic, info);
 			if (server.getInfo() == null) {
-				logger.warn("server {} 's takeTraffic property is set to {}", server.getIpport(), server.isTakeTraffic());
+				logger.warn("server {} 's takeTraffic property is set to {}", server.getIpport(), server.getTakeTraffic());
 			}
 			String serverInfo = JsonUtil.toJson(server);
 			HttpClient.httpPost(upsertUrl, serverInfo);
