@@ -183,8 +183,8 @@
     set http_address = #{httpAddress,jdbcType=VARCHAR},
       client_address = #{clientAddress,jdbcType=VARCHAR},
       real_clusters = #{realClusters,jdbcType=VARCHAR},
-      accessible_ps = #{accessiblePs,jdbcType=VARCHAR}.
-      monitor_level = #{monitorLevel,jdbcType=VARCHAR},
+      accessible_ps = #{accessiblePs,jdbcType=VARCHAR},
+      monitor_level = #{monitorLevel,jdbcType=VARCHAR}
     where cluster_id = #{clusterId,jdbcType=VARCHAR}
   </update>
 </mapper>

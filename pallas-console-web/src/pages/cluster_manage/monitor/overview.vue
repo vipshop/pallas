@@ -16,9 +16,14 @@
                     {{periodTimeMap[timeInterval.command]}}<i class="el-icon-caret-bottom el-icon--right"></i>
                   </span>
                   <el-dropdown-menu slot="dropdown">
-                    <el-dropdown-item command="15">最近15分钟</el-dropdown-item>
                     <el-dropdown-item command="30">最近30分钟</el-dropdown-item>
                     <el-dropdown-item command="60">最近1小时</el-dropdown-item>
+                    <el-dropdown-item command="180">最近3小时</el-dropdown-item>
+                    <el-dropdown-item command="360">最近6小时</el-dropdown-item>
+                    <el-dropdown-item command="720">最近12小时</el-dropdown-item>
+                    <el-dropdown-item command="1440">最近24小时</el-dropdown-item>
+                    <el-dropdown-item command="4320">最近3天</el-dropdown-item>
+                    <el-dropdown-item command="10080">最近7天</el-dropdown-item>
                     <el-dropdown-item divided command="custom">自定义时间</el-dropdown-item>
                   </el-dropdown-menu>
               </el-dropdown>
@@ -62,9 +67,14 @@ export default {
       nodesNum: 0,
       indicesNum: 0,
       periodTimeMap: {
-        15: '最近15分钟',
         30: '最近30分钟',
         60: '最近1小时',
+        180: '最近3小时',
+        360: '最近6小时',
+        720: '最近12小时',
+        1440: '最近24小时',
+        4320: '最近3天',
+        10080: '最近7天',
         custom: '自定义时间',
       },
       customTimeVisible: false,

@@ -623,7 +623,6 @@ public class MonitorServiceImpl implements MonitorService {
             IOUtils.closeQuietly(writer);
         }
 
-      //  parseMetric(result, 1.0);
         return result;
     }
 

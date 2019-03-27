@@ -8,12 +8,13 @@
     <result column="client_address" jdbcType="VARCHAR" property="clientAddress" />
     <result column="real_clusters" jdbcType="VARCHAR" property="realClusters" />
     <result column="accessible_ps" jdbcType="VARCHAR" property="accessiblePs" />
+    <result column="monitor_level" jdbcType="VARCHAR" property="monitorLevel" />
   </resultMap>
   <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.vip.pallas.mybatis.entity.Cluster">
     <result column="description" jdbcType="LONGVARCHAR" property="description" />
   </resultMap>
   <sql id="Base_Column_List">
-    id, cluster_id, http_address, client_address, real_clusters, accessible_ps
+    id, cluster_id, http_address, client_address, real_clusters, accessible_ps, monitor_level
   </sql>
   <sql id="Blob_Column_List">
     description
@@ -80,9 +81,9 @@
   </delete>
   <insert id="insert" parameterType="com.vip.pallas.mybatis.entity.Cluster">
     insert into cluster (cluster_id, http_address, client_address, 
-      real_clusters, accessible_ps, description, create_time)
+      real_clusters, accessible_ps, description, create_time, monitor_level)
     values (#{clusterId,jdbcType=VARCHAR}, #{httpAddress,jdbcType=VARCHAR}, #{clientAddress,jdbcType=VARCHAR}, 
-      #{realClusters,jdbcType=VARCHAR}, #{accessiblePs,jdbcType=VARCHAR}, #{description,jdbcType=LONGVARCHAR}), #{createTime, jdbcType=TIMESTAMP}
+      #{realClusters,jdbcType=VARCHAR}, #{accessiblePs,jdbcType=VARCHAR}, #{description,jdbcType=LONGVARCHAR}), #{createTime, jdbcType=TIMESTAMP, #{monitorLevel,jdbcType=VARCHAR}
   </insert>
   <insert id="insertSelective" parameterType="com.vip.pallas.mybatis.entity.Cluster">
     insert into cluster
@@ -108,6 +109,9 @@
       <if test="createTime != null">
         create_time
       </if>
+      <if test="monitorLevel != null">
+        monitor_level
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="clusterId != null">
@@ -129,7 +133,10 @@
         #{description,jdbcType=LONGVARCHAR},
       </if>
       <if test="createTime != null">
-        #{createTime, jdbcType=TIMESTAMP}
+        #{createTime, jdbcType=TIMESTAMP},
+      </if>
+      <if test="monitorLevel != null">
+        #{monitorLevel, jdbcType=VARCHAR}
       </if>
     </trim>
   </insert>
@@ -152,7 +159,10 @@
         description = #{description,jdbcType=LONGVARCHAR},
       </if>
       <if test="updateTime != null">
-        update_time = #{updateTime, jdbcType=TIMESTAMP}
+        update_time = #{updateTime, jdbcType=TIMESTAMP},
+      </if>
+      <if test="monitorLevel != null">
+        monitor_level = #{monitorLevel,jdbcType=VARCHAR}
       </if>
     </set>
     where cluster_id = #{clusterId,jdbcType=VARCHAR}
@@ -163,7 +173,8 @@
       client_address = #{clientAddress,jdbcType=VARCHAR},
       real_clusters = #{realClusters,jdbcType=VARCHAR},
       accessible_ps = #{accessiblePs,jdbcType=VARCHAR},
-      description = #{description,jdbcType=LONGVARCHAR}
+      description = #{description,jdbcType=LONGVARCHAR},
+      monitor_level = #{monitorLevel,jdbcType=VARCHAR}
     where cluster_id = #{clusterId,jdbcType=VARCHAR}
   </update>
   <update id="updateByPrimaryKey" parameterType="com.vip.pallas.mybatis.entity.Cluster">
@@ -171,7 +182,8 @@
     set http_address = #{httpAddress,jdbcType=VARCHAR},
       client_address = #{clientAddress,jdbcType=VARCHAR},
       real_clusters = #{realClusters,jdbcType=VARCHAR},
-      accessible_ps = #{accessiblePs,jdbcType=VARCHAR}
+      accessible_ps = #{accessiblePs,jdbcType=VARCHAR},
+      monitor_level = #{monitorLevel,jdbcType=VARCHAR}
     where cluster_id = #{clusterId,jdbcType=VARCHAR}
   </update>
 </mapper>
