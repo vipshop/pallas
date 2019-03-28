@@ -17,6 +17,7 @@ export default {
     return {
       myChart: {},
       option: {
+        color: ['#13CE66', '#20A0FF', '#F7BA2A', '#FF4949'],
         title: {
           text: null,
         },
