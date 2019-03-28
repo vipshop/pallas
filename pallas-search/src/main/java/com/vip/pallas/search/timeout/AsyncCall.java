@@ -2,6 +2,7 @@ package com.vip.pallas.search.timeout;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -20,12 +21,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vip.pallas.search.filter.base.AbstractFilterContext;
+import com.vip.pallas.search.filter.circuitbreaker.CircuitBreakerService;
 import com.vip.pallas.search.filter.common.SessionContext;
+import com.vip.pallas.search.filter.rest.RestInvokerFilter;
+import com.vip.pallas.search.http.PallasRequest;
+import com.vip.pallas.search.model.ShardGroup;
 import com.vip.pallas.search.utils.HttpClientUtil;
 import com.vip.pallas.search.utils.PallasSearchProperties;
 import com.vip.pallas.thread.PallasThreadFactory;
 
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
+import io.netty.util.internal.InternalThreadLocalMap;
 
 public class AsyncCall {
 
@@ -48,6 +54,7 @@ public class AsyncCall {
 	private static ExecutorService retryExecutor = Executors.newFixedThreadPool(PallasSearchProperties.SEARCH_RETRY_THREADS,
 			new PallasThreadFactory("timeout-retry"));
 	private HttpEntity entity;
+	private SessionContext sessionContext;
 	
 	public AsyncCall(CloseableHttpAsyncClient httpClient, TryPolicy retryPolicy, HttpHost targetHost, String newURL, String templateId,
 			AbstractFilterContext filterContext, SessionContext sessionContext, DefaultFullHttpRequest outBoundRequest, HttpContext httpContext) {
@@ -56,6 +63,7 @@ public class AsyncCall {
 		this.targetHost = targetHost;
 		this.newURL = newURL;
 		this.templateId = templateId;
+		this.sessionContext = sessionContext;
 		this.outBoundRequest = outBoundRequest;
 		this.httpContext = httpContext;
 		this.retryCount = new AtomicInteger(0);
@@ -66,18 +74,38 @@ public class AsyncCall {
 	
 	public void register() {
 		startCallTime = System.currentTimeMillis();
-		executeRequest();
+		executeRequest(false);
 		// timeout-controller should do the check after it's begun.
 		TimeoutRetryController.addRequest(this);
 	}
-	
-	public void executeRequest() {
+
+	// retry indicates whether it is the first time to request the server.
+	public void executeRequest(boolean retry) {
 		if (!isDone()) {
 			int count = retryCount.incrementAndGet();
 			if (retryPolicy.allowRetry(count)) { // double check.
 				int timeoutMillis =  (retryPolicy.getTotalCountIncludedFirstTime() + 1 - count) * retryPolicy.getTimeoutMillis();
 
 				HttpRequestBase request = null;
+				
+				if (retry) { // if it's a retry request, use another shardGroup instead of the failed one.
+					ShardGroup shardGroup = sessionContext.getRequest().getShardGroup();
+					if (shardGroup != null) {
+						List<ShardGroup> shardGroupList = sessionContext.getRequest().getShardGroupList();
+						// remove the failed groups and the circuteBreaker-open groups.
+						shardGroupList.removeIf(g -> {return g.getId().equals(shardGroup.getId()) || CircuitBreakerService.getInstance().getOpenGroupsList().contains(g.getId());});
+						int randomIndex = InternalThreadLocalMap.get().random().nextInt(shardGroupList.size());
+						ShardGroup group = shardGroupList.get(randomIndex);
+						sessionContext.getRequest().setShardGroup(group); // update shardGroup in requst, in case circuitBreaker counts the wrong server.
+						String ip = group.getServerList().get(InternalThreadLocalMap.get().random().nextInt(group.getServerList().size()));
+						try {
+							targetHost = RestInvokerFilter.constractAtargetHost(ip);
+						} catch (Exception e) {
+							LOGGER.error(e.getMessage(), e);
+						}
+					}
+				}
+				
 				if (this.entity != null) {
 					request = HttpClientUtil.getHttpUriRequest(targetHost, outBoundRequest, entity);
 				} else {
@@ -98,6 +126,11 @@ public class AsyncCall {
 							count, timeoutMillis);
 				}
 				Future<HttpResponse> future = httpClient.execute(targetHost, request, httpContext, futureCallback);
+				// calculate the circuteBreaker TODO 是否在发出请求后再加？因为有可能是连接池满了，根本没发出请求
+				PallasRequest pallasRequest = sessionContext.getRequest();
+				if (pallasRequest.isCircuitBreakerOn() && pallasRequest.getShardGroup() != null) {
+					CircuitBreakerService.getInstance().increaseServiceRequestCounter(pallasRequest.getShardGroup().getId());
+				}
 				executeCount.incrementAndGet();
 				futureList.add(future);
 				canBeginAnotherRetry.set(true);
@@ -153,7 +186,7 @@ public class AsyncCall {
 
 		@Override
 		public void run() {
-			asyncCall.executeRequest();
+			asyncCall.executeRequest(true);
 		}
 
 	}

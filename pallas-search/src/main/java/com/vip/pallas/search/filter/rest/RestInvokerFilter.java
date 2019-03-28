@@ -3,8 +3,11 @@ package com.vip.pallas.search.filter.rest;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -24,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.vip.pallas.search.filter.base.AbstractFilter;
 import com.vip.pallas.search.filter.base.AbstractFilterContext;
+import com.vip.pallas.search.filter.circuitbreaker.CircuitBreakerService;
 import com.vip.pallas.search.filter.common.SessionContext;
 import com.vip.pallas.search.http.PallasRequest;
 import com.vip.pallas.search.model.TemplateWithTimeoutRetry;
@@ -121,15 +125,7 @@ public final class RestInvokerFilter extends AbstractFilter {
 		}
 
 		try {
-			String scheme = HttpHost.DEFAULT_SCHEME_NAME;
-			String address = sessionContext.getServiceInfo().getBackendAddress();
-			// #1025 通过伪协议转换为URI，避免 IPv6处理不当
-			final URI uri = new URI("foo://" + address);
-
-			InetAddress netAddress = InetAddress.getByName(uri.getHost());
-			int port = uri.getPort() >= 0 ? uri.getPort() : 80;
-
-			HttpHost targetHost = new HttpHost(netAddress.getHostAddress(), port, scheme);
+			HttpHost targetHost = constractAtargetHost(sessionContext.getServiceInfo().getBackendAddress());
 			PallasRequest pallasRequest = sessionContext.getRequest();
 
 			String newURL = refactURL(pallasRequest, outBoundRequest.getUri());
@@ -155,6 +151,11 @@ public final class RestInvokerFilter extends AbstractFilter {
 					request.setURI(URI.create(newURL));
 					httpClient.execute(targetHost, request, httpContext,
 							new SendDirectlyCallback(filterContext, sessionContext, outBoundRequest, httpContext));
+
+					// calculate the circuteBreaker TODO 是否在发出请求后再加？因为有可能是连接池满了，根本没发出请求
+					if (pallasRequest.isCircuitBreakerOn() && pallasRequest.getShardGroup() != null) {
+						CircuitBreakerService.getInstance().increaseServiceRequestCounter(pallasRequest.getShardGroup().getId());
+					}
 				} else {
 					TryPolicy tp = new TryPolicy(configByIndexNameTemplateName.getRetry() + 1,
 							configByIndexNameTemplateName.getTimeout());
@@ -175,6 +176,19 @@ public final class RestInvokerFilter extends AbstractFilter {
 		}
 	}
 
+	public static HttpHost constractAtargetHost(final String address)
+			throws URISyntaxException, UnknownHostException {
+		String scheme = HttpHost.DEFAULT_SCHEME_NAME;
+		// #1025 通过伪协议转换为URI，避免 IPv6处理不当
+		final URI uri = new URI("foo://" + address);
+
+		InetAddress netAddress = InetAddress.getByName(uri.getHost());
+		int port = uri.getPort() >= 0 ? uri.getPort() : 80;
+
+		HttpHost targetHost = new HttpHost(netAddress.getHostAddress(), port, scheme);
+		return targetHost;
+	}
+
 	/**
 	 * 针对选择不同类型的节点集，在URL上加上响应的配置
 	 * @param pallasRequest
@@ -186,7 +200,7 @@ public final class RestInvokerFilter extends AbstractFilter {
 
 		if ((uri.endsWith("/_search") || uri.endsWith("/_search/template")) && !uri.contains("scroll=")) {
 			String preference = pallasRequest.getPreference();
-			if (preference != null && !"".equals(preference)) {
+			if (StringUtils.isNotBlank(preference)) {
 				newURL += uri.contains("?") ? "&preference=" + preference : "?preference=" + preference;
 			} else if (pallasRequest.isRoutePrimaryFirst()) {
 				newURL += uri.contains("?") ? "&preference=_primary_first" : "?preference=_primary_first";

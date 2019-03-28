@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.vip.pallas.search.model.ShardGroup;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderResult;
 import io.netty.handler.codec.http.FullHttpResponse;
@@ -201,4 +203,16 @@ public interface PallasRequest {
 	void setPreference(String preference);
 
 	String getPreference();
+
+	boolean isCircuitBreakerOn();
+
+	void setCircuitBreaker(boolean circuitBreaker);
+
+	void setShardGroup(ShardGroup shardGroup);
+
+	ShardGroup getShardGroup();
+
+	void setShardGroupList(List<ShardGroup> groupList);
+
+	List<ShardGroup> getShardGroupList();
 }

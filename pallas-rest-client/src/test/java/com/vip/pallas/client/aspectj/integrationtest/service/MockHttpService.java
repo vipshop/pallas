@@ -41,6 +41,7 @@ import org.apache.http.util.EntityUtils;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
 import org.junit.Before;
+import org.junit.Test;
 
 import com.vip.pallas.client.PallasRestClient;
 import com.vip.pallas.client.PallasRestClientBuilder;
@@ -82,6 +83,21 @@ public class MockHttpService extends LocalServerTestBase {
 				response.setEntity(new StringEntity(res));
             }
         });
+		this.serverBootstrap.registerHandler("/yy_test/_search/template", new HttpRequestHandler() {
+			@Override
+			public void handle(HttpRequest request, HttpResponse response, HttpContext context)
+					throws HttpException, IOException {
+				response.setStatusCode(HttpStatus.SC_BAD_GATEWAY);
+				String res = "ok;";
+				int timeout = 10;// 150 + new Random().nextInt(100);
+				try {
+					TimeUnit.MILLISECONDS.sleep(timeout);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				response.setEntity(new StringEntity("i've slept for " + timeout));
+			}
+		});
 		this.serverBootstrap.registerHandler("/getPsListAndEsDomain", new HttpRequestHandler() {
 			boolean switchRes = true;
 			@Override
@@ -107,6 +123,7 @@ public class MockHttpService extends LocalServerTestBase {
 				response.setEntity(new StringEntity("response return:" + request));
 			}
 		});
+		// serverBootstrap.setListenerPort(55087);
 		target = start();
         serverBootstrap.setSocketConfig(SocketConfig.custom().setSoTimeout(61000).build());
         QueryConsoleTask.consoleQueryUrl = "http://localhost:" + target.getPort() + "/getPsListAndEsDomain";
@@ -127,13 +144,20 @@ public class MockHttpService extends LocalServerTestBase {
 			new Thread(new HttpQuestTask(i)).start();
 			// TimeUnit.MILLISECONDS.sleep(100);
 		}
-		TimeUnit.SECONDS.sleep(60);
-		System.exit(1);
+		
+	}
+
+	@Test
+	public void testTimeout() throws Exception {
+		RestclientService restclientService = new RestclientService("atoken", 1);
+		restclientService.queryTemplateThenClose("myTemplateId");
 	}
 
 	static class HttpQuestTask implements Runnable {
 
 		private int i;
+
+		private Random r = new Random(100);
 
 		public HttpQuestTask(int i) {
 			this.i = i;
@@ -148,12 +172,23 @@ public class MockHttpService extends LocalServerTestBase {
 				// Collections.<String, String> emptyMap(), entity, new Header[0]);
 				// System.out.println("$$$$" + EntityUtils.toString(indexResponse.getEntity(), StandardCharsets.UTF_8));
 				PallasRestClient restClient = PallasRestClientBuilder.buildClient("G9NqpEhYjCtU6Ao9aNgYow==");
-				HttpEntity entity = new NStringEntity(
-						"{\n" + "    \"id\" : \"yy_test_get1id1\",\n" + "    \"params\" : {}\n" + "}",
-						ContentType.APPLICATION_JSON);
-				Response  r = restClient.performRequest("POST", "/yy_test/_search/template", Collections.EMPTY_MAP,
-						"yy_test_get1id1", entity);
-				System.out.println(EntityUtils.toString(r.getEntity()));
+				for (;;) {
+					try {
+
+						HttpEntity entity = new NStringEntity("{\"id\" : \"yy_test_sleep\","
+								+ "    \"params\" : {\"ms\":" + r.nextInt(100) + "}" + "}",
+								ContentType.APPLICATION_JSON);
+						Response r = restClient.performRequest("POST",
+								"/yy_test/_search/template",
+								Collections.EMPTY_MAP,
+								"yy_test_sleep", entity);
+					System.out.println(EntityUtils.toString(r.getEntity()));
+					System.in.read();
+					} catch (Exception e) {
+						e.printStackTrace();
+						System.in.read();
+					}
+				}
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

@@ -50,7 +50,7 @@ public class TimeoutFutureCallback extends SendDirectlyCallback {
 					}
 				}
 			} else {
-				asyncCall.executeRequest();
+				asyncCall.executeRequest(true);
 			}
 		} else { // if meets other exceptions, stop retry and return.
 			if (asyncCall.setDone()) {

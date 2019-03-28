@@ -29,7 +29,17 @@ import org.elasticsearch.client.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vip.pallas.search.model.*;
+import com.vip.pallas.search.filter.circuitbreaker.CircuitBreakerPolicy;
+import com.vip.pallas.search.filter.circuitbreaker.CircuitBreakerPolicyHelper;
+import com.vip.pallas.search.model.Cluster;
+import com.vip.pallas.search.model.FlowRecord;
+import com.vip.pallas.search.model.Index;
+import com.vip.pallas.search.model.IndexRouting;
+import com.vip.pallas.search.model.IndexRoutingTargetGroup;
+import com.vip.pallas.search.model.Node;
+import com.vip.pallas.search.model.SearchAuthorization;
+import com.vip.pallas.search.model.ShardGroup;
+import com.vip.pallas.search.model.TemplateWithTimeoutRetry;
 import com.vip.pallas.search.service.ElasticSearchService;
 import com.vip.pallas.search.service.impl.ElasticSearchServiceImpl;
 import com.vip.pallas.search.utils.ElasticRestClient;
@@ -180,10 +190,7 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
                     clusterName -> {
                         Cluster cluster = clusterMap.get(clusterName);
                         if (cluster != null) {
-                            Matcher matcher = CLUSTER_HTTP_PORT_PATTERN.matcher(cluster.getHttpAddress());
-                            if (matcher.find()) {
-                                return matcher.group(1);
-                            }
+										return extractPortFromAddress(cluster.getHttpAddress());
                         }
                         return "9200";
                     }
@@ -270,6 +277,14 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
         cacheMap.put(INDEX_CLUSTER_MAP, indexClusterMap);
     }
 
+	public static String extractPortFromAddress(String clusterHttpAddress) {
+		Matcher matcher = CLUSTER_HTTP_PORT_PATTERN.matcher(clusterHttpAddress);
+		if (matcher.find()) {
+		    return matcher.group(1);
+		}
+		return "9200";
+	}
+
 	private void cacheTimeoutConfig(Map<String, Object> cacheMap) throws Exception {
 		Map<String, Object> resultMap = JsonUtil.readValue(
 				HttpClient.httpGet(
@@ -339,12 +354,26 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
     private void cacheTargetGroup(Map<String, Object> cacheMap) throws Exception {
         Map<String, Object> resultMap = JsonUtil.readValue(HttpClient.httpGet(PallasBasicProperties.PALLAS_CONSOLE_REST_URL + "/route/index_routing_target_group/all.json"), Map.class);
         List<IndexRoutingTargetGroup> targetGroupList = JsonUtil.readValue(JsonUtil.toJson(resultMap.get("data")), List.class, IndexRoutingTargetGroup.class);
-
+		Map<String /** httpaddress **/, Map<String, String>/** nodeIpId **/> clusterIpIdMap = new HashMap<>();
         if (targetGroupList != null) {
             targetGroupList.stream().forEach(targetGroup -> {
                 try {
                     targetGroup.setNodeInfoList(IndexRoutingTargetGroup.fromXContent(targetGroup.getNodesInfo()));
                     targetGroup.setClusterInfoList(IndexRoutingTargetGroup.fromClusterContent(targetGroup.getClustersInfo()));
+					if (targetGroup.isGroupLevel()) { // calculate the dynamic group
+						
+						String httpAddress = targetGroup.getClusterInfoList().get(0).getAddress();//StringUtils.substringBetween(targetGroup.getClustersInfo(), "address\":\"", "\"");
+						Map<String, String> nodesInfo = clusterIpIdMap.computeIfAbsent(httpAddress, address -> {
+							return elasticSearchService.getNodesInfo(address);
+						});
+						List<ShardGroup> devideShards2Group = elasticSearchService.genDynamicGroup(httpAddress,
+								targetGroup.getIndexName(), nodesInfo);
+						// leave the circuteBreaker-filter for routeFilter, this only calculate the whole list.
+						targetGroup.setShardGroupList(devideShards2Group);
+						// init the policy
+						devideShards2Group.stream().forEach(s -> {CircuitBreakerPolicyHelper.circuitBreakerPolicyMap.putIfAbsent(s.getId(), new CircuitBreakerPolicy());});
+					}
+
                 } catch (Exception e) {
                     LOGGER.error(e.toString(), e);
                 }

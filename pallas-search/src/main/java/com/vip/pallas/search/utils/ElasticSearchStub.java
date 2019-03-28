@@ -24,7 +24,8 @@ public class ElasticSearchStub {
         return ElasticRestClient.build(clusterHttpAddress);
     }
 
-    public static List<String[]> performRequest(String clusterHttpAddress, String endpoint, BiConsumer<String, List<String[]>> comsumer) {
+	public static List<String[]> performRequest(String clusterHttpAddress, String endpoint,
+			BiConsumer<String, List<String[]>> comsumer) {
         if(clusterHttpAddress == null || clusterHttpAddress.isEmpty()){
             return Collections.EMPTY_LIST;
         }
