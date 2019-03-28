@@ -73,6 +73,7 @@
     <if test="params.clusterId != null and params.clusterId !=''">  
         or description like concat('%', #{params.clusterId}, '%')
     </if>
+    order by update_time desc
   </select>  
   
   <delete id="deleteByClusterId" parameterType="java.lang.String">
@@ -83,7 +84,7 @@
     insert into cluster (cluster_id, http_address, client_address, 
       real_clusters, accessible_ps, description, create_time, monitor_level)
     values (#{clusterId,jdbcType=VARCHAR}, #{httpAddress,jdbcType=VARCHAR}, #{clientAddress,jdbcType=VARCHAR}, 
-      #{realClusters,jdbcType=VARCHAR}, #{accessiblePs,jdbcType=VARCHAR}, #{description,jdbcType=LONGVARCHAR}), #{createTime, jdbcType=TIMESTAMP, #{monitorLevel,jdbcType=VARCHAR}
+      #{realClusters,jdbcType=VARCHAR}, #{accessiblePs,jdbcType=VARCHAR}, #{description,jdbcType=LONGVARCHAR}), #{createTime, jdbcType=TIMESTAMP}, #{monitorLevel,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.vip.pallas.mybatis.entity.Cluster">
     insert into cluster
@@ -107,10 +108,10 @@
         description,
       </if>
       <if test="createTime != null">
-        create_time
+        create_time,
       </if>
       <if test="monitorLevel != null">
-        monitor_level
+        monitor_level,
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -136,7 +137,7 @@
         #{createTime, jdbcType=TIMESTAMP},
       </if>
       <if test="monitorLevel != null">
-        #{monitorLevel, jdbcType=VARCHAR}
+        #{monitorLevel, jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -162,7 +163,7 @@
         update_time = #{updateTime, jdbcType=TIMESTAMP},
       </if>
       <if test="monitorLevel != null">
-        monitor_level = #{monitorLevel,jdbcType=VARCHAR}
+        monitor_level = #{monitorLevel,jdbcType=VARCHAR},
       </if>
     </set>
     where cluster_id = #{clusterId,jdbcType=VARCHAR}

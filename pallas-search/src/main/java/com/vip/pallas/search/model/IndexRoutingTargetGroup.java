@@ -1,15 +1,15 @@
 package com.vip.pallas.search.model;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.type.TypeReference;
-
-import com.vip.pallas.search.utils.JsonUtil;
+import static java.util.stream.Collectors.toList;
 
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import static java.util.stream.Collectors.toList;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.type.TypeReference;
+
+import com.vip.pallas.search.utils.JsonUtil;
 
 /**
  * Created by owen on 2/11/2017.
@@ -21,7 +21,7 @@ public class IndexRoutingTargetGroup {
     public static final int SHARD_LEVEL = 2;
     public static final int CLUSTER_PRIMARY_FIRST_LEVEL = 3;
     public static final int CLUSTER_REPLICA_FIRST_LEVEL = 4;
-
+	public static final int DYNAMIC_GROUP = 5;
 
     private Long id;
 
@@ -48,6 +48,8 @@ public class IndexRoutingTargetGroup {
     private List<NodeInfo> nodeInfoList;
 
     private List<ClusterInfo> clusterInfoList;
+
+	private List<ShardGroup> shardGroupList;
 
     public Long getId() {
         return id;
@@ -130,6 +132,11 @@ public class IndexRoutingTargetGroup {
     }
 
     @JsonIgnore
+	public boolean isGroupLevel() {
+		return clusterLevel == DYNAMIC_GROUP;
+	}
+
+	@JsonIgnore
     public boolean isClusterLevel0() {
         return clusterLevel == CLUSTER_LEVEL || clusterLevel == CLUSTER_PRIMARY_FIRST_LEVEL || clusterLevel == CLUSTER_REPLICA_FIRST_LEVEL;
     }
@@ -314,4 +321,12 @@ public class IndexRoutingTargetGroup {
     public void setClusterInfoList(List<ClusterInfo> clusterInfoList) {
         this.clusterInfoList = clusterInfoList;
     }
+
+	public List<ShardGroup> getShardGroupList() {
+		return shardGroupList;
+	}
+
+	public void setShardGroupList(List<ShardGroup> shardGroupList) {
+		this.shardGroupList = shardGroupList;
+	}
 }

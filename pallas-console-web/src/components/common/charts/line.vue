@@ -1,5 +1,6 @@
 <template>
-    <div>
+    <div style="height:300px">
+        <chart-no-data v-if="JSON.stringify(optionInfo) === '{}'"></chart-no-data>
         <div :id="id" style="width: 100%;height:300px"></div>
     </div>
 </template>
@@ -16,6 +17,7 @@ export default {
     return {
       myChart: {},
       option: {
+        color: ['#13CE66', '#20A0FF', '#F7BA2A', '#FF4949'],
         title: {
           text: null,
         },

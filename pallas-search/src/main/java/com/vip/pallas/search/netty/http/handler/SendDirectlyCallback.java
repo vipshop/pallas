@@ -6,6 +6,9 @@ import java.io.InputStream;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
+import org.apache.http.client.HttpResponseException;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.Args;
@@ -16,10 +19,13 @@ import org.slf4j.LoggerFactory;
 
 import com.vip.pallas.search.exception.PallasException;
 import com.vip.pallas.search.filter.base.AbstractFilterContext;
+import com.vip.pallas.search.filter.circuitbreaker.CircuitBreakerService;
 import com.vip.pallas.search.filter.common.PallasRunner;
 import com.vip.pallas.search.filter.common.SessionContext;
 import com.vip.pallas.search.filter.rest.RestInvokerFilter;
 import com.vip.pallas.search.http.HttpCode;
+import com.vip.pallas.search.http.PallasRequest;
+import com.vip.pallas.search.model.ShardGroup;
 import com.vip.pallas.search.monitor.GaugeMonitorService;
 import com.vip.pallas.search.timeout.TimeoutRetryController;
 import com.vip.pallas.search.trace.TraceAspect;
@@ -82,6 +88,16 @@ public class SendDirectlyCallback implements FutureCallback<HttpResponse> {
 	}
 	protected void handleCompleted(HttpResponse response) {
 		setKeyTimeStamp();
+		// in case we got a bad response.
+		if (response.getStatusLine().getStatusCode() != HttpCode.HTTP_OK_CODE) {
+			try {
+				String res = EntityUtils.toString(response.getEntity(), "UTF-8");
+				handleFailed(new HttpResponseException(response.getStatusLine().getStatusCode(), res));
+			} catch (ParseException | IOException e) {
+				handleFailed(e);
+			}
+			return;
+		}
 		try {
 			HttpEntity entity = response.getEntity();
 			byte[] content = null;
@@ -177,7 +193,20 @@ public class SendDirectlyCallback implements FutureCallback<HttpResponse> {
 		}
 	}
 
+	protected void doCircuitBreaker() {
+		PallasRequest request = sessionContext.getRequest();
+		if (request != null && request.isCircuitBreakerOn()) {
+			ShardGroup shardGroup = request.getShardGroup();
+			if (shardGroup != null) {
+				CircuitBreakerService.getInstance().handleFailedRequestCounter(shardGroup.getId());
+			}
+		}
+	}
+
 	protected void handleFailed(Exception ex, int httpCode) {
+		doCircuitBreaker();
+		logger.error(((HttpClientContext) httpContext).getTargetHost().toHostString()
+				+ " " + ((HttpClientContext) httpContext).getRequest().getRequestLine());
 		logger.error(ex.toString(), ex);
 		TimeoutRetryController.notifyGovernor();
 		initEndUpstreamTimeInMonitorAccessLog();

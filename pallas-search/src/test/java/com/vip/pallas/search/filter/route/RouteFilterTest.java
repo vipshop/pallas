@@ -19,14 +19,15 @@ import java.util.stream.Stream;
 
 import org.junit.Test;
 
+import com.vip.pallas.search.http.PallasRequest;
 import com.vip.pallas.search.model.FlowRecord;
 import com.vip.pallas.search.model.Index;
 import com.vip.pallas.search.model.IndexRouting;
 import com.vip.pallas.search.model.IndexRoutingTargetGroup;
 import com.vip.pallas.search.model.SearchAuthorization;
 import com.vip.pallas.search.model.ServiceInfo;
+import com.vip.pallas.search.model.ShardGroup;
 import com.vip.pallas.search.model.TemplateWithTimeoutRetry;
-import com.vip.pallas.search.http.PallasRequest;
 import com.vip.pallas.search.service.MockPallasCacheServiceImpl;
 import com.vip.pallas.search.service.PallasCacheService;
 import com.vip.pallas.search.service.impl.PallasCacheServiceImpl;
@@ -630,6 +631,42 @@ public class RouteFilterTest extends TestCase {
         public String getLogicClusterId() {
             return cluster;
         }
+
+		@Override
+		public boolean isCircuitBreakerOn() {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		public void setCircuitBreaker(boolean circuitBreaker) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void setShardGroup(ShardGroup shardGroup) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public ShardGroup getShardGroup() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public void setShardGroupList(List<ShardGroup> groupList) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public List<ShardGroup> getShardGroupList() {
+			// TODO Auto-generated method stub
+			return null;
+		}
     };
 
     private PallasCacheService mockService = new PallasCacheService() {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-	<property name="log.context.name" value="pallas-console" />
+	<property name="log.context.name" value="pallas-search" />
 	<property name="log.directory" value="${PALLAS_LOG_DIR:-/apps/logs/log_receiver}/${PALLAS_CONSOLE_DOMAIN:-${log.context.name}}" />
 	<property name="log.charset" value="UTF-8" />
 	<property name="log.maxHistory" value="20" />

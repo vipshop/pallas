@@ -41,7 +41,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
-import com.vip.pallas.bean.monitor.ShardInfoModel;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -65,6 +64,7 @@ import com.vip.pallas.bean.EsMappings.Item;
 import com.vip.pallas.bean.EsMappings.Mappings;
 import com.vip.pallas.bean.EsMappings.Propertie;
 import com.vip.pallas.bean.IndexSettings;
+import com.vip.pallas.bean.monitor.ShardInfoModel;
 import com.vip.pallas.mybatis.entity.Cluster;
 import com.vip.pallas.mybatis.entity.Index;
 import com.vip.pallas.mybatis.entity.IndexVersion;
@@ -74,7 +74,7 @@ import com.vip.pallas.mybatis.repository.IndexRepository;
 import com.vip.pallas.mybatis.repository.IndexVersionRepository;
 import com.vip.pallas.mybatis.repository.MappingRepository;
 import com.vip.pallas.service.ElasticSearchService;
-import com.vip.pallas.utils.DevideShards;
+import com.vip.pallas.utils.DivideShards;
 import com.vip.pallas.utils.ElasticRestClient;
 import com.vip.pallas.utils.ElasticSearchStub;
 import com.vip.pallas.utils.JsonUtil;
@@ -1072,7 +1072,7 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 				}
 			}
 			if (!shardDistributionMap.isEmpty()) {
-				return DevideShards.devideShards2Group(shardDistributionMap, shardDistributionMap.get(0).size(), nodes);
+				return DivideShards.divideShards2Group(shardDistributionMap, shardDistributionMap.get(0).size(), nodes);
 			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);

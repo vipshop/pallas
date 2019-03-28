@@ -24,9 +24,10 @@ public class BootStrap {
 
 	private static void initJavaFilters() {
 		// 前置流程
-		if(!PallasSearchProperties.SEARCH_SKIP_ROUTING){
-			DefaultFilterPipeLine.getInstance().addLastSegment(new HttpProtocolCheckFilter(), new RouteFilter(), new BalanceFilter());
-		}else{
+		if (!PallasSearchProperties.SEARCH_SKIP_ROUTING) {
+			DefaultFilterPipeLine.getInstance().addLastSegment(new HttpProtocolCheckFilter(), new RouteFilter(),
+					new BalanceFilter());
+		} else {
 			DefaultFilterPipeLine.getInstance().addLastSegment(new HttpProtocolCheckFilter(), new UpStreamFilter());
 		}
 

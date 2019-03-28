@@ -3,8 +3,6 @@ package com.vip.pallas.search.netty.http;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import com.vip.pallas.search.exception.HttpCodeErrorPallasException;
 import com.vip.pallas.search.http.HttpCode;
 import com.vip.pallas.search.http.PallasRequest;
+import com.vip.pallas.search.model.ShardGroup;
 import com.vip.pallas.search.utils.QueryStringEncoder;
 
 import io.netty.buffer.ByteBuf;
@@ -98,6 +97,10 @@ public class NettyPallasRequest implements PallasRequest {
 	private boolean routeReplicaFirst = false;
 
 	private String preference = null;
+
+	private boolean circuitBreaker = false;
+	private ShardGroup shardGroup;
+	private List<ShardGroup> groupList;
 
 	public NettyPallasRequest(FullHttpRequest httpRequest, Channel channel) {
 		this.httpRequest = httpRequest;
@@ -628,5 +631,35 @@ public class NettyPallasRequest implements PallasRequest {
 	@Override
 	public String getPreference() {
 		return this.preference;
+	}
+
+	@Override
+	public boolean isCircuitBreakerOn() {
+		return circuitBreaker;
+	}
+
+	@Override
+	public void setCircuitBreaker(boolean circuitBreaker) {
+		this.circuitBreaker = circuitBreaker;
+	}
+
+	@Override
+	public void setShardGroup(ShardGroup shardGroup) {
+		this.shardGroup = shardGroup;
+	}
+
+	@Override
+	public ShardGroup getShardGroup() {
+		return this.shardGroup;
+	}
+
+	@Override
+	public void setShardGroupList(List<ShardGroup> groupList) {
+		this.groupList = groupList;
+	}
+
+	@Override
+	public List<ShardGroup> getShardGroupList() {
+		return groupList;
 	}
 }

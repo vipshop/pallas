@@ -8,8 +8,10 @@ import static java.util.stream.Collectors.toList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.apache.commons.lang3.StringUtils;
@@ -19,12 +21,14 @@ import org.slf4j.LoggerFactory;
 import com.vip.pallas.search.exception.HttpCodeErrorPallasException;
 import com.vip.pallas.search.filter.base.AbstractFilter;
 import com.vip.pallas.search.filter.base.AbstractFilterContext;
+import com.vip.pallas.search.filter.circuitbreaker.CircuitBreakerService;
 import com.vip.pallas.search.filter.common.SessionContext;
 import com.vip.pallas.search.http.PallasRequest;
 import com.vip.pallas.search.model.IndexRouting;
 import com.vip.pallas.search.model.IndexRoutingTargetGroup;
 import com.vip.pallas.search.model.SearchAuthorization;
 import com.vip.pallas.search.model.ServiceInfo;
+import com.vip.pallas.search.model.ShardGroup;
 import com.vip.pallas.search.monitor.GaugeMonitorService;
 import com.vip.pallas.search.service.PallasCacheFactory;
 import com.vip.pallas.search.utils.IPMatcher;
@@ -51,6 +55,8 @@ public class RouteFilter extends AbstractFilter {
 
 	public static String className = RouteFilter.class.getSimpleName();
 	public static String classMethod = "run";
+
+	CircuitBreakerService circuitBreakerService = CircuitBreakerService.getInstance();
 
 	protected enum OperationType {
 		INDEX_SERACH, INDEX_UPDATE, CLUSTER_SEARCH, CLUSTER_UPDTE
@@ -338,18 +344,7 @@ public class RouteFilter extends AbstractFilter {
 				return targetList;
 			}
 		} else if(targetGroup.isShardLevel() && clusterInfoList != null && !clusterInfoList.isEmpty()){ // 匹配动态绑定分片
-			for (IndexRoutingTargetGroup.ClusterInfo clusterInfo: clusterInfoList) {
-				List<String> nodeList = PallasCacheFactory.getCacheService().getShardNodeListByIndexAndCluster(indexName, clusterInfo.getCluster());
-				if(nodeList != null && !nodeList.isEmpty()){
-					req.setTargetGroupId(target.getId());
-					return nodeList.stream()
-							.filter(availableNodes::contains) //匹配当前可用节点列表
-							.map(node -> new ServiceInfo(node +
-									":" + PallasCacheFactory.getCacheService().getClusterPortByIndexAndCluster(indexName, clusterInfo.getCluster())
-									, indexName, req.getLogicClusterId(), targetGroup.getName()))
-							.collect(toList());
-				}
-			}
+			return genShardLevelRoutingServerList(indexName, target, targetGroup, req, clusterInfoList, availableNodes);
 		} else if(targetGroup.isClusterLevel0() && clusterInfoList != null && !clusterInfoList.isEmpty()){ // 匹配集群
 			for (IndexRoutingTargetGroup.ClusterInfo clusterInfo: clusterInfoList) {
 				List<String> nodeList = PallasCacheFactory.getCacheService().getAllNodeListByClusterName(clusterInfo.getName());
@@ -365,6 +360,57 @@ public class RouteFilter extends AbstractFilter {
 									, indexName, req.getLogicClusterId(), targetGroup.getName()))
 							.collect(toList());
 				}
+			}
+		} else if (targetGroup.isGroupLevel()) { // 分片分组
+			List<ShardGroup> groupList = targetGroup.getShardGroupList();
+			// if group size less than 2 or the preference is not null(preference from config comes higher priority), fall back to shard routing.
+			if (req.getPreference() != null || groupList.size() < 2) {
+				return genShardLevelRoutingServerList(indexName, target, targetGroup, req, clusterInfoList, availableNodes);
+			}
+			//  filter the circuitBreaker-open groups.
+			for (Iterator<ShardGroup> ite = groupList.iterator(); ite.hasNext();) {
+				ShardGroup g = ite.next();
+				if (circuitBreakerService.getOpenGroupsList().contains(g.getId())) {
+					ite.remove();
+				}
+			}
+			if (groupList.isEmpty()) { // no group? fall back to shard routing
+				return genShardLevelRoutingServerList(indexName, target, targetGroup, req, clusterInfoList, availableNodes);
+			}
+			
+			// random a group
+			int randomIndex = InternalThreadLocalMap.get().random().nextInt(groupList.size());
+			ShardGroup group = groupList.get(randomIndex);
+			// circuitBreaker is on when it's shardGroup routing.
+			req.setCircuitBreaker(true);
+			req.setShardGroup(group);
+			req.setShardGroupList(groupList);
+			req.setPreference("_prefer_nodes:" + group.getPreferNodes());
+			// construct the serviceInfoList
+			List<String> nodeList = group.getServerList();
+			List<ServiceInfo> finalNodeList = nodeList.stream().map(nodeIp -> new ServiceInfo(nodeIp,
+					targetGroup.getIndexName(), req.getLogicClusterId(), targetGroup.getName())).collect(Collectors.toList());
+			return finalNodeList;
+		}
+		return null;
+	}
+
+	public List<ServiceInfo> genShardLevelRoutingServerList(String indexName, IndexRouting.ConditionTarget target,
+			IndexRoutingTargetGroup targetGroup, PallasRequest req,
+			List<IndexRoutingTargetGroup.ClusterInfo> clusterInfoList, List<String> availableNodes)
+			throws ExecutionException {
+		for (IndexRoutingTargetGroup.ClusterInfo clusterInfo : clusterInfoList) {
+			List<String> nodeList = PallasCacheFactory.getCacheService().getShardNodeListByIndexAndCluster(indexName,
+					clusterInfo.getCluster());
+			if (nodeList != null && !nodeList.isEmpty()) {
+				req.setTargetGroupId(target.getId());
+				return nodeList.stream().filter(availableNodes::contains) // 匹配当前可用节点列表
+						.map(node -> new ServiceInfo(
+								node + ":"
+										+ PallasCacheFactory.getCacheService()
+												.getClusterPortByIndexAndCluster(indexName, clusterInfo.getCluster()),
+								indexName, req.getLogicClusterId(), targetGroup.getName()))
+						.collect(toList());
 			}
 		}
 		return null;

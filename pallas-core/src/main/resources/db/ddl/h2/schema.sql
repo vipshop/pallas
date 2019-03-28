@@ -44,8 +44,9 @@ CREATE TABLE IF NOT EXISTS `cluster` (
   `create_time` timestamp NOT NULL DEFAULT '1980-01-01 01:01:01' COMMENT '创建时间',
   `update_time` timestamp NOT NULL DEFAULT '1980-01-01 01:01:01' COMMENT '更新时间',
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否己删除',
-  `real_clusters` varchar(512)  NOT NULL DEFAULT '' COMMENT '当为逻辑集群时，此项不为空，值为集群id集合，逗号分开，如：3,5',
-  `accessible_ps` varchar(512)  DEFAULT '' COMMENT 'ࠉӔ؃ϊ֢ٶܯȺքpallas-searchܯȺ',
+  `real_clusters` varchar(512) NOT NULL DEFAULT '' COMMENT '当为逻辑集群时，此项不为空，值为集群id集合，逗号分开，如：3,5',
+  `accessible_ps` varchar(512) DEFAULT '' COMMENT '可以访问这个集群的pallas-search集群',
+  `monitor_level` varchar(256) DEFAULT '' COMMENT '监控等级',
   PRIMARY KEY (`id`),
   UNIQUE KEY `cluster_id_unqiue` (`cluster_id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;
