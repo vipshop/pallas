@@ -73,6 +73,7 @@
     <if test="params.clusterId != null and params.clusterId !=''">  
         or description like concat('%', #{params.clusterId}, '%')
     </if>
+    order by update_time desc
   </select>  
   
   <delete id="deleteByClusterId" parameterType="java.lang.String">
@@ -83,7 +84,7 @@
     insert into cluster (cluster_id, http_address, client_address, 
       real_clusters, accessible_ps, description, create_time, monitor_level)
     values (#{clusterId,jdbcType=VARCHAR}, #{httpAddress,jdbcType=VARCHAR}, #{clientAddress,jdbcType=VARCHAR}, 
-      #{realClusters,jdbcType=VARCHAR}, #{accessiblePs,jdbcType=VARCHAR}, #{description,jdbcType=LONGVARCHAR}), #{createTime, jdbcType=TIMESTAMP, #{monitorLevel,jdbcType=VARCHAR}
+      #{realClusters,jdbcType=VARCHAR}, #{accessiblePs,jdbcType=VARCHAR}, #{description,jdbcType=LONGVARCHAR}), #{createTime, jdbcType=TIMESTAMP}, #{monitorLevel,jdbcType=VARCHAR}
   </insert>
   <insert id="insertSelective" parameterType="com.vip.pallas.mybatis.entity.Cluster">
     insert into cluster

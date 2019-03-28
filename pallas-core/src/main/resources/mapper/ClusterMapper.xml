@@ -134,7 +134,7 @@
         #{description,jdbcType=LONGVARCHAR},
       </if>
       <if test="createTime != null">
-        #{createTime, jdbcType=TIMESTAMP}
+        #{createTime, jdbcType=TIMESTAMP},
       </if>
       <if test="monitorLevel != null">
         #{monitorLevel, jdbcType=VARCHAR}
