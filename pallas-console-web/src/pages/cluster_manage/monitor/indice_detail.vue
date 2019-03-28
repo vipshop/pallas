@@ -137,7 +137,7 @@ export default {
   watch: {
     '$store.state.monitorTimeInterval': function interval(val) {
       console.log(val);
-      this.getIndexMemory();
+      this.getIndexMonitor();
     },
   },
 };
