@@ -1,5 +1,6 @@
 <template>
-    <div>
+    <div style="height:300px">
+        <chart-no-data v-if="JSON.stringify(optionInfo) === '{}'"></chart-no-data>
         <div :id="id" style="width: 100%;height:300px"></div>
     </div>
 </template>
