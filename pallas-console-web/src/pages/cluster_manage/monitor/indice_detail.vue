@@ -13,28 +13,28 @@
       <div>
         <el-row :gutter="10">
           <el-col :span="12">
-            <chart-container title="Index Memory" type="line">
+            <chart-container :title="`Index Memory(${indexMemoryInfo.yAxisName})`" type="line">
               <div slot="chart">
                <MyLine id="indexMemory" :option-info="indexMemoryInfo"></MyLine>
               </div>
             </chart-container>
           </el-col>
           <el-col :span="12">
-            <chart-container title="Index Disk" type="line">
+            <chart-container :title="`Index Disk(${indexDiskInfo.yAxisName})`" type="line">
               <div slot="chart">
                <MyLine id="indexDisk" :option-info="indexDiskInfo"></MyLine>
               </div>
             </chart-container>
           </el-col>
           <el-col :span="12">
-            <chart-container title="Segment Count" type="line">
+            <chart-container :title="`Segment Count(${segmentCountInfo.yAxisName})`" type="line">
               <div slot="chart">
                <MyLine id="segmentCount" :option-info="segmentCountInfo"></MyLine>
               </div>
             </chart-container>
           </el-col>
           <el-col :span="12">
-            <chart-container title="Document Count" type="line">
+            <chart-container :title="`Document Count(${documentCountInfo.yAxisName})`" type="line">
               <div slot="chart">
                <MyLine id="documentCount" :option-info="documentCountInfo"></MyLine>
               </div>
@@ -57,45 +57,45 @@ export default {
     };
   },
   methods: {
-    getIndexMemory(lucencTotal, terms) {
+    getIndexMemory(lucencTotal, terms, unit) {
       const optionInfo = {
         xAxis: lucencTotal.map(e => e.x),
         seriesData: [
           { name: 'index memory lucenc total', data: lucencTotal.map(e => e.y.toFixed(2)) },
           { name: 'index memory terms', data: terms.map(e => e.y.toFixed(2)) },
         ],
-        yAxisName: 'mb',
+        yAxisName: unit || '个',
       };
       this.indexMemoryInfo = optionInfo;
     },
-    getIndexDisk(total, primary) {
+    getIndexDisk(total, primary, unit) {
       const optionInfo = {
         xAxis: total.map(e => e.x),
         seriesData: [
           { name: 'disk-total', data: total.map(e => e.y.toFixed(2)) },
           { name: 'disk-primary', data: primary.map(e => e.y.toFixed(2)) },
         ],
-        yAxisName: 'gb',
+        yAxisName: unit || '个',
       };
       this.indexDiskInfo = optionInfo;
     },
-    getSegmentCount(segmentCount) {
+    getSegmentCount(segmentCount, unit) {
       const optionInfo = {
         xAxis: segmentCount.map(e => e.x),
         seriesData: [
           { name: 'segment count', data: segmentCount.map(e => e.y) },
         ],
-        yAxisName: '',
+        yAxisName: unit || '个',
       };
       this.segmentCountInfo = optionInfo;
     },
-    getDocumentCount(documentCount) {
+    getDocumentCount(documentCount, unit) {
       const optionInfo = {
         xAxis: documentCount.map(e => e.x),
         seriesData: [
           { name: 'document count', data: documentCount.map(e => e.y) },
         ],
-        yAxisName: '',
+        yAxisName: unit || '个',
       };
       this.documentCountInfo = optionInfo;
     },
@@ -109,10 +109,13 @@ export default {
         if (data) {
           this.gaugeMetricData = [data.gaugeMetric];
           this.getIndexMemory(data.index_memory_lucenc_total_in_byte.metricModel,
-           data.index_memory_terms_in_byte.metricModel);
-          this.getIndexDisk(data.index_disk_total.metricModel, data.index_disk_primary.metricModel);
-          this.getSegmentCount(data.segmentCount.metricModel);
-          this.getDocumentCount(data.documentCount.metricModel);
+           data.index_memory_terms_in_byte.metricModel,
+           data.index_memory_lucenc_total_in_byte.unit);
+          this.getIndexDisk(data.index_disk_total.metricModel,
+            data.index_disk_primary.metricModel,
+            data.index_disk_total.unit);
+          this.getSegmentCount(data.segmentCount.metricModel, data.segmentCount.unit);
+          this.getDocumentCount(data.documentCount.metricModel, data.documentCount.unit);
         }
       });
     },
