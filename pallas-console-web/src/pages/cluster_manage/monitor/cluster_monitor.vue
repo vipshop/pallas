@@ -23,40 +23,28 @@
         </div>
         <div>
             <el-row :gutter="10">
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
+                <el-col :span="12">
                     <chart-container title="Indexing Rate(/s)" type="line">
                         <div slot="chart">
                             <MyLine id="indexingRate" :option-info="indexingRateInfo"></MyLine>
                         </div>
                     </chart-container>
                 </el-col>
-            </el-row>
-        </div>
-        <div>
-            <el-row :gutter="10">
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
+                <el-col :span="12">
                     <chart-container title="Search Rate(/s)" type="line">
                         <div slot="chart">
                             <MyLine id="searchRate" :option-info="searchRateInfo"></MyLine>
                         </div>
                     </chart-container>
                 </el-col>
-            </el-row>
-        </div>
-        <div>
-            <el-row :gutter="10">
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
+                <el-col :span="12">
                     <chart-container title="Indexing Latentcy" type="line">
                         <div slot="chart">
                             <MyLine id="indexingLatency" :option-info="indexingLatencyInfo"></MyLine>
                         </div>
                     </chart-container>
                 </el-col>
-            </el-row>
-        </div>  
-        <div>
-            <el-row :gutter="10">
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
+                <el-col :span="12">
                     <chart-container title="search Latentcy" type="line">
                         <div slot="chart">
                             <MyLine id="searchLatency" :option-info="searchLatencyInfo"></MyLine>
@@ -64,7 +52,7 @@
                     </chart-container>
                 </el-col>
             </el-row>
-        </div>               
+        </div>
     </div>
 </template>
 <script>
@@ -136,14 +124,6 @@ export default {
           this.getSearchLatency(data.searchLatency.metricModel);
         }
       });
-    },
-    bytesToSize(bytes) {
-      if (bytes === 0) return '0 B';
-      const k = 1024;
-      const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      const j = (bytes / (k ** i)).toFixed(2);
-      return `${j} ${sizes[i]}`;
     },
 
   },

@@ -50,7 +50,6 @@
 </template>
 
 <script>
-import Moment from 'moment';
 import {
   SET_MONITOR_TIME_INTERVAL,
 } from '../../../store/types';
@@ -81,11 +80,6 @@ export default {
     };
   },
   methods: {
-    formatDate(time, format) {
-      const date = new Date(time);
-      const formatTime = Moment(date).format(format);
-      return formatTime;
-    },
     handleCommand(command) {
       if (command !== 'custom') {
         const params = {

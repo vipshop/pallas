@@ -7,11 +7,13 @@ import './components';
 import './directives/';
 import App from './App';
 import Store from './store';
+import mixins from './mixins';
 import router from './routers';
 import Utils from './utils';
 import './styles/main.css';
 import './styles/element.css';
 
+Vue.mixin(mixins);
 Vue.use(ElementUI);
 Vue.use(Utils);
 

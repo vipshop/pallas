@@ -12,103 +12,71 @@
             </el-table>
       </div>  
       <div>
-            <el-row :gutter="10">
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
-                    <chart-container title="gc Count" type="line">
-                        <div slot="chart">
-                            <MyLine id="gcCount" :option-info="gcCountInfo"></MyLine>
-                        </div>
-                    </chart-container>
-                </el-col>
-            </el-row>
-      </div>
-      <div>
-            <el-row :gutter="10">
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
-                    <chart-container title="gc Duration" type="line">
-                        <div slot="chart">
-                            <MyLine id="gcDuration" :option-info="gcDurationInfo"></MyLine>
-                        </div>
-                    </chart-container>
-                </el-col>
-            </el-row>
-      </div>
-      <div>
-            <el-row :gutter="10">
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
-                    <chart-container title="jvm heap" type="line">
-                        <div slot="chart">
-                            <MyLine id="jvmHeap" :option-info="jvmHeapInfo"></MyLine>
-                        </div>
-                    </chart-container>
-                </el-col>
-            </el-row>
-      </div>
-      <div>
-            <el-row :gutter="10">
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
-                    <chart-container title="cpu percent" type="line">
-                        <div slot="chart">
-                            <MyLine id="cpuPercent" :option-info="cpuPercentInfo"></MyLine>
-                        </div>
-                    </chart-container>
-                </el-col>
-            </el-row>
-      </div>
-      <div>
-            <el-row :gutter="10">
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
-                    <chart-container title="index memory" type="line">
-                        <div slot="chart">
-                            <MyLine id="indexMemory" :option-info="indexMemoryInfo"></MyLine>
-                        </div>
-                    </chart-container>
-                </el-col>
-            </el-row>
-       </div>
-       <div>
-            <el-row :gutter="10">
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
-                    <chart-container title="threadpool Queue" type="line">
-                        <div slot="chart">
-                            <MyLine id="threadpoolQueue" :option-info="threadpoolQueueInfo"></MyLine>
-                        </div>
-                    </chart-container>
-                </el-col>
-            </el-row>
-      </div>
-      <div>
-            <el-row :gutter="10">
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
-                    <chart-container title="threadpool Reject" type="line">
-                        <div slot="chart">
-                            <MyLine id="threadpoolReject" :option-info="threadpoolRejectInfo"></MyLine>
-                        </div>
-                    </chart-container>
-                </el-col>
-            </el-row>
-      </div>
-      <div>
-            <el-row :gutter="10">
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
-                    <chart-container title="segment count" type="line">
-                        <div slot="chart">
-                            <MyLine id="segmentCount" :option-info="segmentCountInfo"></MyLine>
-                        </div>
-                    </chart-container>
-                </el-col>
-            </el-row>
-      </div>
-      <div>
-            <el-row :gutter="10">
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
-                    <chart-container title="http open current" type="line">
-                        <div slot="chart">
-                            <MyLine id="httpOpenCurrent" :option-info="httpOpenCurrentInfo"></MyLine>
-                        </div>
-                    </chart-container>
-                </el-col>
-            </el-row>
+          <el-row :gutter="10">
+              <el-col :span="12">
+                  <chart-container title="gc Count" type="line">
+                      <div slot="chart">
+                          <MyLine id="gcCount" :option-info="gcCountInfo"></MyLine>
+                      </div>
+                  </chart-container>
+              </el-col>
+              <el-col :span="12">
+                  <chart-container title="gc Duration" type="line">
+                      <div slot="chart">
+                          <MyLine id="gcDuration" :option-info="gcDurationInfo"></MyLine>
+                      </div>
+                  </chart-container>
+              </el-col>
+              <el-col :span="12">
+                  <chart-container title="jvm heap" type="line">
+                      <div slot="chart">
+                          <MyLine id="jvmHeap" :option-info="jvmHeapInfo"></MyLine>
+                      </div>
+                  </chart-container>
+              </el-col>
+              <el-col :span="12">
+                  <chart-container title="cpu percent" type="line">
+                      <div slot="chart">
+                          <MyLine id="cpuPercent" :option-info="cpuPercentInfo"></MyLine>
+                      </div>
+                  </chart-container>
+              </el-col>
+              <el-col :span="12">
+                  <chart-container title="index memory" type="line">
+                      <div slot="chart">
+                          <MyLine id="indexMemory" :option-info="indexMemoryInfo"></MyLine>
+                      </div>
+                  </chart-container>
+              </el-col>
+              <el-col :span="12">
+                  <chart-container title="threadpool Queue" type="line">
+                      <div slot="chart">
+                          <MyLine id="threadpoolQueue" :option-info="threadpoolQueueInfo"></MyLine>
+                      </div>
+                  </chart-container>
+              </el-col>
+              <el-col :span="12">
+                  <chart-container title="threadpool Reject" type="line">
+                      <div slot="chart">
+                          <MyLine id="threadpoolReject" :option-info="threadpoolRejectInfo"></MyLine>
+                      </div>
+                  </chart-container>
+              </el-col>
+              <el-col :span="12">
+                  <chart-container title="segment count" type="line">
+                      <div slot="chart">
+                          <MyLine id="segmentCount" :option-info="segmentCountInfo"></MyLine>
+                      </div>
+                  </chart-container>
+              </el-col>
+              <el-col :span="12">
+                  <chart-container title="http open current" type="line">
+                      <div slot="chart">
+                          <MyLine id="httpOpenCurrent" :option-info="httpOpenCurrentInfo"></MyLine>
+                      </div>
+                  </chart-container>
+              </el-col>
+          </el-row>
       </div>
     </div>
 </template>

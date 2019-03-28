@@ -21,6 +21,13 @@ export default {
         },
         tooltip: {
           trigger: 'axis',
+          formatter(params) {
+            let result = `<b>${moment(Number(params[0].name)).format('YYYY-MM-DD HH:mm:ss')}</b><br/>`;
+            params.forEach((ele) => {
+              result += `${ele.seriesName}: ${ele.value}<br/>`;
+            });
+            return result;
+          },
         },
         legend: {
         },
@@ -37,7 +44,7 @@ export default {
           data: [],
           axisLabel: {
             formatter(value) {
-              return `${moment(Number(value)).format('HH:mm:ss')}`;
+              return `${moment(Number(value)).format('HH:mm')}\n${moment(Number(value)).format('MM-DD')}`;
             },
           },
         },
@@ -67,16 +74,10 @@ export default {
       const seriesArray = this.optionInfo.seriesData.map((obj) => {
         const rObj = { ...obj };
         // const itemStyle = {
-        //   normal: {
-        //     label: {
-        //       show: true,
-        //       position: 'top',
-        //       textStyle: {
-        //         fontWeight: 'bold',
-        //         color: '#eee',
-        //         fontSize: 11,
-        //       },
-        //     },
+        //   markPoint: {
+        //     data: [
+        //       { name: '最大值', type: 'max' },
+        //     ],
         //   },
         // };
         this.$set(rObj, 'type', 'line');

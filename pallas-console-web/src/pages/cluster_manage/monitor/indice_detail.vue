@@ -12,40 +12,28 @@
       </div>
       <div>
         <el-row :gutter="10">
-          <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
+          <el-col :span="12">
             <chart-container title="Index Memory" type="line">
               <div slot="chart">
                <MyLine id="indexMemory" :option-info="indexMemoryInfo"></MyLine>
               </div>
             </chart-container>
           </el-col>
-         </el-row>
-      </div>
-      <div>  
-        <el-row :gutter="10">
-          <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
+          <el-col :span="12">
             <chart-container title="Index Disk" type="line">
               <div slot="chart">
                <MyLine id="indexDisk" :option-info="indexDiskInfo"></MyLine>
               </div>
             </chart-container>
           </el-col>
-         </el-row>
-      </div>
-      <div>  
-        <el-row :gutter="10">
-          <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
+          <el-col :span="12">
             <chart-container title="Segment Count" type="line">
               <div slot="chart">
                <MyLine id="segmentCount" :option-info="segmentCountInfo"></MyLine>
               </div>
             </chart-container>
           </el-col>
-         </el-row>
-      </div>
-      <div>
-        <el-row :gutter="10">
-          <el-col :xs="24" :sm="24" :md="24" :lg="24" class="chart-auto-size">
+          <el-col :span="12">
             <chart-container title="Document Count" type="line">
               <div slot="chart">
                <MyLine id="documentCount" :option-info="documentCountInfo"></MyLine>
