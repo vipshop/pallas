@@ -46,7 +46,6 @@ export default {
     line-height: 35px;
 }
 .panel-container .panel-body {
-    padding: 15px;
     background-color: #373a3c;
 }
 </style>

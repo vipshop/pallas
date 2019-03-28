@@ -18,6 +18,7 @@ export default {
       myChart: {},
       option: {
         color: ['#13CE66', '#20A0FF', '#F7BA2A', '#FF4949'],
+        backgroundColor: '#373a3c',
         title: {
           text: null,
         },
@@ -32,12 +33,13 @@ export default {
           },
         },
         legend: {
+          y: 'bottom',
         },
         grid: {
-          top: '40',
+          top: '45',
           left: '3%',
           right: '3%',
-          bottom: '3%',
+          bottom: '25',
           containLabel: true,
         },
         xAxis: {
@@ -53,6 +55,13 @@ export default {
         yAxis: {
           type: 'value',
           name: '',
+          splitLine: {
+            show: true,
+            lineStyle: {
+              type: 'solid',
+              color: ['#444444'],
+            },
+          },
         },
         series: [],
       },
@@ -75,15 +84,16 @@ export default {
     drawLine() {
       const seriesArray = this.optionInfo.seriesData.map((obj) => {
         const rObj = { ...obj };
-        // const itemStyle = {
-        //   markPoint: {
-        //     data: [
-        //       { name: '最大值', type: 'max' },
-        //     ],
-        //   },
-        // };
+        const markPoint = {
+          data: [
+            { type: 'max', name: '最大值' },
+            { type: 'min', name: '最小值' },
+          ],
+        };
         this.$set(rObj, 'type', 'line');
-        // this.$set(rObj, 'itemStyle', itemStyle);
+        this.$set(rObj, 'symbol', 'none');
+        this.$set(rObj, 'smooth', false);
+        this.$set(rObj, 'markPoint', markPoint);
         return rObj;
       });
       this.option.xAxis.data = this.optionInfo.xAxis;
