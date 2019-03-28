@@ -6,7 +6,7 @@
                 <el-table-column prop="indexCount" label="Indices"></el-table-column>
                 <el-table-column label="Memory">
                   <template scope="scope">
-                      {{scope.row.used_memory_byte}} / {{scope.row.total_memory_byte}}
+                      {{bytesToSize(scope.row.used_memory_byte)}} / {{bytesToSize(scope.row.total_memory_byte)}}
                   </template>
                 </el-table-column>
                 <el-table-column prop="totalShardCount" label="Total Shards"></el-table-column>
@@ -17,6 +17,7 @@
                         {{bytesToSize(scope.row.document_store_byte)}}
                     </template>
                 </el-table-column>
+                <el-table-column prop="max_uptime" label="Uptime"></el-table-column>
                 <el-table-column prop="version" label="Version"></el-table-column>
                 <el-table-column prop="health" label="Health"></el-table-column>
             </el-table>
@@ -74,7 +75,7 @@ export default {
       const optionInfo = {
         xAxis: indexingRateResp.map(e => e.x),
         seriesData: [
-          { name: 'Indexing Rate', data: indexingRateResp.map(e => e.y) },
+          { name: 'Indexing Rate', data: indexingRateResp.map(e => e.y.toFixed(2)) },
         ],
         yAxisName: 's',
       };
@@ -84,7 +85,7 @@ export default {
       const optionInfo = {
         xAxis: searchRateResp.map(e => e.x),
         seriesData: [
-          { name: 'Search Rate', data: searchRateResp.map(e => e.y) },
+          { name: 'Search Rate', data: searchRateResp.map(e => e.y.toFixed(2)) },
         ],
         yAxisName: 's',
       };
@@ -94,7 +95,7 @@ export default {
       const optionInfo = {
         xAxis: searchLatencyResp.map(e => e.x),
         seriesData: [
-          { name: 'Search Latency', data: searchLatencyResp.map(e => e.y) },
+          { name: 'Search Latency', data: searchLatencyResp.map(e => e.y.toFixed(2)) },
         ],
         yAxisName: 's',
       };
@@ -104,7 +105,7 @@ export default {
       const optionInfo = {
         xAxis: indexingLatencyResp.map(e => e.x),
         seriesData: [
-          { name: 'Indexing Latency', data: indexingLatencyResp.map(e => e.y) },
+          { name: 'Indexing Latency', data: indexingLatencyResp.map(e => e.y.toFixed(2)) },
         ],
         yAxisName: 's',
       };

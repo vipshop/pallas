@@ -4,11 +4,20 @@
             <el-table :data="gaugeMetricData" border style="width: 100%">
                 <el-table-column prop="transportAddress" label="transportAddress"></el-table-column>
                 <el-table-column prop="jvmHeapUsage" label="JVM Heap"></el-table-column>
-                <el-table-column prop="availableFS" label="Free Disk"></el-table-column>
+                <el-table-column label="Free Disk">
+                  <template scope="scope">
+                    {{bytesToSize(scope.row.availableFS)}}
+                  </template>
+                </el-table-column>
                 <el-table-column prop="documentCount" label="Documents"></el-table-column>
-                <el-table-column prop="documentStore" label="Data"></el-table-column>
+                <el-table-column label="Data">
+                  <template scope="scope">
+                    {{bytesToSize(scope.row.documentStore)}}
+                  </template>
+                </el-table-column>
                 <el-table-column prop="indexCount" label="Indices"></el-table-column>
                 <el-table-column prop="shardCount" label="Shards"></el-table-column>
+                <el-table-column prop="uptime" label="Uptime"></el-table-column>
             </el-table>
       </div>  
       <div>
@@ -105,7 +114,7 @@ export default {
           { name: 'gc Count Old', data: gcCountOld.map(e => e.y) },
           { name: 'gc Count Young', data: gcCountYoung.map(e => e.y) },
         ],
-        yAxisName: 's',
+        yAxisName: '',
       };
       this.gcCountInfo = optionInfo;
     },
@@ -116,7 +125,7 @@ export default {
           { name: 'gc Duration Old', data: gcDurationOld.map(e => e.y) },
           { name: 'gc Duration Young', data: gcDurationYoung.map(e => e.y) },
         ],
-        yAxisName: 'ms',
+        yAxisName: '',
       };
       this.gcDurationInfo = optionInfo;
     },
@@ -124,8 +133,8 @@ export default {
       const optionInfo = {
         xAxis: jvmHeapMax.map(e => e.x),
         seriesData: [
-          { name: 'jvm heap max', data: jvmHeapMax.map(e => e.y) },
-          { name: 'jvm heap used', data: jvmHeapUsed.map(e => e.y) },
+          { name: 'jvm heap max', data: jvmHeapMax.map(e => e.y.toFixed(2)) },
+          { name: 'jvm heap used', data: jvmHeapUsed.map(e => e.y.toFixed(2)) },
         ],
         yAxisName: 'mb',
       };
@@ -135,8 +144,8 @@ export default {
       const optionInfo = {
         xAxis: cpuNodePercent.map(e => e.x),
         seriesData: [
-          { name: 'cpu node percent', data: cpuNodePercent.map(e => e.y) },
-          { name: 'cpu process percent', data: cpuProcessPerent.map(e => e.y) },
+          { name: 'cpu node percent', data: cpuNodePercent.map(e => e.y.toFixed(2)) },
+          { name: 'cpu process percent', data: cpuProcessPerent.map(e => e.y.toFixed(2)) },
         ],
         yAxisName: '%',
       };
@@ -146,8 +155,8 @@ export default {
       const optionInfo = {
         xAxis: indexMemoryLucencTotal.map(e => e.x),
         seriesData: [
-          { name: 'index memory Lucenc total', data: indexMemoryLucencTotal.map(e => e.y) },
-          { name: 'index memory terms', data: indexMemoryTerms.map(e => e.y) },
+          { name: 'index memory Lucenc total', data: indexMemoryLucencTotal.map(e => e.y.toFixed(2)) },
+          { name: 'index memory terms', data: indexMemoryTerms.map(e => e.y.toFixed(2)) },
         ],
         yAxisName: 'mb',
       };

@@ -14,6 +14,15 @@ public class ClusterGaugeMetricModel implements Serializable {
     private String health;
     private String version;
     private Long max_uptime_in_ms;
+    private String max_uptime;
+
+    public String getMax_uptime() {
+        return max_uptime;
+    }
+
+    public void setMax_uptime(String max_uptime) {
+        this.max_uptime = max_uptime;
+    }
 
     public String getVersion() {
         return version;

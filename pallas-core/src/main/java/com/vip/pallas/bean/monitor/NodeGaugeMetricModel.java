@@ -23,6 +23,8 @@ public class NodeGaugeMetricModel implements Serializable {
 
     private Long uptime_in_ms;
 
+    private String uptime;
+
     private String nodeRole;
 
     private String status;
@@ -34,6 +36,14 @@ public class NodeGaugeMetricModel implements Serializable {
     private Double load_1m;
 
     private boolean isMaster;
+
+    public String getUptime() {
+        return uptime;
+    }
+
+    public void setUptime(String uptime) {
+        this.uptime = uptime;
+    }
 
     public Long getUptime_in_ms() {
         return uptime_in_ms;

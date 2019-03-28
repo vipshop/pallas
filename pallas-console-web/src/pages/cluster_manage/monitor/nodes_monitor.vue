@@ -23,7 +23,6 @@
                             <router-link tag="a" :to="{ path: 'node_monitor_detail', query: {clusterId, node: scope.row.nodeName} }">{{scope.row.nodeName}}</router-link>
                         </template>
                     </el-table-column>
-                    <el-table-column label="Status" prop="status"></el-table-column>
                     <el-table-column label="CPU Usage" prop="osCpuPercent"></el-table-column>
                     <el-table-column label="Load Average" prop="load_1m"></el-table-column>
                     <el-table-column label="JVM Memory" prop="jvmHeapUsage"></el-table-column>

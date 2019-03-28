@@ -3,9 +3,8 @@ package com.vip.pallas.bean.monitor;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
-public class NodeMetricInfoModel implements Serializable {
+public class NodeMetricInfoModel extends MetricInfoModel implements Serializable {
 
     private NodeGaugeMetricModel gaugeMetric;
 
@@ -28,18 +27,42 @@ public class NodeMetricInfoModel implements Serializable {
 
     private MonitorMetricModel<Date, Long> segmentCount;
 
-    private MonitorMetricModel<Date, Double> indexingLatency;
-    private MonitorMetricModel<Date, Double> searchLatency;
-
     private MonitorMetricModel<Date, Integer> searchThreadpoolQueue;
     private MonitorMetricModel<Date, Integer> searchThreadpoolReject;
+    private MonitorMetricModel<Date, Integer> searchThreadpoolThreads;
 
     private MonitorMetricModel<Date, Integer> indexThreadpoolQueue;
     private MonitorMetricModel<Date, Integer> indexThreadpoolReject;
+    private MonitorMetricModel<Date, Integer> indexThreadpoolThreads;
 
     private MonitorMetricModel<Date, Integer> bulkThreadpoolQueue;
     private MonitorMetricModel<Date, Integer> bulkThreadpoolReject;
+    private MonitorMetricModel<Date, Integer> bulkThreadpoolThreads;
 
+
+    public MonitorMetricModel<Date, Integer> getSearchThreadpoolThreads() {
+        return searchThreadpoolThreads;
+    }
+
+    public void setSearchThreadpoolThreads(MonitorMetricModel<Date, Integer> searchThreadpoolThreads) {
+        this.searchThreadpoolThreads = searchThreadpoolThreads;
+    }
+
+    public MonitorMetricModel<Date, Integer> getIndexThreadpoolThreads() {
+        return indexThreadpoolThreads;
+    }
+
+    public void setIndexThreadpoolThreads(MonitorMetricModel<Date, Integer> indexThreadpoolThreads) {
+        this.indexThreadpoolThreads = indexThreadpoolThreads;
+    }
+
+    public MonitorMetricModel<Date, Integer> getBulkThreadpoolThreads() {
+        return bulkThreadpoolThreads;
+    }
+
+    public void setBulkThreadpoolThreads(MonitorMetricModel<Date, Integer> bulkThreadpoolThreads) {
+        this.bulkThreadpoolThreads = bulkThreadpoolThreads;
+    }
 
     private MonitorMetricModel<Date, Integer> httpOpenCurrent;
 
@@ -114,22 +137,6 @@ public class NodeMetricInfoModel implements Serializable {
 
     public void setSegmentCount(MonitorMetricModel<Date, Long> segmentCount) {
         this.segmentCount = segmentCount;
-    }
-
-    public MonitorMetricModel<Date, Double> getIndexingLatency() {
-        return indexingLatency;
-    }
-
-    public void setIndexingLatency(MonitorMetricModel<Date, Double> indexingLatency) {
-        this.indexingLatency = indexingLatency;
-    }
-
-    public MonitorMetricModel<Date, Double> getSearchLatency() {
-        return searchLatency;
-    }
-
-    public void setSearchLatency(MonitorMetricModel<Date, Double> searchLatency) {
-        this.searchLatency = searchLatency;
     }
 
     public MonitorMetricModel<Date, Integer> getSearchThreadpoolQueue() {

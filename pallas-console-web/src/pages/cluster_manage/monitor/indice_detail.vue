@@ -61,8 +61,8 @@ export default {
       const optionInfo = {
         xAxis: lucencTotal.map(e => e.x),
         seriesData: [
-          { name: 'index memory lucenc total', data: lucencTotal.map(e => e.y) },
-          { name: 'index memory terms', data: terms.map(e => e.y) },
+          { name: 'index memory lucenc total', data: lucencTotal.map(e => e.y.toFixed(2)) },
+          { name: 'index memory terms', data: terms.map(e => e.y.toFixed(2)) },
         ],
         yAxisName: 'mb',
       };
@@ -72,8 +72,8 @@ export default {
       const optionInfo = {
         xAxis: total.map(e => e.x),
         seriesData: [
-          { name: 'disk-total', data: total.map(e => e.y) },
-          { name: 'disk-primary', data: primary.map(e => e.y) },
+          { name: 'disk-total', data: total.map(e => e.y.toFixed(2)) },
+          { name: 'disk-primary', data: primary.map(e => e.y.toFixed(2)) },
         ],
         yAxisName: 'gb',
       };

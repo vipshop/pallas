@@ -1,9 +1,9 @@
 package com.vip.pallas.bean.monitor;
 
+import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
-public class IndexMetricInfoModel {
+public class IndexMetricInfoModel extends MetricInfoModel implements Serializable {
     private IndexGaugeMetricModel gaugeMetric;
 
     private MonitorMetricModel<Date, Double> index_memory_lucenc_total_in_byte;
@@ -14,9 +14,6 @@ public class IndexMetricInfoModel {
 
     private MonitorMetricModel<Date, Long> segmentCount;
     private MonitorMetricModel<Date, Long> documentCount;
-
-    private MonitorMetricModel<Date, Double> searchRate ;
-    private MonitorMetricModel<Date, Double> indexingRate;
 
     public IndexGaugeMetricModel getGaugeMetric() {
         return gaugeMetric;
@@ -40,22 +37,6 @@ public class IndexMetricInfoModel {
 
     public void setDocumentCount(MonitorMetricModel<Date, Long> documentCount) {
         this.documentCount = documentCount;
-    }
-
-    public MonitorMetricModel<Date, Double> getSearchRate() {
-        return searchRate;
-    }
-
-    public void setSearchRate(MonitorMetricModel<Date, Double> searchRate) {
-        this.searchRate = searchRate;
-    }
-
-    public MonitorMetricModel<Date, Double> getIndexingRate() {
-        return indexingRate;
-    }
-
-    public void setIndexingRate(MonitorMetricModel<Date, Double> indexingRate) {
-        this.indexingRate = indexingRate;
     }
 
     public MonitorMetricModel<Date, Double> getIndex_memory_lucenc_total_in_byte() {
