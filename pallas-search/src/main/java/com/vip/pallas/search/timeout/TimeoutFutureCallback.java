@@ -4,7 +4,11 @@ import java.net.SocketTimeoutException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.vip.pallas.search.http.PallasRequest;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.protocol.HttpContext;
 
 import com.vip.pallas.search.filter.base.AbstractFilterContext;
@@ -21,8 +25,8 @@ public class TimeoutFutureCallback extends SendDirectlyCallback {
 	private AtomicInteger cancelCount = new AtomicInteger(0);
 
 	public TimeoutFutureCallback(AsyncCall asyncCall, AbstractFilterContext filterContext, SessionContext sessionContext,
-			DefaultFullHttpRequest outBoundRequest, HttpContext httpContext) {
-		super(filterContext, sessionContext, outBoundRequest, httpContext);
+								 DefaultFullHttpRequest outBoundRequest, HttpContext httpContext, HttpRequestBase httpRequest, HttpEntity httpEntity, HttpHost targetHost, String requestUrl, PallasRequest pallasRequest) {
+		super(filterContext, sessionContext, outBoundRequest, httpContext, httpRequest, httpEntity, targetHost, requestUrl, pallasRequest);
 		this.asyncCall = asyncCall;
 	}
 	

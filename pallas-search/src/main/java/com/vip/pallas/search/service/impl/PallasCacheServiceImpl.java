@@ -1,21 +1,21 @@
 package com.vip.pallas.search.service.impl;
 
-import static com.vip.pallas.search.cache.RoutingCache.*;
-import static java.util.stream.Collectors.toList;
+import com.google.common.cache.LoadingCache;
+import com.vip.pallas.search.cache.RoutingCache;
+import com.vip.pallas.search.model.*;
+import com.vip.pallas.search.service.PallasCacheService;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import com.vip.pallas.search.model.*;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.cache.LoadingCache;
-import com.vip.pallas.search.cache.RoutingCache;
-import com.vip.pallas.search.service.PallasCacheService;
+import static com.vip.pallas.search.cache.RoutingCache.*;
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 
 public class PallasCacheServiceImpl implements PallasCacheService {
 
@@ -193,7 +193,23 @@ public class PallasCacheServiceImpl implements PallasCacheService {
 		return flowRecordById.get(recordId);
 	}
 
-	@Override
+    @Override
+    public List<IndexRampup> getRampupByIndexNameAndCluster(String indexName, String clusterId) throws ExecutionException {
+        Map<String, Map<String, List<IndexRampup>>> indexClusterRampupMap = getCache(INDEX_CLUSTER_RAMPUP_MAP);
+        try{
+            return indexClusterRampupMap.get(indexName).get(clusterId);
+        }catch (Exception e){
+            LOGGER.error(e.toString(), e);
+            return emptyList();
+        }
+    }
+
+    @Override
+    public Map<Long, IndexRampup> getRampupMap() throws ExecutionException {
+        return getCache(RAMPUP_MAP);
+    }
+
+    @Override
     public List<String> getAllNodeListByClusterName(String clusterName) throws ExecutionException {
         Map<String, List<String>> allNodeListMap = getCache(CLUSTER_NODE_LIST);
         return allNodeListMap != null ? allNodeListMap.get(clusterName) : null;

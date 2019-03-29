@@ -27,6 +27,8 @@
     <result column="fetch_slow_threshold" jdbcType="BIGINT" property="fetchSlowThreshold" />
     <result column="query_slow_threshold" jdbcType="BIGINT" property="querySlowThreshold" />
     <result column="refresh_interval" jdbcType="TINYINT" property="refreshInterval" />
+    <result column="refresh_interval" jdbcType="TINYINT" property="refreshInterval" />
+    <result column="ramp_up" jdbcType="VARCHAR" property="rampUp" />
   </resultMap>
   
   <resultMap id="IndexParam" type="com.vip.pallas.bean.IndexParam">
@@ -57,7 +59,8 @@
     id, index_id, version_name, is_used, sync_stat, num_of_shards, num_of_replication, 
     vdp_queue, routing_key, create_time, update_time, id_field, update_time_field, is_sync,
     vdp, filter_fields, prefer_executor, check_sum, allocation_nodes, dynamic,
-    index_slow_threshold, fetch_slow_threshold, query_slow_threshold, refresh_interval
+    index_slow_threshold, fetch_slow_threshold, query_slow_threshold, refresh_interval,
+    ramp_up
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     select 
@@ -357,6 +360,9 @@
       <if test="refreshInterval != null">
         refresh_interval = #{refreshInterval,jdbcType=TINYINT},
       </if>
+      <if test="rampUp != null">
+        ramp_up = #{rampUp,jdbcType=VARCHAR},
+      </if>
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
@@ -390,5 +396,10 @@
     from index_version
     where index_id = #{indexId,jdbcType=BIGINT} and is_used = 1
   </select>
-  
+
+  <select id="findRampupByVersionId" parameterType="java.lang.Long" resultType="java.lang.String">
+    select `ramp_up`
+    from index_version
+    where id = #{versionId,jdbcType=BIGINT}
+  </select>
 </mapper>

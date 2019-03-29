@@ -109,6 +109,10 @@ public abstract class IndexVersionService {
 		return indexVersionRepository.selectAll();
 	}
 
+	public String getRampupByVersionId(Long versionId) {
+		return indexVersionRepository.findRampupByVersionId(versionId);
+	}
+
 	public void enableVersion(Long versionId) throws Exception {
 		IndexVersion indexVersion = this.findById(versionId);
 

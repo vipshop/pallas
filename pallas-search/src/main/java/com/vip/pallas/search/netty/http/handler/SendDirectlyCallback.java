@@ -1,22 +1,5 @@
 package com.vip.pallas.search.netty.http.handler;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.ParseException;
-import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.concurrent.FutureCallback;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.util.Args;
-import org.apache.http.util.ByteArrayBuffer;
-import org.apache.http.util.EntityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.vip.pallas.search.exception.PallasException;
 import com.vip.pallas.search.filter.base.AbstractFilterContext;
 import com.vip.pallas.search.filter.circuitbreaker.CircuitBreakerService;
@@ -27,17 +10,28 @@ import com.vip.pallas.search.http.HttpCode;
 import com.vip.pallas.search.http.PallasRequest;
 import com.vip.pallas.search.model.ShardGroup;
 import com.vip.pallas.search.monitor.GaugeMonitorService;
+import com.vip.pallas.search.rampup.RampupHandler;
 import com.vip.pallas.search.timeout.TimeoutRetryController;
 import com.vip.pallas.search.trace.TraceAspect;
-
 import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.http.DefaultFullHttpRequest;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.internal.ThrowableUtil;
+import org.apache.http.*;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpResponseException;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.concurrent.FutureCallback;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.Args;
+import org.apache.http.util.ByteArrayBuffer;
+import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 public class SendDirectlyCallback implements FutureCallback<HttpResponse> {
 
@@ -45,18 +39,27 @@ public class SendDirectlyCallback implements FutureCallback<HttpResponse> {
 	private static Logger logger = LoggerFactory.getLogger(SendDirectlyCallback.class);
 	private static final PallasException REST_INVOKER_ERROR_EXCEPTION = ThrowableUtil.unknownStackTrace(
 			new PallasException(HttpCode.HTTP_BAD_GATEWAY_STR), RestInvokerFilter.class, "onError()");
-	SessionContext sessionContext;
-	AbstractFilterContext filterContext;
-	DefaultFullHttpRequest outBoundRequest;
-	HttpContext httpContext;
+	protected SessionContext sessionContext;
+	protected AbstractFilterContext filterContext;
+	protected DefaultFullHttpRequest outBoundRequest;
+	protected HttpRequestBase httpRequest;
+	protected HttpEntity httpEntity;
+	protected HttpContext httpContext;
+	protected HttpHost targetHost;
+	protected String requestUrl;
+	protected PallasRequest pallasRequest;
 
 	public SendDirectlyCallback(AbstractFilterContext filterContext, SessionContext sessionContext,
-			DefaultFullHttpRequest outBoundRequest, HttpContext httpContext) {
+								DefaultFullHttpRequest outBoundRequest, HttpContext httpContext, HttpRequestBase httpRequest, HttpEntity httpEntity, HttpHost targetHost, String requestUrl, PallasRequest pallasRequest) {
 		this.filterContext = filterContext;
 		this.sessionContext = sessionContext;
 		this.outBoundRequest = outBoundRequest;
 		this.httpContext = httpContext;
-
+		this.httpRequest = httpRequest;
+		this.httpEntity = httpEntity;
+		this.targetHost = targetHost;
+		this.requestUrl = requestUrl;
+		this.pallasRequest = pallasRequest;
 	}
 
 	public SessionContext getSessionContext() {
@@ -126,6 +129,8 @@ public class SendDirectlyCallback implements FutureCallback<HttpResponse> {
 			// 如果是5XX,暂时不做任何处理
 			sessionContext.setRestFullHttpResponse(fullHttpResponse);
 			filterContext.fireNext(sessionContext);
+			//预热其它索引（版本）
+			RampupHandler.rampupIfNecessary(targetHost, requestUrl, outBoundRequest, httpRequest, httpEntity, pallasRequest.getIndexName(), pallasRequest.getLogicClusterId());
 		} catch (Exception ex) {
 			handleFailed(ex);
 		}

@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vip.pallas.search.model.*;
 import org.junit.Test;
 
 import com.vip.pallas.search.http.PallasRequest;
@@ -687,6 +688,16 @@ public class RouteFilterTest extends TestCase {
 
         @Override
         public FlowRecord getFlowRecordById(Long recordId) {
+            return null;
+        }
+
+        @Override
+        public List<IndexRampup> getRampupByIndexNameAndCluster(String indexName, String clusterId) {
+            return null;
+        }
+
+        @Override
+        public Map<Long, IndexRampup> getRampupMap() throws ExecutionException {
             return null;
         }
 

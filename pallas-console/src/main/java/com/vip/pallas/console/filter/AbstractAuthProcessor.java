@@ -29,6 +29,8 @@ public abstract class AbstractAuthProcessor {
 	protected List<String> excludeAuthUrls = Lists.newArrayList(new String[] {
 		"/_health_check",
 		"/index/list/all",
+		"/version/list/all",
+		"/version/rampup/increment",
 		"/cluster/all/physicals",
 		"/node/state",
 		"/cluster/abnormal_node/list",
