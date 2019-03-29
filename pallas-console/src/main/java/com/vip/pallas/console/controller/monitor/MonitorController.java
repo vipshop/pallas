@@ -53,27 +53,29 @@ public class MonitorController {
 
     @RequestMapping("/nodes/info.json")
     @ResponseBody
-    public List<NodeGaugeMetricModel> getGenericNodeInfos(@RequestBody MonitorQueryModel queryModel) throws Exception{
+    public List<NodeGaugeMetricModel> getGenericNodeInfos(@Validated @RequestBody MonitorQueryModel queryModel) throws Exception{
         List<NodeGaugeMetricModel> result = monitorService.queryNodesInfo(queryModel);
+
         return result;
     }
 
     @RequestMapping("/indices/info.json")
     @ResponseBody
-    public List<IndexGaugeMetricModel> getGenericIndexInfos(@RequestBody MonitorQueryModel queryModel) throws Exception{
+    public List<IndexGaugeMetricModel> getGenericIndexInfos(@Validated @RequestBody MonitorQueryModel queryModel) throws Exception{
         List<IndexGaugeMetricModel> result = monitorService.queryIndicesInfo(queryModel);
         return result;
     }
 
     @RequestMapping("nodes/count.json")
     @ResponseBody
-    public Integer getNodeCount(@RequestParam String clusterName) throws Exception{
-        return monitorService.getNodeCount(clusterName);
+    public Integer getNodeCount(@Validated @RequestBody MonitorQueryModel queryModel) throws Exception{
+        return monitorService.getNodeCount(queryModel);
     }
 
     @RequestMapping("indices/count.json")
     @ResponseBody
-    public Integer getIndexCount(@RequestParam String clusterName) throws Exception{
-        return monitorService.getIndexCount(clusterName);
+    public Integer getIndexCount(@Validated @RequestBody MonitorQueryModel queryModel) throws Exception{
+        return monitorService.getIndexCount(queryModel);
     }
+
 }

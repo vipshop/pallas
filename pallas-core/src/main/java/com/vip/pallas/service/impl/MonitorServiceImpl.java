@@ -66,7 +66,7 @@ public class MonitorServiceImpl implements MonitorService {
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("beginTime", queryModel.getFrom());
         dataMap.put("endTime", queryModel.getTo());
-        dataMap.put("cluserName", queryModel.getClusterName());
+        dataMap.put("clusterName", queryModel.getClusterName());
         dataMap.put("interval_unit", getIntevalString(queryModel.getFrom(), queryModel.getTo()));
 
         return dataMap;
@@ -80,7 +80,8 @@ public class MonitorServiceImpl implements MonitorService {
         Cluster cluster =  getCluster(queryModel.getClusterName());
         ClusterMetricInfoModel clusterMetricInfoModel = new ClusterMetricInfoModel();
 
-        clusterMetricInfoModel.setGaugeMetric(queryClusterInfo(queryModel));
+        Template templateGauge = getTempalte(ConstantUtil.GAUGE_STATS_TEMPLATE);
+        clusterMetricInfoModel.setGaugeMetric(queryClusterInfo(templateGauge, dataMap, cluster));
 
         //derivative aggs
         dataMap.put("type", ConstantUtil.TYPE_INDICES_STATS);
@@ -108,7 +109,9 @@ public class MonitorServiceImpl implements MonitorService {
         Cluster cluster =  getCluster(queryModel.getClusterName());
         NodeMetricInfoModel nodeMetricInfoModel = new NodeMetricInfoModel();
 
-        nodeMetricInfoModel.setGaugeMetric(queryNodesInfo(queryModel).get(0));
+        Template templateGauge = getTempalte(ConstantUtil.GAUGE_STATS_TEMPLATE);
+
+        nodeMetricInfoModel.setGaugeMetric(queryNodeInfo(templateGauge, dataMap, cluster));
 
         //normal aggs
         Template templateAggs = getTempalte(ConstantUtil.AGGS_STATS_TEMPLATE);
@@ -117,6 +120,7 @@ public class MonitorServiceImpl implements MonitorService {
 
         nodeMetricInfoModel.setCpuNodePercent(getNodeCpuPercent(templateAggs, dataMap, "node_stats.os.cpu.percent", cluster));
         nodeMetricInfoModel.setCpuProcessPerent(getNodeCpuPercent(templateAggs, dataMap, "node_stats.process.cpu.percent", cluster));
+        nodeMetricInfoModel.setSystemLoad_1m(getSystemLoad(templateAggs, dataMap, "node_stats.os.cpu.load_average.1m", cluster));
 
         nodeMetricInfoModel.setJvm_heap_max_byte(getNodeJvmHeap(templateAggs, dataMap, "node_stats.jvm.mem.heap_max_in_bytes", cluster));
         nodeMetricInfoModel.setJvm_heap_used_byte(getNodeJvmHeap(templateAggs, dataMap, "node_stats.jvm.mem.heap_used_in_bytes", cluster));
@@ -167,7 +171,9 @@ public class MonitorServiceImpl implements MonitorService {
 
         IndexMetricInfoModel indexMetricInfoModel = new IndexMetricInfoModel();
 
-        indexMetricInfoModel.setGaugeMetric(queryIndicesInfo(queryModel).get(0));
+        Template templateGauge = getTempalte(ConstantUtil.GAUGE_STATS_TEMPLATE);
+
+        indexMetricInfoModel.setGaugeMetric(queryIndexInfo(templateGauge, dataMap, cluster));
 
         Template templateAggs = getTempalte(ConstantUtil.AGGS_STATS_TEMPLATE);
 
@@ -192,8 +198,8 @@ public class MonitorServiceImpl implements MonitorService {
         return indexMetricInfoModel;
     }
 
-    @Override
-    public ClusterGaugeMetricModel queryClusterInfo(MonitorQueryModel queryModel) throws Exception {
+
+    public ClusterGaugeMetricModel queryClusterInfoRealTime(MonitorQueryModel queryModel) throws Exception {
         ClusterGaugeMetricModel gaugeMetricModel = new ClusterGaugeMetricModel();
         Cluster cluster =  getCluster(queryModel.getClusterName());
 
@@ -221,8 +227,8 @@ public class MonitorServiceImpl implements MonitorService {
         return gaugeMetricModel;
     }
 
-    @Override
-    public List<NodeGaugeMetricModel> queryNodesInfo(MonitorQueryModel queryModel) throws Exception {
+
+    public List<NodeGaugeMetricModel> queryNodesInfoRealTime(MonitorQueryModel queryModel) throws Exception {
 
         List<NodeGaugeMetricModel> result = new ArrayList<>();
         Cluster cluster =  getCluster(queryModel.getClusterName());
@@ -271,8 +277,8 @@ public class MonitorServiceImpl implements MonitorService {
         return result;
     }
 
-    @Override
-    public List<IndexGaugeMetricModel> queryIndicesInfo(MonitorQueryModel queryModel) throws Exception {
+
+    public List<IndexGaugeMetricModel> queryIndicesInfoRealTime(MonitorQueryModel queryModel) throws Exception {
 
         List<IndexGaugeMetricModel> result = new ArrayList<>();
         Cluster cluster =  getCluster(queryModel.getClusterName());
@@ -293,8 +299,8 @@ public class MonitorServiceImpl implements MonitorService {
             gaugeMetricModel.setHealth(indexInfo[0]);
             gaugeMetricModel.setStatus(indexInfo[1]);
             gaugeMetricModel.setDocumentCount(Long.valueOf(indexInfo[6]));
-            gaugeMetricModel.setDocument_store_byte_total(indexInfo[8]);
-            gaugeMetricModel.setDocument_store_byte_primary(indexInfo[9]);
+            //gaugeMetricModel.setDocument_store_byte_total(indexInfo[8]);
+            //gaugeMetricModel.setDocument_store_byte_primary(indexInfo[9]);
             gaugeMetricModel.setPrimaryShardCount(Integer.valueOf(indexInfo[4]));
             gaugeMetricModel.setReplicaShardCount(Integer.valueOf(indexInfo[5]));
             gaugeMetricModel.setTotalShardCount(gaugeMetricModel.getPrimaryShardCount() * (1 + gaugeMetricModel.getReplicaShardCount()));
@@ -307,8 +313,7 @@ public class MonitorServiceImpl implements MonitorService {
         return result;
     }
 
-    @Override
-    public Integer getNodeCount(String clusterName) throws Exception {
+    private Integer getNodeCountRealTime(String clusterName) throws Exception {
         getCluster(clusterName);
         List<String[]> nodeInfos = elasticSearchService.getNodesInfos(clusterName);
         if(null == nodeInfos || nodeInfos.size() == 0){
@@ -317,14 +322,255 @@ public class MonitorServiceImpl implements MonitorService {
         return nodeInfos.size();
     }
 
-    @Override
-    public Integer getIndexCount(String clusterName) throws Exception {
+    private Integer getIndexCountRealTime(String clusterName) throws Exception {
         getCluster(clusterName);
         List<String[]> indexInfos = elasticSearchService.getIndexInfos(clusterName);
         if(null == indexInfos || indexInfos.size() == 0) {
             return 0;
         }
         return indexInfos.size();
+    }
+
+    @Override
+    public Integer getNodeCount(MonitorQueryModel queryModel) throws Exception {
+        Cluster cluster = getCluster(queryModel.getClusterName());
+
+        Map<String, Object> dataMap = getDataMap(queryModel);
+        dataMap.put("type", ConstantUtil.TYPE_NODE_STATS);
+
+        Template templateListInfo = getTempalte(ConstantUtil.LIST_INFO_TEMPLATE);
+        String fieldName = "node_stats.name";
+
+        String string = getMetricFromES(templateListInfo, dataMap, fieldName, cluster);
+
+        List<String> result = getNameList(string, fieldName);
+
+        return null == result ? 0 :  result.size();
+    }
+
+    @Override
+    public Integer getIndexCount(MonitorQueryModel queryModel) throws Exception {
+        Cluster cluster = getCluster(queryModel.getClusterName());
+        Map<String, Object> dataMap = getDataMap(queryModel);
+        dataMap.put("type", ConstantUtil.TYPE_INDEX_STATS);
+
+        Template templateListInfo = getTempalte(ConstantUtil.LIST_INFO_TEMPLATE);
+        String fieldName = "index_stats.index_name";
+
+        String string = getMetricFromES(templateListInfo, dataMap, fieldName, cluster);
+
+        List<String> result = getNameList(string, fieldName);
+        if(null == result || result.size() == 0) {
+            return 0;
+        }
+
+        int count = 0;
+        for(String indexName: result) {
+            if(indexName.startsWith(".")){
+                continue;
+            }
+            count++;
+        }
+        return count;
+    }
+
+    private NodeGaugeMetricModel queryNodeInfo(Template template, Map<String, Object> dataMap, Cluster cluster) throws PallasException {
+        NodeGaugeMetricModel gaugeMetricModel = new NodeGaugeMetricModel();
+
+        String result = getMetricFromES(template, dataMap, "", cluster);
+        fetchNodeGaugeInfo(result, gaugeMetricModel);
+        return gaugeMetricModel;
+
+    }
+
+    @Override
+    public List<NodeGaugeMetricModel> queryNodesInfo(MonitorQueryModel queryModel) throws PallasException {
+        Cluster cluster = getCluster(queryModel.getClusterName());
+
+        Map<String, Object> dataMap = getDataMap(queryModel);
+        dataMap.put("type", ConstantUtil.TYPE_NODE_STATS);
+
+        Template templateListInfo = getTempalte(ConstantUtil.LIST_INFO_TEMPLATE);
+        String fieldName = "node_stats.name";
+
+        String string = getMetricFromES(templateListInfo, dataMap, fieldName, cluster);
+
+        List<String> result = getNameList(string, fieldName);
+
+        if(null == result || result.size() == 0) {
+            return new ArrayList<>();
+        }
+        JSONObject rootObj = JSONObject.parseObject(string);
+        JSONObject aggsMaxObj = rootObj.getJSONObject("aggregations").getJSONObject("aggs_max");
+        String toMills = aggsMaxObj == null? "" : aggsMaxObj.getString("value_as_string");
+
+        List<NodeGaugeMetricModel> nodeGaugeMetricModels = new ArrayList<>();
+        for(String nodeName : result) {
+            NodeGaugeMetricModel gaugeMetricModel = new NodeGaugeMetricModel();
+            gaugeMetricModel.setNodeName(nodeName);
+            dataMap.put("nodeName", nodeName);
+            Template templateGauge = getTempalte(ConstantUtil.GAUGE_STATS_TEMPLATE);
+            String resultString  = getMetricFromES(templateGauge, dataMap, "", cluster);
+
+            fetchNodeGaugeInfo(resultString, gaugeMetricModel);
+            nodeGaugeMetricModels.add(gaugeMetricModel);
+        }
+
+        return nodeGaugeMetricModels;
+        
+
+    }
+
+    private IndexGaugeMetricModel queryIndexInfo(Template template, Map<String, Object> dataMap, Cluster cluster) throws Exception {
+        IndexGaugeMetricModel gaugeMetricModel = new IndexGaugeMetricModel();
+
+        String result = getMetricFromES(template, dataMap, "", cluster);
+        fetchIndexGaugeInfo(result, gaugeMetricModel);
+        return gaugeMetricModel;
+    }
+
+    @Override
+    public List<IndexGaugeMetricModel> queryIndicesInfo(MonitorQueryModel queryModel) throws Exception {
+
+        Cluster cluster = getCluster(queryModel.getClusterName());
+        Map<String, Object> dataMap = getDataMap(queryModel);
+        dataMap.put("type", ConstantUtil.TYPE_INDEX_STATS);
+
+        Template templateListInfo = getTempalte(ConstantUtil.LIST_INFO_TEMPLATE);
+        String fieldName = "index_stats.index_name";
+
+        String string = getMetricFromES(templateListInfo, dataMap, fieldName, cluster);
+
+        List<String> result = getNameList(string, fieldName);
+        if(null == result || result.size() == 0) {
+            return new ArrayList<>();
+        }
+        List<IndexGaugeMetricModel> indexGaugeMetricModels = new ArrayList<>();
+        for(String indexName : result) {
+            if(indexName.startsWith(".")){
+                continue;
+            }
+            dataMap.put("indexName", indexName);
+            IndexGaugeMetricModel gaugeMetricModel = new IndexGaugeMetricModel();
+            gaugeMetricModel.setIndexName(indexName);
+            Template templateGauge = getTempalte(ConstantUtil.GAUGE_STATS_TEMPLATE);
+            String resultString  = getMetricFromES(templateGauge, dataMap, "", cluster);
+            fetchIndexGaugeInfo(resultString, gaugeMetricModel);
+
+            indexGaugeMetricModels.add(gaugeMetricModel);
+        }
+
+        return indexGaugeMetricModels;
+    }
+
+
+    private void fetchIndexGaugeInfo(String string, IndexGaugeMetricModel gaugeMetricModel) {
+        JSONArray jsonArrayHits = JSON.parseObject(string).getJSONObject("hits").getJSONArray("hits");
+        if(null == jsonArrayHits || jsonArrayHits.size() == 0) {
+            return;
+        }
+        JSONObject indexStatsJsonObj = jsonArrayHits.getJSONObject(0).getJSONObject("_source").getJSONObject("index_stats");
+        JSONObject primariesJsonObj = indexStatsJsonObj.getJSONObject("primaries");
+        JSONObject totalJsonObj = indexStatsJsonObj.getJSONObject("total");
+
+
+        gaugeMetricModel.setHealth(indexStatsJsonObj.getString("health"));
+        gaugeMetricModel.setStatus(indexStatsJsonObj.getString("status"));
+
+
+        gaugeMetricModel.setPrimaryShardCount(indexStatsJsonObj.getInteger("primaryShardCount"));
+        gaugeMetricModel.setReplicaShardCount(indexStatsJsonObj.getInteger("replicaShardCount"));
+        gaugeMetricModel.setTotalShardCount(indexStatsJsonObj.getInteger("primaryShardCount") * (1 + indexStatsJsonObj.getInteger("replicaShardCount")));
+        gaugeMetricModel.setUnassignedShardCount(indexStatsJsonObj.getInteger("unassignedShardCount"));
+
+        gaugeMetricModel.setDocumentCount(totalJsonObj.getJSONObject("docs").getLong("count"));
+        gaugeMetricModel.setDocument_store_byte_total(totalJsonObj.getJSONObject("store").getLong("size_in_bytes"));
+        gaugeMetricModel.setDocument_store_byte_primary(primariesJsonObj.getJSONObject("store").getLong("size_in_bytes"));
+
+    }
+
+    private void fetchNodeGaugeInfo(String string, NodeGaugeMetricModel gaugeMetricModel) {
+
+        JSONArray jsonArrayHits = JSON.parseObject(string).getJSONObject("hits").getJSONArray("hits");
+        if(null == jsonArrayHits || jsonArrayHits.size() == 0) {
+            return;
+        }
+
+        JSONObject nodeStatsJsonObj = jsonArrayHits.getJSONObject(0).getJSONObject("_source").getJSONObject("node_stats");
+        String nodeName = gaugeMetricModel.getNodeName();
+
+        gaugeMetricModel.setOsCpuPercent(nodeStatsJsonObj.getJSONObject("os").getJSONObject("cpu").getDouble("percent"));
+        gaugeMetricModel.setLoad_1m(nodeStatsJsonObj.getJSONObject("os").getJSONObject("cpu").getJSONObject("load_average").getDouble("1m"));
+        gaugeMetricModel.setNodeRole(nodeStatsJsonObj.getJSONArray("roles").toJSONString());
+        gaugeMetricModel.setMaster(nodeStatsJsonObj.getBoolean("node_master"));
+
+        gaugeMetricModel.setTransportAddress(nodeStatsJsonObj.getString("transport_address"));
+        gaugeMetricModel.setProcessCpuPercent(nodeStatsJsonObj.getJSONObject("process").getJSONObject("cpu").getDouble("percent"));
+        //gaugeMetricModel.setUptime_in_ms(metricsJsonObj.getJSONObject(nodeName).getJSONObject("jvm").getLong("uptime_in_millis"));
+        gaugeMetricModel.setJvmHeapUsage(nodeStatsJsonObj.getJSONObject("jvm").getJSONObject("mem").getDouble("heap_used_percent"));
+        gaugeMetricModel.setAvailableFS(nodeStatsJsonObj.getJSONObject("fs").getJSONObject("total").getLong("available_in_bytes"));
+        gaugeMetricModel.setDocumentCount(nodeStatsJsonObj.getJSONObject("indices").getJSONObject("docs").getLong("count"));
+        gaugeMetricModel.setDocumentStore(nodeStatsJsonObj.getJSONObject("indices").getJSONObject("store").getLong("size_in_bytes"));
+        gaugeMetricModel.setIndexCount(nodeStatsJsonObj.getInteger("indexCount"));
+        gaugeMetricModel.setShardCount(nodeStatsJsonObj.getInteger("shardCount"));
+        //自己转化
+        gaugeMetricModel.setUptime(nodeStatsJsonObj.getString("uptime"));
+
+    }
+    private ClusterGaugeMetricModel queryClusterInfo(Template template, Map<String, Object> dataMap, Cluster cluster) throws Exception {
+        ClusterGaugeMetricModel gaugeMetricModel = new ClusterGaugeMetricModel();
+
+        dataMap.put("type", ConstantUtil.TYPE_CLUSTER_HEALTH);
+        String resultClusterHealth = getMetricFromES(template, dataMap, "", cluster);
+        JSONArray jsonArrayClusterHealth = JSON.parseObject(resultClusterHealth).getJSONObject("hits").getJSONArray("hits");
+        if(null == jsonArrayClusterHealth || jsonArrayClusterHealth.size() == 0) {
+            return new ClusterGaugeMetricModel();
+        }
+        JSONObject clusterHealthJsonObj = jsonArrayClusterHealth.getJSONObject(0).getJSONObject("_source").getJSONObject("cluster_health");
+        gaugeMetricModel.setUnassignedShardCount(clusterHealthJsonObj.getLong("unassigned_shards"));
+        gaugeMetricModel.setHealth(clusterHealthJsonObj.getString("status"));
+        gaugeMetricModel.setVersion(clusterHealthJsonObj.getString("version"));
+
+        dataMap.put("type", ConstantUtil.TYPE_CLUSTER_STATS);
+        String resultClusterStats = getMetricFromES(template, dataMap, "", cluster);
+        JSONArray jsonArray = JSON.parseObject(resultClusterStats).getJSONObject("hits").getJSONArray("hits");
+        if(null == jsonArray || jsonArray.size() == 0) {
+            return new ClusterGaugeMetricModel();
+        }
+
+        JSONObject clusterStatsJsonObj = jsonArray.getJSONObject(0).getJSONObject("_source").getJSONObject("cluster_stats");
+
+        JSONObject indicesJsonObj = clusterStatsJsonObj.getJSONObject("indices");
+        JSONObject nodesJsonObj = clusterStatsJsonObj.getJSONObject("nodes");
+
+        gaugeMetricModel.setNodeCount(nodesJsonObj.getJSONObject("count").getInteger("total"));
+        gaugeMetricModel.setIndexCount(indicesJsonObj.getLong("count"));
+        gaugeMetricModel.setTotal_memory_byte(nodesJsonObj.getJSONObject("jvm").getJSONObject("mem").getLong("heap_max_in_bytes"));
+        gaugeMetricModel.setUsed_memory_byte(nodesJsonObj.getJSONObject("jvm").getJSONObject("mem").getLong("heap_used_in_bytes"));
+        gaugeMetricModel.setTotalShardCount(indicesJsonObj.getJSONObject("shards").getLong("total"));
+        gaugeMetricModel.setDocument_store_byte(indicesJsonObj.getJSONObject("store").getLong("size_in_bytes"));
+        gaugeMetricModel.setDocumentCount(indicesJsonObj.getJSONObject("docs").getLong("count"));
+        gaugeMetricModel.setMax_uptime(nodesJsonObj.getJSONObject("jvm").getString("max_uptime"));
+
+        //version status
+        return gaugeMetricModel;
+    }
+
+
+    private List<String> getNameList(String string, String fieldName) throws  PallasException{
+        List<String> result = new ArrayList<>();
+        JSONObject rootObj = JSON.parseObject(string);
+        JSONArray jsonArray = rootObj.getJSONObject("hits").getJSONArray("hits");
+        if(null == jsonArray || jsonArray.size() == 0) {
+            return new ArrayList<>();
+        }
+        jsonArray.forEach(value -> {
+            JSONObject fieldsObj = (JSONObject)value;
+            String name = fieldsObj.getJSONObject("fields").getJSONArray(fieldName).getString(0);
+            result.add(name);
+        });
+
+        return result;
     }
 
     private String getEndPoint(Map<String, Object> dataMap) {
@@ -454,7 +700,7 @@ public class MonitorServiceImpl implements MonitorService {
             } else{
                 List<MetricModel<Date, Double>> result = (getResult(searchRate, searchTime));
                 MonitorMetricModel<Date, Double> monitorMetricModel = new MonitorMetricModel<>();
-                monitorMetricModel.setUnit("/ms");
+                monitorMetricModel.setUnit("ms");
                 monitorMetricModel.setMetricModel(result);
                 metricInfoModel.setSearchLatency(monitorMetricModel);
             }
@@ -491,7 +737,7 @@ public class MonitorServiceImpl implements MonitorService {
             model.setY(value.getY() * 1.0 / intervalMap.get(intervalString));
             result.add(model);
         });
-        MonitorMetricModel<Date, Double> monitorMetricModel = new MonitorMetricModel<>(result, "/s");
+        MonitorMetricModel<Date, Double> monitorMetricModel = new MonitorMetricModel<>(result, "s");
 
         return monitorMetricModel;
     }
@@ -529,14 +775,20 @@ public class MonitorServiceImpl implements MonitorService {
         return monitorMetricModel;
     }
 
+    private MonitorMetricModel<Date, Double> getSystemLoad(Template template, Map<String, Object> dataMap, String fieldName, Cluster cluster) throws PallasException{
+        List<MetricModel<Date, Double>> result = getMonitorMetricModelsMax(template, dataMap, fieldName, cluster);
+        MonitorMetricModel<Date, Double> monitorMetricModel = new MonitorMetricModel<>(result, "");
+        return monitorMetricModel;
+    }
+
     private MonitorMetricModel<Date, Long> getNodeGcCount(Template template, Map<String, Object> dataMap,  String fieldName, Cluster cluster)throws PallasException {
-        List<MetricModel<Date, Double>> result = getMonitorMetricModelsMax(template, dataMap,fieldName, cluster);
-        MonitorMetricModel<Date, Long> monitorMetricModel = new MonitorMetricModel<>(mapLong(result), "");
+        List<MetricModel<Date, Double>> result = getMonitorMetricModelsDerivative(template, dataMap,fieldName, cluster);
+        MonitorMetricModel<Date, Long> monitorMetricModel = new MonitorMetricModel<>(mapLong(result), "次");
         return monitorMetricModel;
     }
 
     private MonitorMetricModel<Date, Long> getNodeGcDuration(Template template, Map<String, Object> dataMap,  String fieldName, Cluster cluster)throws PallasException {
-        List<MetricModel<Date, Double>> result = getMonitorMetricModelsMax(template, dataMap,fieldName, cluster);
+        List<MetricModel<Date, Double>> result = getMonitorMetricModelsDerivative(template, dataMap,fieldName, cluster);
         MonitorMetricModel<Date, Long> monitorMetricModel = new MonitorMetricModel<>(mapLong(result), "ms");
         return monitorMetricModel;
     }
@@ -546,7 +798,7 @@ public class MonitorServiceImpl implements MonitorService {
         result.forEach(value -> {
             value.setY(MetricConvertUtil.byteToMb(value.getY().longValue()));
         });
-        MonitorMetricModel<Date, Double> monitorMetricModel = new MonitorMetricModel<>(result, "MB");
+        MonitorMetricModel<Date, Double> monitorMetricModel = new MonitorMetricModel<>(result, "mb");
         //转换单位：double
         return monitorMetricModel;
     }
@@ -563,7 +815,7 @@ public class MonitorServiceImpl implements MonitorService {
             value.setY(MetricConvertUtil.byteToMb(value.getY().longValue()));
         });
 
-        MonitorMetricModel<Date, Double> monitorMetricModel = new MonitorMetricModel<>(result, "MB");
+        MonitorMetricModel<Date, Double> monitorMetricModel = new MonitorMetricModel<>(result, "mb");
         return monitorMetricModel;
     }
 
@@ -592,7 +844,7 @@ public class MonitorServiceImpl implements MonitorService {
             value.setY(MetricConvertUtil.byteToMb(value.getY().longValue()));
         });
 
-        MonitorMetricModel<Date, Double> monitorMetricModel = new MonitorMetricModel<>(result, "MB");
+        MonitorMetricModel<Date, Double> monitorMetricModel = new MonitorMetricModel<>(result, "mb");
         return monitorMetricModel;
     }
 
@@ -614,7 +866,7 @@ public class MonitorServiceImpl implements MonitorService {
             value.setY(MetricConvertUtil.byteToMb(value.getY().longValue()));
         });
 
-        MonitorMetricModel<Date, Double> monitorMetricModel = new MonitorMetricModel<>(result, "MB");
+        MonitorMetricModel<Date, Double> monitorMetricModel = new MonitorMetricModel<>(result, "mb");
         return monitorMetricModel;
     }
 

@@ -2,8 +2,16 @@
     <div class="my-tab-content" v-loading="loading" element-loading-text="请稍等···">
       <div class="monitor-top">
         <el-table :data="gaugeMetricData" border style="width: 100%">
-          <el-table-column prop="document_store_byte_total" label="Total"></el-table-column>
-          <el-table-column prop="document_store_byte_primary" label="Primaries"></el-table-column>
+          <el-table-column label="Total">
+            <template scope="scope">
+              {{bytesToSize(scope.row.document_store_byte_total)}}
+            </template>
+          </el-table-column>
+          <el-table-column label="Primaries">
+            <template scope="scope">
+              {{bytesToSize(scope.row.document_store_byte_primary)}}
+            </template>
+          </el-table-column>
           <el-table-column prop="documentCount" label="Documents"></el-table-column>
           <el-table-column prop="totalShardCount" label="Total Shards"></el-table-column>
           <el-table-column prop="unassignedShardCount" label="Unassigned Shards"></el-table-column>            
@@ -40,6 +48,20 @@
               </div>
             </chart-container>
           </el-col>
+          <el-col :span="12">
+            <chart-container :title="`Request Rate(${indexSearchRateInfo.yAxisName})`" type="line">
+              <div slot="chart">
+               <MyLine id="indexSearchRate" :option-info="indexSearchRateInfo"></MyLine>
+              </div>
+            </chart-container>
+          </el-col>
+          <el-col :span="12">
+            <chart-container :title="`Request Latency(${indexSearchLatencyInfo.yAxisName})`" type="line">
+              <div slot="chart">
+               <MyLine id="indexSearchLatency" :option-info="indexSearchLatencyInfo"></MyLine>
+              </div>
+            </chart-container>
+          </el-col>
          </el-row>
       </div>
     </div>
@@ -54,6 +76,8 @@ export default {
       indexDiskInfo: {},
       segmentCountInfo: {},
       documentCountInfo: {},
+      indexSearchRateInfo: {},
+      indexSearchLatencyInfo: {},
     };
   },
   methods: {
@@ -99,6 +123,28 @@ export default {
       };
       this.documentCountInfo = optionInfo;
     },
+    getIndexSerachRate(indexingRate, searchRate, unit) {
+      const optionInfo = {
+        xAxis: indexingRate.map(e => e.x),
+        seriesData: [
+          { name: 'indexing', data: indexingRate.map(e => e.y.toFixed(2)) },
+          { name: 'search', data: searchRate.map(e => e.y.toFixed(2)) },
+        ],
+        yAxisName: unit || '个',
+      };
+      this.indexSearchRateInfo = optionInfo;
+    },
+    getIndexSearchLatency(indexingLatency, searchLatency, unit) {
+      const optionInfo = {
+        xAxis: indexingLatency.map(e => e.x),
+        seriesData: [
+          { name: 'indexing', data: indexingLatency.map(e => e.y.toFixed(2)) },
+          { name: 'search', data: searchLatency.map(e => e.y.toFixed(2)) },
+        ],
+        yAxisName: unit || '个',
+      };
+      this.indexSearchLatencyInfo = optionInfo;
+    },
     getIndexMonitor() {
       const params = {
         clusterName: this.clusterId,
@@ -116,6 +162,10 @@ export default {
             data.index_disk_total.unit);
           this.getSegmentCount(data.segmentCount.metricModel, data.segmentCount.unit);
           this.getDocumentCount(data.documentCount.metricModel, data.documentCount.unit);
+          this.getIndexSerachRate(data.indexingRate.metricModel,
+            data.searchRate.metricModel, data.searchRate.unit);
+          this.getIndexSearchLatency(data.indexingLatency.metricModel,
+            data.searchLatency.metricModel, data.searchLatency.unit);
         }
       });
     },

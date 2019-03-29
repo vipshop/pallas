@@ -21,7 +21,7 @@
         }
       }, {
         "term": {
-          "cluster_name": "${cluserName}"
+          "cluster_name": "${clusterName}"
         }
       }
 <#if type == 'node_stats'>

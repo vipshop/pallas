@@ -23,7 +23,7 @@ public class NodeMetricInfoModel extends MetricInfoModel implements Serializable
     private MonitorMetricModel<Date, Double> index_memory_lucenc_total_byte;
     private MonitorMetricModel<Date, Double> index_memory_terms_bytes;
 
-    private MonitorMetricModel<Date, Double> systemLoad;
+    private MonitorMetricModel<Date, Double> systemLoad_1m;
 
     private MonitorMetricModel<Date, Long> segmentCount;
 
@@ -123,12 +123,12 @@ public class NodeMetricInfoModel extends MetricInfoModel implements Serializable
         this.cpuProcessPerent = cpuProcessPerent;
     }
 
-    public MonitorMetricModel<Date, Double> getSystemLoad() {
-        return systemLoad;
+    public MonitorMetricModel<Date, Double> getSystemLoad_1m() {
+        return systemLoad_1m;
     }
 
-    public void setSystemLoad(MonitorMetricModel<Date, Double> systemLoad) {
-        this.systemLoad = systemLoad;
+    public void setSystemLoad_1m(MonitorMetricModel<Date, Double> systemLoad_1m) {
+        this.systemLoad_1m = systemLoad_1m;
     }
 
     public MonitorMetricModel<Date, Long> getSegmentCount() {
