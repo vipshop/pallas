@@ -71,8 +71,8 @@ public class IndexVersion {
 
     private Byte refreshInterval;
 
+    private String rampUp;
 
-    
     public Long getId() {
         return id;
     }
@@ -273,6 +273,14 @@ public class IndexVersion {
 		this.realClusterIds = realClusterIds;
 	}
 
+    public String getRampUp() {
+        return rampUp;
+    }
+
+    public void setRampUp(String rampUp) {
+        this.rampUp = rampUp;
+    }
+
     @Override
     public String toString() {
         return "IndexVersion{" +
@@ -294,13 +302,14 @@ public class IndexVersion {
                 ", filterFields=" + filterFields +
                 ", checkSum=" + checkSum +
                 ", preferExecutor='" + preferExecutor + '\'' +
-				", realClusterIds=" + getRealClusterIds() +
+                ", realClusterIds='" + realClusterIds + '\'' +
                 ", allocationNodes='" + allocationNodes + '\'' +
                 ", dynamic=" + dynamic +
                 ", indexSlowThreshold=" + indexSlowThreshold +
                 ", fetchSlowThreshold=" + fetchSlowThreshold +
                 ", querySlowThreshold=" + querySlowThreshold +
                 ", refreshInterval=" + refreshInterval +
+                ", rampUp='" + rampUp + '\'' +
                 '}';
     }
 }

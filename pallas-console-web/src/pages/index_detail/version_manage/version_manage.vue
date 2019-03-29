@@ -41,6 +41,7 @@
                                 操作<i class="el-icon-caret-bottom el-icon--right"></i>
                               </span>
                               <el-dropdown-menu class="dropdown-operation" slot="dropdown">
+                                <el-dropdown-item><a @click="preheading(scope.row)"><span><i class="fa fa-sun-o"></i>索引预热</span></a></el-dropdown-item>
                                 <el-dropdown-item v-show="!scope.row.isSync"><a @click="createIndex(scope.row)"><span><i class="fa fa-play-circle"></i>创建索引</span></a></el-dropdown-item>
                                 <el-dropdown-item v-show="!scope.row.isUsed"><a @click="enableVersion(scope.row)"><span><i class="fa fa-hand-o-right"></i>启用版本</span></a></el-dropdown-item>
                                 <el-dropdown-item><a @click="triggerDialog(scope.row, 'view')"><span><i class="fa fa-eye"></i>配置查看</span></a></el-dropdown-item>
@@ -64,15 +65,20 @@
         <div v-if="isViewConfigVisible">
             <json-content-dialog :content="configInfo" :title="configTitle" @close-dialog="closeViewConfigDialog"></json-content-dialog>
         </div>
+        <div v-if="isPreheadingVisible">
+            <preheading-dialog @close-dialog="closePreheadingDialog"></preheading-dialog>
+        </div>
     </div>
 </template>
 
 <script>
 import VersionInfoDialog from './version_info_dialog/version_info_dialog';
+import PreheadingDialog from './preheading_dialog';
 
 export default {
   components: {
     'version-info-dialog': VersionInfoDialog,
+    'preheading-dialog': PreheadingDialog,
   },
   data() {
     return {
@@ -116,9 +122,17 @@ export default {
       },
       clusters: [],
       isLogical: false,
+      isPreheadingVisible: false,
     };
   },
   methods: {
+    preheading(row) {
+      console.log(row);
+      this.isPreheadingVisible = true;
+    },
+    closePreheadingDialog() {
+      this.isPreheadingVisible = false;
+    },
     getClusterName(id) {
       let clusterName = '';
       this.clusters.some((ele) => {

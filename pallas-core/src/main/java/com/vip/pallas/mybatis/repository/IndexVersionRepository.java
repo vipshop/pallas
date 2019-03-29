@@ -37,6 +37,8 @@ public interface IndexVersionRepository {
     int updateByPrimaryKeySelective(IndexVersion record);
 
     List<IndexVersion> selectAll();
+
+    String findRampupByVersionId(Long versionId);
     
     IndexParam selectIndexParamById(Long id);
     

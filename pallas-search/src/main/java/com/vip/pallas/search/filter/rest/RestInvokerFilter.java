@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
@@ -150,8 +151,7 @@ public final class RestInvokerFilter extends AbstractFilter {
 					HttpRequestBase request = HttpClientUtil.getHttpUriRequest(targetHost, outBoundRequest);
 					request.setURI(URI.create(newURL));
 					httpClient.execute(targetHost, request, httpContext,
-							new SendDirectlyCallback(filterContext, sessionContext, outBoundRequest, httpContext));
-
+					new SendDirectlyCallback(filterContext, sessionContext, outBoundRequest, httpContext, request, null, targetHost, newURL, pallasRequest));
 					// calculate the circuteBreaker TODO 是否在发出请求后再加？因为有可能是连接池满了，根本没发出请求
 					if (pallasRequest.isCircuitBreakerOn() && pallasRequest.getShardGroup() != null) {
 						CircuitBreakerService.getInstance().increaseServiceRequestCounter(pallasRequest.getShardGroup().getId());
@@ -160,16 +160,15 @@ public final class RestInvokerFilter extends AbstractFilter {
 					TryPolicy tp = new TryPolicy(configByIndexNameTemplateName.getRetry() + 1,
 							configByIndexNameTemplateName.getTimeout());
 					AsyncCall asyncCall = new AsyncCall(httpClient, tp, targetHost, newURL, templateId, filterContext,
-							sessionContext, outBoundRequest, httpContext);
+							sessionContext, outBoundRequest, httpContext, pallasRequest);
 					asyncCall.register();
 				}
 			} else {
 				HttpRequestBase request = HttpClientUtil.getHttpUriRequest(targetHost, outBoundRequest);
 				request.setURI(URI.create(newURL));
 				httpClient.execute(targetHost, request, httpContext,
-						new SendDirectlyCallback(filterContext, sessionContext, outBoundRequest, httpContext));
+						new SendDirectlyCallback(filterContext, sessionContext, outBoundRequest, httpContext, request, null, targetHost, newURL, pallasRequest));
 			}
-
 		} catch (Exception ex) {
 			logger.error(ex.getLocalizedMessage(), ex);
 			throw ex;
@@ -213,7 +212,7 @@ public final class RestInvokerFilter extends AbstractFilter {
 		return newURL;
 	}
 
-	private static class IdleConnectionEvictor extends Thread {
+	public static class IdleConnectionEvictor extends Thread {
 		private final NHttpClientConnectionManager connMgr;
 
 		private volatile boolean stopped;

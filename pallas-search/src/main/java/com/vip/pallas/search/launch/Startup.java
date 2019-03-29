@@ -2,6 +2,7 @@ package com.vip.pallas.search.launch;
 
 import java.util.Locale;
 
+import com.vip.pallas.search.rampup.RampupCounter;
 import org.elasticsearch.common.Booleans;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +55,9 @@ public class Startup {
 		}catch(Exception ex){
 			logger.error(ex.getMessage(), ex);
 		}
+
+		logger.info("start index rampup counter ...");
+		RampupCounter.start();
 		
 		logger.info("start netty ...");
 		final PallasNettyServer gatewayServer = new PallasNettyServer();

@@ -9,6 +9,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.vip.pallas.search.http.PallasRequest;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
@@ -50,6 +51,9 @@ public class AsyncCall {
 	private AtomicInteger executeCount = new AtomicInteger(0);
 	private HttpContext httpContext;
 	private DefaultFullHttpRequest outBoundRequest;
+	private AbstractFilterContext filterContext;
+	private SessionContext sessionContext;
+	private PallasRequest pallasRequest;
 
 	private static ExecutorService retryExecutor = Executors.newFixedThreadPool(PallasSearchProperties.SEARCH_RETRY_THREADS,
 			new PallasThreadFactory("timeout-retry"));
@@ -57,7 +61,7 @@ public class AsyncCall {
 	private SessionContext sessionContext;
 	
 	public AsyncCall(CloseableHttpAsyncClient httpClient, TryPolicy retryPolicy, HttpHost targetHost, String newURL, String templateId,
-			AbstractFilterContext filterContext, SessionContext sessionContext, DefaultFullHttpRequest outBoundRequest, HttpContext httpContext) {
+			AbstractFilterContext filterContext, SessionContext sessionContext, DefaultFullHttpRequest outBoundRequest, HttpContext httpContext, PallasRequest pallasRequest) {
 		this.httpClient = httpClient;
 		this.retryPolicy =  retryPolicy;
 		this.targetHost = targetHost;
@@ -69,7 +73,9 @@ public class AsyncCall {
 		this.retryCount = new AtomicInteger(0);
 		this.done = new AtomicBoolean(false);
 		this.futureList = new ArrayList<>(retryPolicy.getTotalCountIncludedFirstTime());
-		this.futureCallback = new TimeoutFutureCallback(this, filterContext, sessionContext, outBoundRequest, httpContext);
+		this.filterContext = filterContext;
+		this.sessionContext = sessionContext;
+		this.pallasRequest = pallasRequest;
 	}
 	
 	public void register() {
@@ -124,6 +130,9 @@ public class AsyncCall {
 				if (count > 1) {
 					LOGGER.info("query templateId:{} timeout, now start {}th try with real timeout = {}.", templateId,
 							count, timeoutMillis);
+				}
+				if(this.futureCallback == null){
+					this.futureCallback = new TimeoutFutureCallback(this, filterContext, sessionContext, outBoundRequest, httpContext, null, entity, targetHost, newURL, pallasRequest);
 				}
 				Future<HttpResponse> future = httpClient.execute(targetHost, request, httpContext, futureCallback);
 				// calculate the circuteBreaker TODO 是否在发出请求后再加？因为有可能是连接池满了，根本没发出请求

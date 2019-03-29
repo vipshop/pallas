@@ -1,9 +1,10 @@
 package com.vip.pallas.search.service;
 
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-
 import com.vip.pallas.search.model.*;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public interface PallasCacheService {
 
@@ -160,4 +161,20 @@ public interface PallasCacheService {
 	 * @throws ExecutionException
 	 */
 	FlowRecord getFlowRecordById(Long recordId) throws ExecutionException;
+
+    /**
+     * 根据索引名、集群ID获取索引下全部待预热的信息
+     * @param indexName
+     * @param clusterId
+     * @return
+     * @throws ExecutionException
+     */
+	List<IndexRampup> getRampupByIndexNameAndCluster(String indexName, String clusterId) throws ExecutionException;
+
+    /**
+     * 获取全部预热信息MAP
+     * @return
+     * @throws ExecutionException
+     */
+    Map<Long, IndexRampup> getRampupMap() throws ExecutionException;
 }

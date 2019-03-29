@@ -1,51 +1,32 @@
 package com.vip.pallas.search.cache;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.mapping;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import org.elasticsearch.client.Response;
-import org.elasticsearch.client.RestClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.vip.pallas.search.filter.circuitbreaker.CircuitBreakerPolicy;
 import com.vip.pallas.search.filter.circuitbreaker.CircuitBreakerPolicyHelper;
-import com.vip.pallas.search.model.Cluster;
-import com.vip.pallas.search.model.FlowRecord;
-import com.vip.pallas.search.model.Index;
-import com.vip.pallas.search.model.IndexRouting;
-import com.vip.pallas.search.model.IndexRoutingTargetGroup;
-import com.vip.pallas.search.model.Node;
-import com.vip.pallas.search.model.SearchAuthorization;
-import com.vip.pallas.search.model.ShardGroup;
-import com.vip.pallas.search.model.TemplateWithTimeoutRetry;
+import com.vip.pallas.search.model.*;
 import com.vip.pallas.search.service.ElasticSearchService;
 import com.vip.pallas.search.service.impl.ElasticSearchServiceImpl;
 import com.vip.pallas.search.utils.ElasticRestClient;
 import com.vip.pallas.search.utils.HttpClient;
 import com.vip.pallas.search.utils.JsonUtil;
 import com.vip.pallas.utils.PallasBasicProperties;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.client.Response;
+import org.elasticsearch.client.RestClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.*;
 
 public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
 
@@ -64,6 +45,8 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
     public static final String INDEX_CLUSTER_MAP = "INDEX_CLUSTER_MAP";
 	public static final String FLOW_RECORD_MAP = "FLOW_RECORD_MAP";
 	public static final String FLOW_RECORD_MAP_BY_ID = "FLOW_RECORD_MAP_BY_ID";
+    public static final String RAMPUP_MAP = "RAMPUP_MAP";
+    public static final String INDEX_CLUSTER_RAMPUP_MAP = "INDEX_CLUSTER_RAMPUP_MAP";
 
     protected static final Pattern CLUSTER_HTTP_PORT_PATTERN = Pattern.compile(".*:([0-9]+).*");
     private static final Logger LOGGER = LoggerFactory.getLogger(RoutingCache.class);
@@ -86,6 +69,7 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
             cacheAuthorization(cacheMap);
             cacheTimeoutConfig(cacheMap);
 			cacheFlowRecord(cacheMap);
+			cacheRampup(cacheMap);
             
             lastCache = cacheMap;
             return cacheMap;
@@ -285,6 +269,57 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
 		return "9200";
 	}
 
+    private void cacheRampup(Map<String, Object> cacheMap) {
+        try{
+            Map<String, Object> versionResultMap = JsonUtil.readValue(HttpClient.httpGet(PallasBasicProperties.PALLAS_CONSOLE_REST_URL + "/version/list/all.json"), Map.class);
+
+            List<IndexVersion> versionList = JsonUtil.readValue(JsonUtil.toJson(versionResultMap.get("data")), List.class, IndexVersion.class);
+
+            //indexId -> rampupList
+            Map<Long, List<IndexRampup>> indexRampupMap = versionList.stream().filter(t -> StringUtils.isNotBlank(t.getRampUp())).map(t -> {
+                try {
+                    return JsonUtil.readValue(t.getRampUp(), IndexRampup.class);
+                } catch (Exception e) {
+                    LOGGER.error(e.toString(), e);
+                    return new IndexRampup();
+                }
+            }).filter(rampup -> rampup != null && rampup.needRampup() && rampup.getIndexId() != null).collect(groupingBy(t -> t.getIndexId()));
+
+            //versionId -> rampup
+            Map<Long, IndexRampup> rampupMap = versionList.stream().filter(t -> StringUtils.isNotBlank(t.getRampUp()))
+                    .filter(t -> {
+                        try {
+                            IndexRampup rampup = JsonUtil.readValue(t.getRampUp(), IndexRampup.class);
+                            return rampup.needRampup();
+                        } catch (Exception e) {
+                            return false;
+                        }
+                    })
+                    .collect(toMap(k -> k.getId(), t -> {
+                try {
+                    return JsonUtil.readValue(t.getRampUp(), IndexRampup.class);
+                } catch (Exception e) {
+                    LOGGER.error(e.toString(), e);
+                    return new IndexRampup();
+                }
+            }));
+
+            Map<String, Object> indexResultMap = JsonUtil.readValue(HttpClient.httpGet(PallasBasicProperties.PALLAS_CONSOLE_REST_URL + "/index/list/all.json"), Map.class);
+            List<Index> indexList = JsonUtil.readValue(JsonUtil.toJson(indexResultMap.get("data")), List.class, Index.class);
+
+            //indexName -> clusterName -> rampup
+            Map<String, Map<String, List<IndexRampup>>> indexClusterRampupMap = indexList.stream().collect(groupingBy(Index::getIndexName)).entrySet().stream().collect(toMap(
+                    Map.Entry::getKey,
+                    r -> r.getValue().stream().collect(toMap(Index::getClusterName, t -> Optional.ofNullable(indexRampupMap.get(t.getId())).orElseGet(Collections::emptyList))
+            )));
+
+            cacheMap.put(RAMPUP_MAP, rampupMap);
+            cacheMap.put(INDEX_CLUSTER_RAMPUP_MAP, indexClusterRampupMap);
+        }catch (Exception e){
+            LOGGER.error(e.toString(), e);
+        }
+    }
+
 	private void cacheTimeoutConfig(Map<String, Object> cacheMap) throws Exception {
 		Map<String, Object> resultMap = JsonUtil.readValue(
 				HttpClient.httpGet(
@@ -330,6 +365,7 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
 			configMap.put(retry.getClusterName() + "_" + retry.getIndexName(), retry);
 		}
 	}
+
     private void cacheRouting(Map<String, Object> cacheMap){
         try {
             Map<String, Object> resultMap = JsonUtil.readValue(HttpClient.httpGet(PallasBasicProperties.PALLAS_CONSOLE_REST_URL + "/route/index_routing/all.json"), Map.class);
