@@ -6,7 +6,7 @@
             </span>
             <el-form :model="versionInfo" :rules="rules" ref="versionInfo" label-position="left">
                 <div class="label-title">
-                  <span class="span-title">索引配置</span>
+                  <span class="span-title"><i class="fa fa-th-large"></i>索引配置</span>
                   <span v-if="isLogical" style="color: #C8C8C8;">（所属集群：{{clusterArray.join()}}）</span>
                 </div>
                 <div class="label-content">
@@ -99,7 +99,7 @@
                         </el-col>
                     </el-row>
                 </div>
-                <div class="label-title"><span class="span-title">慢日志落盘配置（单位ms，-1不限定）</span></div>
+                <div class="label-title"><span class="span-title"><i class="fa fa-th-large"></i>慢日志落盘配置（单位ms，-1不限定）</span></div>
                 <div class="label-content">
                     <el-row :gutter="20">
                         <el-col :span="8">
@@ -119,7 +119,7 @@
                         </el-col>
                     </el-row>
                 </div>
-                <div class="label-title"><span class="span-title">索引其他配置</span></div>
+                <div class="label-title"><span class="span-title"><i class="fa fa-th-large"></i>索引其他配置</span></div>
                 <div class="label-content">
                     <el-row :gutter="20">
                         <el-col :span="8">
@@ -148,7 +148,7 @@
                     </el-row>
                 </div>
                 <div class="label-title">
-                    <span class="span-title">mapping配置</span>
+                    <span class="span-title"><i class="fa fa-th-large"></i>mapping配置</span>
                     <el-button size="mini" type="success" @click="addField(0)" v-if="isMetaDataNull && versionInfo.schema.length === 0"><i class="fa fa-plus"></i>新增</el-button>
                     <el-button size="mini" type="warning" v-show="!isEditable" @click="importSchema"><i class="fa fa-arrow-circle-o-down"></i>导入schema</el-button>
                     <el-button size="mini" type="warning" v-show="isEditable" @click="exportSchema"><i class="fa fa-arrow-circle-o-up"></i>导出schema</el-button>
@@ -505,21 +505,25 @@ export default {
 
 </script>
 
-<style scoped>
+<style>
 .label-title {
     height: 30px;
     line-height: 30px;
     margin-bottom: 5px;
-    margin-left: 5px;
+    padding-left: 5px;
+    background-color: #333;
 }
 .label-title .span-title{
     color: #eee;
-    font-size: 13px;
+    font-size: 15px;
     margin-right: 5px;
-    font-weight: bold;
 }
 .label-content {
-  margin: 0 15px 20px;
+  margin: 10px 15px 20px;
+}
+.label-content span {
+  color: #eee;
+  font-weight: bold;
 }
 .version-info-dialog .el-dialog__body {
   padding: 10px 5px 10px 0px;
