@@ -26,7 +26,7 @@
         </dependency>
         <dependency>
             <groupId>com.vip.pallas</groupId>
-            <artifactId>pallas-console-vip</artifactId>
+            <artifactId>pallas-console</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>

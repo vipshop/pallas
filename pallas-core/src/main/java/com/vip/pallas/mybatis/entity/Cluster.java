@@ -171,6 +171,7 @@ public class Cluster {
 	public String toString() {
 		return "Cluster [id=" + id + ", clusterId=" + clusterId + ", httpAddress=" + httpAddress + ", clientAddress="
 				+ clientAddress + ", description=" + description + ", hasPrivilege=" + hasPrivilege + ", realClusters="
-				+ realClusters + ", accessPsList=" + accessiblePs + ", logicalCluster=" + isLogicalCluster() + "]";
+				+ realClusters + ", accessiblePs=" + accessiblePs + ", logicalCluster=" + logicalCluster
+				+ ", createTime=" + createTime + ", updateTime=" + updateTime + ", monitorLevel=" + monitorLevel + "]";
 	}
 }

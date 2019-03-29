@@ -17,6 +17,7 @@
 
 package com.vip.pallas.test.utils;
 
+import com.vip.pallas.bean.monitor.MonitorLevelModel;
 import com.vip.pallas.console.vo.ClusterVO;
 import com.vip.pallas.console.vo.FlowRecordConfigVO;
 import com.vip.pallas.console.vo.IndexVO;
@@ -43,6 +44,7 @@ public class ObjectJsonUtils {
         clusterVO.setClientAddress(ConstantValue.clintHttpAddress);
         clusterVO.setRealClusters(null);
         clusterVO.setAccessiblePs(ConstantValue.accessiblePallasSearch);
+        clusterVO.setMonitorLevelModel(MonitorLevelModel.getDefaultModel());
 
         return clusterVO;
     }
