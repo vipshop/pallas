@@ -5,8 +5,8 @@ import java.io.Serializable;
 public class IndexGaugeMetricModel implements Serializable {
     private String indexName;
     private Long documentCount;
-    private String document_store_byte_total;  //primary + replica
-    private String document_store_byte_primary;
+    private Long document_store_byte_total;  //primary + replica
+    private Long document_store_byte_primary;
     private Integer totalShardCount;
     private Integer primaryShardCount;
     private  Integer replicaShardCount;
@@ -46,19 +46,19 @@ public class IndexGaugeMetricModel implements Serializable {
         this.documentCount = documentCount;
     }
 
-    public String getDocument_store_byte_total() {
+    public Long getDocument_store_byte_total() {
         return document_store_byte_total;
     }
 
-    public void setDocument_store_byte_total(String document_store_byte_total) {
+    public void setDocument_store_byte_total(Long document_store_byte_total) {
         this.document_store_byte_total = document_store_byte_total;
     }
 
-    public String getDocument_store_byte_primary() {
+    public Long getDocument_store_byte_primary() {
         return document_store_byte_primary;
     }
 
-    public void setDocument_store_byte_primary(String document_store_byte_primary) {
+    public void setDocument_store_byte_primary(Long document_store_byte_primary) {
         this.document_store_byte_primary = document_store_byte_primary;
     }
 

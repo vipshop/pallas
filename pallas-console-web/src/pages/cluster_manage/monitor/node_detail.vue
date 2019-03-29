@@ -3,7 +3,7 @@
       <div class="monitor-top">
             <el-table :data="gaugeMetricData" border style="width: 100%">
                 <el-table-column prop="transportAddress" label="transportAddress"></el-table-column>
-                <el-table-column prop="jvmHeapUsage" label="JVM Heap"></el-table-column>
+                <el-table-column prop="jvmHeapUsage" label="JVM Heap(%)"></el-table-column>
                 <el-table-column label="Free Disk">
                   <template scope="scope">
                     {{bytesToSize(scope.row.availableFS)}}
@@ -51,13 +51,6 @@
                   </chart-container>
               </el-col>
               <el-col :span="12">
-                  <chart-container :title="`index memory(${indexMemoryInfo.yAxisName})`" type="line">
-                      <div slot="chart">
-                          <MyLine id="indexMemory" :option-info="indexMemoryInfo"></MyLine>
-                      </div>
-                  </chart-container>
-              </el-col>
-              <el-col :span="12">
                   <chart-container :title="`threadpool Queue(${threadpoolQueueInfo.yAxisName})`" type="line">
                       <div slot="chart">
                           <MyLine id="threadpoolQueue" :option-info="threadpoolQueueInfo"></MyLine>
@@ -72,6 +65,20 @@
                   </chart-container>
               </el-col>
               <el-col :span="12">
+                  <chart-container :title="`Request Rate(${indexSearchRateInfo.yAxisName})`" type="line">
+                      <div slot="chart">
+                          <MyLine id="indexSearchRate" :option-info="indexSearchRateInfo"></MyLine>
+                      </div>
+                  </chart-container>
+              </el-col>
+              <el-col :span="12">
+                  <chart-container :title="`Request Latency(${indexSearchLatencyInfo.yAxisName})`" type="line">
+                       <div slot="chart">
+                           <MyLine id="indexSearchLatency" :option-info="indexSearchLatencyInfo"></MyLine>
+                      </div>
+                  </chart-container>
+              </el-col>
+              <el-col :span="12">
                   <chart-container :title="`segment count(${segmentCountInfo.yAxisName})`" type="line">
                       <div slot="chart">
                           <MyLine id="segmentCount" :option-info="segmentCountInfo"></MyLine>
@@ -82,6 +89,20 @@
                   <chart-container :title="`http open current(${httpOpenCurrentInfo.yAxisName})`" type="line">
                       <div slot="chart">
                           <MyLine id="httpOpenCurrent" :option-info="httpOpenCurrentInfo"></MyLine>
+                      </div>
+                  </chart-container>
+              </el-col>
+               <el-col :span="12">
+                  <chart-container :title="`index memory(${indexMemoryInfo.yAxisName})`" type="line">
+                      <div slot="chart">
+                          <MyLine id="indexMemory" :option-info="indexMemoryInfo"></MyLine>
+                      </div>
+                  </chart-container>
+              </el-col>
+              <el-col :span="12">
+                  <chart-container :title="`System load(${systemLoadInfo.yAxisName})`" type="line">
+                      <div slot="chart">
+                          <MyLine id="systemLoad" :option-info="systemLoadInfo"></MyLine>
                       </div>
                   </chart-container>
               </el-col>
@@ -104,6 +125,9 @@ export default {
       threadpoolQueueInfo: {},
       threadpoolRejectInfo: {},
       httpOpenCurrentInfo: {},
+      indexSearchRateInfo: {},
+      indexSearchLatencyInfo: {},
+      systemLoadInfo: {},
     };
   },
   methods: {
@@ -206,6 +230,38 @@ export default {
       };
       this.httpOpenCurrentInfo = optionInfo;
     },
+    getIndexSerachRate(indexingRate, searchRate, unit) {
+      const optionInfo = {
+        xAxis: indexingRate.map(e => e.x),
+        seriesData: [
+          { name: 'indexing', data: indexingRate.map(e => e.y.toFixed(2)) },
+          { name: 'search', data: searchRate.map(e => e.y.toFixed(2)) },
+        ],
+        yAxisName: unit || '个',
+      };
+      this.indexSearchRateInfo = optionInfo;
+    },
+    getIndexSearchLatency(indexingLatency, searchLatency, unit) {
+      const optionInfo = {
+        xAxis: indexingLatency.map(e => e.x),
+        seriesData: [
+          { name: 'indexing', data: indexingLatency.map(e => e.y.toFixed(2)) },
+          { name: 'search', data: searchLatency.map(e => e.y.toFixed(2)) },
+        ],
+        yAxisName: unit || '个',
+      };
+      this.indexSearchLatencyInfo = optionInfo;
+    },
+    getSystemLoad(systemLoad1m, unit) {
+      const optionInfo = {
+        xAxis: systemLoad1m.map(e => e.x),
+        seriesData: [
+          { name: 'system load 1m', data: systemLoad1m.map(e => e.y.toFixed(2)) },
+        ],
+        yAxisName: unit,
+      };
+      this.systemLoadInfo = optionInfo;
+    },
     getNodeMonitor() {
       const params = {
         clusterName: this.clusterId,
@@ -240,6 +296,11 @@ export default {
            data.searchThreadpoolReject.unit);
           this.getSegmentCount(data.segmentCount.metricModel, data.segmentCount.unit);
           this.getHttpOpenCount(data.httpOpenCurrent.metricModel, data.httpOpenCurrent.unit);
+          this.getIndexSerachRate(data.indexingRate.metricModel,
+            data.searchRate.metricModel, data.searchRate.unit);
+          this.getIndexSearchLatency(data.indexingLatency.metricModel,
+            data.searchLatency.metricModel, data.searchLatency.unit);
+          this.getSystemLoad(data.systemLoad_1m.metricModel, data.systemLoad_1m.unit);
         }
       });
     },

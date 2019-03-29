@@ -6,6 +6,7 @@ public interface ConstantUtil {
      */
     String GAUGE_STATS_TEMPLATE = "gauge_stats.ftl";
     String AGGS_STATS_TEMPLATE = "aggs_stats.ftl";
+    String LIST_INFO_TEMPLATE = "list_info.ftl";
 
     /**
      * type字段

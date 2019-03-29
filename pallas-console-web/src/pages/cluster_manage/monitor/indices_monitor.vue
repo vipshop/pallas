@@ -25,8 +25,16 @@
                     </el-table-column>
                     <el-table-column label="Status" prop="status" width="70px"></el-table-column>
                     <el-table-column label="Document Count" prop="documentCount"></el-table-column>
-                    <el-table-column label="Document Store Primary" prop="document_store_byte_primary"></el-table-column>
-                    <el-table-column label="Document Store Total" prop="document_store_byte_total"></el-table-column>
+                    <el-table-column label="Document Store Primary">
+                      <template scope="scope">
+                        {{bytesToSize(scope.row.document_store_byte_primary)}}
+                      </template>
+                    </el-table-column>
+                    <el-table-column label="Document Store Total">
+                      <template scope="scope">
+                        {{bytesToSize(scope.row.document_store_byte_total)}}
+                      </template>
+                    </el-table-column>
                     <el-table-column label="Health" prop="health" width="70px"></el-table-column>
                     <el-table-column label="Total Shard Count" prop="totalShardCount"></el-table-column>
                 </el-table>
@@ -52,7 +60,11 @@ export default {
       this.indicesList = filtered;
     },
     getIndices() {
-      return this.$http.post('/monitor/indices/info.json', { clusterName: this.clusterId }).then((data) => {
+      const params = {
+        clusterName: this.clusterId,
+        ...this.timeInterval,
+      };
+      return this.$http.post('/monitor/indices/info.json', params).then((data) => {
         if (data) {
           this.indices = data;
           this.indicesNum = data.length;
@@ -78,6 +90,12 @@ export default {
   },
   created() {
     this.init();
+  },
+  watch: {
+    '$store.state.monitorTimeInterval': function interval(val) {
+      console.log(val);
+      this.getNodeMonitor();
+    },
   },
 };
 </script>

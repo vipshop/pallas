@@ -120,14 +120,24 @@ export default {
       }
     },
     getIndicesNum() {
-      return this.$http.get('/monitor/indices/count.json', { clusterName: this.clusterId }).then((data) => {
+      const params = {
+        clusterName: this.clusterId,
+        nodeName: this.node,
+        ...this.timeInterval,
+      };
+      return this.$http.post('/monitor/indices/count.json', params).then((data) => {
         if (data) {
           this.indicesNum = data;
         }
       });
     },
     getNodesNum() {
-      return this.$http.get('/monitor/nodes/count.json', { clusterName: this.clusterId }).then((data) => {
+      const params = {
+        clusterName: this.clusterId,
+        nodeName: this.node,
+        ...this.timeInterval,
+      };
+      return this.$http.post('/monitor/nodes/count.json', params).then((data) => {
         if (data) {
           this.nodesNum = data;
         }
@@ -178,6 +188,11 @@ export default {
   },
   watch: {
     $route: 'getActiveTab',
+    '$store.state.monitorTimeInterval': function interval(val) {
+      console.log(val);
+      this.getIndicesNum();
+      this.getNodesNum();
+    },
   },
 };
 </script>

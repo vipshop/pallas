@@ -14,13 +14,12 @@ public interface MonitorService {
 
     IndexMetricInfoModel queryIndexMetrices(MonitorQueryModel queryModel) throws Exception;
 
-    ClusterGaugeMetricModel queryClusterInfo(MonitorQueryModel queryModel) throws Exception;
+    Integer getNodeCount(MonitorQueryModel queryModel) throws Exception;
+
+    Integer getIndexCount(MonitorQueryModel queryModel) throws Exception;
 
     List<NodeGaugeMetricModel> queryNodesInfo(MonitorQueryModel queryModel) throws Exception;
 
     List<IndexGaugeMetricModel> queryIndicesInfo(MonitorQueryModel queryModel) throws Exception;
 
-    Integer getNodeCount(String clusterName) throws Exception;
-
-    Integer getIndexCount(String clusterName) throws Exception;
 }

@@ -25,7 +25,7 @@
                     </el-table-column>
                     <el-table-column label="CPU Usage" prop="osCpuPercent"></el-table-column>
                     <el-table-column label="Load Average" prop="load_1m"></el-table-column>
-                    <el-table-column label="JVM Memory" prop="jvmHeapUsage"></el-table-column>
+                    <el-table-column label="JVM Memory(%)" prop="jvmHeapUsage"></el-table-column>
                     <el-table-column label="Transport Address" prop="transportAddress"></el-table-column>
                     <el-table-column label="Shards" prop="shardCount"></el-table-column>
                 </el-table>
@@ -51,7 +51,11 @@ export default {
       this.nodesList = filtered;
     },
     getNodes() {
-      return this.$http.post('/monitor/nodes/info.json', { clusterName: this.clusterId }).then((data) => {
+      const params = {
+        clusterName: this.clusterId,
+        ...this.timeInterval,
+      };
+      return this.$http.post('/monitor/nodes/info.json', params).then((data) => {
         if (data) {
           this.nodes = data;
           this.nodesNum = data.length;
@@ -71,9 +75,18 @@ export default {
     clusterId() {
       return this.$route.query.clusterId;
     },
+    timeInterval() {
+      return this.$store.state.monitorTimeInterval;
+    },
   },
   created() {
     this.init();
+  },
+  watch: {
+    '$store.state.monitorTimeInterval': function interval(val) {
+      console.log(val);
+      this.getNodes();
+    },
   },
 };
 </script>
