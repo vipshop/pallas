@@ -20,5 +20,5 @@ public interface ConstantUtil {
     /**
      * monitor index name
      */
-    String indexName= "pallas.es.metrics";
+    String indexName= ".pallas-es-metrics";
 }
