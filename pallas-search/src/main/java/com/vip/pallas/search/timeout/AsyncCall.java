@@ -58,8 +58,7 @@ public class AsyncCall {
 	private static ExecutorService retryExecutor = Executors.newFixedThreadPool(PallasSearchProperties.SEARCH_RETRY_THREADS,
 			new PallasThreadFactory("timeout-retry"));
 	private HttpEntity entity;
-	private SessionContext sessionContext;
-	
+
 	public AsyncCall(CloseableHttpAsyncClient httpClient, TryPolicy retryPolicy, HttpHost targetHost, String newURL, String templateId,
 			AbstractFilterContext filterContext, SessionContext sessionContext, DefaultFullHttpRequest outBoundRequest, HttpContext httpContext, PallasRequest pallasRequest) {
 		this.httpClient = httpClient;
