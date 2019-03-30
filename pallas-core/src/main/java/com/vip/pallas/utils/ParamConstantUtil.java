@@ -1,6 +1,8 @@
 package com.vip.pallas.utils;
 
-public interface ConstantUtil {
+public interface ParamConstantUtil {
+
+
     /**
      * freemarker template
      */
@@ -20,5 +22,5 @@ public interface ConstantUtil {
     /**
      * monitor index name
      */
-    String indexName= ".pallas-es-metrics";
+    String MONITOR_INDEX_NAME= ".pallas-es-metrics";
 }

@@ -7,12 +7,12 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.vip.pallas.bean.monitor.*;
 import com.vip.pallas.bean.monitor.MonitorMetricModel.MetricModel;
+import com.vip.pallas.utils.ParamConstantUtil;
 import com.vip.pallas.exception.PallasException;
 import com.vip.pallas.mybatis.entity.Cluster;
 import com.vip.pallas.service.ClusterService;
 import com.vip.pallas.service.ElasticSearchService;
 import com.vip.pallas.service.MonitorService;
-import com.vip.pallas.utils.ConstantUtil;
 import com.vip.pallas.utils.MetricConvertUtil;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -80,14 +80,14 @@ public class MonitorServiceImpl implements MonitorService {
         Cluster cluster =  getCluster(queryModel.getClusterName());
         ClusterMetricInfoModel clusterMetricInfoModel = new ClusterMetricInfoModel();
 
-        Template templateGauge = getTempalte(ConstantUtil.GAUGE_STATS_TEMPLATE);
+        Template templateGauge = getTempalte(ParamConstantUtil.GAUGE_STATS_TEMPLATE);
         clusterMetricInfoModel.setGaugeMetric(queryClusterInfo(templateGauge, dataMap, cluster));
 
         //derivative aggs
-        dataMap.put("type", ConstantUtil.TYPE_INDICES_STATS);
+        dataMap.put("type", ParamConstantUtil.TYPE_INDICES_STATS);
         dataMap.put("isDerivative", true);
 
-        Template templateAggs = getTempalte(ConstantUtil.AGGS_STATS_TEMPLATE);
+        Template templateAggs = getTempalte(ParamConstantUtil.AGGS_STATS_TEMPLATE);
 
         List<MetricModel<Date, Long>> searchRate = getSearchRate(templateAggs, dataMap, "indices_stats.indices_all.total.search.query_total", cluster);
         List<MetricModel<Date, Long>> indexingRate = getIndexingRate(templateAggs, dataMap, "indices_stats.indices_all.total.indexing.index_total", cluster);
@@ -103,18 +103,18 @@ public class MonitorServiceImpl implements MonitorService {
 
         Map<String, Object> dataMap = getDataMap(queryModel);
 
-        dataMap.put("type", ConstantUtil.TYPE_NODE_STATS);
+        dataMap.put("type", ParamConstantUtil.TYPE_NODE_STATS);
         dataMap.put("nodeName", queryModel.getNodeName());
 
         Cluster cluster =  getCluster(queryModel.getClusterName());
         NodeMetricInfoModel nodeMetricInfoModel = new NodeMetricInfoModel();
 
-        Template templateGauge = getTempalte(ConstantUtil.GAUGE_STATS_TEMPLATE);
+        Template templateGauge = getTempalte(ParamConstantUtil.GAUGE_STATS_TEMPLATE);
 
         nodeMetricInfoModel.setGaugeMetric(queryNodeInfo(templateGauge, dataMap, cluster));
 
         //normal aggs
-        Template templateAggs = getTempalte(ConstantUtil.AGGS_STATS_TEMPLATE);
+        Template templateAggs = getTempalte(ParamConstantUtil.AGGS_STATS_TEMPLATE);
 
         dataMap.put("isDerivative", false);
 
@@ -164,18 +164,18 @@ public class MonitorServiceImpl implements MonitorService {
         Map<String, Object> dataMap = getDataMap(queryModel);
 
         //guage
-        dataMap.put("type", ConstantUtil.TYPE_INDEX_STATS);
+        dataMap.put("type", ParamConstantUtil.TYPE_INDEX_STATS);
         dataMap.put("indexName", queryModel.getIndexName());
 
         Cluster cluster =  getCluster(queryModel.getClusterName());
 
         IndexMetricInfoModel indexMetricInfoModel = new IndexMetricInfoModel();
 
-        Template templateGauge = getTempalte(ConstantUtil.GAUGE_STATS_TEMPLATE);
+        Template templateGauge = getTempalte(ParamConstantUtil.GAUGE_STATS_TEMPLATE);
 
         indexMetricInfoModel.setGaugeMetric(queryIndexInfo(templateGauge, dataMap, cluster));
 
-        Template templateAggs = getTempalte(ConstantUtil.AGGS_STATS_TEMPLATE);
+        Template templateAggs = getTempalte(ParamConstantUtil.AGGS_STATS_TEMPLATE);
 
         dataMap.put("isDerivative", false);
 
@@ -336,9 +336,9 @@ public class MonitorServiceImpl implements MonitorService {
         Cluster cluster = getCluster(queryModel.getClusterName());
 
         Map<String, Object> dataMap = getDataMap(queryModel);
-        dataMap.put("type", ConstantUtil.TYPE_NODE_STATS);
+        dataMap.put("type", ParamConstantUtil.TYPE_NODE_STATS);
 
-        Template templateListInfo = getTempalte(ConstantUtil.LIST_INFO_TEMPLATE);
+        Template templateListInfo = getTempalte(ParamConstantUtil.LIST_INFO_TEMPLATE);
         String fieldName = "node_stats.name";
 
         String string = getMetricFromES(templateListInfo, dataMap, fieldName, cluster);
@@ -352,9 +352,9 @@ public class MonitorServiceImpl implements MonitorService {
     public Integer getIndexCount(MonitorQueryModel queryModel) throws Exception {
         Cluster cluster = getCluster(queryModel.getClusterName());
         Map<String, Object> dataMap = getDataMap(queryModel);
-        dataMap.put("type", ConstantUtil.TYPE_INDEX_STATS);
+        dataMap.put("type", ParamConstantUtil.TYPE_INDEX_STATS);
 
-        Template templateListInfo = getTempalte(ConstantUtil.LIST_INFO_TEMPLATE);
+        Template templateListInfo = getTempalte(ParamConstantUtil.LIST_INFO_TEMPLATE);
         String fieldName = "index_stats.index_name";
 
         String string = getMetricFromES(templateListInfo, dataMap, fieldName, cluster);
@@ -364,14 +364,7 @@ public class MonitorServiceImpl implements MonitorService {
             return 0;
         }
 
-        int count = 0;
-        for(String indexName: result) {
-            if(indexName.startsWith(".")){
-                continue;
-            }
-            count++;
-        }
-        return count;
+        return result.size();
     }
 
     private NodeGaugeMetricModel queryNodeInfo(Template template, Map<String, Object> dataMap, Cluster cluster) throws PallasException {
@@ -388,9 +381,9 @@ public class MonitorServiceImpl implements MonitorService {
         Cluster cluster = getCluster(queryModel.getClusterName());
 
         Map<String, Object> dataMap = getDataMap(queryModel);
-        dataMap.put("type", ConstantUtil.TYPE_NODE_STATS);
+        dataMap.put("type", ParamConstantUtil.TYPE_NODE_STATS);
 
-        Template templateListInfo = getTempalte(ConstantUtil.LIST_INFO_TEMPLATE);
+        Template templateListInfo = getTempalte(ParamConstantUtil.LIST_INFO_TEMPLATE);
         String fieldName = "node_stats.name";
 
         String string = getMetricFromES(templateListInfo, dataMap, fieldName, cluster);
@@ -402,22 +395,23 @@ public class MonitorServiceImpl implements MonitorService {
         }
         JSONObject rootObj = JSONObject.parseObject(string);
         JSONObject aggsMaxObj = rootObj.getJSONObject("aggregations").getJSONObject("aggs_max");
-        String toMills = aggsMaxObj == null? "" : aggsMaxObj.getString("value_as_string");
+        String toMillsString = aggsMaxObj == null? "" : aggsMaxObj.getString("value_as_string");
 
         List<NodeGaugeMetricModel> nodeGaugeMetricModels = new ArrayList<>();
         for(String nodeName : result) {
             NodeGaugeMetricModel gaugeMetricModel = new NodeGaugeMetricModel();
             gaugeMetricModel.setNodeName(nodeName);
             dataMap.put("nodeName", nodeName);
-            Template templateGauge = getTempalte(ConstantUtil.GAUGE_STATS_TEMPLATE);
+            Template templateGauge = getTempalte(ParamConstantUtil.GAUGE_STATS_TEMPLATE);
             String resultString  = getMetricFromES(templateGauge, dataMap, "", cluster);
 
             fetchNodeGaugeInfo(resultString, gaugeMetricModel);
+
             nodeGaugeMetricModels.add(gaugeMetricModel);
         }
 
         return nodeGaugeMetricModels;
-        
+
 
     }
 
@@ -434,9 +428,9 @@ public class MonitorServiceImpl implements MonitorService {
 
         Cluster cluster = getCluster(queryModel.getClusterName());
         Map<String, Object> dataMap = getDataMap(queryModel);
-        dataMap.put("type", ConstantUtil.TYPE_INDEX_STATS);
+        dataMap.put("type", ParamConstantUtil.TYPE_INDEX_STATS);
 
-        Template templateListInfo = getTempalte(ConstantUtil.LIST_INFO_TEMPLATE);
+        Template templateListInfo = getTempalte(ParamConstantUtil.LIST_INFO_TEMPLATE);
         String fieldName = "index_stats.index_name";
 
         String string = getMetricFromES(templateListInfo, dataMap, fieldName, cluster);
@@ -447,13 +441,10 @@ public class MonitorServiceImpl implements MonitorService {
         }
         List<IndexGaugeMetricModel> indexGaugeMetricModels = new ArrayList<>();
         for(String indexName : result) {
-            if(indexName.startsWith(".")){
-                continue;
-            }
             dataMap.put("indexName", indexName);
             IndexGaugeMetricModel gaugeMetricModel = new IndexGaugeMetricModel();
             gaugeMetricModel.setIndexName(indexName);
-            Template templateGauge = getTempalte(ConstantUtil.GAUGE_STATS_TEMPLATE);
+            Template templateGauge = getTempalte(ParamConstantUtil.GAUGE_STATS_TEMPLATE);
             String resultString  = getMetricFromES(templateGauge, dataMap, "", cluster);
             fetchIndexGaugeInfo(resultString, gaugeMetricModel);
 
@@ -497,7 +488,6 @@ public class MonitorServiceImpl implements MonitorService {
         }
 
         JSONObject nodeStatsJsonObj = jsonArrayHits.getJSONObject(0).getJSONObject("_source").getJSONObject("node_stats");
-        String nodeName = gaugeMetricModel.getNodeName();
 
         gaugeMetricModel.setOsCpuPercent(nodeStatsJsonObj.getJSONObject("os").getJSONObject("cpu").getDouble("percent"));
         gaugeMetricModel.setLoad_1m(nodeStatsJsonObj.getJSONObject("os").getJSONObject("cpu").getJSONObject("load_average").getDouble("1m"));
@@ -513,14 +503,14 @@ public class MonitorServiceImpl implements MonitorService {
         gaugeMetricModel.setDocumentStore(nodeStatsJsonObj.getJSONObject("indices").getJSONObject("store").getLong("size_in_bytes"));
         gaugeMetricModel.setIndexCount(nodeStatsJsonObj.getInteger("indexCount"));
         gaugeMetricModel.setShardCount(nodeStatsJsonObj.getInteger("shardCount"));
-        //自己转化
+
         gaugeMetricModel.setUptime(nodeStatsJsonObj.getString("uptime"));
 
     }
     private ClusterGaugeMetricModel queryClusterInfo(Template template, Map<String, Object> dataMap, Cluster cluster) throws Exception {
         ClusterGaugeMetricModel gaugeMetricModel = new ClusterGaugeMetricModel();
 
-        dataMap.put("type", ConstantUtil.TYPE_CLUSTER_HEALTH);
+        dataMap.put("type", ParamConstantUtil.TYPE_CLUSTER_HEALTH);
         String resultClusterHealth = getMetricFromES(template, dataMap, "", cluster);
         JSONArray jsonArrayClusterHealth = JSON.parseObject(resultClusterHealth).getJSONObject("hits").getJSONArray("hits");
         if(null == jsonArrayClusterHealth || jsonArrayClusterHealth.size() == 0) {
@@ -531,7 +521,7 @@ public class MonitorServiceImpl implements MonitorService {
         gaugeMetricModel.setHealth(clusterHealthJsonObj.getString("status"));
         gaugeMetricModel.setVersion(clusterHealthJsonObj.getString("version"));
 
-        dataMap.put("type", ConstantUtil.TYPE_CLUSTER_STATS);
+        dataMap.put("type", ParamConstantUtil.TYPE_CLUSTER_STATS);
         String resultClusterStats = getMetricFromES(template, dataMap, "", cluster);
         JSONArray jsonArray = JSON.parseObject(resultClusterStats).getJSONObject("hits").getJSONArray("hits");
         if(null == jsonArray || jsonArray.size() == 0) {
@@ -574,7 +564,7 @@ public class MonitorServiceImpl implements MonitorService {
     }
 
     private String getEndPoint(Map<String, Object> dataMap) {
-        String indexName= ConstantUtil.indexName;
+        String indexName= ParamConstantUtil.MONITOR_INDEX_NAME;
         StringBuilder result = new StringBuilder();
         result.append("/").append(indexName).append("/_search");
         return result.toString();
