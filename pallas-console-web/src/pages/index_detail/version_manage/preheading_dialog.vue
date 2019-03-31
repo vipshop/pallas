@@ -9,24 +9,24 @@
                 <el-row :gutter="10">
                     <el-col :span="12">
                         <el-form-item label="总预热条数：">
-                            <span >10000</span>
+                            <span>{{rampupInfo.rampupTarget}}</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="当前状态：">
-                            <span>正在预热</span>
+                            <span>{{rampupInfo.state}}</span>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row :gutter="10">
                     <el-col :span="12">
                         <el-form-item label="开始时间：">
-                            <span>2019-03-28 13:00:00</span>
+                            <span>{{rampupInfo.beginTime}}</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="结束时间：">
-                            <span>2019-03-28 14:00:00</span>
+                            <span>{{rampupInfo.endTime}}</span>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -35,11 +35,10 @@
                 <span class="span-title"><i class="fa fa-th-large"></i>开始预热</span>
             </div>
             <div class="label-content">
-                <el-button size="small" style="margin-bottom: 10px;"><i class="fa fa-caret-square-o-right"></i>开始预热</el-button>
                 <el-row :gutter="10">
                     <el-col :span="11">
                         <el-form-item label="预热条数" label-width="80px">
-                            <el-input-number v-model="preheadNum" :min="0"></el-input-number>
+                            <el-input-number v-model="rampupTarget" :min="0"></el-input-number>
                         </el-form-item>
                     </el-col>
                     <el-col :span="11">
@@ -52,6 +51,9 @@
                         </el-form-item>
                     </el-col>
                 </el-row>
+                <div style="margin-top: 20px;text-align: center;">
+                    <el-button size="small" @click="startRampup()"><i class="fa fa-caret-square-o-right"></i>开始预热</el-button>
+                </div>
             </div>
         </el-form>
     </el-dialog>
@@ -60,18 +62,44 @@
 
 <script>
 export default {
-  props: [],
+  props: ['preheadingInfo'],
   data() {
     return {
       loading: false,
       visible: true,
-      preheadNum: 1000,
+      rampupTarget: 10000,
       expireTime: '',
+      rampupInfo: {
+          rampupTarget: '',
+          state: '',
+          beginTime: '',
+          endTime: '',
+      },
+      versionId: this.preheadingInfo.versionId,
     };
+  },
+  created() {
+    this.init();
   },
   methods: {
     closeDialog() {
       this.$emit('close-dialog');
+    },
+    init() {
+      this.$http.get(`/version/rampup/id.json?versionId=${this.versionId}`).then((data) => {
+        this.rampupInfo = data;
+      });
+    },
+    startRampup() {
+      const params = {
+        versionId: this.preheadingInfo.versionId,
+        rampupTarget: this.rampupTarget,
+      };
+      this.$http.get(`/version/rampup/start.json?versionId=${params.versionId}&rampupTarget=${params.rampupTarget}`).then((data) => {
+        this.$message.successMessage('开启预热成功', () => {
+          this.init();
+        });
+      });
     },
   },
 };
