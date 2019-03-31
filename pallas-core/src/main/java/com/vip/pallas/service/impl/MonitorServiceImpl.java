@@ -137,7 +137,7 @@ public class MonitorServiceImpl implements MonitorService {
         nodeMetricInfoModel.setIndexThreadpoolQueue(getNodeThreadpool(templateAggs, dataMap, "node_stats.thread_pool.index.queue", cluster));
         nodeMetricInfoModel.setIndexThreadpoolReject(getNodeThreadpool(templateAggs, dataMap, "node_stats.thread_pool.index.reject", cluster));
         nodeMetricInfoModel.setIndexThreadpoolThreads(getNodeThreadpool(templateAggs, dataMap, "node_stats.thread_pool.index.threads", cluster));
-        nodeMetricInfoModel.setBulkThreadpoolQueue(getNodeThreadpool(templateAggs, dataMap, "node_stats.thread_pool.bulk.threads", cluster));
+        nodeMetricInfoModel.setBulkThreadpoolQueue(getNodeThreadpool(templateAggs, dataMap, "node_stats.thread_pool.bulk.queue", cluster));
         nodeMetricInfoModel.setBulkThreadpoolReject(getNodeThreadpool(templateAggs, dataMap, "node_stats.thread_pool.bulk.reject", cluster));
         nodeMetricInfoModel.setBulkThreadpoolThreads(getNodeThreadpool(templateAggs, dataMap, "node_stats.thread_pool.bulk.threads", cluster));
         //derivative aggs
@@ -492,7 +492,14 @@ public class MonitorServiceImpl implements MonitorService {
         gaugeMetricModel.setOsCpuPercent(nodeStatsJsonObj.getJSONObject("os").getJSONObject("cpu").getDouble("percent"));
         gaugeMetricModel.setLoad_1m(nodeStatsJsonObj.getJSONObject("os").getJSONObject("cpu").getJSONObject("load_average").getDouble("1m"));
         gaugeMetricModel.setNodeRole(nodeStatsJsonObj.getJSONArray("roles").toJSONString());
-        gaugeMetricModel.setMaster(nodeStatsJsonObj.getBoolean("node_master"));
+        if(nodeStatsJsonObj.getBoolean("node_master") != null && nodeStatsJsonObj.getBoolean("node_master") == true) {
+            gaugeMetricModel.setMaster(true);
+            gaugeMetricModel.setType("Master Node");
+        } else {
+            gaugeMetricModel.setMaster(false);
+            gaugeMetricModel.setType("Node");
+        }
+
 
         gaugeMetricModel.setTransportAddress(nodeStatsJsonObj.getString("transport_address"));
         gaugeMetricModel.setProcessCpuPercent(nodeStatsJsonObj.getJSONObject("process").getJSONObject("cpu").getDouble("percent"));
@@ -671,7 +678,7 @@ public class MonitorServiceImpl implements MonitorService {
 //
 //    }
 
-    private void setLatency(List<MetricModel<Date, Long>> indexingRate, List<MetricModel<Date, Long>> indexingTime, List<MetricModel<Date, Long>> searchRate, List<MetricModel<Date, Long>> searchTime,Map<String, Object> dataMap, MetricInfoModel metricInfoModel) {
+    private void setLatency(List<MetricModel<Date, Long>> searchRate, List<MetricModel<Date, Long>> searchTime, List<MetricModel<Date, Long>> indexingRate, List<MetricModel<Date, Long>> indexingTime,Map<String, Object> dataMap, MetricInfoModel metricInfoModel) {
         if(indexingRate!= null && indexingRate.size() > 0 && indexingTime != null && indexingTime.size() > 0) {
             if(indexingRate.size() != indexingTime.size()) {
                 logger.error("latency error: size not equals; indexingRate size: {}, indexingTime size: {}", indexingRate.size(), indexingTime.size());
@@ -767,7 +774,7 @@ public class MonitorServiceImpl implements MonitorService {
 
     private MonitorMetricModel<Date, Double> getSystemLoad(Template template, Map<String, Object> dataMap, String fieldName, Cluster cluster) throws PallasException{
         List<MetricModel<Date, Double>> result = getMonitorMetricModelsMax(template, dataMap, fieldName, cluster);
-        MonitorMetricModel<Date, Double> monitorMetricModel = new MonitorMetricModel<>(result, "");
+        MonitorMetricModel<Date, Double> monitorMetricModel = new MonitorMetricModel<>(result, "1m");
         return monitorMetricModel;
     }
 

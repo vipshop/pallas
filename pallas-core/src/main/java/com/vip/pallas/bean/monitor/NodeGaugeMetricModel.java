@@ -35,7 +35,17 @@ public class NodeGaugeMetricModel implements Serializable {
 
     private Double load_1m;
 
-    private boolean isMaster;
+    private boolean master;
+
+    private String type;
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 
     public String getUptime() {
         return uptime;
@@ -54,11 +64,11 @@ public class NodeGaugeMetricModel implements Serializable {
     }
 
     public boolean isMaster() {
-        return isMaster;
+        return master;
     }
 
     public void setMaster(boolean master) {
-        isMaster = master;
+        this.master = master;
     }
 
     public Double getLoad_1m() {

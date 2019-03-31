@@ -17,48 +17,56 @@
                 </el-table-column>
                 <el-table-column prop="indexCount" label="Indices"></el-table-column>
                 <el-table-column prop="shardCount" label="Shards"></el-table-column>
+                <el-table-column prop="type" label="Type"></el-table-column>
                 <el-table-column prop="uptime" label="Uptime"></el-table-column>
             </el-table>
       </div>  
       <div>
           <el-row :gutter="10">
               <el-col :span="12">
-                  <chart-container :title="`gc Count(${gcCountInfo.yAxisName})`" type="line">
+                  <chart-container :title="`GC Count(${gcCountInfo.yAxisName})`" type="line">
                       <div slot="chart">
                           <MyLine id="gcCount" :option-info="gcCountInfo"></MyLine>
                       </div>
                   </chart-container>
               </el-col>
               <el-col :span="12">
-                  <chart-container :title="`gc Duration(${gcDurationInfo.yAxisName})`" type="line">
+                  <chart-container :title="`GC Duration(${gcDurationInfo.yAxisName})`" type="line">
                       <div slot="chart">
                           <MyLine id="gcDuration" :option-info="gcDurationInfo"></MyLine>
                       </div>
                   </chart-container>
               </el-col>
               <el-col :span="12">
-                  <chart-container :title="`jvm heap(${jvmHeapInfo.yAxisName})`" type="line">
+                  <chart-container :title="`JVM Heap(${jvmHeapInfo.yAxisName})`" type="line">
                       <div slot="chart">
                           <MyLine id="jvmHeap" :option-info="jvmHeapInfo"></MyLine>
                       </div>
                   </chart-container>
               </el-col>
               <el-col :span="12">
-                  <chart-container :title="`cpu percent(${cpuPercentInfo.yAxisName})`" type="line">
+                  <chart-container :title="`Cpu Percent(${cpuPercentInfo.yAxisName})`" type="line">
                       <div slot="chart">
                           <MyLine id="cpuPercent" :option-info="cpuPercentInfo"></MyLine>
                       </div>
                   </chart-container>
               </el-col>
               <el-col :span="12">
-                  <chart-container :title="`threadpool Queue(${threadpoolQueueInfo.yAxisName})`" type="line">
+                  <chart-container :title="`Threadpool Threads(${threadpoolThreadsInfo.yAxisName})`" type="line">
+                      <div slot="chart">
+                          <MyLine id="threadpoolThreads" :option-info="threadpoolThreadsInfo"></MyLine>
+                      </div>
+                  </chart-container>
+              </el-col>
+              <el-col :span="12">
+                  <chart-container :title="`Threadpool Queue(${threadpoolQueueInfo.yAxisName})`" type="line">
                       <div slot="chart">
                           <MyLine id="threadpoolQueue" :option-info="threadpoolQueueInfo"></MyLine>
                       </div>
                   </chart-container>
               </el-col>
               <el-col :span="12">
-                  <chart-container :title="`threadpool Reject(${threadpoolRejectInfo.yAxisName})`" type="line">
+                  <chart-container :title="`Threadpool Reject(${threadpoolRejectInfo.yAxisName})`" type="line">
                       <div slot="chart">
                           <MyLine id="threadpoolReject" :option-info="threadpoolRejectInfo"></MyLine>
                       </div>
@@ -79,21 +87,21 @@
                   </chart-container>
               </el-col>
               <el-col :span="12">
-                  <chart-container :title="`segment count(${segmentCountInfo.yAxisName})`" type="line">
+                  <chart-container :title="`Segment Count(${segmentCountInfo.yAxisName})`" type="line">
                       <div slot="chart">
                           <MyLine id="segmentCount" :option-info="segmentCountInfo"></MyLine>
                       </div>
                   </chart-container>
               </el-col>
-              <el-col :span="12">
-                  <chart-container :title="`http open current(${httpOpenCurrentInfo.yAxisName})`" type="line">
+              <!-- <el-col :span="12">
+                  <chart-container :title="`Http Open Current(${httpOpenCurrentInfo.yAxisName})`" type="line">
                       <div slot="chart">
                           <MyLine id="httpOpenCurrent" :option-info="httpOpenCurrentInfo"></MyLine>
                       </div>
                   </chart-container>
-              </el-col>
+              </el-col> -->
                <el-col :span="12">
-                  <chart-container :title="`index memory(${indexMemoryInfo.yAxisName})`" type="line">
+                  <chart-container :title="`Index Memory(${indexMemoryInfo.yAxisName})`" type="line">
                       <div slot="chart">
                           <MyLine id="indexMemory" :option-info="indexMemoryInfo"></MyLine>
                       </div>
@@ -124,6 +132,7 @@ export default {
       segmentCountInfo: {},
       threadpoolQueueInfo: {},
       threadpoolRejectInfo: {},
+      threadpoolThreadsInfo: {},
       httpOpenCurrentInfo: {},
       indexSearchRateInfo: {},
       indexSearchLatencyInfo: {},
@@ -210,6 +219,18 @@ export default {
       };
       this.threadpoolRejectInfo = optionInfo;
     },
+    getThreadPoolThreads(search, indexing, bulk, unit) {
+      const optionInfo = {
+        xAxis: search.map(e => e.x),
+        seriesData: [
+          { name: 'threads-search', data: search.map(e => e.y) },
+          { name: 'threads-indexing', data: indexing.map(e => e.y) },
+          { name: 'threads-bulk', data: bulk.map(e => e.y) },
+        ],
+        yAxisName: unit || '个',
+      };
+      this.threadpoolThreadsInfo = optionInfo;
+    },
     getSegmentCount(segmentCount, unit) {
       const optionInfo = {
         xAxis: segmentCount.map(e => e.x),
@@ -290,6 +311,10 @@ export default {
            data.indexThreadpoolQueue.metricModel,
            data.bulkThreadpoolQueue.metricModel,
            data.searchThreadpoolQueue.unit);
+          this.getThreadPoolThreads(data.searchThreadpoolThreads.metricModel,
+           data.indexThreadpoolThreads.metricModel,
+           data.bulkThreadpoolThreads.metricModel,
+           data.searchThreadpoolThreads.unit);
           this.getThreadPoolReject(data.searchThreadpoolReject.metricModel,
            data.indexThreadpoolReject.metricModel,
            data.bulkThreadpoolReject.metricModel,

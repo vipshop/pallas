@@ -46,7 +46,7 @@
                     </chart-container>
                 </el-col>
                 <el-col :span="12">
-                    <chart-container :title="`search Latentcy(${searchLatencyInfo.yAxisName})`" type="line">
+                    <chart-container :title="`Search Latentcy(${searchLatencyInfo.yAxisName})`" type="line">
                         <div slot="chart">
                             <MyLine id="searchLatency" :option-info="searchLatencyInfo"></MyLine>
                         </div>
