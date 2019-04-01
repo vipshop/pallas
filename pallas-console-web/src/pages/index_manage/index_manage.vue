@@ -17,7 +17,7 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="">
-                        <el-input placeholder="请搜索索引" v-model="indexNameForSearch" @keyup.enter.native="toPage"></el-input>
+                        <el-input placeholder="请搜索索引" v-model.trim="indexNameForSearch" @keyup.enter.native="toPage"></el-input>
                     </el-form-item>
                     <el-form-item class="filter-search">
                         <el-button type="primary" icon="search" @click="toPage">查询</el-button>
