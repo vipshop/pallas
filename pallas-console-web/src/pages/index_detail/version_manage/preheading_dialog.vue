@@ -8,7 +8,7 @@
             <div class="label-content">
                 <div style="margin-bottom: 10px;">
                     <el-button size="small" @click="init()"><i class="fa fa-refresh"></i>刷新</el-button>
-                    <el-button size="small" @click="handleStop()"><i class="fa fa-stop-circle"></i>停止</el-button>
+                    <el-button size="small" @click="handleStop()" v-if="rampupInfo.state === 'doing'"><i class="fa fa-stop-circle"></i>停止</el-button>
                     <el-button size="small" @click="toMercury()" class="pull-right"><i class="fa fa-area-chart"></i>Mercury监控</el-button>
                 </div>
                 <el-row :gutter="10">
