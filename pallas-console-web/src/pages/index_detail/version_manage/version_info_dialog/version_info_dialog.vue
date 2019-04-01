@@ -523,7 +523,6 @@ export default {
 }
 .label-content span {
   color: #eee;
-  font-weight: bold;
 }
 .version-info-dialog .el-dialog__body {
   padding: 10px 5px 10px 0px;

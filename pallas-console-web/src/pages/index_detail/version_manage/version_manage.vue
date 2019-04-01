@@ -66,7 +66,7 @@
             <json-content-dialog :content="configInfo" :title="configTitle" @close-dialog="closeViewConfigDialog"></json-content-dialog>
         </div>
         <div v-if="isPreheadingVisible">
-            <preheading-dialog @close-dialog="closePreheadingDialog"></preheading-dialog>
+            <preheading-dialog :preheading-info="preheadingInfo" @close-dialog="closePreheadingDialog"></preheading-dialog>
         </div>
     </div>
 </template>
@@ -123,11 +123,15 @@ export default {
       clusters: [],
       isLogical: false,
       isPreheadingVisible: false,
+      preheadingInfo: {},
     };
   },
   methods: {
     preheading(row) {
-      console.log(row);
+      this.preheadingInfo = {
+        versionId: row.id,
+        isUsed: row.isUsed,
+      };
       this.isPreheadingVisible = true;
     },
     closePreheadingDialog() {
