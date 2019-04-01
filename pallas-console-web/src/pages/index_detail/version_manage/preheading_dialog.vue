@@ -127,9 +127,12 @@ export default {
       } else if (this.formInfo.rampupTarget && this.formInfo.endTime) {
         this.$message.errorMessage('预热条数与截止时间二选一！');
       } else {
+        const params = {
+          versionId: this.preheadingInfo.versionId,
+          ...this.formInfo,
+        };
         this.loading = true;
-        this.$http.get(`/version/rampup/start.json?versionId=
-        ${this.preheadingInfo.versionId}&rampupTarget=${this.formInfo.rampupTarget}&endTime=${this.formInfo.endTime}`).then(() => {
+        this.$http.get('/version/rampup/start.json?', params).then(() => {
           this.$message.successMessage('开启预热成功', () => {
             this.init();
           });
