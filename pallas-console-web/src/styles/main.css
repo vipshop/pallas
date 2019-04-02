@@ -128,7 +128,15 @@ pre {
 }
 
 .text-danger {
-    color: #FF4949;
+    color: #FF4949 !important;
+}
+
+.text-success {
+    color: #13ce66 !important;
+}
+
+.text-warning {
+    color: #F7BA2A !important;
 }
 
 @media only screen and (min-width: 1920px) {

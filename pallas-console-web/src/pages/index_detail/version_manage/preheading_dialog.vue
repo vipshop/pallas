@@ -1,7 +1,7 @@
 <template>
   <div class="version-info-dialog">
     <el-dialog title="索引预热" v-model="visible" :before-close="closeDialog" v-loading="loading" element-loading-text="请稍等···">
-        <el-form :model="formInfo" ref="formInfo" label-width="100px">
+        <el-form :model="formInfo" ref="formInfo" :rules="rules" label-width="100px">
             <div class="label-title">
                 <span class="span-title"><i class="fa fa-th-large"></i>最近预热情况</span>
             </div>
@@ -9,7 +9,7 @@
                 <div style="margin-bottom: 10px;">
                     <el-button size="small" @click="init()"><i class="fa fa-refresh"></i>刷新</el-button>
                     <el-button size="small" @click="handleStop()" v-if="rampupInfo.state === 'doing'"><i class="fa fa-stop-circle"></i>停止</el-button>
-                    <el-button size="small" @click="toMercury()" class="pull-right"><i class="fa fa-area-chart"></i>Mercury监控</el-button>
+                    <preheading-monitor :version-id="preheadingInfo.versionId" :full-index-name="rampupInfo.fullIndexName"></preheading-monitor>
                 </div>
                 <el-row :gutter="10">
                     <el-col :span="12">
@@ -19,7 +19,7 @@
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="当前状态：">
-                            <span>{{rampupStatusMap[rampupInfo.state]}}</span>
+                            <span :class="rampupStatusTypeMap[rampupInfo.state]">{{rampupStatusMap[rampupInfo.state]}}</span>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -89,6 +89,14 @@ export default {
         finish: '预热完成',
         stop: '预热终止',
       },
+      rampupStatusTypeMap: {
+        doing: 'text-warning',
+        finish: 'text-success',
+        stop: 'text-danger',
+      },
+      rules: {
+        endTime: [{ validator: this.$validate.validateTimeExpire, trigger: 'change' }],
+      },
     };
   },
   created() {
@@ -108,14 +116,16 @@ export default {
       });
     },
     handleStop() {
-      this.loading = true;
-      this.$http.get(`/version/rampup/stop.json?versionId=${this.preheadingInfo.versionId}`).then(() => {
-        this.$message.successMessage('停止预热成功', () => {
-          this.init();
+      this.$message.confirmMessage('确定停止预热吗？', () => {
+        this.loading = true;
+        this.$http.get(`/version/rampup/stop.json?versionId=${this.preheadingInfo.versionId}`).then(() => {
+          this.$message.successMessage('停止预热成功', () => {
+            this.init();
+          });
+        })
+        .finally(() => {
+          this.loading = false;
         });
-      })
-      .finally(() => {
-        this.loading = false;
       });
     },
     startRampup() {
