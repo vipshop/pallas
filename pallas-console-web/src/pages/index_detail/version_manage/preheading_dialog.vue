@@ -95,9 +95,6 @@ export default {
     this.init();
   },
   methods: {
-    toMercury() {
-      window.open('http://trace.vip.vip.com/#/group/aaa/' + ${this.preheadingInfo.versionId} + '/endpointDetails/info?uri=Search:pallas-es:pms_price_time_slot_index');
-    },
     closeDialog() {
       this.$emit('close-dialog');
     },
