@@ -9,7 +9,7 @@
                 <div style="margin-bottom: 10px;">
                     <el-button size="small" @click="init()"><i class="fa fa-refresh"></i>刷新</el-button>
                     <el-button size="small" @click="handleStop()" v-if="rampupInfo.state === 'doing'"><i class="fa fa-stop-circle"></i>停止</el-button>
-                    <preheading-monitor :version-id="preheadingInfo.versionId" :full-index-name="rampupInfo.fullIndexName"></preheading-monitor>
+                    <preheading-monitor :cluster-name="rampupInfo.clusterName" :full-index-name="rampupInfo.fullIndexName"></preheading-monitor>
                 </div>
                 <el-row :gutter="10">
                     <el-col :span="12">
