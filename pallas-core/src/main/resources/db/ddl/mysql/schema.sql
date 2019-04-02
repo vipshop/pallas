@@ -253,6 +253,7 @@ CREATE TABLE IF NOT EXISTS `index_version` (
   `fetch_slow_threshold` bigint(15) NOT NULL DEFAULT '0' COMMENT 'fetch slowlog threshold',
   `query_slow_threshold` bigint(15) NOT NULL DEFAULT '0' COMMENT 'query slowlog threshold',
   `refresh_interval` tinyint(3) NOT NULL DEFAULT '60' COMMENT '索引刷新周期，单位秒',
+  `ramp_up` VARCHAR(2048) NOT NULL DEFAULT '' COMMENT '索引预热配置',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
