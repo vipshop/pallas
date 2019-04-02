@@ -14,7 +14,7 @@
                 <el-row :gutter="10">
                     <el-col :span="12">
                         <el-form-item label="总预热条数：">
-                            <span>{{rampupInfo.rampupTarget}}</span>
+                            <span>{{rampupInfo.rampupNow}}</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
@@ -96,7 +96,7 @@ export default {
   },
   methods: {
     toMercury() {
-      window.open('http://trace.vip.vip.com/#/group/aaa/gd15-pes-ebs.api.vip.com/endpointDetails');
+      window.open('http://trace.vip.vip.com/#/group/aaa/' + ${this.preheadingInfo.versionId} + '/endpointDetails/info?uri=Search:pallas-es:pms_price_time_slot_index');
     },
     closeDialog() {
       this.$emit('close-dialog');
@@ -112,7 +112,7 @@ export default {
     },
     handleStop() {
       this.loading = true;
-      this.$http.get(`/version/rampup/stop.json?versionId=${this.versionId}`).then(() => {
+      this.$http.get(`/version/rampup/stop.json?versionId=${this.preheadingInfo.versionId}`).then(() => {
         this.$message.successMessage('停止预热成功', () => {
           this.init();
         });
