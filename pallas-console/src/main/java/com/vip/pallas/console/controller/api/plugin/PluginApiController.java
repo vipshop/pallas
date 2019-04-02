@@ -69,7 +69,12 @@ public class PluginApiController {
 
         String nodeIp = pluginStates.getNodeIp();
 
-        if(isIllegalNode(pluginStates.getClusterId(), nodeIp)){
+        try{
+            if(isIllegalNode(pluginStates.getClusterId(), nodeIp)){
+                return resultMap;
+            }
+        }catch (Exception e){
+            LOGGER.error(e.toString(), e);
             return resultMap;
         }
 
