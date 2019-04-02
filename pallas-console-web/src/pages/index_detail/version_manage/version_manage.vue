@@ -41,12 +41,12 @@
                                 操作<i class="el-icon-caret-bottom el-icon--right"></i>
                               </span>
                               <el-dropdown-menu class="dropdown-operation" slot="dropdown">
-                                <el-dropdown-item><a @click="preheading(scope.row)"><span><i class="fa fa-sun-o"></i>索引预热</span></a></el-dropdown-item>
                                 <el-dropdown-item v-show="!scope.row.isSync"><a @click="createIndex(scope.row)"><span><i class="fa fa-play-circle"></i>创建索引</span></a></el-dropdown-item>
                                 <el-dropdown-item v-show="!scope.row.isUsed"><a @click="enableVersion(scope.row)"><span><i class="fa fa-hand-o-right"></i>启用版本</span></a></el-dropdown-item>
                                 <el-dropdown-item><a @click="triggerDialog(scope.row, 'view')"><span><i class="fa fa-eye"></i>配置查看</span></a></el-dropdown-item>
                                 <el-dropdown-item v-show="!scope.row.isSync"><a @click="triggerDialog(scope.row, 'edit')"><span><i class="fa fa-pencil-square-o"></i>配置更改</span></a></el-dropdown-item>
                                 <el-dropdown-item><a @click="copyVersion(scope.row, 'copy')"><span><i class="fa fa-clone"></i>版本复制</span></a></el-dropdown-item>
+                                <el-dropdown-item><a @click="preheading(scope.row)"><span><i class="fa fa-sun-o"></i>索引预热</span></a></el-dropdown-item>
                                 <el-dropdown-item v-show="scope.row.isSync"><a @click="stopSync(scope.row)"><span><i class="fa fa-stop-circle-o"></i>删除索引</span></a></el-dropdown-item>
                                 <el-dropdown-item v-show="!scope.row.isSync"><a @click="handleDelete(scope.row)"><span><i class="fa fa-trash"></i>删除版本</span></a></el-dropdown-item>
                               </el-dropdown-menu>
