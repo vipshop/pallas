@@ -8,6 +8,7 @@ import java.util.Date;
 public class IndexRampup {
     private Long indexId;
     private Long versionId;
+    private String clusterName;
     private String fullIndexName;
     private Date beginTime;
     private Date endTime;
@@ -85,5 +86,13 @@ public class IndexRampup {
 
     public void setIndexId(Long indexId) {
         this.indexId = indexId;
+    }
+
+    public String getClusterName() {
+        return clusterName;
+    }
+
+    public void setClusterName(String clusterName) {
+        this.clusterName = clusterName;
     }
 }

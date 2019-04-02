@@ -102,6 +102,7 @@ public class VersionApiController {
         IndexRampupVO rampupVO = new IndexRampupVO();
         rampupVO.setIndexId(index.getId());
         rampupVO.setVersionId(versionId);
+        rampupVO.setClusterName(index.getClusterName());
         rampupVO.setFullIndexName(index.getIndexName() + "_" + versionId);
         rampupVO.setBeginTime(new Date());
         rampupVO.setState(IndexRampupVO.STATE_DOING);
@@ -117,8 +118,10 @@ public class VersionApiController {
             }
         }
 
-        if(rampupTarget > 0){
+        if(rampupTarget != null){
             rampupVO.setRampupTarget(rampupTarget);
+        }else{
+            rampupVO.setRampupTarget(-1L);
         }
 
         indexVersion.setRampUp(JsonUtil.toJson(rampupVO));
@@ -132,6 +135,7 @@ public class VersionApiController {
         if(rampupInfo != null && StringUtils.isNotBlank(rampupInfo)){
             IndexRampupVO rampup = JsonUtil.readValue(rampupInfo, IndexRampupVO.class);
             rampup.setState(IndexRampupVO.STATE_STOP);
+            rampup.setEndTime(new Date());
 
             IndexVersion indexVersion = versionService.findById(versionId);
             indexVersion.setRampUp(JsonUtil.toJson(rampup));
