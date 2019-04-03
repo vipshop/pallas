@@ -10,7 +10,7 @@ REPLACE INTO `permission` VALUES (1,'cluster.all','cluster.all.write','','System
 
 CREATE ALIAS IF NOT EXISTS FIND_IN_SET FOR "com.vip.pallas.utils.H2DBFunctions.getClusterIds";
 
-REPLACE INTO `cluster` VALUES (1,'pallas-test-cluster','开源测试演示','127.0.0.1:9200','127.0.0.1:9300',NULL,now(),0,'','SHARED-CLUSTER');
+REPLACE INTO `cluster` VALUES (1,'pallas-test-cluster','开源测试演示','127.0.0.1:9200','127.0.0.1:9300',NULL,now(),0,'','SHARED-CLUSTER', '');
 
 REPLACE INTO `index` (`id`, `index_name`, `description`, `cluster_name`, `stat`, `create_time`, `update_time`, `is_deleted`, `timeout`, `retry`, `slower_than`) VALUES ('1', 'product_comment', '商品评价测试索引', 'pallas-test-cluster', 'inactive', now(), now(), '0', '0', '0', '200');
 
