@@ -361,6 +361,9 @@
       <if test="refreshInterval != null">
         refresh_interval = #{refreshInterval,jdbcType=TINYINT},
       </if>
+      <if test="rampUp != null">
+        ramp_up = #{rampUp,jdbcType=VARCHAR},
+      </if>
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
@@ -384,7 +387,8 @@
       index_slow_threshold = #{indexSlowThreshold,jdbcType=BIGINT},
       fetch_slow_threshold = #{fetchSlowThreshold,jdbcType=BIGINT},
       query_slow_threshold = #{querySlowThreshold,jdbcType=BIGINT},
-      refresh_interval = #{refreshInterval,jdbcType=TINYINT}
+      refresh_interval = #{refreshInterval,jdbcType=TINYINT},
+      ramp_up = #{rampUp,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
   

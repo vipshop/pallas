@@ -151,6 +151,6 @@ public class VersionApiController {
             return JsonUtil.readValue(rampupInfo, IndexRampupVO.class);
         }
 
-        return null;
+        return new IndexRampupVO();
     }
 }
