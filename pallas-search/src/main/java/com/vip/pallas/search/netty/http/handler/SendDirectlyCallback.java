@@ -1,5 +1,24 @@
 package com.vip.pallas.search.netty.http.handler;
 
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
+import org.apache.http.client.HttpResponseException;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.concurrent.FutureCallback;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.Args;
+import org.apache.http.util.ByteArrayBuffer;
+import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.vip.pallas.search.exception.PallasException;
 import com.vip.pallas.search.filter.base.AbstractFilterContext;
 import com.vip.pallas.search.filter.circuitbreaker.CircuitBreakerService;
@@ -13,25 +32,15 @@ import com.vip.pallas.search.monitor.GaugeMonitorService;
 import com.vip.pallas.search.rampup.RampupHandler;
 import com.vip.pallas.search.timeout.TimeoutRetryController;
 import com.vip.pallas.search.trace.TraceAspect;
+
 import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.DefaultFullHttpRequest;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.internal.ThrowableUtil;
-import org.apache.http.*;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.concurrent.FutureCallback;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.util.Args;
-import org.apache.http.util.ByteArrayBuffer;
-import org.apache.http.util.EntityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
 
 public class SendDirectlyCallback implements FutureCallback<HttpResponse> {
 
@@ -48,9 +57,12 @@ public class SendDirectlyCallback implements FutureCallback<HttpResponse> {
 	protected HttpHost targetHost;
 	protected String requestUrl;
 	protected PallasRequest pallasRequest;
+	private ShardGroup shardGroup;
 
 	public SendDirectlyCallback(AbstractFilterContext filterContext, SessionContext sessionContext,
-								DefaultFullHttpRequest outBoundRequest, HttpContext httpContext, HttpRequestBase httpRequest, HttpEntity httpEntity, HttpHost targetHost, String requestUrl, PallasRequest pallasRequest) {
+			DefaultFullHttpRequest outBoundRequest, HttpContext httpContext, HttpRequestBase httpRequest,
+			HttpEntity httpEntity, HttpHost targetHost, String requestUrl, PallasRequest pallasRequest,
+			ShardGroup shardGroup) {
 		this.filterContext = filterContext;
 		this.sessionContext = sessionContext;
 		this.outBoundRequest = outBoundRequest;
@@ -60,6 +72,7 @@ public class SendDirectlyCallback implements FutureCallback<HttpResponse> {
 		this.targetHost = targetHost;
 		this.requestUrl = requestUrl;
 		this.pallasRequest = pallasRequest;
+		this.shardGroup = shardGroup;
 	}
 
 	public SessionContext getSessionContext() {
@@ -200,17 +213,14 @@ public class SendDirectlyCallback implements FutureCallback<HttpResponse> {
 
 	protected void doCircuitBreaker() {
 		PallasRequest request = sessionContext.getRequest();
-		if (request != null && request.isCircuitBreakerOn()) {
-			ShardGroup shardGroup = request.getShardGroup();
-			if (shardGroup != null) {
-				CircuitBreakerService.getInstance().handleFailedRequestCounter(shardGroup.getId());
-			}
+		if (shardGroup != null && request.isCircuitBreakerOn()) {
+			CircuitBreakerService.getInstance().handleFailedRequestCounter(shardGroup.getId());
 		}
 	}
 
 	protected void handleFailed(Exception ex, int httpCode) {
 		doCircuitBreaker();
-		logger.error(((HttpClientContext) httpContext).getTargetHost().toHostString()
+		logger.error("request failed: " + ((HttpClientContext) httpContext).getTargetHost().toHostString()
 				+ " " + ((HttpClientContext) httpContext).getRequest().getRequestLine());
 		logger.error(ex.toString(), ex);
 		TimeoutRetryController.notifyGovernor();

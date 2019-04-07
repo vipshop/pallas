@@ -2,9 +2,7 @@ package com.vip.pallas.search.timeout;
 
 import java.net.SocketTimeoutException;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import com.vip.pallas.search.http.PallasRequest;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
@@ -14,6 +12,8 @@ import org.apache.http.protocol.HttpContext;
 import com.vip.pallas.search.filter.base.AbstractFilterContext;
 import com.vip.pallas.search.filter.common.SessionContext;
 import com.vip.pallas.search.http.HttpCode;
+import com.vip.pallas.search.http.PallasRequest;
+import com.vip.pallas.search.model.ShardGroup;
 import com.vip.pallas.search.netty.http.handler.SendDirectlyCallback;
 
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
@@ -21,12 +21,13 @@ import io.netty.handler.codec.http.DefaultFullHttpRequest;
 public class TimeoutFutureCallback extends SendDirectlyCallback {
 
 	private AsyncCall asyncCall;
-	private AtomicInteger failedCount = new AtomicInteger(0);
-	private AtomicInteger cancelCount = new AtomicInteger(0);
 
 	public TimeoutFutureCallback(AsyncCall asyncCall, AbstractFilterContext filterContext, SessionContext sessionContext,
-								 DefaultFullHttpRequest outBoundRequest, HttpContext httpContext, HttpRequestBase httpRequest, HttpEntity httpEntity, HttpHost targetHost, String requestUrl, PallasRequest pallasRequest) {
-		super(filterContext, sessionContext, outBoundRequest, httpContext, httpRequest, httpEntity, targetHost, requestUrl, pallasRequest);
+			DefaultFullHttpRequest outBoundRequest, HttpContext httpContext, HttpRequestBase httpRequest,
+			HttpEntity httpEntity, HttpHost targetHost, String requestUrl, PallasRequest pallasRequest,
+			ShardGroup shardGroup) {
+		super(filterContext, sessionContext, outBoundRequest, httpContext, httpRequest, httpEntity, targetHost,
+				requestUrl, pallasRequest, shardGroup);
 		this.asyncCall = asyncCall;
 	}
 	
@@ -45,7 +46,7 @@ public class TimeoutFutureCallback extends SendDirectlyCallback {
 	@Override
 	public void failed(Exception ex) {
 		if (ex instanceof SocketTimeoutException) { // retry only it is SocketTimeoutException.
-			if (failedCount.incrementAndGet() == asyncCall.retryPolicy.getTotalCountIncludedFirstTime()) {
+			if (asyncCall.failedCount.incrementAndGet() == asyncCall.retryPolicy.getTotalCountIncludedFirstTime()) {
 				if (asyncCall.setDone()) {
 					try {
 						cancelAllRequests(true);
@@ -54,6 +55,7 @@ public class TimeoutFutureCallback extends SendDirectlyCallback {
 					}
 				}
 			} else {
+				doCircuitBreaker(); // before retry, we count the circuitBreaker of the failed host.
 				asyncCall.executeRequest(true);
 			}
 		} else { // if meets other exceptions, stop retry and return.
@@ -69,7 +71,7 @@ public class TimeoutFutureCallback extends SendDirectlyCallback {
 
 	@Override
 	public void cancelled() {
-		if (cancelCount.incrementAndGet() == asyncCall.retryPolicy.getTotalCountIncludedFirstTime()) {
+		if (asyncCall.cancelCount.incrementAndGet() == asyncCall.retryPolicy.getTotalCountIncludedFirstTime()) {
 			if (asyncCall.setDone()) {
 				TimeoutRetryController.notifyGovernor();
 				handleCancelled();

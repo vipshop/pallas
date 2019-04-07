@@ -9,7 +9,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.vip.pallas.search.http.PallasRequest;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
@@ -49,6 +48,8 @@ public class AsyncCall {
 	private HttpHost targetHost;
 	private String newURL;
 	private AtomicInteger executeCount = new AtomicInteger(0);
+	public AtomicInteger failedCount = new AtomicInteger(0);
+	public AtomicInteger cancelCount = new AtomicInteger(0);
 	private HttpContext httpContext;
 	private DefaultFullHttpRequest outBoundRequest;
 	private AbstractFilterContext filterContext;
@@ -92,25 +93,30 @@ public class AsyncCall {
 				int timeoutMillis =  (retryPolicy.getTotalCountIncludedFirstTime() + 1 - count) * retryPolicy.getTimeoutMillis();
 
 				HttpRequestBase request = null;
-				
+				String thisRequestUrl = newURL;
 				if (retry) { // if it's a retry request, use another shardGroup instead of the failed one.
 					ShardGroup shardGroup = sessionContext.getRequest().getShardGroup();
 					if (shardGroup != null) {
 						List<ShardGroup> shardGroupList = sessionContext.getRequest().getShardGroupList();
+						List<ShardGroup> shardGroupListCopy = (ArrayList<ShardGroup>) ((ArrayList) shardGroupList).clone();
 						// remove the failed groups and the circuteBreaker-open groups.
-						shardGroupList.removeIf(g -> {return g.getId().equals(shardGroup.getId()) || CircuitBreakerService.getInstance().getOpenGroupsList().contains(g.getId());});
-						int randomIndex = InternalThreadLocalMap.get().random().nextInt(shardGroupList.size());
-						ShardGroup group = shardGroupList.get(randomIndex);
-						sessionContext.getRequest().setShardGroup(group); // update shardGroup in requst, in case circuitBreaker counts the wrong server.
+						shardGroupListCopy.removeIf(g -> {
+							return g.getId().equals(shardGroup.getId())
+									|| CircuitBreakerService.getInstance().getOpenGroupsList().contains(g.getId());
+						});
+						int randomIndex = InternalThreadLocalMap.get().random().nextInt(shardGroupListCopy.size());
+						ShardGroup group = shardGroupListCopy.get(randomIndex);
+						sessionContext.getRequest().setShardGroup(group); // update shardGroup in request, in case
+																			// circuitBreaker counts the wrong server.
 						String ip = group.getServerList().get(InternalThreadLocalMap.get().random().nextInt(group.getServerList().size()));
 						try {
 							targetHost = RestInvokerFilter.constractAtargetHost(ip);
+							thisRequestUrl = replaceUriValue(thisRequestUrl, "preference=_prefer_nodes:", group.getPreferNodes());
 						} catch (Exception e) {
 							LOGGER.error(e.getMessage(), e);
 						}
 					}
 				}
-				
 				if (this.entity != null) {
 					request = HttpClientUtil.getHttpUriRequest(targetHost, outBoundRequest, entity);
 				} else {
@@ -118,7 +124,7 @@ public class AsyncCall {
 					this.entity = ((HttpPost) request).getEntity();
 				}
 
-				String urlWithTimeout = newURL + "&timeout=" + timeoutMillis + "ms";
+				String urlWithTimeout = replaceUriValue(thisRequestUrl, "timeout=", timeoutMillis + "ms");
 				request.setURI(URI.create(urlWithTimeout));
 				request.setConfig(RequestConfig.custom()
 						.setConnectionRequestTimeout(timeoutMillis)
@@ -126,13 +132,16 @@ public class AsyncCall {
 						.build());
 				// record the start time.
 				startCallTime = System.currentTimeMillis();
+				LOGGER.info("{}th request routes to: {}, {}", count, targetHost.getHostName(), urlWithTimeout);
 				if (count > 1) {
-					LOGGER.info("query templateId:{} timeout, now start {}th try with real timeout = {}.", templateId,
-							count, timeoutMillis);
+					LOGGER.info("query templateId:{} timeout, now start {}th try with real timeout = {}, request: {}",
+							templateId, count, timeoutMillis,
+							targetHost.getHostName() + ":" + targetHost.getPort() + urlWithTimeout);
 				}
-				if(this.futureCallback == null){
-					this.futureCallback = new TimeoutFutureCallback(this, filterContext, sessionContext, outBoundRequest, httpContext, null, entity, targetHost, newURL, pallasRequest);
-				}
+				// if(this.futureCallback == null){
+				this.futureCallback = new TimeoutFutureCallback(this, filterContext, sessionContext, outBoundRequest,
+						httpContext, null, entity, targetHost, newURL, pallasRequest, pallasRequest.getShardGroup());
+				// }
 				Future<HttpResponse> future = httpClient.execute(targetHost, request, httpContext, futureCallback);
 				// calculate the circuteBreaker TODO 是否在发出请求后再加？因为有可能是连接池满了，根本没发出请求
 				PallasRequest pallasRequest = sessionContext.getRequest();
@@ -145,6 +154,25 @@ public class AsyncCall {
 				TimeoutRetryController.notifyGovernor();
 			}
 		}
+	}
+
+	public static String replaceUriValue(String uri, String key, String newValue) {
+		int keyIndex = uri.indexOf(key);
+		if (keyIndex > 0) { // exist key
+			int andIndex = uri.substring(keyIndex).indexOf("&");
+			String oldVal = null;
+			if (andIndex > 0) {
+				oldVal = uri.substring(keyIndex).substring(0, andIndex);
+			} else {
+				oldVal = uri.substring(keyIndex);
+			}
+			return uri.replace(oldVal, key + newValue);
+		} else if (uri.indexOf("?") > 0) {
+			return uri += "&" + key + newValue;
+		} else {
+			return uri += "?" + key + newValue;
+		}
+
 	}
 
 	public boolean setDone() {

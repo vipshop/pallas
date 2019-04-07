@@ -10,7 +10,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
@@ -151,7 +150,8 @@ public final class RestInvokerFilter extends AbstractFilter {
 					HttpRequestBase request = HttpClientUtil.getHttpUriRequest(targetHost, outBoundRequest);
 					request.setURI(URI.create(newURL));
 					httpClient.execute(targetHost, request, httpContext,
-					new SendDirectlyCallback(filterContext, sessionContext, outBoundRequest, httpContext, request, null, targetHost, newURL, pallasRequest));
+							new SendDirectlyCallback(filterContext, sessionContext, outBoundRequest, httpContext,
+									request, null, targetHost, newURL, pallasRequest, null));
 					// calculate the circuteBreaker TODO 是否在发出请求后再加？因为有可能是连接池满了，根本没发出请求
 					if (pallasRequest.isCircuitBreakerOn() && pallasRequest.getShardGroup() != null) {
 						CircuitBreakerService.getInstance().increaseServiceRequestCounter(pallasRequest.getShardGroup().getId());
@@ -167,7 +167,8 @@ public final class RestInvokerFilter extends AbstractFilter {
 				HttpRequestBase request = HttpClientUtil.getHttpUriRequest(targetHost, outBoundRequest);
 				request.setURI(URI.create(newURL));
 				httpClient.execute(targetHost, request, httpContext,
-						new SendDirectlyCallback(filterContext, sessionContext, outBoundRequest, httpContext, request, null, targetHost, newURL, pallasRequest));
+						new SendDirectlyCallback(filterContext, sessionContext, outBoundRequest, httpContext, request,
+								null, targetHost, newURL, pallasRequest, null));
 			}
 		} catch (Exception ex) {
 			logger.error(ex.getLocalizedMessage(), ex);
