@@ -91,7 +91,7 @@ public class ServerController {
         }
         example.setOffset((currentPage-1) * pageSize);
         example.setLimit(pageSize);
-        example.setOrderByClause(" healthy desc, cluster asc, ipport asc ");
+		example.setOrderByClause(" healthy desc, cluster asc, pools asc, ipport asc ");
 
         long total = searchServerService.countByExample(example);
         int pageCount = (int) (total % pageSize == 0 ? total / pageSize : total / pageSize + 1);
