@@ -43,32 +43,17 @@ public class DivideShards {
 						if (nodeList.isEmpty()) { // 所有节点都有组了
 							return allGroups;
 						}
-						if (nodesInThisGroup.isEmpty()) {
+						if (nodesInThisGroup.isEmpty()) { // 将第一个node放进去
 							nodesInThisGroup.add(nodeList.get(0));
-							// nodes.remove(nodeList.get(0));
 							nodes4nextRound.addAll(nodeList);
-							nodes4nextRound.removeAll(nodesInThisGroup);
+							nodes4nextRound.removeAll(nodesInThisGroup); // 剩余的node放进下个迭代
 							continue;
 						}
-						boolean nodeAdded = false;
-						for (String node : nodeList) {
-							if (nodesInThisGroup.contains(node)) { // 偏向于在已经选择node的
-								nodeAdded = true;
-								break;
-							}
-							if (!nodes4nextRound.contains(node)) {
-								nodesInThisGroup.add(node);
-								// nodes.remove(node);
-								nodes4nextRound.addAll(nodeList);
-								nodes4nextRound.removeAll(nodesInThisGroup);
-								nodeAdded = true;
-								break;
-							}
-						}
-						if (!nodeAdded) { // 那就加第一个
+						if (!nodesInThisGroup.stream().anyMatch(c -> { return nodeList.contains(c);})) { // 如无包含则用第一个
 							nodesInThisGroup.add(nodeList.get(0));
-							// nodes.remove(nodeList.get(0));
 						}
+						nodes4nextRound.addAll(nodeList);
+						nodes4nextRound.removeAll(nodesInThisGroup);
 					}
 					nodes.removeAll(nodesInThisGroup);// 已有组的node不参与下round选择
 					allGroups.add(nodesInThisGroup);
@@ -79,4 +64,6 @@ public class DivideShards {
 		}
 		return allGroups;
 	}
+
+		
 }
