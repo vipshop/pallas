@@ -113,7 +113,9 @@ Pallas rest客户端对Elasticsearch-rest进行了封装了，并且做了如下
     
     > 使用推荐: 请把该代码放在jvm容器启动后执行的地方并缓存起来。（初始化一次，持续用）
     
-### 4.3 调用template
+### 4.3 通过template查询
+  
+适用场景：基本的业务查询
   
   - Pallas console查询API
   
@@ -136,9 +138,9 @@ Pallas rest客户端对Elasticsearch-rest进行了封装了，并且做了如下
       Response response = restClient.performRequest(method, endPoint ,Collections.<String, String>emptyMap(), templateId, entity, new Header[0]);
     ````
 
-### 4.4 解析返回值
+ - 解析返回值
   
-  以Json格式返回结果
+    以Json格式返回结果
  
    ````java
    HttpEntity httpEntity = response.getEntity();
@@ -149,8 +151,107 @@ Pallas rest客户端对Elasticsearch-rest进行了封装了，并且做了如下
    JSON.parseXXX(jsonString, XXX);
      
    ````    
+   
+### 4.4 通过scoll深度分页
+适用场景：大批量的文档查询（比如超过**10000**的文档获取）
 
+  - 基于template查询，初始化scroll，获取scroll_id
 
+	```java
+
+	String json = "{\"params\": {}}";
+	HttpEntity entity = new NStringEntity(json, ContentType.APPLICATION_JSON);
+	String method = "POST";
+	String endPoint = "/chatinfo/template/_search?scroll=1m";
+	String templateId = "chatinfo_vip_vchat_search";
+	Response response = restEsClient.performRequest(method, endPoint, Collections.emptyMap(), templateId, entity, null);
+	String result = EntityUtils.toString(response.getEntity(), "UTF-8");
+	
+	```
+
+  - 通过基于scroll查询，通过scroll_id，获取后续的查询数据
+
+	> 重复多次执行当前过程，直至返回结果中hits为空对象，或者业务数据了已满足要求。
+
+	```java
+
+	String json = "{ \"scroll\": \"1m\", \"scroll_id\": \"DXF1ZXJ5QW5kRmV0Y2gBAAAAAAABo_oWYXFZZmRTb3BTLWlTdzhhcWJfMl9Fdw==[189]\"}";
+	HttpEntity entity = new NStringEntity(json, ContentType.APPLICATION_JSON);
+	String method = "POST";
+	String endPoint = "/_search/scroll";
+	Response response = restEsClient.performRequest(method, endPoint, Collections.emptyMap(), null, entity, null);
+	String result = EntityUtils.toString(response.getEntity(), "UTF-8");
+
+	```
+
+  - 获取完数据后，删除scroll_id
+
+	```java
+
+	String json = "{\"scroll_id\": \"DXF1ZXJ5QW5kRmV0Y2gBAAAAAAABo_oWYXFZZmRTb3BTLWlTdzhhcWJfMl9Fdw==[189]\"}";
+	HttpEntity entity = new NStringEntity(json, ContentType.APPLICATION_JSON);
+	String method = "DELETE";
+	String endPoint = "/_search/scroll";
+	Response response = restEsClient.performRequest(method, endPoint, Collections.emptyMap(), null, entity, null);
+	String result = EntityUtils.toString(response.getEntity(), "UTF-8");
+
+	```
+
+### 4.5 通过_bulk批量索引
+适用场景：文档的批量变更，建议一次批量文档数不要超过**800**个
+  
+  - 构建请求体
+	
+   > 使用XContentBuilder构建
+   
+   ````java
+    XContentBuilder builder = XContentFactory.contentBuilder(XContentType.JSON);
+
+    builder.startObject().startObject("index")
+    	.field("_index", "chatinfo")
+    	.field("_type", "detail")
+    	.field("_id", "1164170849")
+    	.field("_parent", "8498").endObject().endObject();
+		
+    builder.rawValue(new BytesArray("\n"), XContentType.JSON);
+	
+    builder.startObject().field("id", "1164170849")
+    	.field("chatid", "8498")
+	    .field("senderName", "在线客服")
+	    .field("receiverName", "访客#8508")
+	    .field("msg", "阳光暖暖的，在最好的季节遇见最好的您，小唯很乐意为您效劳，请问有什么可以帮到您吗？")
+	    .field("sendtime", "2019-01-17 11:47:29.0")
+	    .field("flag", "2")
+	    .endObject();
+		
+    builder.rawValue(new BytesArray("\n"), XContentType.JSON);
+
+    String json = builder.bytes().utf8ToString();
+	
+   ````
+   
+   > 用Jons字符拼接
+   
+   ````java
+   String json = "{\"index\":{\"_index\":\"chatinfo\",\"_type\":\"detail\",\"_id\":\"1164170849\",\"_parent\":\"8498\"}}\n" + 
+				  "{\"id\":\"1164170849\",\"chatid\":\"8498\",\"senderName\":\"在线客服\",\"receiverName\":\"访客#8508\",\"msg\":\"阳光暖暖的，在最好的季节遇见最好的您，小唯很乐意为您效劳，请问有什么可以帮到您吗？\",\"sendtime\":\"2019-01-17 11:47:29.0\",\"flag\":\"2\"}\n";
+				  
+   ````
+   > 因为_buk 格式的原因，大家一定要小心"\n"的录入
+   
+  - 执行请求
+	
+	````java
+	 HttpEntity entity = new NStringEntity("{\"id\":\"vms2_msg_trace_query_by_msgid\"}", ContentType.APPLICATION_JSON);
+	  
+      String method = "POST";
+      String endPoint = "/chatinfo/_bulk";
+      String templateId = null;
+      
+      Response response = restClient.performRequest(method, endPoint ,Collections.<String, String>emptyMap(), templateId, entity, new Header[0]);
+	  
+	````
+	
 
 
 

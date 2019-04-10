@@ -59,7 +59,7 @@ public class LaunchAll {
         System.setProperty("pallas.flow.record.save.cluster.name", "localhost");
         System.setProperty("pallas.flow.record.save.cluster.rest.address", "localhost:9200,localhost:9210,localhost:9220");
         System.setProperty("pallas.flow.record.save.cluster.transport.address", "localhost:9300,localhost:9310,localhost:9320");
-
+        System.setProperty("pool.name", "poo1,poo2,pool3");
         ClassLoader classLoader = LaunchAll.class.getClassLoader();
         Class<?> loadClass = classLoader.loadClass("com.vip.pallas.demo.Launcher");
         Method method = loadClass.getMethod("main", String[].class);

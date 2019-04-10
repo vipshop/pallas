@@ -51,17 +51,59 @@
 
 ![](image/coverview.png)
 
-### Bigdesk
+### 4.1 Bigdesk
 
 如图所示，相关人员可以直接操作所有bigdesk的所有操作和查看所有节点的即时状态，更多详细的操作请参考[bigdesk](https://github.com/hlstudio/bigdesk)的官网。
 
 ![](image/bigdesk.png)
 
-### Cerebro
+### 4.2 Cerebro
 
 Pallas Console同时集成了ES集群管理管理工具`Cerebro`供用户操作，用户可以自行进入`索引信息，节点信息，命令行工具`等tab进行操作。更详细的`Cerebro`的操作可以参考[官方文档](https://github.com/lmenezes/elasticsearch-kopf)(Cerebro的前身是kopf)。
 
 ![](image/coverview.png)
+
+### 4.3 监控
+
+#### 4.1 概述
+
+> 提供集群、节点、索引三个级别的监控
+
+> 监控信息默认保存7天
+
+> 提供相对时间（最近30分钟等）和指定查询时间段两种方式查询
+
+#### 4.2 设计
+
+![](image/monitor.png)
+
+##### 4.2.1 定时采集
+
+- 采集数据来源：/_nodes/stats、/_cluster/stats、/stats、/_cat、/_cluster/health
+
+- 数据清洗：过滤掉不需要的指标
+
+- 数据存储：保存到ES中，索引名：.pallas-es-metrics,mapping保存在pallas-index模块(待开源)下的resources/templates/monitor_index.ftl
+
+- 采集周期：每10s一次
+
+- 定时删除：每天凌晨1点定时删除7天的前的数据
+
+#### 4.2.2 查询
+
+- 借助ES的Aggs实现聚合查询
+
+- 借助freemarker，将查询语句模板化，模板保存在pallas-core模块下的resources/templates
+
+- 前端效果图借助[Echarts](https://echarts.baidu.com/)来展示
+
+- 具体实现，参照：com.vip.pallas.service.impl.MonitorServiceImpl.java
+
+#### 4.3 效果
+
+![](image/monitor_cluster.png)
+
+![](image/monitor_index_open.jpg)
 
 ## 5 重启
 

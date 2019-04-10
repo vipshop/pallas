@@ -83,6 +83,8 @@
 
 ## 6 超时重试逻辑
 
+###6.1 设计
+
 超时重试配置目前是索引级别
 
 通过`Route Cache`模块访问`Pallas Console`进行定期更新，其中key为`{indexName-templateName}`，value为超时重试对象。
@@ -97,6 +99,32 @@
 ![](image/retry2.png)
 
 关于超时重试的配置可以参考`索引管理`的`超时重试`一节。
+
+### 6.2 超时重试次数
+
+> 最大重试次数为1，再大只会徒增机器压力，无意义
+
+### 6.3 分组
+
+ - 以分组的形式进行重试
+ 
+ - 每次重试时，先剔除该次分组再做random loadbalance，保证去到别的分组进行重试
+
+### 6.4 熔断
+
+ - 开启分组的才开启熔断
+ 
+ - 熔断策略暂时不可配，默认为：
+ 
+   - 1分钟内请求超过10次，错误率超过60%打开熔断
+   
+   - 2分钟后进入半熔断状态，半熔断状态下如果10个请求错误超过5个，则继续熔断
+   
+   ![](image/breake.png)
+   
+   - 实现：
+   
+     - 参考package：com.vip.pallas.search.filter.circuitbreaker
 
 ## 7 调用链跟踪
 
@@ -133,10 +161,83 @@
 
 详细设计请参考`流量记录`章节。
 
+## 8 索引预热
 
-## 8 性能测试报告
+### 8.1 概念
 
-### 8.1测试环境
+索引预热：索引在被真实使用前，通过非直接流量的请求打压，构造真实调用环境，使得索引状态达到最佳。
+
+### 8.2 功能概述
+
+ - 在pallas-search单次请求代理完成后（返回Client前，当次处理没有超时）把请求流量再次请求，重发到目标预热索引，通过流量拷贝重发，达到预热目的；
+ 
+ - 新索引跟在用索引的名字不同，所以重发的url要有所调整
+
+ - 新索引预热情况可以通过监控系统进行监控
+ 
+### 8.3 流程图
+
+![](image/search_warmup_2.jpg)
+
+### 8.4 核心设计
+
+#### 8.1 预热请求体
+ 
+ - 模板使用原先请求模板，id不用调整，url决定请求的索引，需要替换成目标预热索引名
+ 
+#### 8.2 预热请求时机
+
+ - PS取到ES成功响应（进入handleCompleted，没有发生超时），并返回给客户端后，再进行预热请求的处理
+ 
+#### 8.3 预热请求资源
+
+ - 新构建一个CloseableHttpAsyncClient实例，不占用正常请求的连接与Http线程
+ 
+ - 会简短占用worker发送预热请求，发送后不会await response，可以设计成独立线程池
+ 
+#### 8.4 上报预热进度
+
+ -  统计已预热请求数，调用Pallas console api，记录到DB。
+  
+#### 8.5 实现
+
+ - package: com.vip.pallas.search.rampup
+
+### 9 业务隔离
+
+#### 9.1 概述
+
+ - 多个业务共用同一个Pallas search集群时，当其中一个或者多个业务出现问题后，极容易引起其他业务的故障
+ 
+ - 为了更好地隔离，在集群之上引入poolName(业务Label)的粒度，并跟token形成映射
+ 
+ - 特定的token就能获取到特定poolName的pallas search列表进行负载
+ 
+ ![](image/poolname_open.png)
+ 
+#### 9.2 pallas search端
+
+ - 定时向console上报时，增加一列：poosl (["poolName1", "poolName2"]),用来标识pallas search属于哪个pool
+ 
+ - 容器通过getEnv("VIP_POOL_NAME")即可获取，同时支持 -Dpool.name 获取，支持配置多个pool, 使用逗号进行分隔。 如 -Dpool.name="poolName1,poolName2"。
+
+#### 9.3 pallas console端
+ 
+ > 通过token管理其与poolName的关系
+ 
+ ![](image/token_poolname_select_open.png)
+ 
+ - 如果不勾选，默认为整个search集群
+ 
+#### 9.4 pallas restClient端
+
+ > 根据token和本机ip获取pallas search节点集，获取逻辑如下：
+ 
+ ![](image/poolname_sdk.png)
+ 
+## 10 性能测试报告
+
+### 10.1测试环境
 
 为了更准确地测试各种数据包大小，采用nginX转发静态资源的形式来模拟ES集群，另外，为了实现Pallas-Search对ES集群节点的健康检测，同时通过nginX模拟ES集群的endpoint，包括_cat/nodes等。各组件部署情况如下：
 
@@ -146,7 +247,7 @@
 |10.0.0.1|mock-es-cluster|CentOS release 6.6 (Final)|2500MHz*24|189G|20000Mb/s| 529G|
 |10.0.0.1|mock-es-cluster|CentOS release 6.6 (Final)|2500MHz*24|189G|20000Mb/s| 24582G|
 
-### 8.2 测试场景
+### 10.2 测试场景
 
 主要覆盖在不同并发，不同payload大小，已经不同路由规则情况下Pallas-Search的性能表现，并与不通过Pallas-Search直接连接后端接口的性能对比。
 
@@ -163,7 +264,7 @@
 11.  500并发，集群级别路由，限2WTPS，10Kpayload
 12.  500并发，集群级别路由，限5000TPS，100Kpayload
 
-### 8.3测试结果
+### 10.3测试结果
 
 |不限TPS-100并发|平均响应时间|80%响应时间|95%响应时间|99%响应时间|最大响应时间|TPS|192.168.1.1 CPU user|192.168.1.2 CPU|user	192.168.1.3 CPU user|
 |---------------|------------|-----------|-----------|-----------|------------|---|-----------------------|-------------------|----------------------------|
