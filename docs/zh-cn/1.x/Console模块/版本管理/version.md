@@ -8,7 +8,7 @@
 
 ![](image/indexVersionEntrance.png)
 
-![](image/versionOverview.PNG)
+![](image/versionOverview.png)
 
 ## 2 新增版本
 
@@ -16,7 +16,7 @@
 
     ![](image/addVersionOpen.png)
 
-    ![](image/mapping2.PNG)
+    ![](image/mapping2.png)
     
     当数据源为mysql时，如上图所示，具体解释如下：
       

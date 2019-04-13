@@ -14,7 +14,7 @@ Pallas rest客户端对Elasticsearch-rest进行了封装了，并且做了如下
 
 ## 一 设计
 
-![](image/sdk.PNG)
+![](image/sdk.png)
 
 上图简要描述了Pallas客户端的实现原理：
 

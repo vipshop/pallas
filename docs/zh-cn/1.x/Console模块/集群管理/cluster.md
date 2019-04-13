@@ -12,7 +12,7 @@
 
   点击添加集群按钮：
 
-  ![](image/addphycluster.PNG)
+  ![](image/addphycluster.png)
 
   - 域名：集群的域名
 
@@ -26,7 +26,7 @@
 
   如果是添加逻辑集群，则无须填HTTP地址和ES client地址,如图：
 
-![](image/addlogicluster.PNG)
+![](image/addlogicluster.png)
 
 ## 3 路由管理
 
@@ -111,7 +111,7 @@ Pallas Console同时集成了ES集群管理管理工具`Cerebro`供用户操作�
 
 集群总览页，操作栏点击对应集群的重启按钮，进入如下页面：
 
-![](image/clusterRestart.PNG)
+![](image/clusterRestart.png)
 
 点击重启按钮，等待完成重启
 

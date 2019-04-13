@@ -16,7 +16,7 @@
   
   - 创建规则
   
-     ![](image/createIndexrule.PNG)
+     ![](image/createIndexrule.png)
      
       规则各个字段说明：
       
@@ -34,7 +34,7 @@
   
   -  规则总览
   
-     ![](image/indexRouteRuleoverview.PNG)
+     ![](image/indexRouteRuleoverview.png)
   
        > 可以配置多条规则，当前只支持规则间的AND运算
        
@@ -56,7 +56,7 @@
         
           路由只会把请求分发到选中的Node节点，并且ES集群实时新增Node节点，并不会影响该节点集，如果ES集群实时减少一个选中的Node节点，路由将不会再分发请求到该节点
         
-          ![](image/indexRouteRuleNormalNodes.PNG)
+          ![](image/indexRouteRuleNormalNodes.png)
           
           通过勾选集群节点，设置请求可路由到哪些ES集群节点。
           
