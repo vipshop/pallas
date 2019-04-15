@@ -6,13 +6,13 @@
 
 点击集群管理，可以看到集群的列表信息，并提供了操作集群的快捷入口。
 
-![](image/clusteroverview.png)
+![](image/clusteroverview_open.png)
 
 ## 2 添加集群
 
   点击添加集群按钮：
 
-  ![](image/addphycluster.png)
+  ![](image/addphycluster_open.png)
 
   - 域名：集群的域名
 
@@ -26,7 +26,7 @@
 
   如果是添加逻辑集群，则无须填HTTP地址和ES client地址,如图：
 
-![](image/addlogicluster.png)
+![](image/addlogicluster_open.png)
 
 ## 3 路由管理
 
@@ -49,7 +49,7 @@
 
 > 为了加强Pallas Console对集群的管理，集成了两个比较重要的ES集群管理工具，`bigdesk`和`cerebro`，并且集成到同一个视图来管理，如下：
 
-![](image/coverview.png)
+![](image/coverview_open.png)
 
 ### 4.1 Bigdesk
 
@@ -61,11 +61,11 @@
 
 Pallas Console同时集成了ES集群管理管理工具`Cerebro`供用户操作，用户可以自行进入`索引信息，节点信息，命令行工具`等tab进行操作。更详细的`Cerebro`的操作可以参考[官方文档](https://github.com/lmenezes/elasticsearch-kopf)(Cerebro的前身是kopf)。
 
-![](image/coverview.png)
+![](image/coverview_open.png)
 
 ### 4.3 监控
 
-#### 4.1 概述
+#### 4.3.1 概述
 
 > 提供集群、节点、索引三个级别的监控
 
@@ -73,11 +73,11 @@ Pallas Console同时集成了ES集群管理管理工具`Cerebro`供用户操作�
 
 > 提供相对时间（最近30分钟等）和指定查询时间段两种方式查询
 
-#### 4.2 设计
+#### 4.3.2 设计
 
 ![](image/monitor.png)
 
-##### 4.2.1 定时采集
+##### 4.3.2.1 定时采集
 
 - 采集数据来源：/_nodes/stats、/_cluster/stats、/stats、/_cat、/_cluster/health
 
@@ -89,7 +89,7 @@ Pallas Console同时集成了ES集群管理管理工具`Cerebro`供用户操作�
 
 - 定时删除：每天凌晨1点定时删除7天的前的数据
 
-#### 4.2.2 查询
+#### 4.3.2.2 查询
 
 - 借助ES的Aggs实现聚合查询
 
@@ -99,7 +99,7 @@ Pallas Console同时集成了ES集群管理管理工具`Cerebro`供用户操作�
 
 - 具体实现，参照：com.vip.pallas.service.impl.MonitorServiceImpl.java
 
-#### 4.3 效果
+#### 4.3.3 效果
 
 ![](image/monitor_cluster.png)
 
@@ -111,7 +111,7 @@ Pallas Console同时集成了ES集群管理管理工具`Cerebro`供用户操作�
 
 集群总览页，操作栏点击对应集群的重启按钮，进入如下页面：
 
-![](image/clusterRestart.png)
+![](image/clusterRestart_open.png)
 
 点击重启按钮，等待完成重启
 
