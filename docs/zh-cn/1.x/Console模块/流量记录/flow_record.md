@@ -120,7 +120,7 @@ Pallas支持对经过Pallas-search组件的流量进行采集、保存、离线�
 
 #### 4.2.1 新增规则
 
-![](image/recordRelayRule.PNG)
+![](image/recordRelayRule_open.png)
 
   - 模板模板：可以指定目标模板；如果不指定的话，表示该索引下的全部模板，本地模板为已经保存但未提交的模板，针对临时模板作回放
  

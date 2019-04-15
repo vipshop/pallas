@@ -54,7 +54,7 @@
 
 ## 3 概览
 
-![](image/indexDynamic.png)
+![](image/indexDynamic_open.png)
 
 
 

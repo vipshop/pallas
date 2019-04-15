@@ -8,15 +8,15 @@
 
 ![](image/indexVersionEntrance.png)
 
-![](image/versionOverview.png)
+![](image/versionOverview_open.png)
 
 ## 2 新增版本
 
   - mysql
 
-    ![](image/addVersionOpen.png)
+    ![](image/addVersionOpen_open.png)
 
-    ![](image/mapping2.png)
+    ![](image/mapping2_open.png)
     
     当数据源为mysql时，如上图所示，具体解释如下：
       
@@ -91,7 +91,7 @@
 
 ### 7.1 查看配置信息
 
-![](image/versionMapping.png)
+![](image/versionMapping_open.png)
 
 查询此版本索引在es中的mapping信息。
 
