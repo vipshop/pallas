@@ -188,7 +188,8 @@ public class AsyncCall {
 			if (retryPolicy.allowRetry(retryCount.get() + 1)) {
 				long now = System.currentTimeMillis();
 				long timeLeft = startCallTime + retryPolicy.getTimeoutMillis() - now;
-				if (timeLeft < 0) {
+				// in case of concurrent modify done
+				if (timeLeft < 0 && done.compareAndSet(false, false)) {
 					canBeginAnotherRetry.set(false);
 					retryExecutor.submit(new RetryTask(this));
 				}
