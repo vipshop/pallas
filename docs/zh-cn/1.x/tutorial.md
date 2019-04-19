@@ -165,6 +165,16 @@ pallas-rest-client已经通过pallas-search访问到es，并取到正确结果�
   
     -  ```mvn initialize -Pinitialize```
   
+### 3.2 embedElasticSearch相关
+
+  unable delete file: /{path}/transport-netty4-5.5.2.jar
   
+  ![](image/embedES.jpg)
+  
+  原因：第一次启动程序时进行了强杀操作
+  
+  解决方式：打开进程管理，强杀Java进程，重启Demo；如果还有问题，相应路径下删除es的临时目录
+  
+
   
   
