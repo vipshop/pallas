@@ -310,11 +310,6 @@
 				<version>${springframework.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.springframework</groupId>
-				<artifactId>spring-test</artifactId>
-				<version>${springframework.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>jcl-over-slf4j</artifactId>
 				<version>${slf4j.version}</version>
@@ -706,7 +701,8 @@
 						<charset>${project.build.sourceEncoding}</charset>
 						<encoding>${project.build.sourceEncoding}</encoding>
 						<docencoding>${project.build.sourceEncoding}</docencoding>
-					</configuration>
+                        <additionalparam>-Xdoclint:none</additionalparam>
+                    </configuration>
 				</plugin>
 
 				<plugin>
@@ -765,6 +761,52 @@
 					</dependencies>
 				</plugin>
 
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>jar-no-fork</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>cobertura-maven-plugin</artifactId>
+                    <configuration>
+                        <check>
+                            <branchRate>85</branchRate>
+                            <lineRate>85</lineRate>
+                            <haltOnFailure>true</haltOnFailure>
+                            <totalBranchRate>85</totalBranchRate>
+                            <totalLineRate>85</totalLineRate>
+                            <packageLineRate>85</packageLineRate>
+                            <packageBranchRate>85</packageBranchRate>
+                        </check>
+                        <aggregate>false</aggregate>
+                        <encoding>${project.build.sourceEncoding}</encoding>
+                        <quiet>true</quiet>
+                        <format>xml</format>
+                        <instrumentation>
+                            <ignoreTrivial>true</ignoreTrivial>
+                            <excludes>
+                                <exclude>com/vip/**/*Test.class</exclude>
+                                <exclude>com/vip/**/Test*.class</exclude>
+                            </excludes>
+                        </instrumentation>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.eluder.coveralls</groupId>
+                    <artifactId>coveralls-maven-plugin</artifactId>
+                    <version>${coveralls-maven-plugin.version}</version>
+                </plugin>
 			</plugins>
 		</pluginManagement>
 
@@ -772,48 +814,21 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>jar-no-fork</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>cobertura-maven-plugin</artifactId>
-				<configuration>
-					<check>
-						<branchRate>85</branchRate>
-						<lineRate>85</lineRate>
-						<haltOnFailure>true</haltOnFailure>
-						<totalBranchRate>85</totalBranchRate>
-						<totalLineRate>85</totalLineRate>
-						<packageLineRate>85</packageLineRate>
-						<packageBranchRate>85</packageBranchRate>
-					</check>
-					<aggregate>false</aggregate>
-					<encoding>${project.build.sourceEncoding}</encoding>
-					<quiet>true</quiet>
-					<format>xml</format>
-					<instrumentation>
-						<ignoreTrivial>true</ignoreTrivial>
-						<excludes>
-							<exclude>com/vip/**/*Test.class</exclude>
-							<exclude>com/vip/**/Test*.class</exclude>
-						</excludes>
-					</instrumentation>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.eluder.coveralls</groupId>
 				<artifactId>coveralls-maven-plugin</artifactId>
-				<version>${coveralls-maven-plugin.version}</version>
 			</plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+            </plugin>
 		</plugins>
 	</build>
 
