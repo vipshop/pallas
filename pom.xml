@@ -410,11 +410,11 @@
 				<scope>test</scope>
 			</dependency>
 
+            <!--scope cannot be test, because of pallas-it module-->
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-test</artifactId>
 				<version>${springframework.version}</version>
-				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.mockito</groupId>
