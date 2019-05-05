@@ -25,11 +25,11 @@ import org.slf4j.LoggerFactory;
 import com.vip.pallas.utils.PallasBasicProperties;
 
 /*
- * Order 
- * 	env 	     --> key
- *  env 	     --> key.replace(".", "_").toUpperCase()
+ * priority levels, from high to low
  *  jvm args     --> key
  *  jvm args     --> key.replace(".", "_").toUpperCase()
+ * 	env 	     --> key
+ *  env 	     --> key.replace(".", "_").toUpperCase()
  *  app props    --> key
  */
 public class DefaultPropertyProcessor extends AbstractPropertyProcessor {
@@ -45,14 +45,16 @@ public class DefaultPropertyProcessor extends AbstractPropertyProcessor {
 	
 	protected String getValue(String key) {
 		Objects.requireNonNull(key);
-        String val = getEnv(key);
+		String val = getSystem(key);
+		if (null != val) {
+			return val;
+		}
+
+		val = getEnv(key);
         if (null != val) {
             return val;
         }
-        val = getSystem(key);
-        if (null != val) {
-            return val;
-        }
+
         return getProperty(key);
 	}
 	

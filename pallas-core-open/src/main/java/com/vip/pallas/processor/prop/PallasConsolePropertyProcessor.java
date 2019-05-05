@@ -20,11 +20,11 @@ package com.vip.pallas.processor.prop;
 import com.vip.pallas.utils.ConfigReader;
 
 /*
- * Order 
- * 	env 	     --> key
- *  env 	     --> key.replace(".", "_").toUpperCase()
+ * priority levels, from high to low
  *  jvm args     --> key
  *  jvm args     --> key.replace(".", "_").toUpperCase()
+ * 	env 	     --> key
+ *  env 	     --> key.replace(".", "_").toUpperCase()
  *  app props    --> key
  *  spring props --> key
  */
