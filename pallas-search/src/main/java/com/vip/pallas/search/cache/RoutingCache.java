@@ -414,17 +414,21 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
                     targetGroup.setNodeInfoList(IndexRoutingTargetGroup.fromXContent(targetGroup.getNodesInfo()));
                     targetGroup.setClusterInfoList(IndexRoutingTargetGroup.fromClusterContent(targetGroup.getClustersInfo()));
 					if (targetGroup.isGroupLevel()) { // calculate the dynamic group
-						
-						String httpAddress = targetGroup.getClusterInfoList().get(0).getAddress();//StringUtils.substringBetween(targetGroup.getClustersInfo(), "address\":\"", "\"");
-						Map<String, String> nodesInfo = clusterIpIdMap.computeIfAbsent(httpAddress, address -> {
-							return elasticSearchService.getNodesInfo(address);
-						});
-						List<ShardGroup> devideShards2Group = elasticSearchService.genDynamicGroup(httpAddress,
-								targetGroup.getIndexName(), nodesInfo);
-						// leave the circuteBreaker-filter for routeFilter, this only calculate the whole list.
-						targetGroup.setShardGroupList(devideShards2Group);
-						// init the policy
-						devideShards2Group.stream().forEach(s -> {CircuitBreakerPolicyHelper.circuitBreakerPolicyMap.putIfAbsent(s.getId(), new CircuitBreakerPolicy());});
+						if(null == targetGroup.getClusterInfoList() || targetGroup.getClusterInfoList().size() == 0) {
+                            LOGGER.info("indexName: {}, targetGroupName: {}, clusterInfoList is empty", targetGroup.getIndexName(), targetGroup.getName());
+                        } else {
+                            String httpAddress = targetGroup.getClusterInfoList().get(0).getAddress();//StringUtils.substringBetween(targetGroup.getClustersInfo(), "address\":\"", "\"");
+                            Map<String, String> nodesInfo = clusterIpIdMap.computeIfAbsent(httpAddress, address -> {
+                                return elasticSearchService.getNodesInfo(address);
+                            });
+                            List<ShardGroup> devideShards2Group = elasticSearchService.genDynamicGroup(httpAddress,
+                                    targetGroup.getIndexName(), nodesInfo);
+                            // leave the circuteBreaker-filter for routeFilter, this only calculate the whole list.
+                            targetGroup.setShardGroupList(devideShards2Group);
+                            // init the policy
+                            devideShards2Group.stream().forEach(s -> {CircuitBreakerPolicyHelper.circuitBreakerPolicyMap.putIfAbsent(s.getId(), new CircuitBreakerPolicy());});
+                        }
+
 					}
 
                 } catch (Exception e) {
