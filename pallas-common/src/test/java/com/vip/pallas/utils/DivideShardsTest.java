@@ -91,6 +91,48 @@ public class DivideShardsTest {
 	}
 
 	@Test
+	public void fourNodes4Shards2copies2() {
+		List<String> fakeNodes = Arrays.asList("A", "B", "C", "D", "E", "F");
+		HashSet<String> nodes = new HashSet<>(fakeNodes);
+		Map<Integer, List<String>> shardNodesMap = new HashMap<>();
+
+		List<String> shard2FakeList = Arrays.asList("A", "C");
+		ArrayList<String> shard2 = new ArrayList<>(shard2FakeList);
+		shardNodesMap.put(2, shard2);
+		List<String> shard3FakeList = Arrays.asList("A", "C");
+		ArrayList<String> shard3 = new ArrayList<>(shard3FakeList);
+		shardNodesMap.put(3, shard3);
+
+		List<String> shard0FakeList = Arrays.asList("B", "F");
+		ArrayList<String> shard0 = new ArrayList<>(shard0FakeList);
+		shardNodesMap.put(0, shard0);
+		List<String> shard1FakeList = Arrays.asList("B", "D");
+		ArrayList<String> shard1 = new ArrayList<>(shard1FakeList);
+		shardNodesMap.put(1, shard1);
+
+		List<String> shard4FakeList = Arrays.asList("D", "E");
+		ArrayList<String> shard4 = new ArrayList<>(shard4FakeList);
+		shardNodesMap.put(4, shard4);
+		List<String> shard5FakeList = Arrays.asList("E", "F");
+		ArrayList<String> shard5 = new ArrayList<>(shard5FakeList);
+		shardNodesMap.put(5, shard5);
+
+		Set<Entry<Integer, List<String>>> entrySet = shardNodesMap.entrySet();
+		List<Entry<Integer, List<String>>> entryList = new ArrayList<>(entrySet);
+		Collections.sort(entryList, (o1, o2) -> {
+			Collections.sort(o1.getValue());
+			Collections.sort(o2.getValue());
+			return o1.getKey().compareTo(o2.getKey());
+		});
+
+		System.out.println(entryList);
+
+		List<HashSet<String>> shards2Group = DivideShards.divideShards2Group(shardNodesMap, 2, nodes);
+		System.out.println(shards2Group);
+
+	}
+
+	@Test
 	public void fourNodes4Shards3copies() {
 		List<String> fakeNodes = Arrays.asList("node1", "node2", "node3", "node4");
 		HashSet<String> nodes = new HashSet<>(fakeNodes);
@@ -142,5 +184,30 @@ public class DivideShardsTest {
 		shardNodesMap.put(2, shard2);
 
 		DivideShards.divideShards2Group(shardNodesMap, 2, nodes);
+	}
+
+	@Test
+	public void testSort() {
+		Map<String, List<Integer>> ipShardsMap = new HashMap<>();
+		ipShardsMap.put("A", Arrays.asList(1, 2));
+		ipShardsMap.put("B", Arrays.asList(3));
+		ipShardsMap.put("C", Arrays.asList(3, 0));
+		ipShardsMap.put("D", Arrays.asList(2, 0, 1));
+
+		Set<Entry<String, List<Integer>>> entrySet = ipShardsMap.entrySet();
+		List<Entry<String, List<Integer>>> entryList = new ArrayList<>(entrySet);
+		Collections.sort(entryList, (o1, o2) -> {
+			Collections.sort(o1.getValue());
+			Collections.sort(o2.getValue());
+			if (o1.getValue().size() > o2.getValue().size()) {
+				return -1;
+			} else if (o1.getValue().size() < o2.getValue().size()) {
+				return 1;
+			} else {
+				return 0;
+			}
+		});
+
+
 	}
 }

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +51,10 @@ public class DivideShards {
 							continue;
 						}
 						if (!nodesInThisGroup.stream().anyMatch(c -> { return nodeList.contains(c);})) { // 如无包含则用第一个
-							nodesInThisGroup.add(nodeList.get(0));
+							List<String> excludeNextRound = nodeList.stream().filter(node -> {
+								return !nodes4nextRound.contains(node);
+							}).collect(Collectors.toList());
+							nodesInThisGroup.add(excludeNextRound.isEmpty() ? nodeList.get(0) : excludeNextRound.get(0));
 						}
 						nodes4nextRound.addAll(nodeList);
 						nodes4nextRound.removeAll(nodesInThisGroup);
@@ -64,6 +68,4 @@ public class DivideShards {
 		}
 		return allGroups;
 	}
-
-		
 }
