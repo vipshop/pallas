@@ -12,10 +12,6 @@
 	<name>${project.artifactId}</name>
 	<packaging>jar</packaging>
 
-	<properties>
-		<maven.javadoc.skip>true</maven.javadoc.skip>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>com.vip.pallas</groupId>
