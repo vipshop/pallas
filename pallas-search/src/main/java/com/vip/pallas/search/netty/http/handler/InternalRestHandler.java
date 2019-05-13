@@ -24,6 +24,8 @@ import java.lang.reflect.Method;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.search.utils.SearchLogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +71,7 @@ public class InternalRestHandler {
 						ctx.channel().close();
 					}
 				} catch (Exception e) {
-					logger.error(e.getMessage(), e);
+					LogUtils.error(logger, context.getRequest().getTemplateId(), e.getMessage(), e);
 					HttpConnectionHandler.writeBody(context, HttpResponseStatus.SERVICE_UNAVAILABLE.code(),
 							e.getMessage());
 					ctx.channel().close();

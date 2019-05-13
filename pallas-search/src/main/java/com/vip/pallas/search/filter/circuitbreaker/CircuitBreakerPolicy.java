@@ -18,6 +18,8 @@
 
 package com.vip.pallas.search.filter.circuitbreaker;
 
+import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.search.utils.SearchLogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,10 +53,10 @@ public class CircuitBreakerPolicy {
 
 	public void setErrorPercentage(int circuitBreakerErrorPercentage) {
 		if (circuitBreakerErrorPercentage < CIRCUIT_BREAKER_ERROR_PERCENTAGE_MIN_VALUE) {
-			logger.error("熔断设置中的错误率必须大于10%");
+			LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT,"熔断设置中的错误率必须大于10%");
 			this.errorPercentage = CIRCUIT_BREAKER_ERROR_PERCENTAGE_MIN_VALUE;
 		} else if (circuitBreakerErrorPercentage > CIRCUIT_BREAKER_ERROR_PERCENTAGE_MAX_VALUE) {
-			logger.error("熔断设置中的错误率必须小于100%");
+			LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT,"熔断设置中的错误率必须小于100%");
 			this.errorPercentage = CIRCUIT_BREAKER_ERROR_PERCENTAGE_MAX_VALUE;
 		} else {
 			this.errorPercentage = circuitBreakerErrorPercentage;
@@ -67,10 +69,10 @@ public class CircuitBreakerPolicy {
 
 	public void setInterval(int circuitBreakerInterval) {
 		if (circuitBreakerInterval < CIRCUIT_BREAKER_SILDING_WINDOW_MIN_VALUE) {
-			logger.error("熔断设置中的Interval时间必须大于5秒");
+			LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT,"熔断设置中的Interval时间必须大于5秒");
 			this.interval = CIRCUIT_BREAKER_SILDING_WINDOW_MIN_VALUE;
 		} else if (circuitBreakerInterval > CIRCUIT_BREAKER_SILDING_WINDOW_MAX_VALUE) {
-			logger.error("熔断设置中的Interval时间必须小于600秒");
+			LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT,"熔断设置中的Interval时间必须小于600秒");
 			this.interval = CIRCUIT_BREAKER_SILDING_WINDOW_MAX_VALUE;
 		} else {
 			this.interval = circuitBreakerInterval;
@@ -92,10 +94,10 @@ public class CircuitBreakerPolicy {
 
 	public void setSleepWindow(int circuitBreakerSleepWindow) {
 		if (circuitBreakerSleepWindow < CIRCUIT_BREAKER_SLEEP_WINDOW_MIN_VALUE) {
-			logger.error("熔断设置中的Sleep Window时间必须大于5秒");
+			LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT,"熔断设置中的Sleep Window时间必须大于5秒");
 			this.sleepWindow = CIRCUIT_BREAKER_SLEEP_WINDOW_MIN_VALUE;
 		} else if (circuitBreakerSleepWindow > CIRCUIT_BREAKER_SLEEP_WINDOW_MAX_VALUE) {
-			logger.error("熔断设置中的Sleep Window时间必须小于600秒");
+			LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT,"熔断设置中的Sleep Window时间必须小于600秒");
 			this.sleepWindow = CIRCUIT_BREAKER_SLEEP_WINDOW_MAX_VALUE;
 		} else {
 			this.sleepWindow = circuitBreakerSleepWindow;

@@ -20,6 +20,8 @@ package com.vip.pallas.search.launch;
 import java.util.Locale;
 
 import com.vip.pallas.search.rampup.RampupCounter;
+import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.search.utils.SearchLogEvent;
 import org.elasticsearch.common.Booleans;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +41,7 @@ public class Startup {
 		try {
 			start();
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			LogUtils.error(logger, SearchLogEvent.INIT_EVENT, e.getMessage(), e);
 			System.exit(1);
 		}
 	}
@@ -52,31 +54,31 @@ public class Startup {
 
 		StartCheckUtil.add2CheckList(StartCheckUtil.StartCheckItem.PORT);
 		prepareSysProps();
-		
-		logger.info("Gateway Application Start...");
-		logger.info("init zuul ...");
+
+		LogUtils.info(logger, SearchLogEvent.INIT_EVENT, "Gateway Application Start...");
+		LogUtils.info(logger, SearchLogEvent.INIT_EVENT, "init zuul ...");
 		BootStrap.initZuul();
 
-		logger.info("init trace ...");
+		LogUtils.info(logger, SearchLogEvent.INIT_EVENT, "init trace ...");
 		TraceAop.instance().start();
 
-		logger.info("start upload info timmer ...");
+		LogUtils.info(logger, SearchLogEvent.INIT_EVENT, "start upload info timmer ...");
 		new UploadInfoService().startUploadTimmer();
 
-		logger.info("start timeout retry checker ...");
+		LogUtils.info(logger, SearchLogEvent.INIT_EVENT, "start timeout retry checker ...");
 		TimeoutRetryController.start();
 
-		logger.info("init cache service ...");
+		LogUtils.info(logger, SearchLogEvent.INIT_EVENT, "init cache service ...");
 		try{
 			PallasCacheFactory.getCacheService().initCache();
 		}catch(Exception ex){
-			logger.error(ex.getMessage(), ex);
+			LogUtils.error(logger, SearchLogEvent.INIT_EVENT, ex.getMessage(), ex);
 		}
 
-		logger.info("start index rampup counter ...");
+		LogUtils.info(logger, SearchLogEvent.INIT_EVENT, "start index rampup counter ...");
 		RampupCounter.start();
-		
-		logger.info("start netty ...");
+
+		LogUtils.info(logger, SearchLogEvent.INIT_EVENT, "start netty ...");
 		final PallasNettyServer gatewayServer = new PallasNettyServer();
 		gatewayServer.startServer(PallasSearchProperties.PALLAS_SEARCH_PORT); // 启动HTTP容器
 	}
@@ -85,12 +87,12 @@ public class Startup {
 	 *  System properties default reset
 	 */
 	private static void prepareSysProps(){
-		logger.info("Set default locale language[en] ...");
+		LogUtils.info(logger, SearchLogEvent.INIT_EVENT, "Set default locale language[en] ...");
 		Locale.setDefault(Locale.ENGLISH);
 	}
 
 	public static void fail(String message) {
-		logger.info("Error: " + message);
+		LogUtils.info(logger, SearchLogEvent.INIT_EVENT, "Error: " + message);
 		System.exit(-1);
 	}
     

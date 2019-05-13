@@ -17,6 +17,7 @@
 
 package com.vip.pallas.search.filter.post;
 
+import com.vip.pallas.search.utils.LogUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +50,7 @@ public class ResponseSendFilter extends AbstractFilter {
 	public void run(AbstractFilterContext filterContext, SessionContext sessionContext) {
 		// 保证只会发送一次
 		if (sessionContext.isBodySend()) {
-			logger.error("body sent, close channel", sessionContext.getThrowable());
+			LogUtils.error(logger, sessionContext.getRequest().getTemplateId(), "body sent, close channel", sessionContext.getThrowable());
 			sessionContext.getRequest().closeChannle();
 			return;
 		}
@@ -68,7 +69,7 @@ public class ResponseSendFilter extends AbstractFilter {
 			// 发送信息
 			sessionContext.getRequest().writeAndFlush(fullResponse);
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			LogUtils.error(logger, sessionContext.getRequest().getTemplateId(), e.getMessage(), e);
 			sessionContext.getRequest().closeChannle();
 		} finally {
 			// 记录mercury日志

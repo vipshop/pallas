@@ -17,6 +17,8 @@
 
 package com.vip.pallas.search.filter;
 
+import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.search.utils.SearchLogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,7 +92,7 @@ public class HttpProtocolCheckFilter extends AbstractFilter {
 			try {
 				request.getCookieMap();
 			} catch (Throwable e) {
-				logger.error(e.getMessage(), e);
+				LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT, e.getMessage(), e);
 				PallasRunner.errorProcess(sessionContext, new HttpCodeErrorPallasException(e.getMessage(),
 						HttpCode.HTTP_PRECONDITION_FAILED, className, classMethod));
 				// 关闭掉channel

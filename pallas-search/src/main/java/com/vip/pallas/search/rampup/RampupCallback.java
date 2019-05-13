@@ -18,6 +18,8 @@
 package com.vip.pallas.search.rampup;
 
 import com.vip.pallas.search.model.IndexRampup;
+import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.search.utils.SearchLogEvent;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
@@ -57,17 +59,18 @@ public class RampupCallback implements FutureCallback<HttpResponse> {
             }
             rampupCounterMap.get(versionId).incrementAndGet();
         }else{
-            LOGGER.error("index rampup error response with {}，targetHost: {}, requestUrl: {}, indexName: {}, clusterId: {}", statusLine.getReasonPhrase(), targetHost.toHostString(), requestUrl, rampup.getFullIndexName(), clusterId);
+            LogUtils.error(LOGGER, SearchLogEvent.RAMPUP_EVENT,
+					"index rampup error response with {}，targetHost: {}, requestUrl: {}, indexName: {}, clusterId: {}", statusLine.getReasonPhrase(), targetHost.toHostString(), requestUrl, rampup.getFullIndexName(), clusterId);
         }
     }
 
     @Override
     public void failed(Exception e) {
-        LOGGER.error("index rampup request failed cause by {}，targetHost: {}, requestUrl: {}, indexName: {}, clusterId: {}", e.getMessage(), targetHost.toHostString(), requestUrl, rampup.getFullIndexName(), clusterId, e);
+		LogUtils.error(LOGGER, SearchLogEvent.RAMPUP_EVENT, "index rampup request failed cause by {}，targetHost: {}, requestUrl: {}, indexName: {}, clusterId: {}", e.getMessage(), targetHost.toHostString(), requestUrl, rampup.getFullIndexName(), clusterId, e);
     }
 
     @Override
     public void cancelled() {
-        LOGGER.error("index rampup request cancelled，targetHost: {}, requestUrl: {}, indexName: {}, clusterId: {}", targetHost.toHostString(), requestUrl, rampup.getFullIndexName(), clusterId);
+		LogUtils.error(LOGGER, SearchLogEvent.RAMPUP_EVENT, "index rampup request cancelled，targetHost: {}, requestUrl: {}, indexName: {}, clusterId: {}", targetHost.toHostString(), requestUrl, rampup.getFullIndexName(), clusterId);
     }
 }

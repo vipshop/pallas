@@ -22,6 +22,8 @@ import java.net.UnknownHostException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.search.utils.SearchLogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +38,8 @@ import com.vip.pallas.utils.PallasBasicProperties;
 
 import io.netty.handler.codec.http.HttpHeaders.Names;
 import io.netty.util.internal.InternalThreadLocalMap;
+
+import javax.websocket.Session;
 
 public class MonitorAccessLog {
 	private static Logger logger = LoggerFactory.getLogger(MonitorAccessLog.class);
@@ -66,7 +70,7 @@ public class MonitorAccessLog {
 				hostname = inetAddress.getHostName();
 			}
 		} catch (UnknownHostException e) {
-			logger.error(e.getMessage(), e);
+			LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT, e.getMessage(), e);
 		}
 	}
 
@@ -183,7 +187,7 @@ public class MonitorAccessLog {
 				.append('\t').append(wrapValue(vDomainName))
 				.append('\t').append(wrapValue(traceId));
 
-		executor.submit(() -> logger.info(accessLog.toString()));
+		executor.submit(() -> LogUtils.info(logger, templateId, accessLog.toString()));
 	}
 
 	private String wrapValue(String value) {

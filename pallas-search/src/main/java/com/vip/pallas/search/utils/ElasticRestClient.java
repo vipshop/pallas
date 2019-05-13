@@ -85,7 +85,7 @@ public class ElasticRestClient {
 				RestClient restClient = RestClient.builder(hosts.toArray(new HttpHost[] {}))
 						.setRequestConfigCallback((RequestConfig.Builder requestConfigBuilder) -> requestConfigBuilder.setConnectTimeout(5000).setSocketTimeout(60000)).setMaxRetryTimeoutMillis(30000).build();
 				clients.put(address, restClient);
-				logger.info("init restClient with address:{} successfully.", address);
+				LogUtils.info(logger, SearchLogEvent.NORMAL_EVENT, "init restClient with address:{} successfully.", address);
 				return restClient;
 			}
 		}
@@ -119,7 +119,7 @@ public class ElasticRestClient {
 
 				TransportClient client = new PreBuiltTransportClient(settings).addTransportAddresses(hostList);
 				nativeClients.put(address, client);
-				logger.info("init nativeClient with address:{} successfully.", address);
+				LogUtils.info(logger, SearchLogEvent.NORMAL_EVENT, "init nativeClient with address:{} successfully.", address);
 				return client;
 			}
 		}

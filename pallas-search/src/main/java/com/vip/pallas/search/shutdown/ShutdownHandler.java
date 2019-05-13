@@ -20,6 +20,8 @@ package com.vip.pallas.search.shutdown;
 import java.util.Date;
 import java.util.List;
 
+import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.search.utils.SearchLogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +54,7 @@ public class ShutdownHandler extends Thread {
 			System.out.println("shutdown now, wait 31s for lb server to discover.");// NOSONAR
 			Thread.sleep(PallasSearchProperties.HEALTH_INVALID_TIME);
 		} catch (Exception e) {//because it's shuting down
-			logger.error(e.toString(), e);
+			LogUtils.error(logger, SearchLogEvent.SHUTDOWN_EVENT,e.toString(), e);
 		}
 		ServerStatus.offline.set(true);
 		shutdownFilters();
@@ -79,7 +81,7 @@ public class ShutdownHandler extends Thread {
 			try{
 				filter.shutdown();
 			}catch(Exception e){
-				logger.error(e.getMessage(), e);
+				LogUtils.error(logger, SearchLogEvent.SHUTDOWN_EVENT,e.getMessage(), e);
 			}
 		}
 	}
@@ -87,7 +89,7 @@ public class ShutdownHandler extends Thread {
 		server.shutdownWorkerGroup();
 		while (working) {
 			if (server.isWorkerGroupShuttingDown()) {
-				logger.info("WorkerGroup is shutdown.");
+				LogUtils.info(logger, SearchLogEvent.SHUTDOWN_EVENT,"WorkerGroup is shutdown.");
 				System.out.println(new Date() + " WorkerGroup is shutdown.");// NOSONAR
 
 				break;
@@ -96,7 +98,7 @@ public class ShutdownHandler extends Thread {
 			try {
 				Thread.sleep(500);
 			} catch (InterruptedException ignore) {
-				logger.info("Thread is interrupted.");
+				LogUtils.info(logger, SearchLogEvent.SHUTDOWN_EVENT,"Thread is interrupted.");
 				Thread.currentThread().interrupt();
 				working = false;
 			}
@@ -109,7 +111,7 @@ public class ShutdownHandler extends Thread {
 		server.shutdownBossGroup();
 		while (working) {
 			if (server.isBossGroupShuttingDown()) {
-				logger.info("BossGroup is shutdown.");
+				LogUtils.info(logger, SearchLogEvent.SHUTDOWN_EVENT, "BossGroup is shutdown.");
 				System.out.println(new Date() + " BossGroup is shutdown.");// NOSONAR
 				break;
 			}

@@ -18,6 +18,8 @@
 package com.vip.pallas.search.service.impl;
 
 
+import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.search.utils.SearchLogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,16 +38,16 @@ public class RestServiceImpl {
 
 	@RequestConfig(url="/_py/update_routing")
 	public FullHttpResponse updateRouting(PallasRequest request) {
-		logger.info("received update routing command.");
+		LogUtils.info(logger, SearchLogEvent.NORMAL_EVENT, "received update routing command.");
 
 		try{
 			PallasCacheFactory.getCacheService().refreshRouting();
 		}catch(Exception e){
-			logger.error(e.toString(), e);
+			LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT, e.toString(), e);
 			throw e;
 		}
 
-		logger.info("update routing finished!");
+		LogUtils.info(logger, SearchLogEvent.NORMAL_EVENT, "update routing finished!");
 
 		return new DefaultFullHttpResponse(
 				HttpVersion.HTTP_1_1,

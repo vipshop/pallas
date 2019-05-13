@@ -17,6 +17,8 @@
 
 package com.vip.pallas.search.filter.common;
 
+import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.search.utils.SearchLogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +52,7 @@ public class PallasRunner {
 			// 说明在处理错误当中，又发生了错误(该方法被调用了两次)，则直接到发送数据的地方
 			if (throwable != null) {
 				if (t != null) {
-					logger.error("", t);
+					LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT, "", t);
 				}
 				DefaultFilterPipeLine.getInstance().get(ResponseSendFilter.DEFAULT_NAME).fireSelf(sessionContext);
 			} else { // 有错误，则将指向errorFilter进行处理
@@ -59,7 +61,7 @@ public class PallasRunner {
 			}
 
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT, e.getMessage(), e);
 			sessionContext.setHttpCode(HttpCode.HTTP_INTERNAL_SERVER_ERROR);
 			// 直接打印错误
 			DefaultFilterPipeLine.getInstance().get(ResponseSendFilter.DEFAULT_NAME).fireSelf(sessionContext);

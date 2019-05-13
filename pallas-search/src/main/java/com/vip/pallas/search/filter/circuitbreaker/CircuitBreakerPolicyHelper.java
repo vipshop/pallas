@@ -22,6 +22,8 @@ package com.vip.pallas.search.filter.circuitbreaker;
 
 import java.util.Map;
 
+import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.search.utils.SearchLogEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +54,7 @@ public class CircuitBreakerPolicyHelper {
 
 			CircuitBreakerPolicyHelper.circuitBreakerPolicyMap.put(key, newPolicy);
 
-			logger.info("【circuitBreaker】CircuitBreakerPolicy changed from {} to {}", oldPolicy, newPolicy);
+			LogUtils.info(logger, SearchLogEvent.NORMAL_EVENT, "【circuitBreaker】CircuitBreakerPolicy changed from {} to {}", oldPolicy, newPolicy);
 		}
 	}
 
@@ -67,7 +69,7 @@ public class CircuitBreakerPolicyHelper {
 		try {
 			return JSON.parseObject(circuitBreakerPolicyContent, CircuitBreakerPolicy.class);
 		} catch (Exception ex) {
-			logger.error("【circuitBreaker】Wrong json format for the circuit breaker definition:"
+			LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT, "【circuitBreaker】Wrong json format for the circuit breaker definition:"
 					+ circuitBreakerPolicyContent, ex);
 			return new CircuitBreakerPolicy();
 		}

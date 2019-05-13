@@ -66,7 +66,7 @@ public class PallasTransportClient {
 							transportClient.addTransportAddress(new InetSocketTransportAddress(
 									InetAddress.getByName(ipAndPortArray[0]), Integer.parseInt(ipAndPortArray[1])));
 						} catch (UnknownHostException e) {
-							LOGGER.error(e.getMessage(), e);
+							LogUtils.error(LOGGER, SearchLogEvent.NORMAL_EVENT, e.getMessage(), e);
 						}
 					}
 					TRANSPORT_CLIENT_MAP.put(clusterName, transportClient);

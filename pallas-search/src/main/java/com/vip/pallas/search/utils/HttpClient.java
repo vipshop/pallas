@@ -45,13 +45,13 @@ public class HttpClient {
 			CloseableHttpResponse httpResponse = httpClient.execute(httpDelete);
 			return getResponseBody(httpResponse, urlStr);
 		} catch (IOException e) {
-			logger.error(e.getClass() + " " + e.getMessage(), e);
+			LogUtils.error(logger, SearchLogEvent.IO_EVENT, e.getClass() + " " + e.getMessage(), e);
             throw e;
         } finally {
             try {
                 httpClient.close();
             } catch (IOException e) {
-            	logger.error(e.getClass() + " " + e.getMessage(), e);
+				LogUtils.error(logger, SearchLogEvent.IO_EVENT, e.getClass() + " " + e.getMessage(), e);
             }
         }
 	}
@@ -69,13 +69,13 @@ public class HttpClient {
             CloseableHttpResponse httpResponse = httpClient.execute(httpPost);
             return getResponseBody(httpResponse, urlStr);
         } catch (IOException e) {
-			logger.error(e.getClass() + " " + e.getMessage(), e);
+			LogUtils.error(logger, SearchLogEvent.IO_EVENT, e.getClass() + " " + e.getMessage(), e);
             throw e;
         } finally {
             try {
                 httpClient.close();
             } catch (IOException e) {
-				logger.error(e.getClass() + " " + e.getMessage(), e);
+				LogUtils.error(logger, SearchLogEvent.IO_EVENT, e.getClass() + " " + e.getMessage(), e);
             }
         }
 	}
@@ -98,13 +98,13 @@ public class HttpClient {
             	throw new Exception("httpGet error");
             }
         } catch (IOException e) {
-			logger.error(e.getClass() + " " + e.getMessage(), e);
+			LogUtils.error(logger, SearchLogEvent.IO_EVENT, e.getClass() + " " + e.getMessage(), e);
             throw e;
         } finally {
             try {
                 httpClient.close();
             } catch (IOException e) {
-            	logger.error(e.getClass() + " " + e.getMessage(), e);
+				LogUtils.error(logger, SearchLogEvent.IO_EVENT, e.getClass() + " " + e.getMessage(), e);
             }
         }
 	}

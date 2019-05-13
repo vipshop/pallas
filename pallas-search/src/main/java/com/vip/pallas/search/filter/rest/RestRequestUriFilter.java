@@ -24,6 +24,8 @@ import com.vip.pallas.search.filter.route.RouteFilter;
 import com.vip.pallas.search.http.PallasRequest;
 import com.vip.pallas.search.model.ServiceInfo;
 
+import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.search.utils.SearchLogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +51,7 @@ public class RestRequestUriFilter extends AbstractFilter {
 				String rampupIndexName = targetGroupTitle.substring(targetGroupTitle.indexOf("index:")+6, targetGroupTitle.lastIndexOf("}}")).trim();
 				uri = uri.replaceFirst("/" + indexName + "/", "/" + rampupIndexName + "/");
 			} catch (Exception ignore) {
-				logger.error(ignore.getMessage());
+				LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT, ignore.getMessage());
 			}
 		}
 		sessionContext.setRestRequestUri(uri);

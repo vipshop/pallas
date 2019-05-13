@@ -23,6 +23,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.search.utils.SearchLogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +67,7 @@ public class CircuitBreakerCounterCleanupScheduler {
 				scheduledExecutor.awaitTermination(5, TimeUnit.SECONDS);
 			}
 		} catch (Exception ex) {
-			logger.error("【circuitBreaker】CircuitBreakerCleanupScheduler reschedule has error!", ex);
+			LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT, "【circuitBreaker】CircuitBreakerCleanupScheduler reschedule has error!", ex);
 		}
 		init(circuitBreakerService);
 	}
@@ -82,7 +84,7 @@ public class CircuitBreakerCounterCleanupScheduler {
 			try {
 				long startTime = System.currentTimeMillis();
 				String beginCleanUpMsg = "Begin CircuitBreakerCounterCleanupTask cleanup counter";
-				logger.info(beginCleanUpMsg);
+				LogUtils.info(logger, SearchLogEvent.NORMAL_EVENT,beginCleanUpMsg);
 				int count = 0;
 				for (Iterator<Map.Entry<String, CircuitBreakerCounter>> it = myCircuitBreakerService
 						.getGroupInvokeCounterMap().entrySet().iterator(); it.hasNext();) {
@@ -95,11 +97,11 @@ public class CircuitBreakerCounterCleanupScheduler {
 				}
 				// myCircuitBreakerService.getServiceInvokeHashKeysMap().clear();// 每天清一次服务和hash key集合的映射，保证超过服务的hash
 				// key阈值个数的服务可以恢复熔断功能
-				logger.info(
+				LogUtils.info(logger, SearchLogEvent.NORMAL_EVENT,
 						"【circuitBreaker】Finish CircuitBreakerCounterCleanupTask cleanup counter count : {} , used time : {} ms",
 						count, System.currentTimeMillis() - startTime);
 			} catch (Exception ex) {
-				logger.error("【circuitBreaker】CircuitBreakerCounterCleanupTask has error!", ex);
+				LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT,"【circuitBreaker】CircuitBreakerCounterCleanupTask has error!", ex);
 			}
 		}
 

@@ -20,6 +20,8 @@ package com.vip.pallas.search.trace;
 import java.util.Iterator;
 import java.util.ServiceLoader;
 
+import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.search.utils.SearchLogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,16 +48,16 @@ public abstract class TraceAop {
 			Iterator<TraceAop> iter = loader.iterator();
 			while (iter.hasNext()) {
 				instance = iter.next();
-				logger.info("TraceAop implementation found: {}", instance.getClass().getName());
+				LogUtils.info(logger, SearchLogEvent.TRACE_EVENT, "TraceAop implementation found: {}", instance.getClass().getName());
 				return;
 			}
 			// log error, fallback
 			instance = new DefaultTraceAop();
-			logger.error("TraceAop implementation not found, fallback to: {}", instance.getClass().getName());
+			LogUtils.error(logger, SearchLogEvent.TRACE_EVENT, "TraceAop implementation not found, fallback to: {}", instance.getClass().getName());
 		} catch (Throwable e) {
 			// log error, fallback
 			instance = new DefaultTraceAop();
-			logger.error("TraceAop implementation not found, fallback to: {}", instance.getClass().getName());
+			LogUtils.error(logger, SearchLogEvent.TRACE_EVENT, "TraceAop implementation not found, fallback to: {}", instance.getClass().getName());
 		}
 
 	}

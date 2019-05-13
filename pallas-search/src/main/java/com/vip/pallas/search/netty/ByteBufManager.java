@@ -17,6 +17,8 @@
 
 package com.vip.pallas.search.netty;
 
+import com.vip.pallas.search.utils.SearchLogEvent;
+import com.vip.pallas.search.utils.LogUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,7 +88,7 @@ public class ByteBufManager {
 	public static void release(ByteBuf buf, String message) {
 		if (buf != null && buf.refCnt() > 0) {
 			buf.release();
-			logger.info(message);
+			LogUtils.info(logger, SearchLogEvent.NORMAL_EVENT, message);
 		}
 	}
 }

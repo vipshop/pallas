@@ -52,7 +52,7 @@ public class ElasticSearchStub {
         try {
             response = client.performRequest("GET", endpoint);
         } catch (IOException e) {
-			LOGGER.error("invoker error by clusterHttpAddress: {}, cause: " + e, clusterHttpAddress);
+			LogUtils.error(LOGGER, SearchLogEvent.NORMAL_EVENT, "invoker error by clusterHttpAddress: {}, cause: " + e, clusterHttpAddress);
             return Collections.EMPTY_LIST;
         }
 
@@ -64,7 +64,7 @@ public class ElasticSearchStub {
             }
             return aliasesList;
         } catch (Exception e) {
-			LOGGER.error("invoker error by clusterHttpAddress: {}, cause: " + e, clusterHttpAddress);
+			LogUtils.error(LOGGER, SearchLogEvent.NORMAL_EVENT, "invoker error by clusterHttpAddress: {}, cause: " + e, clusterHttpAddress);
             return Collections.EMPTY_LIST;
         }
     }

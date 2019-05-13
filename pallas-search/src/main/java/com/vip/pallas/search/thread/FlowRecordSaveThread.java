@@ -20,13 +20,11 @@ package com.vip.pallas.search.thread;
 import com.vip.pallas.search.model.FlowRecord;
 import com.vip.pallas.search.filter.route.FlowRecordFilter;
 import com.vip.pallas.search.service.PallasCacheFactory;
+import com.vip.pallas.search.utils.*;
 import com.vip.pallas.thread.ExtendableThreadPoolExecutor;
 import com.vip.pallas.thread.PallasThreadFactory;
 import com.vip.pallas.thread.TaskQueue;
-import com.vip.pallas.search.utils.HttpClient;
-import com.vip.pallas.search.utils.JsonUtil;
 import com.vip.pallas.utils.PallasBasicProperties;
-import com.vip.pallas.search.utils.PallasTransportClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +94,7 @@ public class FlowRecordSaveThread implements Runnable  {
 				}
 			}
 		}catch(Exception e){
-			LOGGER.error(e.toString(), e);
+			LogUtils.error(LOGGER, SearchLogEvent.NORMAL_EVENT, e.toString(), e);
 		}finally {
 			cleanQueueWhenExit();
 		}

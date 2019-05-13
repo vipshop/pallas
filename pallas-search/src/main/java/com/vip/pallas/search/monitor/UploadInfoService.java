@@ -22,6 +22,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import com.vip.pallas.search.utils.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,9 +30,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.vip.pallas.search.model.SearchServer;
 import com.vip.pallas.search.netty.http.server.PallasNettyServer;
-import com.vip.pallas.search.utils.HttpClient;
-import com.vip.pallas.search.utils.JsonUtil;
-import com.vip.pallas.search.utils.PallasSearchProperties;
 
 public class UploadInfoService {
 
@@ -68,12 +66,12 @@ public class UploadInfoService {
 		try {
 			SearchServer server = new SearchServer(takeTraffic, info);
 			if (server.getInfo() == null) {
-				logger.warn("server {} 's takeTraffic property is set to {}", server.getIpport(), server.getTakeTraffic());
+				LogUtils.warn(logger, SearchLogEvent.NORMAL_EVENT, "server {} 's takeTraffic property is set to {}", server.getIpport(), server.getTakeTraffic());
 			}
 			String serverInfo = JsonUtil.toJson(server);
 			HttpClient.httpPost(upsertUrl, serverInfo);
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT, e.getMessage(), e);
 		}
 	}
 	

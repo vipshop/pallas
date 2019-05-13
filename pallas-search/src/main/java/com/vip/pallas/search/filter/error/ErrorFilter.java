@@ -17,6 +17,8 @@
 
 package com.vip.pallas.search.filter.error;
 
+import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.search.utils.SearchLogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,7 +88,7 @@ public class ErrorFilter extends AbstractFilter {
 			return;
 		}
 
-		logger.error(t.getMessage(), t);
+		LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT, t.getMessage(), t);
 
 	}
 

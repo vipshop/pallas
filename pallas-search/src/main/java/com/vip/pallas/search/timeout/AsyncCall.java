@@ -26,6 +26,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.vip.pallas.search.utils.LogUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
@@ -130,7 +131,7 @@ public class AsyncCall {
 							targetHost = RestInvokerFilter.constractAtargetHost(ip);
 							thisRequestUrl = replaceUriValue(thisRequestUrl, "preference=_prefer_nodes:", group.getPreferNodes());
 						} catch (Exception e) {
-							LOGGER.error(e.getMessage(), e);
+							LogUtils.error(LOGGER, templateId, e.getMessage(), e);
 						}
 					}
 				}
@@ -149,9 +150,9 @@ public class AsyncCall {
 						.build());
 				// record the start time.
 				startCallTime = System.currentTimeMillis();
-				LOGGER.info("{}th request routes to: {}, {}", count, targetHost.getHostName(), urlWithTimeout);
+				LogUtils.info(LOGGER, templateId, "{}th request routes to: {}, {}", count, targetHost.getHostName(), urlWithTimeout);
 				if (count > 1) {
-					LOGGER.info("query templateId:{} timeout, now start {}th try with real timeout = {}, request: {}",
+					LogUtils.info(LOGGER, templateId, "query templateId:{} timeout, now start {}th try with real timeout = {}, request: {}",
 							templateId, count, timeoutMillis,
 							targetHost.getHostName() + ":" + targetHost.getPort() + urlWithTimeout);
 				}
@@ -219,11 +220,11 @@ public class AsyncCall {
 	public void logRetryStatisticsIfNeeded(boolean failed) {
 		if (executeCount.get() > 1) {
 			if (failed) {
-				LOGGER.info("{} retried for {} times but failed.", templateId, executeCount.get());
+				LogUtils.info(LOGGER, templateId, "{} retried for {} times but failed.", templateId, executeCount.get());
 			} else {
 				String finalURI = (String) httpContext.getAttribute("finalURI");
 				httpContext.removeAttribute("finalURI");
-				LOGGER.info("{} retried for {} times and winner is {}", templateId, executeCount.get(),
+				LogUtils.info(LOGGER, templateId, "{} retried for {} times and winner is {}", templateId, executeCount.get(),
 						finalURI);
 			}
 		}

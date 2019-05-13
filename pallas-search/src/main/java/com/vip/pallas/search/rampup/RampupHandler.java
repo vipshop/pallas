@@ -22,7 +22,9 @@ import com.vip.pallas.search.filter.rest.RestInvokerFilter;
 import com.vip.pallas.search.model.IndexRampup;
 import com.vip.pallas.search.service.PallasCacheFactory;
 import com.vip.pallas.search.utils.HttpClientUtil;
+import com.vip.pallas.search.utils.LogUtils;
 import com.vip.pallas.search.utils.PallasSearchProperties;
+import com.vip.pallas.search.utils.SearchLogEvent;
 import com.vip.pallas.thread.ExtendableThreadPoolExecutor;
 import com.vip.pallas.thread.PallasThreadFactory;
 import com.vip.pallas.thread.TaskQueue;
@@ -71,7 +73,7 @@ public class RampupHandler {
                     .setIoThreadCount(PallasSearchProperties.CONNECTION_IO_THREAD_NUM).build();
             ioReactor = new DefaultConnectingIOReactor(config);
         } catch (IOReactorException e) {
-            LOGGER.error(e.getMessage(), e);
+            LogUtils.error(LOGGER, SearchLogEvent.RAMPUP_EVENT,e.getMessage(), e);
             throw new RuntimeException(e);// Noncompliant
         }
 
@@ -126,7 +128,7 @@ public class RampupHandler {
                     }
                 }
             }catch (Exception e){
-                LOGGER.error("index rampup error cause by {}，targetHost: {}, requestUrl: {}, indexName: {}, clusterId: {}", e.getMessage(), targetHost, requestUrl, indexName, clusterId, e);
+                LogUtils.error(LOGGER, SearchLogEvent.RAMPUP_EVENT,"index rampup error cause by {}，targetHost: {}, requestUrl: {}, indexName: {}, clusterId: {}", e.getMessage(), targetHost, requestUrl, indexName, clusterId, e);
             }
         });
     }
@@ -140,7 +142,7 @@ public class RampupHandler {
             try {
                 httpClient.close();
             } catch (IOException e) {
-                LOGGER.error(e.getMessage(), e);
+                LogUtils.error(LOGGER, SearchLogEvent.RAMPUP_EVENT,e.getMessage(), e);
             }
         }
     }

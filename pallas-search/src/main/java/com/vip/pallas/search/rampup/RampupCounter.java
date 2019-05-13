@@ -21,6 +21,8 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.vip.pallas.search.model.IndexRampup;
 import com.vip.pallas.search.service.PallasCacheFactory;
 import com.vip.pallas.search.utils.HttpClient;
+import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.search.utils.SearchLogEvent;
 import com.vip.pallas.utils.PallasBasicProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -68,7 +70,7 @@ public class RampupCounter implements Runnable {
                 });
             }
         } catch (Exception e) {
-            LOGGER.error(e.toString(), e);
+            LogUtils.error(LOGGER, SearchLogEvent.RAMPUP_EVENT, e.toString(), e);
         }
     }
 
@@ -86,7 +88,7 @@ public class RampupCounter implements Runnable {
                     throw new Exception("error post rampup increment, cause by : " + result);
                 }
             } catch (Exception e){
-                LOGGER.error(e.toString(), e);
+				LogUtils.error(LOGGER, SearchLogEvent.RAMPUP_EVENT, e.toString(), e);
             }
         }
     }

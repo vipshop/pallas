@@ -20,6 +20,8 @@ package com.vip.pallas.search.netty.http.handler;
 import java.io.IOException;
 import java.io.InputStream;
 
+import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.search.utils.SearchLogEvent;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
@@ -237,9 +239,9 @@ public class SendDirectlyCallback implements FutureCallback<HttpResponse> {
 
 	protected void handleFailed(Exception ex, int httpCode) {
 		doCircuitBreaker();
-		logger.error("request failed: " + ((HttpClientContext) httpContext).getTargetHost().toHostString()
+		LogUtils.error(logger, sessionContext.getRequest().getTemplateId(),"request failed: " + ((HttpClientContext) httpContext).getTargetHost().toHostString()
 				+ " " + ((HttpClientContext) httpContext).getRequest().getRequestLine());
-		logger.error(ex.toString(), ex);
+		LogUtils.error(logger, sessionContext.getRequest().getTemplateId(), ex.toString(), ex);
 		TimeoutRetryController.notifyGovernor();
 		initEndUpstreamTimeInMonitorAccessLog();
 		sessionContext.setHttpCode(httpCode);
@@ -264,7 +266,7 @@ public class SendDirectlyCallback implements FutureCallback<HttpResponse> {
 		}
 		REST_INVOKER_ERROR_EXCEPTION.setMessage("Cancelled");
 		PallasRunner.errorProcess(sessionContext, REST_INVOKER_ERROR_EXCEPTION);
-		logger.error("Request cancelled.");
+		LogUtils.error(logger, sessionContext.getRequest().getTemplateId(), "Request cancelled.");
 	}
 
 	@Override

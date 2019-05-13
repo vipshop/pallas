@@ -21,6 +21,8 @@ import com.google.common.cache.LoadingCache;
 import com.vip.pallas.search.cache.RoutingCache;
 import com.vip.pallas.search.model.*;
 import com.vip.pallas.search.service.PallasCacheService;
+import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.search.utils.SearchLogEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -152,7 +154,7 @@ public class PallasCacheServiceImpl implements PallasCacheService {
             Map<String, Map<String, String>> map = getCache(INDEX_CLUSTER_PORT);
             return map.get(indexName).get(clusterName);
         } catch (ExecutionException e) {
-            LOGGER.error(e.toString(), e);
+            LogUtils.error(LOGGER, SearchLogEvent.ROUTING_EVENT, e.toString(), e);
         }
         return "9200";
     }
@@ -163,7 +165,7 @@ public class PallasCacheServiceImpl implements PallasCacheService {
             Map<String, String> cacheMap = getCache(CLUSTER_PORT);
             return cacheMap != null ? cacheMap.get(clusterName) : null;
         } catch (ExecutionException e) {
-            LOGGER.error(e.toString(), e);
+			LogUtils.error(LOGGER, SearchLogEvent.ROUTING_EVENT, e.toString(), e);
         }
         return "9200";
     }
@@ -216,7 +218,7 @@ public class PallasCacheServiceImpl implements PallasCacheService {
         try{
             return indexClusterRampupMap.get(indexName).get(clusterId);
         }catch (Exception e){
-            LOGGER.error(e.toString(), e);
+			LogUtils.error(LOGGER, SearchLogEvent.ROUTING_EVENT, e.toString(), e);
             return emptyList();
         }
     }
@@ -288,7 +290,7 @@ public class PallasCacheServiceImpl implements PallasCacheService {
                 return indexMap != null && indexMap.containsKey(clusterName) ? indexMap.get(clusterName) : null;
             }
         } catch (ExecutionException e) {
-            LOGGER.error(e.getMessage(), e);
+			LogUtils.error(LOGGER, SearchLogEvent.ROUTING_EVENT, e.getMessage(), e);
             return null;
         }
         return null;

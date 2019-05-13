@@ -19,6 +19,8 @@ package com.vip.pallas.search.netty.http.server;
 
 import java.util.concurrent.TimeUnit;
 
+import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.search.utils.SearchLogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,12 +88,12 @@ public class PallasNettyServer {
 		addSingalHook();
 
 		UploadInfoService.internalUpload(null, true);
-		logger.info("inform console to take traffic.");
+		LogUtils.info(logger, SearchLogEvent.NORMAL_EVENT, "inform console to take traffic.");
 
-		logger.info("[listen HTTP NoSSL][" + IPUtils.localIp4Str() + ":" + noSSLPort + "]");
+		LogUtils.info(logger, SearchLogEvent.NORMAL_EVENT, "[listen HTTP NoSSL][" + IPUtils.localIp4Str() + ":" + noSSLPort + "]");
 		// Wait until the server socket is closed.
 		channelFuture.channel().closeFuture().sync();
-		logger.info("[stop HTTP NoSSL success]");
+		LogUtils.info(logger, SearchLogEvent.NORMAL_EVENT, "[stop HTTP NoSSL success]");
 
 	}
 

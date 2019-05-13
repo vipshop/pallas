@@ -31,9 +31,7 @@ import com.vip.pallas.search.netty.http.NettyPallasRequest;
 import com.vip.pallas.search.netty.http.server.PallasNettyServer;
 import com.vip.pallas.search.trace.TraceAop;
 import com.vip.pallas.search.trace.TraceAspect;
-import com.vip.pallas.search.utils.ByteUtils;
-import com.vip.pallas.search.utils.ClientIpUtil;
-import com.vip.pallas.search.utils.PallasSearchProperties;
+import com.vip.pallas.search.utils.*;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -163,7 +161,7 @@ public class HttpConnectionHandler extends ChannelInboundHandlerAdapter {
 						String requestBody = byteBuf.toString(CharsetUtil.UTF_8);
 						accessLog.setRequestBody(StringUtils.removeAll(requestBody,"\r|\n|\t"));
 					}catch (Exception e){
-						logger.error("get request body from bytebuf error",e);
+						LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT, "get request body from bytebuf error",e);
 					}
 				}
 				context.setMonitorAccessLog(accessLog);
@@ -178,7 +176,7 @@ public class HttpConnectionHandler extends ChannelInboundHandlerAdapter {
 			// 业务执行代码
 			PallasRunner.run(context);
 		} catch (Throwable t) {
-			logger.error(t.getMessage(), t);
+			LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT, t.getMessage(), t);
 			releaseByteBuf(fullHttpRequest); //NOSONAR
 			if (context != null) {
 				// 设置返回的httpcode
@@ -232,7 +230,7 @@ public class HttpConnectionHandler extends ChannelInboundHandlerAdapter {
 			String detailMessage = cause.getMessage();
 			if(detailMessage != null){
 				if(!detailMessage.contains("reset")){
-					logger.warn("Unexpected IOException from downstream.Throwable Message:" + cause.getMessage());
+					LogUtils.warn(logger, SearchLogEvent.NORMAL_EVENT, "Unexpected IOException from downstream.Throwable Message:" + cause.getMessage());
 				}
 			}
 
@@ -245,7 +243,7 @@ public class HttpConnectionHandler extends ChannelInboundHandlerAdapter {
 			channelRead(ctx, httpRequest);
 			return;
 		} else { // other errors, log.error
-			logger.error("[pallasExceptionCaught][" + ctx.channel().remoteAddress() + " -> "
+			LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT, "[pallasExceptionCaught][" + ctx.channel().remoteAddress() + " -> "
 					+ ctx.channel().localAddress() + "]", cause);
 		}
 		// 错误的上报

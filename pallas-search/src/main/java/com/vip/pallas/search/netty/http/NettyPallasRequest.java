@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.vip.pallas.search.utils.SearchLogEvent;
+import com.vip.pallas.search.utils.LogUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -339,7 +341,7 @@ public class NettyPallasRequest implements PallasRequest {
 					strList.add(attribute.getValue());
 				}
 			} catch (IOException e) {
-				logger.error(e.getMessage(), e);
+				LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT, e.getMessage(), e);
 			}
 		}
 		return postFormParamsMap;
@@ -474,7 +476,7 @@ public class NettyPallasRequest implements PallasRequest {
 		try {
 			channel.writeAndFlush(fullHttpResponse);
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT, e.getMessage(), e);
 			channel.close();
 		}
 	}
@@ -484,7 +486,7 @@ public class NettyPallasRequest implements PallasRequest {
 		try {
 			channel.close();
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT, e.getMessage(), e);
 		}
 
 	}
@@ -527,7 +529,7 @@ public class NettyPallasRequest implements PallasRequest {
 			try {
 				templateId = getHeader("X-PALLAS-SEARCH-TEMPLATE-ID");
 			} catch (Exception e) {
-				logger.error(e.getMessage(), e);
+				LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT, e.getMessage(), e);
 			}
 		}
 		return templateId;
@@ -605,7 +607,7 @@ public class NettyPallasRequest implements PallasRequest {
 		try {
 			return getHeader("X-PALLAS-CLIENT-TOKEN");
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT, e.getMessage(), e);
 			return null;
 		}
 	}

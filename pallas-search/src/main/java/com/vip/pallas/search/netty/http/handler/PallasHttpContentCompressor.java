@@ -19,6 +19,8 @@ package com.vip.pallas.search.netty.http.handler;
 
 import java.util.List;
 
+import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.search.utils.SearchLogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +60,7 @@ public class PallasHttpContentCompressor extends HttpContentCompressor {
 		try {
 			super.encode(ctx, msg, out);
 		} catch (IllegalStateException e) {
-			logger.error(e.getMessage(), e);
+			LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT, e.getMessage(), e);
 			out.add(ReferenceCountUtil.retain(msg));
 		}
 

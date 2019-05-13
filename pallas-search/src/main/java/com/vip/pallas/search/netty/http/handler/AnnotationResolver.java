@@ -21,6 +21,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.search.utils.SearchLogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,11 +39,11 @@ public class AnnotationResolver {
 	            RequestConfig cfg = m.getAnnotation(RequestConfig.class);
 	            if (cfg != null) {
 	            	URL_MAPPING.put(cfg.url(), m);
-	    	        logger.info("export rest url: {} , method: {}.{}", cfg.url(), clazz.getSimpleName(), m.getName());
+					LogUtils.info(logger, SearchLogEvent.NORMAL_EVENT, "export rest url: {} , method: {}.{}", cfg.url(), clazz.getSimpleName(), m.getName());
 	            }
 	        }
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT, e.getMessage(), e);
 		}
 	}
 	

@@ -24,6 +24,8 @@ import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 
+import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.search.utils.SearchLogEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
@@ -83,7 +85,7 @@ public final class RestInvokerFilter extends AbstractFilter {
 					.setIoThreadCount(PallasSearchProperties.CONNECTION_IO_THREAD_NUM).build();
 			ioReactor = new DefaultConnectingIOReactor(config);
 		} catch (IOReactorException e) {
-			logger.error(e.getMessage(), e);
+			LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT, e.getMessage(), e);
 			throw new RuntimeException(e);// Noncompliant
 		}
 
@@ -121,7 +123,7 @@ public final class RestInvokerFilter extends AbstractFilter {
 			try {
 				httpClient.close();
 			} catch (IOException e) {
-				logger.error(e.getMessage(), e);
+				LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT, e.getMessage(), e);
 			}
 		}
 	}
@@ -153,12 +155,12 @@ public final class RestInvokerFilter extends AbstractFilter {
 
 			//#554 pallas-search调用es全链路时间点跟踪
 			sessionContext.setTimestampClientStartExecute(System.currentTimeMillis());
-			
+
 
 			String templateId = pallasRequest.getTemplateId();
 			HttpClientContext httpContext = HttpClientContext.create();
-			
-		
+
+
 			if (templateId != null && newURL.contains("/_search/template")) { // only search template enables  timeout-retry.
 				TemplateWithTimeoutRetry configByIndexNameTemplateName = PallasCacheFactory.getCacheService()
 						.getConfigByTemplateIdAndCluster(templateId, pallasRequest.getLogicClusterId(),
@@ -188,7 +190,7 @@ public final class RestInvokerFilter extends AbstractFilter {
 								null, targetHost, newURL, pallasRequest, null));
 			}
 		} catch (Exception ex) {
-			logger.error(ex.getLocalizedMessage(), ex);
+			LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT, ex.getLocalizedMessage(), ex);
 			throw ex;
 		}
 	}
@@ -256,11 +258,12 @@ public final class RestInvokerFilter extends AbstractFilter {
 					}
 					b = System.currentTimeMillis() - a;
 					if (b > PallasBasicProperties.DEFAULT_PS_SIDE_THRESHOLD) {
-						logger.warn("IdleConnectionEvictor took too much time to close expire connections, took: {}(ms)", b);
+						LogUtils.warn(logger, SearchLogEvent.NORMAL_EVENT,
+								"IdleConnectionEvictor took too much time to close expire connections, took: {}(ms)", b);
 					}
 				}
 			} catch (InterruptedException ex) {
-				logger.error(ex.getMessage(), ex);
+				LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT, ex.getMessage(), ex);
 				Thread.currentThread().interrupt();
 			}
 		}

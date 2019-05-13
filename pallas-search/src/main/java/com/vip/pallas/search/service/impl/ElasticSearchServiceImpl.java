@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.search.utils.SearchLogEvent;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.Response;
@@ -61,7 +63,7 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 				}
 			}
 		} catch (Exception e) {
-			logger.error("getExcludeNodeList by {} error: " + e, clusterAddress);
+			LogUtils.error(logger, SearchLogEvent.ROUTING_EVENT, "getExcludeNodeList by {} error: " + e, clusterAddress);
 		}
 		return emptyList();
 	}
@@ -145,7 +147,7 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 
 			}
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			LogUtils.error(logger, SearchLogEvent.ROUTING_EVENT, e.getMessage(), e);
 		}
 		return emptyList();
 	}

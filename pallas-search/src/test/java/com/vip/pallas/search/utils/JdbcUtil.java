@@ -38,7 +38,7 @@ public class JdbcUtil {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 		} catch (ClassNotFoundException e) {
-			logger.error(e.getMessage(), e);
+			LogUtils.error(logger, SearchLogEvent.JDBC_EVENT, e.getMessage(), e);
 			throw new ExceptionInInitializerError();
 		}
 	}
@@ -49,7 +49,7 @@ public class JdbcUtil {
 			conn = getConnection(ip, port, db, user, password);
 			return true;
 		} catch (SQLException e) {
-			logger.error(e.getClass() + " " + e.getMessage(), e);
+			LogUtils.error(logger, SearchLogEvent.JDBC_EVENT, e.getClass() + " " + e.getMessage(), e);
 			return false;
 		} finally {
 			JdbcUtil.free(conn, null, null);
@@ -67,7 +67,7 @@ public class JdbcUtil {
 		try {
 			return DriverManager.getConnection(url, user, password);
 		} catch (SQLException e) {
-			logger.error("connect db error by url: " + url + " and user: " + user, e);
+			LogUtils.error(logger, SearchLogEvent.JDBC_EVENT, "connect db error by url: " + url + " and user: " + user, e);
 			throw e;
 		}
 	}
@@ -78,7 +78,7 @@ public class JdbcUtil {
 			pstmt = connection.prepareStatement(sql);
 			return pstmt.executeUpdate();
 		} catch (SQLException e) {
-			logger.error(e.toString(), e);
+			LogUtils.error(logger, SearchLogEvent.JDBC_EVENT, e.toString(), e);
 			return 0;
 		} finally {
 			free(connection, pstmt, null);
@@ -91,20 +91,20 @@ public class JdbcUtil {
 				rs.close();
 			}
 		} catch (SQLException e) {
-			logger.error(e.getClass() + " " + e.getMessage(), e);
+			LogUtils.error(logger, SearchLogEvent.JDBC_EVENT,e.getClass() + " " + e.getMessage(), e);
 		} finally {
 			try {
 				if (stmt != null) {
 					stmt.close();
 				}
 			} catch (SQLException e) {
-				logger.error(e.getClass() + " " + e.getMessage(), e);
+				LogUtils.error(logger, SearchLogEvent.JDBC_EVENT,e.getClass() + " " + e.getMessage(), e);
 			} finally {
 				if (conn != null) {
 					try {
 						conn.close();
 					} catch (SQLException e) {
-						logger.error(e.getClass() + " " + e.getMessage(), e);
+						LogUtils.error(logger, SearchLogEvent.JDBC_EVENT,e.getClass() + " " + e.getMessage(), e);
 					}
 				}
 			}

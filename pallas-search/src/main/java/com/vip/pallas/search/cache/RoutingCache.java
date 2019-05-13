@@ -22,9 +22,7 @@ import com.vip.pallas.search.filter.circuitbreaker.CircuitBreakerPolicyHelper;
 import com.vip.pallas.search.model.*;
 import com.vip.pallas.search.service.ElasticSearchService;
 import com.vip.pallas.search.service.impl.ElasticSearchServiceImpl;
-import com.vip.pallas.search.utils.ElasticRestClient;
-import com.vip.pallas.search.utils.HttpClient;
-import com.vip.pallas.search.utils.JsonUtil;
+import com.vip.pallas.search.utils.*;
 import com.vip.pallas.utils.PallasBasicProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.Response;
@@ -91,7 +89,7 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
             lastCache = cacheMap;
             return cacheMap;
         } catch (Exception e) {
-            LOGGER.error(e.toString(), e);
+            LogUtils.error(LOGGER, SearchLogEvent.ROUTING_EVENT, e.toString(), e);
             return lastCache;
         }
     }
@@ -214,7 +212,7 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
                         return Optional.ofNullable(nodeList).orElseGet(Collections::emptyList);
                     }
 					// if sth. goes wrong, keep the former cache rather than the null value.
-					LOGGER.info("getNodeList by {} returns null, keep the former values in cache.",
+					LogUtils.info(LOGGER, SearchLogEvent.ROUTING_EVENT, "getNodeList by {} returns null, keep the former values in cache.",
 							cluster.getHttpAddress());
 					Map<String, List<String>> clusterNodeListMapInCache = (Map<String, List<String>>) cacheMap
 							.get(CLUSTER_NODE_LIST);
@@ -247,7 +245,7 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
 								.orElseGet(Collections::emptyMap);
 					}
 					// if sth. goes wrong, keep the former cache rather than the null value.
-					LOGGER.info("getShards by {} returns null, keep the former values in cache.",
+					LogUtils.info(LOGGER, SearchLogEvent.ROUTING_EVENT, "getShards by {} returns null, keep the former values in cache.",
 							cluster.getHttpAddress());
 					Map<String, Map<String, List<String>>> clusterShardNodeListMapInCache = (Map<String, Map<String, List<String>>>) cacheMap
 							.get(SHARD_NODE_LIST);
@@ -297,7 +295,7 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
                 try {
                     return JsonUtil.readValue(t.getRampUp(), IndexRampup.class);
                 } catch (Exception e) {
-                    LOGGER.error(e.toString(), e);
+                    LogUtils.error(LOGGER, SearchLogEvent.ROUTING_EVENT, e.toString(), e);
                     return new IndexRampup();
                 }
             }).filter(rampup -> rampup != null && rampup.needRampup() && rampup.getIndexId() != null).collect(groupingBy(t -> t.getIndexId()));
@@ -316,8 +314,8 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
                 try {
                     return JsonUtil.readValue(t.getRampUp(), IndexRampup.class);
                 } catch (Exception e) {
-                    LOGGER.error(e.toString(), e);
-                    return new IndexRampup();
+					LogUtils.error(LOGGER, SearchLogEvent.ROUTING_EVENT, e.toString(), e);
+					return new IndexRampup();
                 }
             }));
 
@@ -333,7 +331,7 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
             cacheMap.put(RAMPUP_MAP, rampupMap);
             cacheMap.put(INDEX_CLUSTER_RAMPUP_MAP, indexClusterRampupMap);
         }catch (Exception e){
-            LOGGER.error(e.toString(), e);
+			LogUtils.error(LOGGER, SearchLogEvent.ROUTING_EVENT, e.toString(), e);
         }
     }
 
@@ -393,14 +391,14 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
                     try {
                         indexRouting.setConditionList(IndexRouting.fromXContent(indexRouting.getRoutingsInfo()));
                     } catch (Exception e) {
-                        LOGGER.error(e.toString(), e);
+						LogUtils.error(LOGGER, SearchLogEvent.ROUTING_EVENT, e.toString(), e);
                     }
                 });
                 cacheMap.put(INDEXLEVEL_ROUTING, routingList.stream().filter(r -> r.getType().equals(IndexRouting.ROUTE_TYPE_INDEX)).collect(groupingBy(IndexRouting::getIndexId)));
                 cacheMap.put(CLUSTERLEVEL_ROUTING, routingList.stream().filter(r -> r.getType().equals(IndexRouting.ROUTE_TYPE_CLUSTER)).collect(groupingBy(IndexRouting::getIndexName)));
             }
         } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
+			LogUtils.error(LOGGER, SearchLogEvent.ROUTING_EVENT, e.toString(), e);
         }
     }
 
@@ -415,7 +413,7 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
                     targetGroup.setClusterInfoList(IndexRoutingTargetGroup.fromClusterContent(targetGroup.getClustersInfo()));
 					if (targetGroup.isGroupLevel()) { // calculate the dynamic group
 						if(null == targetGroup.getClusterInfoList() || targetGroup.getClusterInfoList().size() == 0) {
-                            LOGGER.info("indexName: {}, targetGroupName: {}, clusterInfoList is empty", targetGroup.getIndexName(), targetGroup.getName());
+                            LogUtils.info(LOGGER, SearchLogEvent.ROUTING_EVENT, "indexName: {}, targetGroupName: {}, clusterInfoList is empty", targetGroup.getIndexName(), targetGroup.getName());
                         } else {
                             String httpAddress = targetGroup.getClusterInfoList().get(0).getAddress();//StringUtils.substringBetween(targetGroup.getClustersInfo(), "address\":\"", "\"");
                             Map<String, String> nodesInfo = clusterIpIdMap.computeIfAbsent(httpAddress, address -> {
@@ -432,7 +430,7 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
 					}
 
                 } catch (Exception e) {
-                    LOGGER.error(e.toString(), e);
+					LogUtils.error(LOGGER, SearchLogEvent.ROUTING_EVENT, e.toString(), e);
                 }
             });
             cacheMap.put(INDEX_TARGET_GROUP, targetGroupList.stream().collect(groupingBy(IndexRoutingTargetGroup::getIndexId)));
@@ -446,7 +444,7 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
         try {
             response = client.performRequest("GET", "/_cat/nodes");
         } catch (IOException e) {
-			LOGGER.error("getNodeList error by clusterHttpAddress: {}, cause: " + e.getMessage(), clusterHttpAddress);
+			LogUtils.error(LOGGER, SearchLogEvent.ROUTING_EVENT, "getNodeList error by clusterHttpAddress: {}, cause: " + e.getMessage(), clusterHttpAddress);
             return null;
         }
 
@@ -462,7 +460,7 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
             }
             return nodeList;
         } catch (Exception e) {
-			LOGGER.error("getNodeList error by clusterHttpAddress: {}, cause: " + e.getMessage(), clusterHttpAddress);
+			LogUtils.error(LOGGER, SearchLogEvent.ROUTING_EVENT, "getNodeList error by clusterHttpAddress: {}, cause: " + e.getMessage(), clusterHttpAddress);
             return null;
         }
     }
@@ -487,7 +485,7 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
                 return abnormalNodeList.stream().map(node -> node.getNodeIp()).distinct().collect(toList());
             }
         } catch (Exception ignore){
-            LOGGER.error("error", ignore);
+			LogUtils.error(LOGGER, SearchLogEvent.ROUTING_EVENT, "error", ignore);
         }
         return Collections.EMPTY_LIST;
     }

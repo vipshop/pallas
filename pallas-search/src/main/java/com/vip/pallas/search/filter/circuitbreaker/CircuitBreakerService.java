@@ -23,6 +23,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.search.utils.SearchLogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,7 +82,7 @@ public class CircuitBreakerService {
 
 			// 若half-open 状态下的服务instance被调用次数超过取样的sample数，没有达到失败阈值被再次熔断，则从half-open服务列表中去掉,回归close状态
 			if (isServerInHalfOpen(id) && counter.countRequest() > circuitBreakerPolicy.getRecoverySampleVolume()) {
-				logger.info("【circuitBreaker】circuit break move from half open to close, indexName:preferNodes = " + id);
+				LogUtils.info(logger, SearchLogEvent.NORMAL_EVENT, "【circuitBreaker】circuit break move from half open to close, indexName:preferNodes = " + id);
 				if (getHalfOpenGroupsList().contains(id)) {
 					getHalfOpenGroupsList().remove(id);
 				}
@@ -130,7 +132,7 @@ public class CircuitBreakerService {
 	 * 定时任务调用，定时将Open的Server放回Half-Open状态
 	 */
 	public void moveOpenCircuitBreakerServerToHalfOpen(String id) {
-		logger.info("【circuitBreaker】circuit break move from open to half-open status, id = " + id);
+		LogUtils.info(logger, SearchLogEvent.NORMAL_EVENT, "【circuitBreaker】circuit break move from open to half-open status, id = " + id);
 
 		if (getOpenGroupsList().contains(id)) {
 			// remove server ip from open circuit breaker
@@ -179,7 +181,7 @@ public class CircuitBreakerService {
 
 	private CircuitBreakerCounter newCircuitBreakerCounter(String id, int circuitBreakerInterval) {
 		if (circuitBreakerInterval == 0) {
-			logger.error("【circuitBreaker】circuit breaker interval can't set to 0");
+			LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT, "【circuitBreaker】circuit breaker interval can't set to 0");
 		}
 
 		if (isServerInHalfOpen(id)) {
@@ -195,7 +197,7 @@ public class CircuitBreakerService {
 
 	private void moveToOpenCircuitBreakerServers(String id, CircuitBreakStatus previousStatus,
 			PercentageHolder percentage) {
-		logger.info("【circuitBreaker】circuit break move from {} to {} status, id = {}", previousStatus.getTitle(),
+		LogUtils.info(logger, SearchLogEvent.NORMAL_EVENT, "【circuitBreaker】circuit break move from {} to {} status, id = {}", previousStatus.getTitle(),
 				CircuitBreakStatus.OPEN.getTitle(), id);
 
 		// 增加到open服务列表
@@ -257,7 +259,7 @@ public class CircuitBreakerService {
 			try {
 				moveOpenCircuitBreakerServerToHalfOpen(id);
 			} catch (Exception ex) {
-				logger.error("【circuitBreaker】MoveOpenToHalfOpenTask has error", ex);
+				LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT, "【circuitBreaker】MoveOpenToHalfOpenTask has error", ex);
 			}
 		}
 

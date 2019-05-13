@@ -21,6 +21,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.search.utils.SearchLogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,7 +87,7 @@ public class TimeoutRetryController {
 						}
 					}
 				} catch (Exception e) {
-					LOGGER.error(e.getMessage(), e);
+					LogUtils.error(LOGGER, SearchLogEvent.NORMAL_EVENT, e.getMessage(), e);
 				}
 			}
 		}

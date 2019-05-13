@@ -19,6 +19,8 @@ package com.vip.pallas.search.filter.base;
 
 import com.vip.pallas.search.filter.common.PallasRunner;
 import com.vip.pallas.search.filter.common.SessionContext;
+import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.search.utils.SearchLogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +59,7 @@ public abstract class AbstractFilterContext {
 			}
 
 		} catch (Exception e) {
-			LOGGER.error(e.toString(), e);
+			LogUtils.error(LOGGER, SearchLogEvent.NORMAL_EVENT, e.toString(), e);
 			PallasRunner.errorProcess(sessionContext, e);
 		}
 	}

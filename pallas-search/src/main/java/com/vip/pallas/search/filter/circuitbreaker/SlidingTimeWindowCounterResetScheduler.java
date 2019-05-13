@@ -21,6 +21,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.search.utils.SearchLogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +60,7 @@ public class SlidingTimeWindowCounterResetScheduler {
 					}
 				}
 			} catch (Exception ex) {
-				logger.error("【circuitBreaker】SlidingTimeWindowCounterResetTask has error!", ex);
+				LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT, "【circuitBreaker】SlidingTimeWindowCounterResetTask has error!", ex);
 			}
 		}
 

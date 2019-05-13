@@ -31,6 +31,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.search.utils.SearchLogEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -447,7 +449,7 @@ public class RouteFilter extends AbstractFilter {
 		int weight = randomList.stream().mapToInt(IndexRouting.ConditionTarget::getWeight).sum();
 		if (weight <= 0) {
 			//never should go here
-			logger.warn("计算出权重是负数：{}, group IDs:{}", weight, randomList);
+			LogUtils.warn(logger, SearchLogEvent.NORMAL_EVENT, "计算出权重是负数：{}, group IDs:{}", weight, randomList);
 			randomList.get(0);
 		}
 
@@ -459,7 +461,7 @@ public class RouteFilter extends AbstractFilter {
 			}
 		}
 		//never should go here
-		logger.warn("权重计算错误：{}, group IDs:{}", selected, randomList);
+		LogUtils.warn(logger, SearchLogEvent.NORMAL_EVENT, "权重计算错误：{}, group IDs:{}", selected, randomList);
 		return null;
 	}
 
@@ -540,7 +542,7 @@ public class RouteFilter extends AbstractFilter {
 		try {
 			targetGroupId = Long.valueOf(scrollId.substring(scrollId.indexOf('[')+1, scrollId.indexOf(']')));
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT, e.getMessage(), e);
 			throw new HttpCodeErrorPallasException("cannot find [targetGroupId] in the Scroll Request", HTTP_SERVICE_UNAVAILABLE, className, classMethod);
 		}
 
