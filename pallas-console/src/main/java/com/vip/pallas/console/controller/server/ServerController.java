@@ -70,8 +70,13 @@ public class ServerController {
 
     @RequestMapping("/clusters.json")
     public List<String> clusters() {
-        return searchServerService.selectDistictCluster();
+        return searchServerService.selectDistinctCluster();
     }
+
+	@RequestMapping("/pools.json")
+	public List<String> pools() {
+    	return searchServerService.selectDistinctPoolList();
+	}
 
     @RequestMapping(value = "/find.json", method = RequestMethod.GET)
 	public PageResultVO<SearchServer> page(
@@ -90,6 +95,12 @@ public class ServerController {
         if (StringUtils.isNotBlank(selectedCluster)) {
             criteria.andClusterEqualTo(selectedCluster);
         }
+
+        // pools field is a json, so do query by like at first
+		if (StringUtils.isNotBlank(selectedPool)){
+			criteria.andPoolsLike("%" + selectedPool + "%");
+		}
+
         example.setOffset((currentPage-1) * pageSize);
         example.setLimit(pageSize);
 		example.setOrderByClause(" healthy desc, cluster asc, pools asc, ipport asc ");
@@ -97,8 +108,10 @@ public class ServerController {
         long total = searchServerService.countByExample(example);
         int pageCount = (int) (total % pageSize == 0 ? total / pageSize : total / pageSize + 1);
         List<SearchServer> ssList = searchServerService.selectByExampleWithBLOBsAndHealthyInterval(example);
-        List<SearchServer> ssListMatchPool = ssList;
-		if (StringUtils.isNotBlank(selectedPool)){
+		List<SearchServer> ssListMatchPool = ssList;
+
+		// parse the json, do filter
+		if (StringUtils.isNotBlank(selectedPool)) {
 			ssListMatchPool = ssList.stream().filter(server -> {
 				Set<String> poolSet;
 				try {

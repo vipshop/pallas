@@ -248,6 +248,11 @@ export default {
         this.clusters = data;
       });
     },
+    getPools() {
+      return this.$http.post('/ss/pools.json').then((data) => {
+        this.poolList = data;
+      });
+    },
     getAgents() {
       const params = {
         currentPage: this.$route.query.currentPage || 1,
@@ -259,12 +264,6 @@ export default {
         this.agentList = data.list;
         this.total = data.total;
         this.isPrivilege = true;
-        data.list.forEach((ss) => {
-          const tempSet = new Set(this.poolList);
-          JSON.parse(ss.pools).forEach(item => tempSet.add(item));
-          this.poolList = Array.from(tempSet);
-          // }
-        });
         this.agentList.forEach((ss) => {
           if (ss !== null) {
             try {
@@ -278,7 +277,7 @@ export default {
     },
     init() {
       this.loading = true;
-      Promise.all([this.getAgents(), this.getClusters()]).then(() => {
+      Promise.all([this.getAgents(), this.getClusters(), this.getPools()]).then(() => {
         this.heartbeat();
         this.loading = false;
       });
