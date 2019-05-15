@@ -3,7 +3,7 @@ import message from './message';
 
 require('promise.prototype.finally').shim();
 
-axios.defaults.baseURL = '/pallas';
+axios.defaults.baseURL = './pallas';
 
 let showError = false;
 

@@ -32,3 +32,4 @@ Vue.component('json-diff', JsonDiff);
 Vue.component('Panel', Panel);
 Vue.component('log-monitor', { template: '<div></div>' });
 Vue.component('preheading-monitor', { template: '<span></span>' });
+Vue.component('cluster-manage-search', { template: '<span></span>' });

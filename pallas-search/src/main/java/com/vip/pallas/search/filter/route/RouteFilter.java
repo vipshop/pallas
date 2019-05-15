@@ -97,10 +97,6 @@ public class RouteFilter extends AbstractFilter {
 
 		List<ServiceInfo> serviceInfoList = evaluateRouting(req);
 
-		if(serviceInfoList == null || serviceInfoList.isEmpty()){
-			throw new HttpCodeErrorPallasException("no service with " + req.getIndexName() + " by routing", HTTP_SERVICE_UNAVAILABLE, className, classMethod);
-		}
-
 		// 计算一个QPS，这里涉及排查所有的干扰，过了Token检测和路由检测之后再计算一个QPS
 		GaugeMonitorService.incQPS();
 		sessionContext.setServiceInfoList(serviceInfoList);
@@ -478,7 +474,7 @@ public class RouteFilter extends AbstractFilter {
 			routingList = PallasCacheFactory.getCacheService().getClusterLevelRoutingByIndexNameAndCluster(cluster);
 			isIndexRouting = false;
 			if (routingList == null || routingList.isEmpty()) {
-				throw new HttpCodeErrorPallasException("none Routing List found for index or cluster:" + indexName, HTTP_SERVICE_UNAVAILABLE, className, classMethod);
+				throw new HttpCodeErrorPallasException("none Routing Rule List found for index:" + indexName + " or Cluster:" + cluster, HTTP_SERVICE_UNAVAILABLE, className, classMethod);
 			}
 		}
 		req.setIsIndexSearch(isIndexRouting);
@@ -486,7 +482,7 @@ public class RouteFilter extends AbstractFilter {
 
 		List<IndexRoutingTargetGroup> targetGroupList = PallasCacheFactory.getCacheService().getTargetGroupByIndexId(routeOwnerId);
 		if(targetGroupList == null || targetGroupList.isEmpty()){
-			throw new HttpCodeErrorPallasException("no targetGroup found with " + indexName, HTTP_SERVICE_UNAVAILABLE, className, classMethod);
+			throw new HttpCodeErrorPallasException("no targetGroup found with index:" + indexName + " cluster:" + cluster, HTTP_SERVICE_UNAVAILABLE, className, classMethod);
 		}
 
 		List<String> availableNodes;
@@ -513,7 +509,11 @@ public class RouteFilter extends AbstractFilter {
 			}
 		}
 
-		return null;
+		//never meant to go here
+		throw new HttpCodeErrorPallasException(
+				String.format("can not find any accessable routing info, index:{}, cluster:{}, availableNodes:{}, routingListSize:{}",
+						indexName, cluster, availableNodes, routingList.size()),
+				HTTP_SERVICE_UNAVAILABLE, className, classMethod);
 	}
 
 	/**
