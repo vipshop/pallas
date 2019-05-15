@@ -4,9 +4,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,19 +17,18 @@
 
 package com.vip.pallas.console.controller.server;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Min;
 
+import com.vip.pallas.mybatis.entity.SearchAuthorization;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,10 +74,12 @@ public class ServerController {
     }
 
     @RequestMapping(value = "/find.json", method = RequestMethod.GET)
-    public PageResultVO<SearchServer> page(@RequestParam(required = false, defaultValue = "1") @Min(value = 0, message = "currentPage必须为正数") Integer currentPage,
-                                    @RequestParam(required = false, defaultValue = "10") @Min(value = 0, message = "pageSize必须为正数") Integer pageSize,
-                                    @RequestParam(required = false)  String selectedCluster, HttpServletRequest request) { // NOSONAR
-        if (!AuthorizeUtil.authorizePSearchPrivilege(request, null)){
+	public PageResultVO<SearchServer> page(
+			@RequestParam(required = false, defaultValue = "1") @Min(value = 0, message = "currentPage必须为正数") Integer currentPage,
+			@RequestParam(required = false, defaultValue = "10") @Min(value = 0, message = "pageSize必须为正数") Integer pageSize,
+			@RequestParam(required = false) String selectedCluster, @RequestParam(required = false) String selectedPool,
+			HttpServletRequest request) { // NOSONAR
+		if (!AuthorizeUtil.authorizePSearchPrivilege(request, null)) {
         	throw new BusinessLevelException(403, "无权限操作");
         }
 
@@ -96,8 +97,21 @@ public class ServerController {
         long total = searchServerService.countByExample(example);
         int pageCount = (int) (total % pageSize == 0 ? total / pageSize : total / pageSize + 1);
         List<SearchServer> ssList = searchServerService.selectByExampleWithBLOBsAndHealthyInterval(example);
-        // ssList = searchServerService.markUnHealthyServer(ssList);
-        resultVO.setList(ssList);
+        List<SearchServer> ssListMatchPool = ssList;
+		if (StringUtils.isNotBlank(selectedPool)){
+			ssListMatchPool = ssList.stream().filter(server -> {
+				Set<String> poolSet;
+				try {
+					poolSet = SearchAuthorization.Pool.fromPoolsContent(server.getPools());
+				} catch (Exception e) {
+					logger.error("Pools illegal", e);
+					return false;
+				}
+				return poolSet.contains(selectedPool);
+			}).collect(Collectors.toList());
+		}
+
+		resultVO.setList(ssListMatchPool);
         resultVO.setTotal(total);
         resultVO.setPageCount(pageCount);
 
@@ -109,7 +123,7 @@ public class ServerController {
     	if (!AuthorizeUtil.authorizePSearchPrivilege(request, null)){
         	throw new BusinessLevelException(403, "无权限操作");
         }
-    	
+
         Long id = ObjectMapTool.getLong(params, "id");
         Boolean takeTraffic = ObjectMapTool.getBoolean(params, "takeTraffic");
 
@@ -122,7 +136,7 @@ public class ServerController {
     	if (!AuthorizeUtil.authorizePSearchPrivilege(request, null)){
         	throw new BusinessLevelException(403, "无权限操作");
         }
-    	
+
         String ids = ObjectMapTool.getString(params, "ssIds");
         String[] idArray = ids.split(",");
         for (String id: idArray) {
@@ -137,7 +151,7 @@ public class ServerController {
     	if (!AuthorizeUtil.authorizePSearchPrivilege(request, null)){
         	throw new BusinessLevelException(403, "无权限操作");
         }
-    	
+
         List<SearchServer> ssList = searchServerService.selectHealthyServers(SearchServerService.HEALTHY_UPLOAD_INTERVAL_TOLERANCE);
         StringBuilder sb = new StringBuilder();
         List<Future<String>> futures = new ArrayList<>(ssList.size());
@@ -164,7 +178,7 @@ public class ServerController {
     	if (!AuthorizeUtil.authorizePSearchPrivilege(request, null)){
         	throw new BusinessLevelException(403, "无权限操作");
         }
-    	
+
         Long id = ObjectMapTool.getLong(params, "id");
         if (id != null) { // delete by id
             searchServerService.deleteByPrimaryKey(id);
