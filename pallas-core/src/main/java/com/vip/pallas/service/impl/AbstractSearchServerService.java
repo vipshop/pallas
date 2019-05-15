@@ -99,7 +99,6 @@ public abstract class AbstractSearchServerService implements SearchServerService
 			}
 			distinctPools.addAll(poolSet);
 		});
-		System.out.println("distinctPools = " + distinctPools);
 		return new ArrayList<>(distinctPools);
 	}
 
