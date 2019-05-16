@@ -37,7 +37,9 @@ public interface SearchServerService {
 
 	List<SearchServer> selectByExampleWithBLOBsAndHealthyInterval(SearchServerExample example);
 
-	List<String> selectDistictCluster();
+	List<String> selectDistinctCluster();
+
+	List<String> selectDistinctPoolList();
 
 	SearchServer selectByPrimaryKey(Long id);
 

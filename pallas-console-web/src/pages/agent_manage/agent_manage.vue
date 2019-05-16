@@ -17,6 +17,12 @@
                             <el-option v-for="item in clusters" :label="item" :value="item" :key="item"></el-option>
                         </el-select>
                     </el-form-item>
+                    <el-form-item label="">
+                        <el-select v-model="selectedPool" @change="toPage">
+                            <el-option label="全部节点集" value=""></el-option>
+                            <el-option v-for="pool in poolList" :label="pool" :key="pool" :value="pool"></el-option>
+                        </el-select>
+                    </el-form-item>
                     <el-form-item class="filter-search">
                         <el-button type="primary" icon="delete" @click="handleDeleteExpired">删除离线数据(3天前)</el-button>
                     </el-form-item>
@@ -28,10 +34,10 @@
             <el-table-column label="ID" prop="id"></el-table-column>
             <el-table-column label="IP端口" prop="ipport"></el-table-column>
             <el-table-column label="代理集群" prop="cluster"></el-table-column>
-            <el-table-column label="节点集">
+            <el-table-column label="节点集" props="pools">
                 <template scope="scope">
                     <span v-if="!scope.row.pools || Object.keys(JSON.parse(scope.row.pools)).length === 0" close-transition class="target-group-item">default</span>
-                    <span :key="item" v-if="scope.row.pools" v-for="item in (JSON.parse(scope.row.pools))" close-transition class="target-group-item">{{item}}</span>
+                    <span :key="item" v-if="scope.row.pools" v-for="item in (JSON.parse(scope.row.pools))" close-transition class="target-group-item"><div>{{item}}</div></span>
                 </template>
             </el-table-column>
             <el-table-column label="节点状态" width="80px">
@@ -100,6 +106,8 @@ export default {
       viewInfo: '',
       selectedCluster: this.$route.query.cluster || '',
       clusters: [],
+      selectedPool: this.$route.query.pool || '',
+      poolList: [],
       agentList: [],
       currentPage: Number(this.$route.query.currentPage) || 1,
       pageSize: 10,
@@ -233,11 +241,16 @@ export default {
       this.init();
     },
     toPage() {
-      this.$router.push({ path: this.$routermapper.GetPath('agentManage'), query: { currentPage: this.currentPage, cluster: this.selectedCluster } });
+      this.$router.push({ path: this.$routermapper.GetPath('agentManage'), query: { currentPage: this.currentPage, cluster: this.selectedCluster, pool: this.selectedPool } });
     },
     getClusters() {
       return this.$http.post('/ss/clusters.json').then((data) => {
         this.clusters = data;
+      });
+    },
+    getPools() {
+      return this.$http.post('/ss/pools.json').then((data) => {
+        this.poolList = data;
       });
     },
     getAgents() {
@@ -245,6 +258,7 @@ export default {
         currentPage: this.$route.query.currentPage || 1,
         pageSize: this.pageSize,
         selectedCluster: this.selectedCluster,
+        selectedPool: this.selectedPool,
       };
       return this.$http.get('/ss/find.json', params).then((data) => {
         this.agentList = data.list;
@@ -263,7 +277,7 @@ export default {
     },
     init() {
       this.loading = true;
-      Promise.all([this.getAgents(), this.getClusters()]).then(() => {
+      Promise.all([this.getAgents(), this.getClusters(), this.getPools()]).then(() => {
         this.heartbeat();
         this.loading = false;
       });

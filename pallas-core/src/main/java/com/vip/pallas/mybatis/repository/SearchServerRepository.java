@@ -60,9 +60,11 @@ public interface SearchServerRepository {
 
     void setTakeTraffic(@Param("id") Long id, @Param("takeTraffic") Boolean takeTraffic);
     
-    List<String> selectDistictCluster();
+    List<String> selectDistinctCluster();
 
-    List<SearchServer> selectAll();
+	List<String> selectDistinctPoolList();
+
+	List<SearchServer> selectAll();
 
 	void deleteNDaysOldServer(int n);
 }

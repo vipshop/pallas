@@ -18,6 +18,10 @@
     select DISTINCT cluster from `search_server`;
   </select>
 
+  <select id="selectDistictPoolList" resultType="java.lang.String">
+    select DISTINCT pools from `search_server`;
+  </select>
+
   <select id="selectAll" resultMap="BaseResultMap">
     select * from `search_server`;
   </select>

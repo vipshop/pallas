@@ -17,13 +17,11 @@
 
 package com.vip.pallas.service.impl;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.vip.pallas.mybatis.entity.SearchAuthorization;
+import com.vip.vjtools.vjkit.collection.SetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,10 +82,26 @@ public abstract class AbstractSearchServerService implements SearchServerService
 	}
 
 	@Override
-	public List<String> selectDistictCluster() {
-		return searchServerRepository.selectDistictCluster();
+	public List<String> selectDistinctCluster() {
+		return searchServerRepository.selectDistinctCluster();
 	}
-	
+
+	@Override
+	public List<String> selectDistinctPoolList() {
+		List<String> poolJson = searchServerRepository.selectDistinctPoolList();
+		Set<String> distinctPools = SetUtil.newHashSet();
+		poolJson.forEach(json -> {
+			Set<String> poolSet = SetUtil.newHashSet();
+			try {
+				poolSet = SearchAuthorization.Pool.fromPoolsContent(json);
+			} catch (Exception e) {
+				logger.error("Pools illegal", e);
+			}
+			distinctPools.addAll(poolSet);
+		});
+		return new ArrayList<>(distinctPools);
+	}
+
 	@Override
 	public SearchServer selectByPrimaryKey(Long id) {
 		return searchServerRepository.selectByPrimaryKey(id);

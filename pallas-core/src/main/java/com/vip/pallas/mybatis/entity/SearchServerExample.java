@@ -352,6 +352,26 @@ public class SearchServerExample {
             return (Criteria) this;
         }
 
+		public Criteria andPoolsEqualTo(String value) {
+			addCriterion("pools =", value, "pools");
+			return (Criteria) this;
+		}
+
+		public Criteria andPoolsNotEqualTo(String value) {
+			addCriterion("cluster <>", value, "pools");
+			return (Criteria) this;
+		}
+
+		public Criteria andPoolsLike(String value) {
+			addCriterion("pools like", value, "pools");
+			return (Criteria) this;
+		}
+
+		public Criteria andPoolsNotLike(String value) {
+			addCriterion("pools not like", value, "pools");
+			return (Criteria) this;
+		}
+
         public Criteria andCreateTimeIsNull() {
             addCriterion("create_time is null");
             return (Criteria) this;
