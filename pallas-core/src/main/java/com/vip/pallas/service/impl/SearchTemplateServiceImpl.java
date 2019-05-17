@@ -344,6 +344,7 @@ public class SearchTemplateServiceImpl implements SearchTemplateService {
         String port = address.contains(":") ? address.substring(address.lastIndexOf(':')) : ":9200";
         apiMap.put("http_address", cluster.getClusterId() + port);
         apiMap.put("transport_address", cluster.getClientAddress());
+        apiMap.put("rest_client", getRestClientDemo(index,dbEntity) );
 		apiMap.put("path", "/" + index.getIndexName() + "/_search/template");
         Map<String, Object> conMap = new HashMap<>();
 
@@ -351,6 +352,31 @@ public class SearchTemplateServiceImpl implements SearchTemplateService {
         conMap.put("id", index.getIndexName() + "_" + dbEntity.getTemplateName());
         conMap.put("params", genParams(dbEntity));
 
+    }
+    public String getRestClientDemo(Index index,SearchTemplate dbEntity){
+        StringBuilder demo=new StringBuilder();
+        demo.append("String token=\"replace token here\";\n");
+        demo.append("final PallasRestClient buildClient = PallasRestClientBuilder.buildClient(token, 2000);\n");
+        demo.append("final HttpEntity entity = new NStringEntity(\"{\\n\" +\n");
+        demo.append("    \"    \\\"id\\\" : \\\""+index.getIndexName() + "_" + dbEntity.getTemplateName()+"\\\",\\n\" +\n");
+
+        Map<String,Object> params=genParams(dbEntity);
+        if (params.size()>0){
+            demo.append("    \"    \\\"params\\\" : {\\n\" +\n");
+            String comma="";
+            for (Map.Entry<String, Object> entry : params.entrySet()) {
+                demo.append(comma+"    \"        \\\""+entry.getKey()+"\\\": "+entry.getValue());
+                comma=",\\n\" +\n";
+            }
+            demo.append("\\n\" +\n");
+            demo.append("    \"    }\\n\" +\n");
+        }else {
+            demo.append("    \"    \\\"params\\\" : {}\" +\n");
+        }
+        demo.append("    \"}\", ContentType.APPLICATION_JSON);\n");
+        demo.append("Response response = buildClient.performRequest(\"POST\",\"/" + index.getIndexName() + "/_search/template\", Collections.EMPTY_MAP, \""+dbEntity.getTemplateName()+"\",entity);\n");
+
+        return demo.toString();
     }
 
     @Override

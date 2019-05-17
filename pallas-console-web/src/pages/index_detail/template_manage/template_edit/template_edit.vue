@@ -94,8 +94,10 @@
                               <el-row>
                                   <fieldset class="no-border">
                                       <div class="api-content">
-                                          {{`Host: ${apiContent.http_address}`}}
-                                          <br/><br/>
+                                          RestClient示例:
+                                          <br/>
+                                          <pre>{{apiContent.rest_client}}</pre>
+                                          <br/>
                                           <pre>{{`POST: ${apiContent.path}`}}</pre>
                                           <pre>{{apiContent.content}}</pre>
                                       </div>
