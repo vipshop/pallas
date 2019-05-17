@@ -210,6 +210,8 @@ export default {
     toPage(id) {
       if (id) {
         this.clusterIdForSearch = id;
+      } else {
+        this.clusterIdForSearch = '';
       }
       this.$router.push({ path: this.$routermapper.GetPath('clusterManage'), query: { currentPage: this.currentPage, clusterId: this.clusterIdForSearch } });
     },
