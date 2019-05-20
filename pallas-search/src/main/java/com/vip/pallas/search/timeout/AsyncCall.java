@@ -26,7 +26,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.vip.pallas.search.utils.LogUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
@@ -45,6 +44,7 @@ import com.vip.pallas.search.filter.rest.RestInvokerFilter;
 import com.vip.pallas.search.http.PallasRequest;
 import com.vip.pallas.search.model.ShardGroup;
 import com.vip.pallas.search.utils.HttpClientUtil;
+import com.vip.pallas.search.utils.LogUtils;
 import com.vip.pallas.search.utils.PallasSearchProperties;
 import com.vip.pallas.thread.PallasThreadFactory;
 
@@ -150,7 +150,6 @@ public class AsyncCall {
 						.build());
 				// record the start time.
 				startCallTime = System.currentTimeMillis();
-				LogUtils.info(LOGGER, templateId, "{}th request routes to: {}, {}", count, targetHost.getHostName(), urlWithTimeout);
 				if (count > 1) {
 					LogUtils.info(LOGGER, templateId, "query templateId:{} timeout, now start {}th try with real timeout = {}, request: {}",
 							templateId, count, timeoutMillis,
