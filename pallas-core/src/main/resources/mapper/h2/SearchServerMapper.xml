@@ -14,11 +14,11 @@
     <result column="info" jdbcType="LONGVARCHAR" property="info" />
   </resultMap>
   
-  <select id="selectDistictCluster" resultType="java.lang.String">
+  <select id="selectDistinctCluster" resultType="java.lang.String">
     select DISTINCT cluster from `search_server`;
   </select>
 
-  <select id="selectDistictPoolList" resultType="java.lang.String">
+  <select id="selectDistinctPoolList" resultType="java.lang.String">
     select DISTINCT pools from `search_server`;
   </select>
 
