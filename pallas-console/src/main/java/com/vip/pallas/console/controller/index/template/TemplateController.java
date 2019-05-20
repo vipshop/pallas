@@ -23,11 +23,7 @@ import static java.util.stream.Collectors.toList;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -39,6 +35,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import com.vip.pallas.console.vo.BatchSubmitVO;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -368,6 +365,45 @@ public class TemplateController {
 
         return approve.getId();
 
+    }
+
+
+    //batch approve
+    @RequestMapping(value = "/batch/approve.json", method = RequestMethod.POST)
+    public int batchApprove(HttpServletRequest req, @Validated @RequestBody BatchSubmitVO params) throws Exception {
+        Long indexId =  params.getIndexId();
+        String historyDesc = params.getHistoryDesc();
+        String currentUser = SessionUtil.getLoginUser(req);
+        Index index = indexService.findById(indexId);
+        if(index == null) {
+            throw new BusinessLevelException(500, "该索引不存在");
+        }
+        if (!AuthorizeUtil.authorizeTemplatePrivilege(req, indexId, index.getIndexName())) {
+            throw new BusinessLevelException(403, "无权限操作");
+        }
+        Long[] templateIds = Arrays.stream(params.getTemplateIds().split(",")).map(id->Long.valueOf(id)).toArray(Long[]::new);
+        if (templateIds.length<=0){
+            throw new BusinessLevelException(500, "id数组为空");
+        }
+        List<SearchTemplate> templates=templateService.findAllByIndexIdAndTemplateIds(indexId,templateIds);
+        int validApprove = 0;
+        for (SearchTemplate dbEntity:templates){
+            if (dbEntity == null) {
+                logger.error("batch approve error, submit illegal template id");
+                continue;
+            }
+            if(approveService.isInApprove(dbEntity.getId())){
+                logger.error("batch approve error, submit a approving template, template id: " + dbEntity.getId());
+                continue;
+            }
+            //增加审批流程
+            templateService.submitToApprove(currentUser, historyDesc, dbEntity.getId());
+            validApprove ++;
+        }
+        if (validApprove == 0){
+            throw new PallasException("选择的模板已有变更内容等待审批，请等待审批流程结束再发起变更！");
+        }
+        return validApprove;
     }
 
     @RequestMapping(value = "/genapi.json", method = RequestMethod.POST)
