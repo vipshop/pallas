@@ -45,6 +45,7 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class MonitorServiceImpl implements MonitorService {
@@ -666,7 +667,12 @@ public class MonitorServiceImpl implements MonitorService {
     }
 
     private List<MetricModel<Date, Long>> getIndexingRate(Template template, Map<String, Object> dataMap,  String fieldName, Cluster cluster) throws PallasException {
-        List<MetricModel<Date, Double>> result = getMonitorMetricModelsDerivative(template, dataMap,fieldName, cluster);
+        List<MetricModel<Date, Double>> result = getMonitorMetricModelsDerivative(template, dataMap,fieldName, cluster).stream().map(model-> {
+            if (model.getY()<0) {
+                model.setY(-1d);
+            }
+            return model;
+        }).collect(Collectors.toList());
         return mapLong(result);
     }
 
