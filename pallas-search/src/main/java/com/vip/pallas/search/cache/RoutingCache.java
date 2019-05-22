@@ -419,8 +419,17 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
                             Map<String, String> nodesInfo = clusterIpIdMap.computeIfAbsent(httpAddress, address -> {
                                 return elasticSearchService.getNodesInfo(address);
                             });
-                            List<ShardGroup> devideShards2Group = elasticSearchService.genDynamicGroup(httpAddress,
-                                    targetGroup.getIndexName(), nodesInfo);
+                            List<ShardGroup> devideShards2Group = emptyList();
+                            // if nodesInfo is empty, try get ShardGroup list from cache.return the list from cache
+                            if ((null == nodesInfo || nodesInfo.size() == 0) && cacheMap.containsKey(TARGET_GROUP_BY_ID)){
+                                Map<Long,IndexRoutingTargetGroup> targetGroupMap= (Map<Long,IndexRoutingTargetGroup>)cacheMap.get(TARGET_GROUP_BY_ID);
+                                if (targetGroupMap != null && targetGroupMap.containsKey(targetGroup.getId())){
+                                    devideShards2Group = targetGroupMap.get(targetGroup.getId()).getShardGroupList();
+                                }
+                            }else {
+                                devideShards2Group = elasticSearchService.genDynamicGroup(httpAddress,
+                                        targetGroup.getIndexName(), nodesInfo);
+                            }
                             // leave the circuteBreaker-filter for routeFilter, this only calculate the whole list.
                             targetGroup.setShardGroupList(devideShards2Group);
                             // init the policy
