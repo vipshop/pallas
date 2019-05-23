@@ -19,14 +19,7 @@ package com.vip.pallas.console.controller.token;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -65,18 +58,13 @@ import com.vip.vjtools.vjkit.collection.SetUtil;
 @RestController
 @RequestMapping("/token")
 public class TokenController {
-
     private static Logger logger = LoggerFactory.getLogger(TokenController.class);
-    
     @Autowired
     private SearchAuthorizationService authService;
-    
     @Autowired
     private ClusterService clusterService;
-    
     @Autowired
     private IndexService indexServcie;
-    
     @Autowired
     private SearchServerService searchServerService;
     
@@ -85,22 +73,18 @@ public class TokenController {
         if (!AuthorizeUtil.authorizeTokenPrivilege(request, null)) {
         	throw new BusinessLevelException(403, "无权限操作");
         }
-
         return authService.selectAll();
     }
-    
+
     @RequestMapping(path="/insert.json", method={RequestMethod.POST})
     public void createOrUpdateToken(@RequestBody @Validated SearchAuthorization token, HttpServletRequest request){
     	if (!AuthorizeUtil.authorizeTokenPrivilege(request, null)) {
         	throw new BusinessLevelException(403, "无权限操作");
         }
-
         if (StringUtils.isEmpty(token.getAuthorizationItems())){
             token.setAuthorizationItems("[]");
         }
-
         SearchAuthorization tokenInDB = authService.findByToken(token.getClientToken());
-
         SearchAuthorization auth = null;
         if (token.getId() == null) {
             if (tokenInDB != null) {
@@ -142,7 +126,6 @@ public class TokenController {
             for(Cluster c : clusters) {
                 privileges.add(parseClusterPrivilege(c, clusterPools, indices, authItems));
             }
-
         }
         return privileges;
     }
@@ -160,7 +143,6 @@ public class TokenController {
         if (clusterItem == null) {
         	clusterItem = new AuthorizationItemVO(c.getId(), c.getClusterId());
         }
-        
         Set<Pool> serverPools = SetUtil.newHashSet();
         if (StringUtils.isNoneEmpty(c.getAccessiblePs())) {
 			List<String> accessiblePs = Splitter.on(",").trimResults().omitEmptyStrings()
@@ -190,6 +172,11 @@ public class TokenController {
                 indexItems.add(newObj);
             }
         }
+        // 先按授权与否排序，再按字母
+        indexItems = indexItems.stream().sorted(
+                Comparator.comparing((SearchAuthorization.AuthorizationItem indexItem) -> indexItem.getPrivileges() == null? 0 : -indexItem.getPrivileges().size())
+                .thenComparing(SearchAuthorization.AuthorizationItem::getName)).collect(Collectors.toList());
+        clusterItem.setIndexPrivileges(indexItems);
         return clusterItem;
     }
     
@@ -198,19 +185,16 @@ public class TokenController {
         if (!AuthorizeUtil.authorizeTokenPrivilege(request, null)){
         	throw new BusinessLevelException(403, "无权限操作");
         }
-
         SearchAuthorization sa = authService.findById(tokenPrivilegeVO.getId());
         if (sa == null) {
             throw new BusinessLevelException(500, "SearchAuthorization 不存在");
         }
-        
         try {
             sa.setAuthorizationItems(SearchAuthorization.toXContent(tokenPrivilegeVO.getAuthorizationItems()));
         } catch (Exception e) {
             logger.error("error", e);
             throw new BusinessLevelException(500, "authorizationItems 解析错误：" + tokenPrivilegeVO.getAuthorizationItems());
         }
-        
         authService.addOrUpdateAuthorization(sa);
     }
     
