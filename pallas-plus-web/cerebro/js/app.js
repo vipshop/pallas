@@ -715,6 +715,12 @@ angular.module('cerebro').controller('NavbarController', ['$scope', '$http',
       $scope.currentUrl = $location.path();      
     });
 
+    $scope.$on("isResetInterval", function(e, m){
+      if(m) {
+        $scope.setRefreshInterval(1800000); 
+      }
+    });
+
     $scope.$on("destroy",function(){
       locationChangeSuccess();
     });
@@ -828,9 +834,9 @@ angular.module('cerebro').factory('NodesDataService', ['DataService',
 
 angular.module('cerebro').controller('OverviewController', ['$scope', '$http',
   '$window', '$location', 'OverviewDataService', 'AlertService', 'ModalService',
-  'RefreshService', 'DataService',
+  'RefreshService', 'DataService', '$rootScope',
   function($scope, $http, $window, $location, OverviewDataService, AlertService,
-           ModalService, RefreshService, DataService) {
+           ModalService, RefreshService, DataService, $rootScope) {
 
     $scope.data = undefined;
 
@@ -864,6 +870,20 @@ angular.module('cerebro').controller('OverviewController', ['$scope', '$http',
         $scope.paginator.setPageSize($scope.getPageSize());
       });
     });
+
+    $scope.setup = function() {
+      OverviewDataService.getOverview(
+        function(data) {
+          var indicesLength = data.indices.length;
+          if(indicesLength > 50) {
+            $rootScope.$broadcast('isResetInterval', true);
+          }
+        },
+        function(error) {
+          AlertService.error('Error while loading data', error);
+        }
+      );
+    };
 
     $scope.$watch(
       function() {
