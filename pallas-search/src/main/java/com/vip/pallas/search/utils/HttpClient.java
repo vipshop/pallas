@@ -19,6 +19,7 @@ package com.vip.pallas.search.utils;
 
 import java.io.IOException;
 
+import com.vip.pallas.utils.LogUtils;
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;

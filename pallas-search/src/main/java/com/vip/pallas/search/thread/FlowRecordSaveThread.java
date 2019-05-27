@@ -24,6 +24,7 @@ import com.vip.pallas.search.utils.*;
 import com.vip.pallas.thread.ExtendableThreadPoolExecutor;
 import com.vip.pallas.thread.PallasThreadFactory;
 import com.vip.pallas.thread.TaskQueue;
+import com.vip.pallas.utils.LogUtils;
 import com.vip.pallas.utils.PallasBasicProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 

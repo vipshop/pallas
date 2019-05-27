@@ -18,7 +18,7 @@
 package com.vip.pallas.search.rampup;
 
 import com.vip.pallas.search.model.IndexRampup;
-import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.utils.LogUtils;
 import com.vip.pallas.search.utils.SearchLogEvent;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;

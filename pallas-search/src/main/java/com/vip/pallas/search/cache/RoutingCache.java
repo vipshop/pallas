@@ -23,6 +23,7 @@ import com.vip.pallas.search.model.*;
 import com.vip.pallas.search.service.ElasticSearchService;
 import com.vip.pallas.search.service.impl.ElasticSearchServiceImpl;
 import com.vip.pallas.search.utils.*;
+import com.vip.pallas.utils.LogUtils;
 import com.vip.pallas.utils.PallasBasicProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.Response;

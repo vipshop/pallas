@@ -17,7 +17,7 @@
 
 package com.vip.pallas.search.filter.post;
 
-import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.utils.LogUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

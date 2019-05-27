@@ -20,11 +20,10 @@ package com.vip.pallas.search.filter.rest;
 import com.vip.pallas.search.filter.base.AbstractFilter;
 import com.vip.pallas.search.filter.base.AbstractFilterContext;
 import com.vip.pallas.search.filter.common.SessionContext;
-import com.vip.pallas.search.filter.route.RouteFilter;
 import com.vip.pallas.search.http.PallasRequest;
 import com.vip.pallas.search.model.ServiceInfo;
 
-import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.utils.LogUtils;
 import com.vip.pallas.search.utils.SearchLogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

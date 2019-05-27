@@ -21,7 +21,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.vip.pallas.search.model.IndexRampup;
 import com.vip.pallas.search.service.PallasCacheFactory;
 import com.vip.pallas.search.utils.HttpClient;
-import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.utils.LogUtils;
 import com.vip.pallas.search.utils.SearchLogEvent;
 import com.vip.pallas.utils.PallasBasicProperties;
 import org.apache.commons.lang3.StringUtils;

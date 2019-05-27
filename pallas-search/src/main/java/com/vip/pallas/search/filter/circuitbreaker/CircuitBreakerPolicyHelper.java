@@ -22,7 +22,7 @@ package com.vip.pallas.search.filter.circuitbreaker;
 
 import java.util.Map;
 
-import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.utils.LogUtils;
 import com.vip.pallas.search.utils.SearchLogEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

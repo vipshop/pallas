@@ -19,7 +19,7 @@ package com.vip.pallas.search.netty.http.handler;
 
 import java.util.List;
 
-import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.utils.LogUtils;
 import com.vip.pallas.search.utils.SearchLogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

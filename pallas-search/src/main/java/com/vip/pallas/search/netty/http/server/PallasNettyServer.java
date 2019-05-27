@@ -19,7 +19,7 @@ package com.vip.pallas.search.netty.http.server;
 
 import java.util.concurrent.TimeUnit;
 
-import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.utils.LogUtils;
 import com.vip.pallas.search.utils.SearchLogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

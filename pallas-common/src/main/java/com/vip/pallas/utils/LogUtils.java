@@ -1,4 +1,4 @@
-package com.vip.pallas.search.utils;
+package com.vip.pallas.utils;
 
 import org.slf4j.Logger;
 

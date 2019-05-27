@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.vip.pallas.search.utils.SearchLogEvent;
-import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.utils.LogUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

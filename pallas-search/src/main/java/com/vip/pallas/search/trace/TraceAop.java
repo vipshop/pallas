@@ -20,7 +20,7 @@ package com.vip.pallas.search.trace;
 import java.util.Iterator;
 import java.util.ServiceLoader;
 
-import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.utils.LogUtils;
 import com.vip.pallas.search.utils.SearchLogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -24,8 +24,7 @@ import java.lang.reflect.Method;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.vip.pallas.search.utils.LogUtils;
-import com.vip.pallas.search.utils.SearchLogEvent;
+import com.vip.pallas.utils.LogUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

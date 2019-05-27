@@ -20,7 +20,7 @@ package com.vip.pallas.search.launch;
 import java.util.Locale;
 
 import com.vip.pallas.search.rampup.RampupCounter;
-import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.utils.LogUtils;
 import com.vip.pallas.search.utils.SearchLogEvent;
 import org.elasticsearch.common.Booleans;
 import org.slf4j.Logger;

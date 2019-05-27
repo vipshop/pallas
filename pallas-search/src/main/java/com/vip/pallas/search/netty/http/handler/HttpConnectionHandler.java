@@ -33,6 +33,7 @@ import com.vip.pallas.search.trace.TraceAop;
 import com.vip.pallas.search.trace.TraceAspect;
 import com.vip.pallas.search.utils.*;
 
+import com.vip.pallas.utils.LogUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;

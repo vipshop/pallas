@@ -20,8 +20,7 @@ package com.vip.pallas.search.netty.http.handler;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.vip.pallas.search.utils.LogUtils;
-import com.vip.pallas.search.utils.SearchLogEvent;
+import com.vip.pallas.utils.LogUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;

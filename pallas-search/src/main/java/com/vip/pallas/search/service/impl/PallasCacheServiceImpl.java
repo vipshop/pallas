@@ -21,7 +21,7 @@ import com.google.common.cache.LoadingCache;
 import com.vip.pallas.search.cache.RoutingCache;
 import com.vip.pallas.search.model.*;
 import com.vip.pallas.search.service.PallasCacheService;
-import com.vip.pallas.search.utils.LogUtils;
+import com.vip.pallas.utils.LogUtils;
 import com.vip.pallas.search.utils.SearchLogEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
