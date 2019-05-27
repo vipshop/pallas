@@ -1,11 +1,12 @@
 <template>
     <div>
-        <div :id="id" style="width: 100%;height:300px"></div>
+        <div :id="id" style="width: 100%;height:200px"></div>
     </div>
 </template>
 
 <script>
 import echarts from 'echarts';
+import moment from 'moment';
 
 require('echarts/lib/chart/bar');
 
@@ -15,54 +16,59 @@ export default {
     return {
       myChart: {},
       option: {
-        color: ['#7CB5EC'],
-        tooltip: {},
+        color: ['#13CE66', '#20A0FF', '#F7BA2A', '#FF4949'],
+        backgroundColor: '#373a3c',
+        tooltip: {
+          trigger: 'axis',
+          formatter(params) {
+            let result = `<b>${moment(Number(params[0].name)).format('YYYY-MM-DD HH:mm:ss')}</b><br/>`;
+            params.forEach((ele) => {
+              result += `${ele.seriesName}: ${ele.value}<br/>`;
+            });
+            return result;
+          },
+        },
+        title: {
+          text: null,
+        },
         grid: {
-          top: '40',
-          left: '3%',
-          right: '3%',
-          bottom: '3%',
+          top: '35',
+          left: '1%',
+          right: '2%',
+          bottom: '25',
           containLabel: true,
         },
-        xAxis: [
-          {
-            type: 'category',
-            data: [],
-            axisLabel: {
-              show: true,
-              interval: 0,
-              rotate: '20',
-              formatter(value) {
-                const str = value.length < 15 ? value : `${value.substr(0, 13)}...`;
-                return str;
-              },
-            },
-          },
-        ],
-        yAxis: [
-          {
-            type: 'value',
-            name: '',
-          },
-        ],
-        series: [{
-          type: 'bar',
-          barWidth: '40%',
-          itemStyle: {
-            normal: {
-              label: {
-                show: true,
-                position: 'top',
-                textStyle: {
-                  fontWeight: 'bold',
-                  color: 'gray',
-                  fontSize: 11,
-                },
-              },
-            },
-          },
+        legend: {
+          y: 'bottom',
+          padding: [
+            5,  // 上
+            10, // 右
+            5,  // 下
+            10, // 左
+          ],
+        },
+        xAxis: {
+          type: 'category',
+          boundaryGap: false,
           data: [],
-        }],
+          axisLabel: {
+            formatter(value) {
+              return `${moment(Number(value)).format('HH:mm')}\n${moment(Number(value)).format('MM-DD')}`;
+            },
+          },
+        },
+        yAxis: {
+          type: 'value',
+          name: '',
+          splitLine: {
+            show: true,
+            lineStyle: {
+              type: 'solid',
+              color: ['#444444'],
+            },
+          },
+        },
+        series: [],
       },
     };
   },
@@ -80,31 +86,29 @@ export default {
         this.myChart.resize();
       });
     },
-    handleClick() {
-      this.myChart.on('click', (handler) => {
-        if (handler.data.columnType === 'domain') {
-          this.$router.push({ name: 'job_overview', params: { domain: handler.data.domainName } });
-        } else if (handler.data.columnType === 'job') {
-          this.$router.push({ name: 'job_setting', params: { domain: handler.data.domainName, jobName: handler.data.jobName } });
-        }
-      });
-    },
     drawLine() {
-      this.option.xAxis[0].data = this.optionInfo.xCategories;
-      this.option.yAxis[0].name = this.optionInfo.yTitle;
-      this.option.tooltip = this.optionInfo.tooltip;
-      this.option.series[0].data = this.optionInfo.seriesData;
-      this.myChart = echarts.init(document.getElementById(this.id));
+      const seriesArray = this.optionInfo.seriesData.map((obj) => {
+        const rObj = { ...obj };
+        const label = {
+          normal: {
+            show: true,
+            position: 'top',
+          },
+        };
+        this.$set(rObj, 'type', 'bar');
+        this.$set(rObj, 'label', label);
+        return rObj;
+      });
+      this.option.xAxis.data = this.optionInfo.xCategories;
+      this.option.yAxis.name = this.optionInfo.yTitle;
+      this.option.series = seriesArray;
+      this.myChart = echarts.init(document.getElementById(this.id), 'dark');
       this.myChart.setOption(this.option);
       this.resize();
-      this.handleClick();
     },
   },
   mounted() {
-    this.drawLine();
+    // this.drawLine();
   },
 };
 </script>
-
-<style>
-</style>

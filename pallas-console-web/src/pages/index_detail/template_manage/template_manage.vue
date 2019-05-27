@@ -5,7 +5,8 @@
                 <div v-show="isAllPrivilege">
                   <el-button type="primary" size="small" @click="addTemplate">新增</el-button>
                   <el-button type="primary" size="small" @click="exportTemplate">导出</el-button>
-                  <el-button type="primary" size="small" @click="importTemplate">导入</el-button>
+                　<el-button type="primary" size="small" @click="importTemplate">导入</el-button>
+                　<el-button type="primary" size="small" @click="batchSubmitTemplate">批量提交</el-button>
                 </div>
                 <div class="mrg-top-10">
                   <el-tree node-key="id" :data="treeData" :props="defaultProps" default-expand-all :expand-on-click-node="false" highlight-current @node-click="handleNodeClick"></el-tree>
@@ -25,6 +26,9 @@
     <div v-if="isExprotTemplateVisible">
         <template-export-dialog :index-id="indexId" :template-list="templateList" @close-export-dialog="closeExportDialog"></template-export-dialog>
     </div>
+    <div v-if="isBatchSubmitVisible">
+        <template-batch-submit-dialog :index-id="indexId" :modified-template-list="modifiedTemplateList" @close-batch-submit-dialog="closeBatchSubmitDialog"></template-batch-submit-dialog>
+    </div>
     </div>
 </template>
 
@@ -34,6 +38,7 @@ import TemplateAddDialog from './template_add_dialog/template_add_dialog';
 import TemplateImportDialog from './template_import_dialog/template_import_dialog';
 import TemplateEdit from './template_edit/template_edit';
 import TemplateExportDialog from './template_export_dialog/template_export_dialog';
+import TemplateBatchSubmitDialog from './template_batch_submit_dialog/template_batch_submit_dialog';
 
 export default {
   data() {
@@ -44,12 +49,14 @@ export default {
       isAllPrivilege: false,
       templateInfo: {},
       templateList: [],
+      modifiedTemplateList: [],
       isEditable: false,
       isTemplateAddVisible: false,
       isTemplateImportVisible: false,
       templateImportTitle: '',
       templateImportUrl: '',
       isExprotTemplateVisible: false,
+      isBatchSubmitVisible: false,
       tempList: [],
       macroList: [],
       treeData: [{
@@ -78,8 +85,14 @@ export default {
     exportTemplate() {
       this.isExprotTemplateVisible = true;
     },
+    batchSubmitTemplate() {
+      this.isBatchSubmitVisible = true;
+    },
     closeExportDialog() {
       this.isExprotTemplateVisible = false;
+    },
+    closeBatchSubmitDialog() {
+      this.isBatchSubmitVisible = false;
     },
     importTemplate() {
       this.isTemplateImportVisible = true;
@@ -117,6 +130,13 @@ export default {
     },
     handleCallback(data) {
       this.templateList = data.list;
+      const modifiedArr = [];
+      data.list.forEach((element) => {
+        if (element.newer && element.type === 1 && !element.approving) {
+          modifiedArr.push(element);
+        }
+      });
+      this.modifiedTemplateList = modifiedArr;
       this.isAllPrivilege = data.allPrivilege;
       const array = JSON.parse(JSON.stringify(data.list));
       const tempArr = [];
@@ -180,6 +200,7 @@ export default {
     'template-import-dialog': TemplateImportDialog,
     'template-edit': TemplateEdit,
     'template-export-dialog': TemplateExportDialog,
+    'template-batch-submit-dialog': TemplateBatchSubmitDialog,
   },
   created() {
     this.init();

@@ -150,7 +150,6 @@ public class AsyncCall {
 						.build());
 				// record the start time.
 				startCallTime = System.currentTimeMillis();
-				LogUtils.info(LOGGER, templateId, "{}th request routes to: {}, {}", count, targetHost.getHostName(), urlWithTimeout);
 				if (count > 1) {
 					LogUtils.info(LOGGER, templateId, "query templateId:{} timeout, now start {}th try with real timeout = {}, request: {}",
 							templateId, count, timeoutMillis,

@@ -87,7 +87,7 @@ public class SearchServerServiceImplTest extends BaseSpringEsTest {
 		long countByExample = searchServerService.countByExample(example);
 		assertEquals(countByExample, 1l);
 		
-		List<String> selectDistictCluster = searchServerService.selectDistictCluster();
+		List<String> selectDistictCluster = searchServerService.selectDistinctCluster();
     	assertThat(selectDistictCluster.size()).isGreaterThanOrEqualTo(1);
 		
     	List<SearchServer> selectHealthyServers = searchServerService.selectHealthyServers(SearchServerService.HEALTHY_UPLOAD_INTERVAL_TOLERANCE);
