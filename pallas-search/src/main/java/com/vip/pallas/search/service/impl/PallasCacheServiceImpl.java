@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static com.vip.pallas.search.cache.RoutingCache.*;
+import static java.util.Collections.EMPTY_LIST;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 
@@ -216,10 +217,16 @@ public class PallasCacheServiceImpl implements PallasCacheService {
     public List<IndexRampup> getRampupByIndexNameAndCluster(String indexName, String clusterId) throws ExecutionException {
         Map<String, Map<String, List<IndexRampup>>> indexClusterRampupMap = getCache(INDEX_CLUSTER_RAMPUP_MAP);
         try{
-            return indexClusterRampupMap.get(indexName).get(clusterId);
+            if(indexClusterRampupMap != null && indexClusterRampupMap.containsKey(indexName)){
+                Map<String, List<IndexRampup>> map = indexClusterRampupMap.get(indexName);
+                if(map != null && map.containsKey(clusterId)){
+                    return map.get(clusterId);
+                }
+            }
+            return EMPTY_LIST;
         }catch (Exception e){
 			LogUtils.error(LOGGER, SearchLogEvent.ROUTING_EVENT, e.toString(), e);
-            return emptyList();
+            return EMPTY_LIST;
         }
     }
 
