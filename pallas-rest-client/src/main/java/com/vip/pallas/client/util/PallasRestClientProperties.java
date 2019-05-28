@@ -27,5 +27,11 @@ public class PallasRestClientProperties extends PallasBasicProperties {
 	
 	public static final String NAME_QUERY_INTERVAL_SECONDS = "pallas.query.interval.seconds";
 	public static final int PALLAS_QUERY_INTERVAL_SECONDS = processor.getInteger(NAME_QUERY_INTERVAL_SECONDS, 10);
-	
+
+	public static final String NAME_CLIENT_FATAL_ERROR_KEY = "pallas.client.fatal.error.key";
+	public static final String PALLAS_CLIENT_FATAL_ERROR_KEY = processor.getString(NAME_CLIENT_FATAL_ERROR_KEY, "PALLAS_FATAL_ERROR");
+
+	public static final String NAME_CLIENT_FATAL_ERROR_MSG = "pallas.client.fatal.error.msg";
+	public static final String PALLAS_CLIENT_FATAL_ERROR_MSG = processor.getString(NAME_CLIENT_FATAL_ERROR_MSG,
+			"pls check your token and pallas console domain. make sure you get a valid pallas-search to connect to.");
 }

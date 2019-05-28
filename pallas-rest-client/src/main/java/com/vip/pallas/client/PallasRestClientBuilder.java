@@ -4,9 +4,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,6 +30,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+import com.vip.pallas.client.util.PallasRestClientProperties;
+import com.vip.pallas.utils.LogUtils;
+import com.vip.pallas.utils.PallasBasicProperties;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
@@ -68,7 +71,7 @@ public class PallasRestClientBuilder {
 			return DEFAULT_KEEPALIVE_MILLISECOND;
 		}
 	};
-	
+
 	static {
 		ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactory() {
 			@Override
@@ -83,7 +86,7 @@ public class PallasRestClientBuilder {
 	}
 
 	private PallasRestClientBuilder() {}
-    
+
 	public static PallasRestClient buildClient(String token)
 			throws InstantiationException, IllegalAccessException, InvocationTargetException, InterruptedException {
 		return buildClient(token, MAX_TIMEOUT_MILLS);
@@ -129,14 +132,16 @@ public class PallasRestClientBuilder {
 		}
 	}
 
-	private static PallasRestClient createPallasRestclient(String clientToken,
-			CloseableHttpAsyncClient httpClient, long maxTimeoutMils)
+	private static PallasRestClient createPallasRestclient(String clientToken, CloseableHttpAsyncClient httpClient,
+			long maxTimeoutMils)
 			throws InterruptedException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		// try 3times to get a valid ps-list
 		int retryCount = 3;
 		while (QueryConsoleTask.getPsListByToken(clientToken) == null && retryCount-- > 0) {
 			TimeUnit.SECONDS.sleep(1);
-			log.error("can't get a valid pallas-search list from {} with token: {}, init pallas-client failed.",
+			LogUtils.error(log, PallasRestClientProperties.PALLAS_CLIENT_FATAL_ERROR_KEY,
+					"can't get a valid pallas-search list from {} with token: {}, init pallas-client failed. "
+							+ PallasRestClientProperties.PALLAS_CLIENT_FATAL_ERROR_MSG,
 					QueryConsoleTask.consoleQueryUrl, clientToken);
 		}
 		PallasRestClient pallasRestClient;
