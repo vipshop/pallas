@@ -123,7 +123,7 @@ public class SendDirectlyCallback implements FutureCallback<HttpResponse> {
 	protected void handleCompleted(HttpResponse response) {
 		setKeyTimeStamp();
 		// in case we got a bad response.
-		if (response.getStatusLine().getStatusCode() != HttpCode.HTTP_OK_CODE) {
+		if (response.getStatusLine().getStatusCode() != HttpCode.HTTP_OK_CODE && response.getStatusLine().getStatusCode() != HttpCode.HTTP_NOT_FOUND && response.getStatusLine().getStatusCode() != HttpCode.HTTP_BAD_REQUEST) {
 			try {
 				String res = EntityUtils.toString(response.getEntity(), "UTF-8");
 				handleFailed(new HttpResponseException(response.getStatusLine().getStatusCode(), res));
