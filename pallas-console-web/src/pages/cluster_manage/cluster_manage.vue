@@ -14,7 +14,7 @@
                     </el-form-item>
                     <el-form-item class="filter-search">
                         <el-button type="primary" icon="search" @click="toPage">查询</el-button>
-                        <cluster-manage-search @cluster-search='toPage'></cluster-manage-search>
+                        <cluster-manage-search @cluster-search='toSpecificPage'></cluster-manage-search>
                     </el-form-item>
                 </el-form>
             </div>
@@ -207,13 +207,16 @@ export default {
     refreshPage() {
       this.init();
     },
-    toPage(id) {
+    toPage() {
+      this.$router.push({ path: this.$routermapper.GetPath('clusterManage'), query: { currentPage: this.currentPage, clusterId: this.clusterIdForSearch } });
+    },
+    toSpecificPage(id) {
       if (id) {
         this.clusterIdForSearch = id;
       } else {
         this.clusterIdForSearch = '';
       }
-      this.$router.push({ path: this.$routermapper.GetPath('clusterManage'), query: { currentPage: this.currentPage, clusterId: this.clusterIdForSearch } });
+      this.toPage();
     },
     closeDialog() {
       this.isClusterInfoVisible = false;
