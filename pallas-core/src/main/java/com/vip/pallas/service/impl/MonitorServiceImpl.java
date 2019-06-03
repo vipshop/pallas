@@ -667,12 +667,7 @@ public class MonitorServiceImpl implements MonitorService {
     }
 
     private List<MetricModel<Date, Long>> getIndexingRate(Template template, Map<String, Object> dataMap,  String fieldName, Cluster cluster) throws PallasException {
-        List<MetricModel<Date, Double>> result = getMonitorMetricModelsDerivative(template, dataMap,fieldName, cluster).stream().map(model-> {
-            if (model.getY()<0) {
-                model.setY(-1d);
-            }
-            return model;
-        }).collect(Collectors.toList());
+        List<MetricModel<Date, Double>> result = getMonitorMetricModelsDerivative(template, dataMap,fieldName, cluster);
         return mapLong(result);
     }
 
@@ -897,7 +892,12 @@ public class MonitorServiceImpl implements MonitorService {
      */
     private List<MetricModel<Date, Double>> getMonitorMetricModelsDerivative(Template template, Map<String, Object> dataMap, String fieldName, Cluster cluster) throws PallasException{
         String stringResult = getMetricFromES(template, dataMap,fieldName, cluster);
-        List<MetricModel<Date, Double>> result =  parseMetricDerivative(stringResult);
+        List<MetricModel<Date, Double>> result =  parseMetricDerivative(stringResult).stream().map(model-> {
+            if (model.getY()<0) {
+                model.setY(-1d);
+            }
+            return model;
+        }).collect(Collectors.toList());;
         return result;
     }
 
