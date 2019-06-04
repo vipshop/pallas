@@ -404,5 +404,10 @@
     from index_version
     where id = #{versionId,jdbcType=BIGINT}
   </select>
-  
+
+  <select id="findIndexIdByVdpQueue" parameterType="java.lang.String" resultType="java.lang.Long">
+    select `index_id`
+    from index_version
+    where vdp_queue = #{vdpQueue,jdbcType=VARCHAR} LIMIT 1
+  </select>
 </mapper>
