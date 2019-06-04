@@ -204,4 +204,9 @@ public abstract class IndexService {
 		Cluster cluster = clusterService.findByName(index.getClusterName());
 		return cluster.isLogicalCluster();
 	}
+
+	public Index findByQueueName(String queueName){
+		Long indexId = indexVersionRepository.findIndexIdByVdpQueue(queueName);
+		return indexId == null ? null : indexRepository.selectByid(indexId);
+	}
 }
