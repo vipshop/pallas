@@ -110,7 +110,7 @@ public class ClusterControllerTest extends BaseSpringEsTest {
 
 	@Test
 	public void test7ApiController() throws Exception {
-		// test
+		// test test
 		assertThat(callRestApi("/cluster/abnormal_node/list.json", "{\"clusterName\": \"" + clusterId + "\"}")).isNotNull();
 	}
 
