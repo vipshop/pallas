@@ -32,7 +32,7 @@ Pallas, the VIP.com's uniform search platform, built on top of the [elasticsearc
     * Pallas plugin management.
 
 Pallas是唯品会统一的检索平台，基于ElasticSearch深度定制，解决关系数据库和NOSQL均无法有效处理的文本检索打分，模糊查询，数据多关键字组合查询，聚合等问题场景。
-功能包括:
+功能包括: 
 * ES可视化管理监控，基于[Cerebro](https://github.com/lmenezes/cerebro)，[bigdesk](http://bigdesk.org/)，[sense](https://github.com/elastic/sense)。通过访问http://localhost:8081 就能全拥有了。
 * ES模板管理，基于索引粒度
     * 增删改查、渲染DSL、在线调试
