@@ -19,6 +19,8 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * 基础ES测试类，继承即获得内嵌ES前置启动
+ *
+ *
  */
 public class BaseEsTest{
 
