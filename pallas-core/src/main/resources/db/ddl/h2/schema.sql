@@ -271,6 +271,8 @@ CREATE TABLE IF NOT EXISTS `mapping` (
   `update_time` timestamp NOT NULL DEFAULT '1980-01-01 01:01:01' COMMENT '更新时间',
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否删除',
   `dynamic` tinyint(1) NOT NULL DEFAULT '0' COMMENT '配置dynamic属性是否为true',
+  `parent_type` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'parent_id类型，1为nested,2为object,3为multi-fields',
+  `copy_to` varchar(256) COLLATE utf8_bin DEFAULT NULL COMMENT '复制域数组',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;
 
