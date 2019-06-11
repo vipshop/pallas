@@ -176,6 +176,19 @@ public class MonitorServiceImpl implements MonitorService {
 
         return nodeMetricInfoModel;
     }
+    @Override
+    public MetricInfoModel getMetricInfoModel(MonitorQueryModel queryModel) throws Exception {
+        Map<String, Object> dataMap = getDataMap(queryModel);
+        Template templateAggs = getTempalte(ParamConstantUtil.AGGS_STATS_TEMPLATE);
+        Cluster cluster =  getCluster(queryModel.getClusterName());
+
+        MetricInfoModel model = new MetricInfoModel();
+
+        dataMap.put("type", ParamConstantUtil.TYPE_INDEX_STATS);
+        dataMap.put("indexName", queryModel.getIndexName());
+        constructMetricModel(templateAggs,dataMap,cluster,model);
+        return model;
+    }
 
     @Override
     public IndexMetricInfoModel queryIndexMetrices(MonitorQueryModel queryModel) throws Exception{
@@ -206,15 +219,19 @@ public class MonitorServiceImpl implements MonitorService {
         indexMetricInfoModel.setIndex_disk_primary(getIndex_disk(templateAggs, dataMap, "index_stats.primaries.store.size_in_bytes", cluster));
         indexMetricInfoModel.setIndex_disk_total(getIndex_disk(templateAggs, dataMap, "index_stats.total.store.size_in_bytes", cluster));
 
+        constructMetricModel(templateAggs,dataMap,cluster,indexMetricInfoModel);
+
+        return indexMetricInfoModel;
+    }
+
+    private void constructMetricModel(Template templateAggs, Map<String, Object> dataMap, Cluster cluster,MetricInfoModel model) throws PallasException {
         dataMap.put("isDerivative", true);
         List<MetricModel<Date, Long>> searchRate = getSearchRate(templateAggs, dataMap, "index_stats.total.search.query_total", cluster);
         List<MetricModel<Date, Long>> indexingRate = getIndexingRate(templateAggs, dataMap, "index_stats.total.indexing.index_total", cluster);
         List<MetricModel<Date, Long>> searchTime = getSearchTime(templateAggs, dataMap, "index_stats.total.search.query_time_in_millis", cluster);
         List<MetricModel<Date, Long>> indexingTime = getIndexingTime(templateAggs, dataMap, "index_stats.total.indexing.index_time_in_millis", cluster);
 
-        setLatency(searchRate, searchTime, indexingRate, indexingTime, dataMap, indexMetricInfoModel);
-
-        return indexMetricInfoModel;
+        setLatency(searchRate, searchTime, indexingRate, indexingTime, dataMap, model);
     }
 
 

@@ -33,6 +33,24 @@
             </div>
         </div>
         <div class="content">
+            <el-row :gutter="20">
+                <el-col :span="12">
+                    <chart-container :title="`Request Rate(${indexSearchRateInfo.yAxisName})`" type="line">
+                        <div slot="chart">
+                            <MyLine id="indexSearchRate" :option-info="indexSearchRateInfo"></MyLine>
+                        </div>
+                    </chart-container>
+                </el-col>
+                <el-col :span="12">
+                    <chart-container :title="`Request Latency(${indexSearchLatencyInfo.yAxisName})`" type="line">
+                        <div slot="chart">
+                            <MyLine id="indexSearchLatency" :option-info="indexSearchLatencyInfo"></MyLine>
+                        </div>
+                    </chart-container>
+                </el-col>
+            </el-row>
+        </div>
+        <div class="content">
           <div v-if="operationList.length === 0" class="empty-operation">暂无数据</div>
           <Timeline v-else>
               <Timeline-item v-for="op in operationList" :key="op.id">
@@ -100,6 +118,8 @@ export default {
       dynamicInfoTitle: '',
       isDynamicInfoVisible: false,
       dynamicInfo: {},
+      indexSearchRateInfo: {},
+      indexSearchLatencyInfo: {},
       dynamicDeleteInfo: {
         indexId: this.$route.query.indexId,
         indexName: this.$route.query.indexName,
@@ -136,6 +156,28 @@ export default {
         this.loading = false;
       });
     },
+    getIndexSerachRate(indexingRate, searchRate, unit) {
+      const optionInfo = {
+        xAxis: indexingRate.map(e => e.x),
+        seriesData: [
+          { name: 'indexing', data: indexingRate.map(e => e.y.toFixed(2)) },
+          { name: 'search', data: searchRate.map(e => e.y.toFixed(2)) },
+        ],
+        yAxisName: unit || '个',
+      };
+      this.indexSearchRateInfo = optionInfo;
+    },
+    getIndexSearchLatency(indexingLatency, searchLatency, unit) {
+      const optionInfo = {
+        xAxis: indexingLatency.map(e => e.x),
+        seriesData: [
+          { name: 'indexing', data: indexingLatency.map(e => e.y.toFixed(2)) },
+          { name: 'search', data: searchLatency.map(e => e.y.toFixed(2)) },
+        ],
+        yAxisName: unit || '个',
+      };
+      this.indexSearchLatencyInfo = optionInfo;
+    },
     getOperationList() {
       if (JSON.stringify(this.timeRange) === '[null,null]') {
         this.timeRange = '';
@@ -170,6 +212,12 @@ export default {
           }
           return rObj;
         });
+        if (data.metric) {
+          this.getIndexSerachRate(data.metric.indexingRate.metricModel,
+            data.metric.searchRate.metricModel, data.metric.searchRate.unit);
+          this.getIndexSearchLatency(data.metric.indexingLatency.metricModel,
+            data.metric.searchLatency.metricModel, data.metric.searchLatency.unit);
+        }
       });
     },
     handleDelete() {
