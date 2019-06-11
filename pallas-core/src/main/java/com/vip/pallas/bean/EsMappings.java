@@ -17,6 +17,7 @@
 
 package com.vip.pallas.bean;
 
+import java.util.List;
 import java.util.Map;
 
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -90,6 +91,8 @@ public class EsMappings {
 		private String normalizer;
 
 		private Map<String, Propertie> properties;
+		private Map<String, Propertie> fields;
+		private List<String> copy_to;
 		
 		public String getType() {
 			return type;
@@ -138,6 +141,23 @@ public class EsMappings {
 		public void setProperties(Map<String, Propertie> properties) {
 			this.properties = properties;
 		}
+
+		public Map<String, Propertie> getFields() {
+			return fields;
+		}
+
+		public void setFields(Map<String, Propertie> fields) {
+			this.fields = fields;
+		}
+
+		public List<String> getCopy_to() {
+			return copy_to;
+		}
+
+		public void setCopy_to(List<String> copy_to) {
+			this.copy_to = copy_to;
+		}
+
 		public boolean isDateType(){
 			return "date".equals(type);
 		}

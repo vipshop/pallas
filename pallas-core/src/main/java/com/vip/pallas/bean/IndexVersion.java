@@ -59,13 +59,29 @@ public class IndexVersion {
 		private boolean docValue;
 		private boolean dynamic;
 		private List<VersionField> children;
-		
+		private List<VersionField> multiField;
+		private List<String> copyTo;
+
 		public void addField(VersionField field){
-	    	if(this.children == null){
-	    		setChildren(new ArrayList<>());
-	    	}
-	    	getChildren().add(field);
-	    }
+			if(this.children == null){
+				setChildren(new ArrayList<>());
+			}
+			getChildren().add(field);
+		}
+
+		public void addMultiField(VersionField field){
+			if(this.multiField == null){
+				setMultiField(new ArrayList<>());
+			}
+			getMultiField().add(field);
+		}
+
+		public void addCopyToField(String field){
+			if(this.copyTo == null){
+				setCopyTo(new ArrayList<>());
+			}
+			getCopyTo().add(field);
+		}
 		
 		public String getFieldName() {
 			return fieldName;
@@ -120,6 +136,22 @@ public class IndexVersion {
 
 		public void setDynamic(boolean dynamic) {
 			this.dynamic = dynamic;
+		}
+
+		public List<VersionField> getMultiField() {
+			return multiField;
+		}
+
+		public void setMultiField(List<VersionField> multiField) {
+			this.multiField = multiField;
+		}
+
+		public List<String> getCopyTo() {
+			return copyTo;
+		}
+
+		public void setCopyTo(List<String> copyTo) {
+			this.copyTo = copyTo;
 		}
 
 		@Override

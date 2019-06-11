@@ -224,6 +224,10 @@ export default {
         Object.keys(this.versionGetInfo.schema).forEach((element, index) => {
           this.versionGetInfo.schema[index].children =
           this.versionGetInfo.schema[index].children || [];
+          this.versionGetInfo.schema[index].multiField =
+          this.versionGetInfo.schema[index].multiField || [];
+          this.versionGetInfo.schema[index].copyTo =
+          this.versionGetInfo.schema[index].copyTo || [];
           this.versionGetInfo.versionId = row.id;
         });
         this.$set(this.versionGetInfo, 'versionId', this.versionGetInfo.id);
@@ -258,6 +262,10 @@ export default {
         Object.keys(this.versionGetInfo.schema).forEach((element, index) => {
           this.versionGetInfo.schema[index].children =
           this.versionGetInfo.schema[index].children || [];
+          this.versionGetInfo.schema[index].multiField =
+          this.versionGetInfo.schema[index].multiField || [];
+          this.versionGetInfo.schema[index].copyTo =
+          this.versionGetInfo.schema[index].copyTo || [];
           this.versionGetInfo.versionId = row.id;
         });
         this.$set(this.versionGetInfo, 'versionId', this.versionGetInfo.id);
@@ -381,6 +389,8 @@ export default {
                 break;
             }
             rObj.children = [];
+            rObj.multiField = [];
+            rObj.copyTo = [];
             return rObj;
           });
         }

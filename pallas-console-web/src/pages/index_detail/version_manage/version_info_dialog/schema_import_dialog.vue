@@ -60,6 +60,8 @@ export default {
         rObj.search = obj.search;
         rObj.docValue = obj.docValue;
         rObj.children = obj.children || [];
+        rObj.multiField = obj.multiField || [];
+        rObj.copyTo = obj.copyTo || [];
         return rObj;
       });
       this.$emit('schema-import-success', arr);

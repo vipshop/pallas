@@ -13,6 +13,8 @@
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
     <result column="dynamic" jdbcType="BIT" property="dynamic" />
+    <result column="parent_type" jdbcType="INTEGER" property="parentType" />
+    <result column="copy_to" jdbcType="VARCHAR" property="copyTo" />
   </resultMap>
   
   <resultMap id="OnlyFieldName" type="com.vip.pallas.mybatis.entity.Mapping">
@@ -21,7 +23,7 @@
     
   <sql id="Base_Column_List">
     id, parent_id, version_id, field_name, field_type, multi, search, doc_value, create_time, 
-    update_time, dynamic
+    update_time, dynamic, parent_type, copy_to
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     select 
@@ -51,21 +53,7 @@
     delete
     from mapping
     where version_id = #{versionId,jdbcType=BIGINT}
-  </select>      
-  
-  <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
-    insert into mapping (id, parent_id, version_id, 
-      field_name, field_type, multi, 
-      search, doc_value, create_time, 
-      update_time)
-    values 
-    <foreach collection="list" item="item" index="index" separator="," >  
-     (#{item.id,jdbcType=BIGINT}, #{item.parentId,jdbcType=BIGINT}, #{item.versionId,jdbcType=BIGINT}, 
-      #{item.fieldName,jdbcType=VARCHAR}, #{item.fieldType,jdbcType=VARCHAR}, #{item.multi,jdbcType=BIT}, 
-      #{item.search,jdbcType=BIT}, #{item.docValue,jdbcType=BIT}, #{item.createTime,jdbcType=TIMESTAMP}, 
-      #{item.updateTime,jdbcType=TIMESTAMP})
-    </foreach>  
-  </insert>  
+  </select>
   
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
     delete from mapping
@@ -75,11 +63,11 @@
     insert into mapping (id, parent_id, version_id, 
       field_name, field_type, multi, 
       search, doc_value, create_time, 
-      update_time, dynamic)
+      update_time, dynamic, parent_type, copy_to)
     values (#{id,jdbcType=BIGINT}, #{parentId,jdbcType=BIGINT}, #{versionId,jdbcType=BIGINT}, 
       #{fieldName,jdbcType=VARCHAR}, #{fieldType,jdbcType=VARCHAR}, #{multi,jdbcType=BIT}, 
       #{search,jdbcType=BIT}, #{docValue,jdbcType=BIT}, #{createTime,jdbcType=TIMESTAMP}, 
-      #{updateTime,jdbcType=TIMESTAMP},#{dynamic,jdbcType=BIT})
+      #{updateTime,jdbcType=TIMESTAMP},#{dynamic,jdbcType=BIT},#{parentType,jdbcType=INTEGER},#{copyTo,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.vip.pallas.mybatis.entity.Mapping">
     insert into mapping
@@ -117,6 +105,12 @@
       <if test="dynamic != null">
         dynamic,
       </if>
+      <if test="parentType != null">
+        parent_type,
+      </if>
+      <if test="copyTo != null">
+        copy_to,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -151,6 +145,12 @@
       </if>
       <if test="dynamic != null">
         #{dynamic,jdbcType=BIT},
+      </if>
+      <if test="parentType != null">
+        parent_type = #{parentType,jdbcType=INTEGER},
+      </if>
+      <if test="copyTo != null">
+        copy_to = #{copyTo,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -187,6 +187,12 @@
       <if test="dynamic != null">
         dynamic = #{dynamic,jdbcType=BIT},
       </if>
+      <if test="parentType != null">
+        parent_type = #{parentType,jdbcType=INTEGER},
+      </if>
+      <if test="copyTo != null">
+        copy_to = #{copyTo,jdbcType=VARCHAR},
+      </if>
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
@@ -201,7 +207,9 @@
       doc_value = #{docValue,jdbcType=BIT},
       create_time = #{createTime,jdbcType=TIMESTAMP},
       update_time = #{updateTime,jdbcType=TIMESTAMP},
-      dynamic = #{dynamic,jdbcType=BIT}
+      dynamic = #{dynamic,jdbcType=BIT},
+      parent_type = #{parentType,jdbcType=INTEGER},
+      copy_to = #{copyTo,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>

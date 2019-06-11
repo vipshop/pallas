@@ -13,6 +13,8 @@
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
     <result column="dynamic" jdbcType="BIT" property="dynamic" />
+    <result column="parent_type" jdbcType="INTEGER" property="parentType" />
+    <result column="copy_to" jdbcType="VARCHAR" property="copyTo" />
   </resultMap>
   
   <resultMap id="OnlyFieldName" type="com.vip.pallas.mybatis.entity.Mapping">
@@ -21,7 +23,7 @@
     
   <sql id="Base_Column_List">
     id, parent_id, version_id, field_name, field_type, multi, search, doc_value, create_time, 
-    update_time, dynamic
+    update_time, dynamic, parent_type, copy_to
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     select 
@@ -79,7 +81,7 @@
     values (#{id,jdbcType=BIGINT}, #{parentId,jdbcType=BIGINT}, #{versionId,jdbcType=BIGINT}, 
       #{fieldName,jdbcType=VARCHAR}, #{fieldType,jdbcType=VARCHAR}, #{multi,jdbcType=BIT}, 
       #{search,jdbcType=BIT}, #{docValue,jdbcType=BIT}, #{createTime,jdbcType=TIMESTAMP}, 
-      #{updateTime,jdbcType=TIMESTAMP},#{dynamic,jdbcType=BIT})
+      #{updateTime,jdbcType=TIMESTAMP},#{dynamic,jdbcType=BIT},#{parentType,jdbcType=INTEGER},#{copyTo,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.vip.pallas.mybatis.entity.Mapping">
     insert into mapping
@@ -117,6 +119,12 @@
       <if test="dynamic != null">
         dynamic,
       </if>
+      <if test="parentType != null">
+        parent_type,
+      </if>
+      <if test="copyTo != null">
+        copy_to,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -151,6 +159,12 @@
       </if>
       <if test="dynamic != null">
         #{dynamic,jdbcType=BIT},
+      </if>
+      <if test="parentType != null">
+        parent_type = #{parentType,jdbcType=INTEGER},
+      </if>
+      <if test="copyTo != null">
+        copy_to = #{copyTo,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -187,6 +201,12 @@
       <if test="dynamic != null">
         dynamic = #{dynamic,jdbcType=BIT},
       </if>
+      <if test="parentType != null">
+        parent_type = #{parentType,jdbcType=INTEGER},
+      </if>
+      <if test="copyTo != null">
+        copy_to = #{copyTo,jdbcType=VARCHAR},
+      </if>
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
@@ -201,7 +221,9 @@
       doc_value = #{docValue,jdbcType=BIT},
       create_time = #{createTime,jdbcType=TIMESTAMP},
       update_time = #{updateTime,jdbcType=TIMESTAMP},
-      dynamic = #{dynamic,jdbcType=BIT}
+      dynamic = #{dynamic,jdbcType=BIT},
+      parent_type = #{parentType,jdbcType=INTEGER},
+      copy_to = #{copyTo,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>

@@ -163,14 +163,16 @@
                         </el-table-column>
                         <el-table-column label="字段名" min-width="180">
                             <template scope="scope">
-                                <el-button type="text" @click="viewSchemaChildren(scope.row)"  v-show="!scope.row.isNew">
-                                    <span v-if="scope.row.children.length !== 0" class="red">*</span>
+                                <el-button type="text" v-show="!scope.row.isNew">
                                     <span>{{scope.row.fieldName}}</span>
                                 </el-button>
                                 <el-input style="width:50%" v-model="scope.row.fieldName" placeholder="请输入字段名" v-show="scope.row.isNew"></el-input>
-                                <el-button type="text" @click="viewSchemaChildren(scope.row)"  v-show="scope.row.isNew">
+                                <el-button type="text" v-show="scope.row.isNew">
                                     <span>子字段</span>
                                 </el-button>
+                                <el-tag type="success" v-if="scope.row.copyTo.length > 0">copy to: {{scope.row.copyTo}}</el-tag>
+                                <el-button type="warning" @click="viewSchemaChildren(scope.row)" v-if="scope.row.children.length !== 0" ><i class="fa"></i>nested</el-button>
+                                <el-button type="warning" @click="viewSchemaMultiFields(scope.row)" v-if="scope.row.multiField.length !== 0" ><i class="fa"></i>多域字段</el-button>
                             </template>
                         </el-table-column>
                         <el-table-column label="DB类型" v-if="!isMetaDataNull">
@@ -203,6 +205,20 @@
                                 <el-checkbox v-model="scope.row.docValue" :disabled="isEditable || scope.row.fieldType === 'nested' || scope.row.fieldType === 'text'">用于排序或聚合</el-checkbox>
                             </template>
                         </el-table-column>
+                        <el-table-column label="更多操作" width="80" v-if="!isEditable">
+                            <template scope="scope">
+                                <el-dropdown trigger="click">
+                              <span class="el-dropdown-link">
+                                操作<i class="el-icon-caret-bottom el-icon--right"></i>
+                              </span>
+                                    <el-dropdown-menu class="dropdown-operation" slot="dropdown">
+                                        <el-dropdown-item v-if="scope.row.multiField.length === 0 && (scope.row.fieldType === 'nested' || scope.row.fieldType === 'object')"><a @click="viewSchemaChildren(scope.row)"><span><i class="fa fa-play-circle"></i>添加nested</span></a></el-dropdown-item>
+                                        <el-dropdown-item v-if="scope.row.children.length === 0 && scope.row.fieldType !== 'nested'"><a @click="viewSchemaMultiFields(scope.row)"><span><i class="fa fa-play-circle"></i>添加多域字段</span></a></el-dropdown-item>
+                                        <el-dropdown-item v-if="!isEditable" ><a @click="viewSchemaCopyTo(scope.row)"><span><i class="fa fa-play-circle"></i>添加copyTo</span></a></el-dropdown-item>
+                                    </el-dropdown-menu>
+                                </el-dropdown>
+                            </template>
+                        </el-table-column>
                     </el-table>
                 </div>
             </el-form>
@@ -212,7 +228,9 @@
             </div>
         </el-dialog>
 
-        <schema-child-dialog :is-schema-child-visible="isSchemaChildVisible" :schema-child-info="schemaChildInfo" :version-operation="versionOperation" :schema-parent-field-name="schemaParentFieldName" @close-schema-dialog="closeSchemaDialog" @add-schema-child="addSchemaChild"></schema-child-dialog>
+        <schema-child-dialog :is-schema-child-visible="isSchemaChildVisible" :schema-child-info="schemaExtInfo" :version-operation="versionOperation" :schema-parent-field-name="schemaParentFieldName" :version-info="versionInfo" @close-schema-dialog="closeSchemaDialog" @add-schema-child="addSchemaChild"></schema-child-dialog>
+        <schema-multi-field-dialog :is-schema-multi-fields-visible="isSchemaMultiFieldsVisible" :schema-multi-fields-info="schemaExtInfo" :version-operation="versionOperation" :schema-parent-field-name="schemaParentFieldName" @close-schema-dialog="closeSchemaMultiFieldsDialog" @add-schema-multi-field="addSchemaMultiFields"></schema-multi-field-dialog>
+        <schema-copy-to-dialog :is-copy-to-fields-visible="isCopyToFieldsVisible" :schema-copy-to-info="schemaExtInfo" :copy-to-list="validCopyToFields" :schema-parent-field-name="schemaParentFieldName" @close-schema-dialog="closeSchemaCopyToDialog" @add-schema-copy-to="addSchemaCopyTo" ></schema-copy-to-dialog>
         <div v-if="isSchemaImportVisible">
             <schema-import-dialog :schema-import-title="schemaImportTitle" :schema-import-url="schemaImportUrl" @schema-import-success="schemaImportSuccess" @close-schema-import-dialog="closeSchemaImportDialog"></schema-import-dialog>
         </div>
@@ -221,11 +239,15 @@
 
 <script>
 import SchemaChildDialog from './schema_child_dialog';
+import SchemaMultiFieldDialog from './schema_multi_field_dialog';
+import SchemaCopyToDialog from './schema_copy_to_dialog';
 import SchemaImportDialog from './schema_import_dialog';
 
 export default {
   components: {
     'schema-child-dialog': SchemaChildDialog,
+    'schema-multi-field-dialog': SchemaMultiFieldDialog,
+    'schema-copy-to-dialog': SchemaCopyToDialog,
     'schema-import-dialog': SchemaImportDialog,
   },
   props: ['versionOperation', 'versionInfo', 'versionInfoTitle', 'isMetaDataNull', 'clusters', 'isLogical'],
@@ -237,7 +259,10 @@ export default {
       schemaImportTitle: '',
       schemaImportUrl: '',
       isSchemaChildVisible: false,
-      schemaChildInfo: {},
+      isSchemaMultiFieldsVisible: false,
+      isCopyToFieldsVisible: false,
+      schemaExtInfo: {},
+      validCopyToFields: [],
       schemaParentFieldName: '',
       rules: {
         shardNum: [{ required: true, message: '分片数量不能为空' }, { type: 'number', message: '分片数量必须为数字值' }],
@@ -434,13 +459,65 @@ export default {
     closeSchemaDialog() {
       this.isSchemaChildVisible = false;
     },
+    closeSchemaMultiFieldsDialog() {
+      this.isSchemaMultiFieldsVisible = false;
+    },
+    closeSchemaCopyToDialog() {
+      this.isCopyToFieldsVisible = false;
+    },
     viewSchemaChildren(row) {
       this.isSchemaChildVisible = true;
-      this.schemaChildInfo = row;
+      this.schemaExtInfo = row;
+    },
+    viewSchemaMultiFields(row) {
+      this.isSchemaMultiFieldsVisible = true;
+      this.schemaExtInfo = row;
+    },
+    viewSchemaCopyTo(row) {
+      this.schemaExtInfo = row;
+      this.validCopyToFields = [];
+      this.versionInfo.schema.forEach((el) => {
+        if (el.dbFieldType === 'N/A') {
+          if (el.fieldType === 'nested') {
+            this.getNestedFieldName(el, '', this.validCopyToFields);
+            return;
+          }
+          this.validCopyToFields.push(el.fieldName);
+        }
+      });
+      this.copyToListFilter(this.validCopyToFields, row.fieldName);
+      this.isCopyToFieldsVisible = true;
+    },
+    getNestedFieldName(field, parentFieldName, fieldArr) {
+      if (field.fieldType !== 'nested') {
+        fieldArr.push(`${parentFieldName}${field.fieldName}`);
+        return;
+      }
+      field.children.forEach((child) => {
+        if (child.fieldType === 'nested') {
+          this.getNestedFieldName(child, `${parentFieldName}${field.fieldName}.`, fieldArr);
+        } else {
+          fieldArr.push(`${parentFieldName}${field.fieldName}.${child.fieldName}`);
+        }
+      });
+    },
+    copyToListFilter(fieldArr, fieldName) {
+      const index = fieldArr.indexOf(fieldName);
+      if (index >= 0) {
+        fieldArr.splice(index, 1);
+      }
     },
     addSchemaChild(array) {
       console.log(JSON.stringify(array));
       this.isSchemaChildVisible = false;
+    },
+    addSchemaMultiFields(array) {
+      console.log(JSON.stringify(array));
+      this.isSchemaMultiFieldsVisible = false;
+    },
+    addSchemaCopyTo(array) {
+      console.log(JSON.stringify(array));
+      this.isCopyToFieldsVisible = false;
     },
     deleteField(row) {
       this.$message.confirmMessage(`确定删除字段${row.fieldName}吗?`, () => {
@@ -455,6 +532,8 @@ export default {
         fieldType: 'keyword',
         multi: false,
         children: [],
+        multiField: [],
+        copyTo: [],
         search: false,
         isNew: true,
         dynamic: false,

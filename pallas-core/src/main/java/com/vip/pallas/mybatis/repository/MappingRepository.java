@@ -28,8 +28,6 @@ public interface MappingRepository {
     int deleteByPrimaryKey(Long id);
 
     int insert(Mapping record);
-    
-    int insertBatch(List<Mapping> list);
 
     int insertSelective(Mapping record);
 

@@ -8,7 +8,9 @@
             <el-table :data="childInfo" border style="width: 100%">
                 <el-table-column label="字段名">
                     <template scope="scope">
-                        <el-input v-model="scope.row.fieldName" :disabled="isEditable"></el-input>
+                        <el-input class="nested-input" v-model="scope.row.fieldName" :disabled="isEditable"></el-input>
+                        <el-tag type="success" v-if="checkArrayNotEmpty(scope.row.copyTo)">copy to: {{scope.row.copyTo}}</el-tag>
+                        <el-button type="warning" @click="viewSchemaMultiFields(scope.row)" v-if="scope.row.multiField.length !== 0" ><i class="fa"></i>多域字段</el-button>
                     </template>
                 </el-table-column>
                 <el-table-column label="ES类型">
@@ -39,6 +41,19 @@
                 <el-table-column v-if="!isEditable" label="操作" min-width="60">
                     <template scope="scope">
                         <el-button size="small" type="danger" @click="handleDelete(scope.row)">删除</el-button>
+                        <el-button type="warning" @click="viewSchemaCopyTo(scope.row)">copyTo</el-button>
+                    </template>
+                    <template scope="scope">
+                        <el-dropdown trigger="click">
+                              <span class="el-dropdown-link">
+                                操作<i class="el-icon-caret-bottom el-icon--right"></i>
+                              </span>
+                            <el-dropdown-menu class="dropdown-operation" slot="dropdown">
+                                <el-dropdown-item ><a @click="handleDelete(scope.row)"><span><i class="fa fa-play-circle"></i>删除</span></a></el-dropdown-item>
+                                <el-dropdown-item ><a @click="viewSchemaMultiFields(scope.row)"><span><i class="fa fa-play-circle"></i>添加多域字段</span></a></el-dropdown-item>
+                                <el-dropdown-item ><a @click="viewSchemaCopyTo(scope.row)"><span><i class="fa fa-play-circle"></i>添加copyTo</span></a></el-dropdown-item>
+                            </el-dropdown-menu>
+                        </el-dropdown>
                     </template>
                 </el-table-column>
             </el-table>
@@ -48,15 +63,28 @@
               <el-button v-if="!isEditable" type="confirm" @click="confirmBtn()">确定</el-button>     
             </div>
         </el-dialog>
+        <schema-multi-field-dialog :is-schema-multi-fields-visible="isSchemaMultiFieldsVisible" :schema-multi-fields-info="schemaExtInfo" :version-operation="versionOperation" :schema-parent-field-name="schemaParentFieldName" @close-schema-dialog="closeSchemaMultiFieldsDialog" @add-schema-multi-field="addSchemaMultiFields"></schema-multi-field-dialog>
+        <schema-copy-to-dialog :is-copy-to-fields-visible="isCopyToFieldsVisible" :schema-copy-to-info="schemaExtInfo" :copy-to-list="validCopyToFields" :schema-parent-field-name="schemaParentFieldName" @close-schema-dialog="closeSchemaCopyToDialog" @add-schema-copy-to="addSchemaCopyTo" ></schema-copy-to-dialog>
     </div>
 </template>
 
 <script>
+import SchemaCopyToDialog from './schema_copy_to_dialog';
+import SchemaMultiFieldDialog from './schema_multi_field_dialog';
+
 export default {
-  props: ['isSchemaChildVisible', 'schemaChildInfo', 'versionOperation', 'schemaParentFieldName'],
+  components: {
+    'schema-copy-to-dialog': SchemaCopyToDialog,
+    'schema-multi-field-dialog': SchemaMultiFieldDialog,
+  },
+  props: ['isSchemaChildVisible', 'schemaChildInfo', 'versionOperation', 'schemaParentFieldName', 'versionInfo'],
   data() {
     return {
       childInfo: [],
+      schemaExtInfo: {},
+      validCopyToFields: [],
+      isCopyToFieldsVisible: false,
+      isSchemaMultiFieldsVisible: false,
       initDynamic: false,
       fieldTypes: [{
         value: 'text',
@@ -103,6 +131,8 @@ export default {
         fieldName: '',
         fieldType: '',
         multi: '',
+        copyTo: [],
+        multiField: [],
         search: false,
         docValue: false,
       };
@@ -144,7 +174,76 @@ export default {
     },
     openDialog() {
       this.childInfo = JSON.parse(JSON.stringify(this.schemaChildInfo.children));
+      Object.keys(this.childInfo).forEach((element, index) => {
+        this.childInfo[index].multiField =
+          this.childInfo[index].multiField || [];
+      });
       this.initDynamic = this.schemaChildInfo.dynamic;
+    },
+    checkArrayNotEmpty(arr) {
+      return arr && arr.length > 0;
+    },
+    viewSchemaMultiFields(row) {
+      this.isSchemaMultiFieldsVisible = true;
+      this.schemaExtInfo = row;
+    },
+    viewSchemaCopyTo(row) {
+      this.schemaExtInfo = row;
+      this.validCopyToFields = [];
+      this.versionInfo.schema.forEach((el) => {
+        if (el.dbFieldType === 'N/A') {
+          if (el.fieldType === 'nested') {
+            // skip current nested doc
+            if (el.fieldName === this.schemaChildInfo.fieldName) return;
+            this.getNestedFieldName(el, '', this.validCopyToFields);
+            return;
+          }
+          this.validCopyToFields.push(el.fieldName);
+        }
+      });
+      // get the tmp nested field
+      this.childInfo.forEach((el) => {
+        if (el.fieldType === 'nested') {
+          this.getNestedFieldName(el, this.schemaChildInfo.fieldName, this.validCopyToFields);
+          return;
+        }
+        this.validCopyToFields.push(`${this.schemaChildInfo.fieldName}.${el.fieldName}`);
+      });
+      this.copyToListFilter(this.validCopyToFields, `${this.schemaChildInfo.fieldName}.${row.fieldName}`);
+      this.isCopyToFieldsVisible = true;
+    },
+    getNestedFieldName(field, parentFieldName, fieldArr) {
+      if (field.fieldType !== 'nested') {
+        fieldArr.push(`${parentFieldName}${field.fieldName}`);
+        return;
+      }
+      field.children.forEach((child) => {
+        if (child.fieldType === 'nested') {
+          this.getNestedFieldName(child, `${parentFieldName}${field.fieldName}.`, fieldArr);
+        } else {
+          fieldArr.push(`${parentFieldName}${field.fieldName}.${child.fieldName}`);
+        }
+      });
+    },
+    copyToListFilter(fieldArr, fieldName) {
+      const index = fieldArr.indexOf(fieldName);
+      if (index >= 0) {
+        fieldArr.splice(index, 1);
+      }
+    },
+    closeSchemaCopyToDialog() {
+      this.isCopyToFieldsVisible = false;
+    },
+    closeSchemaMultiFieldsDialog() {
+      this.isSchemaMultiFieldsVisible = false;
+    },
+    addSchemaCopyTo(array) {
+      console.log(JSON.stringify(array));
+      this.isCopyToFieldsVisible = false;
+    },
+    addSchemaMultiFields(array) {
+      console.log(JSON.stringify(array));
+      this.isSchemaMultiFieldsVisible = false;
     },
   },
   computed: {
@@ -162,7 +261,10 @@ export default {
 
 <style type="text/css">
 .schema-content {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
+}
+.nested-input {
+  width: 50%;
 }
 .schema-info-dialog .el-dialog__footer {
   padding: 10px 20px 15px;
