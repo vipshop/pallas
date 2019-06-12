@@ -77,7 +77,7 @@
     insert into mapping (id, parent_id, version_id, 
       field_name, field_type, multi, 
       search, doc_value, create_time, 
-      update_time, dynamic)
+      update_time, dynamic,parent_type,copy_to)
     values (#{id,jdbcType=BIGINT}, #{parentId,jdbcType=BIGINT}, #{versionId,jdbcType=BIGINT}, 
       #{fieldName,jdbcType=VARCHAR}, #{fieldType,jdbcType=VARCHAR}, #{multi,jdbcType=BIT}, 
       #{search,jdbcType=BIT}, #{docValue,jdbcType=BIT}, #{createTime,jdbcType=TIMESTAMP}, 

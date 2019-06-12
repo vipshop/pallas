@@ -136,6 +136,8 @@ public class IndexVersionServiceImplTest extends BaseSpringEsTest {
         node.put("search", true);
         node.put("docValue", true);
         node.put("dynamic", false);
+        node.put("parent_type", 0);
+        node.put("copy_to", "");
 
         ArrayNode chilren = JsonNodeFactory.instance.arrayNode();
         ObjectNode child = JsonNodeFactory.instance.objectNode();
@@ -148,6 +150,8 @@ public class IndexVersionServiceImplTest extends BaseSpringEsTest {
         child.put("search", true);
         child.put("docValue", true);
         child.put("dynamic", false);
+        child.put("parent_type", 0);
+        child.put("copy_to", "");
 
         ArrayNode array = JsonNodeFactory.instance.arrayNode();
         array.add(node);
