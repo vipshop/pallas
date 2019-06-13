@@ -10,6 +10,8 @@
     <result column="plugin_type" jdbcType="TINYINT" property="pluginType" />
     <result column="package_path" jdbcType="VARCHAR" property="packagePath" />
     <result column="state" jdbcType="TINYINT" property="state" />
+    <result column="flowlsh_no" jdbcType="VARCHAR" property="flowlshNo" />
+    <result column="flowlsh_state" jdbcType="TINYINT" property="flowlshState" />
     <result column="note" jdbcType="VARCHAR" property="note" />
     <result column="apply_user" jdbcType="VARCHAR" property="applyUser" />
     <result column="approve_user" jdbcType="VARCHAR" property="approveUser" />
@@ -58,6 +60,11 @@
       <if test="approveTime != null">
         approve_time = #{approveTime},
       </if>
+      <if test="flowlshNo != null">
+        flowlsh_no = #{flowlshNo},
+      </if><if test="flowlshState != null">
+      flowlsh_state = #{flowlshState},
+    </if>
     </set>
     where id = #{id}
   </update>
@@ -84,6 +91,12 @@
     </if>
     <if test="state != null">
       state,
+    </if>
+    <if test="flowlshState != null">
+      flowlsh_state,
+    </if>
+    <if test="flowlshNo != null">
+      flowlsh_no,
     </if>
     <if test="note != null">
       note,
@@ -122,6 +135,12 @@
       </if>
       <if test="state != null">
         #{state},
+      </if>
+      <if test="flowlshState != null">
+        #{flowlshState},
+      </if>
+      <if test="flowlshNo != null">
+        #{flowlshNo},
       </if>
       <if test="note != null">
         #{note},

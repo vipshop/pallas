@@ -46,6 +46,16 @@ public class PluginUpgrade {
 
     public static final int UPGRADE_STATUS_REMOVE = 7; //移除插件
 
+    public static final int ITIL_STATUS_INIT = 0; //未创建工单，初始化状态
+
+    public static final int ITIL_STATUS_CRREATED = 1; //创建一个工单
+
+    public static final int ITIL_STATUS_STARTED = 2; //正在执行的工单
+
+    public static final int ITIL_STATUS_ENDED = 3; //已经结束的工单
+
+
+
     private long id;
 
     @NotBlank(message = "clusterId不能为空")
@@ -77,6 +87,11 @@ public class PluginUpgrade {
 
     @NotBlank(message = "note不能为空")
     private String note;
+
+    //变更工单号
+    private String flowlshNo;
+
+    private int flowlshState;
 
     public long getId() {
         return id;
@@ -188,6 +203,22 @@ public class PluginUpgrade {
 
     public void setNote(String note) {
         this.note = note;
+    }
+
+    public String getFlowlshNo() {
+        return flowlshNo;
+    }
+
+    public void setFlowlshNo(String flowlshNo) {
+        this.flowlshNo = flowlshNo;
+    }
+
+    public int getFlowlshState() {
+        return flowlshState;
+    }
+
+    public void setFlowlshState(int flowlshState) {
+        this.flowlshState = flowlshState;
     }
 
     public boolean isFinished() {
