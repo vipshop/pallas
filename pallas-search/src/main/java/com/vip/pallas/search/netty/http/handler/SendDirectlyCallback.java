@@ -248,6 +248,8 @@ public class SendDirectlyCallback implements FutureCallback<HttpResponse> {
 		if (sessionContext.getTimestampClientResponseRead() == -1) {
 			sessionContext.setTimestampClientResponseRead(System.currentTimeMillis());
 		}
+		// mercury接入
+		recordMercury(ex, httpCode);
 		REST_INVOKER_ERROR_EXCEPTION.setMessage(ex.toString());
 		PallasRunner.errorProcess(sessionContext, REST_INVOKER_ERROR_EXCEPTION);
 	}
