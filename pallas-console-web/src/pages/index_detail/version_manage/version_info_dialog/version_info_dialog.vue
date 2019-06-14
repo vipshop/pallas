@@ -5,8 +5,10 @@
               <span>{{versionInfoTitle}}</span>
             </span>
             <el-form :model="versionInfo" :rules="rules" ref="versionInfo" label-position="left">
+                <el-tabs value="first">
+                    <el-tab-pane label="索引配置" name="first">
                 <div class="label-title">
-                  <span class="span-title"><i class="fa fa-th-large"></i>索引配置</span>
+                            <span class="span-title"><i class="fa fa-th-large"></i>分片路由属性</span>
                   <span v-if="isLogical" style="color: #C8C8C8;">（所属集群：{{clusterArray.join()}}）</span>
                 </div>
                 <div class="label-content">
@@ -147,14 +149,16 @@
                         </div>
                     </el-row>
                 </div>
+                    </el-tab-pane>
+                    <el-tab-pane label="Mapping配置" name="second">
                 <div class="label-title">
-                    <span class="span-title"><i class="fa fa-th-large"></i>mapping配置</span>
+                            <span class="span-title"><i class="fa fa-th-large"></i>ES映射关系配置</span>
                     <el-button size="mini" type="success" @click="addField(0)" v-if="isMetaDataNull && versionInfo.schema.length === 0"><i class="fa fa-plus"></i>新增</el-button>
                     <el-button size="mini" type="warning" v-show="!isEditable" @click="importSchema"><i class="fa fa-arrow-circle-o-down"></i>导入schema</el-button>
                     <el-button size="mini" type="warning" v-show="isEditable" @click="exportSchema"><i class="fa fa-arrow-circle-o-up"></i>导出schema</el-button>
                 </div>
                 <div>
-                    <el-table :data="versionInfo.schema" border style="width: 100%" :max-height="280">
+                            <el-table :data="versionInfo.schema" border style="width: 100%" :max-height="550">
                         <el-table-column label="操作">
                           <template scope="scope">
                               <el-button size="small" type="success" @click="addField(scope.$index)" :disabled="isEditable"><i class="el-icon-plus"></i></el-button>
@@ -221,6 +225,10 @@
                         </el-table-column>
                     </el-table>
                 </div>
+                    </el-tab-pane>
+                </el-tabs>
+
+
             </el-form>
             <div slot="footer" class="dialog-footer">                
                 <el-button @click="closeDialog()">取 消</el-button>
