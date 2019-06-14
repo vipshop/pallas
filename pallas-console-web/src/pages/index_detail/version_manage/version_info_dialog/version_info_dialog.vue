@@ -158,6 +158,25 @@
                     <el-button size="mini" type="warning" v-show="isEditable" @click="exportSchema"><i class="fa fa-arrow-circle-o-up"></i>导出schema</el-button>
                 </div>
                 <div>
+                            <div style="margin: 10px">
+                                <el-alert
+                                        title="如何选择ES类型"
+                                        type="info"
+                                        description=" "
+                                        show-icon>
+                                    <div style="font-size: 12px">
+                                        1.某些数据库字段，尽管是number类型，但是在做业务查询时仅仅只是做term(s)这类非数学运算非聚合查询，我们非常建议你采用"keyword as number"类型，在这个类型下，ES将会用string格式来建索引以达到更高的检索性能，
+                                        而获取 _source 时我们仍然会以number的格式返回给 Client。
+                                        <br/>
+                                        2.当你需要做模糊匹配，比如数据库值是 AbC，但是仍然希望abc和ABC都能检索出来，那请选择"keyword[全大写处理]"类型，我们在建索引和查询都做大写处理，
+                                        而获取 _source 时我们仍然会以原值 AbC 的格式返回给 Client。
+                                        <br/>
+                                        3.所有的DB类型为TINYINT 的字段，我们都假设它是一些枚举值并且不会用于数学运算，因此我们为这些字段自动匹配了"keyword as number"类型，请自行检查。
+                                    </div>
+                                </el-alert>
+
+                            </div>
+
                             <el-table :data="versionInfo.schema" border style="width: 100%" :max-height="550">
                         <el-table-column label="操作">
                           <template scope="scope">
@@ -199,14 +218,14 @@
                                 </select>
                             </template>
                         </el-table-column>
-                        <el-table-column label="是否查询关键字" min-width="90">
+                                <el-table-column label="是否创建索引" min-width="90">
                             <template scope="scope">
-                                <el-checkbox v-model="scope.row.search" :disabled="isEditable || scope.row.fieldType === 'nested'">查询关键字</el-checkbox>
+                                        <el-checkbox v-model="scope.row.search" :disabled="isEditable || scope.row.fieldType === 'nested'">创建索引</el-checkbox>
                             </template>
                         </el-table-column>
-                        <el-table-column label="排序或聚合">
+                                <el-table-column label="是否启用doc value">
                             <template scope="scope">
-                                <el-checkbox v-model="scope.row.docValue" :disabled="isEditable || scope.row.fieldType === 'nested' || scope.row.fieldType === 'text'">用于排序或聚合</el-checkbox>
+                                <el-checkbox v-model="scope.row.docValue" :disabled="isEditable || scope.row.fieldType === 'nested' || scope.row.fieldType === 'text'">启用doc value</el-checkbox>
                             </template>
                         </el-table-column>
                         <el-table-column label="更多操作" width="80" v-if="!isEditable">
