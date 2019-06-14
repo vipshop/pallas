@@ -448,7 +448,7 @@ public abstract class IndexVersionService {
 		switch (field.getDbFieldType()) {
 			case "TINYINT":
 			case "SMALLINT":
-				field.setFieldType("short");
+				field.setFieldType("keyword_as_number");
 				break;
 			case "INTEGER":
 				field.setFieldType("integer");

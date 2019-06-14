@@ -356,7 +356,7 @@ export default {
             switch (rObj.dbFieldType) {
               case 'TINYINT':
               case 'SMALLINT':
-                rObj.fieldType = 'short';
+                rObj.fieldType = 'keyword_as_number';
                 break;
               case 'INTEGER':
                 rObj.fieldType = 'integer';
