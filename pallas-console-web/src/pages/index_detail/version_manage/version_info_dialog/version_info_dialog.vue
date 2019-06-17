@@ -223,7 +223,7 @@
                                         <el-checkbox v-model="scope.row.search" :disabled="isEditable || scope.row.fieldType === 'nested'">创建索引</el-checkbox>
                             </template>
                         </el-table-column>
-                                <el-table-column label="是否启用doc value">
+                                <el-table-column :render-header="renderDocValueHeader">
                             <template scope="scope">
                                 <el-checkbox v-model="scope.row.docValue" :disabled="isEditable || scope.row.fieldType === 'nested' || scope.row.fieldType === 'text'">启用doc value</el-checkbox>
                             </template>
@@ -351,6 +351,20 @@ export default {
     };
   },
   methods: {
+    renderDocValueHeader(h) {
+      return h(
+        'span',
+        [
+          h('span', { slot: 'reference', style: { 'font-size': '14px', 'margin-right': '5px' } }, '是否启用doc value'),
+          h('el-popover', { props: { placement: 'top', trigger: 'hover' } },
+            [
+              h('div', '是否需要用到 Sort,Aggs,Script 查询'),
+              h('i', { slot: 'reference', class: { fa: true, 'fa-question-circle': true } }),
+            ],
+          ),
+        ],
+      );
+    },
     clusterChange() {
       this.versionInfo.nodes = [];
     },
