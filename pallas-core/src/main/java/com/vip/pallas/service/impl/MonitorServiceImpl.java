@@ -215,7 +215,9 @@ public class MonitorServiceImpl implements MonitorService {
         indexMetricInfoModel.setIndex_memory_lucenc_total_in_byte(getIndex_memory(templateAggs, dataMap, "index_stats.total.segments.memory_in_bytes", cluster));
 
         indexMetricInfoModel.setSegmentCount(getIndexSegmentCount(templateAggs, dataMap, "index_stats.total.segments.count", cluster));
+        indexMetricInfoModel.setPrimarySegmentCount(getIndexSegmentCount(templateAggs, dataMap, "index_stats.primaries.segments.count", cluster));
         indexMetricInfoModel.setDocumentCount(getIndexDocumentCount(templateAggs, dataMap, "index_stats.total.docs.count", cluster));
+        indexMetricInfoModel.setPrimaryDocumentCount(getIndexDocumentCount(templateAggs, dataMap, "index_stats.primaries.docs.count", cluster));
         indexMetricInfoModel.setIndex_disk_primary(getIndex_disk(templateAggs, dataMap, "index_stats.primaries.store.size_in_bytes", cluster));
         indexMetricInfoModel.setIndex_disk_total(getIndex_disk(templateAggs, dataMap, "index_stats.total.store.size_in_bytes", cluster));
 
@@ -511,6 +513,7 @@ public class MonitorServiceImpl implements MonitorService {
         gaugeMetricModel.setUnassignedShardCount(indexStatsJsonObj.getInteger("unassignedShardCount"));
 
         gaugeMetricModel.setDocumentCount(totalJsonObj.getJSONObject("docs").getLong("count"));
+        gaugeMetricModel.setPrimaryDocumentCount(primariesJsonObj.getJSONObject("docs").getLong("count"));
         gaugeMetricModel.setDocument_store_byte_total(totalJsonObj.getJSONObject("store").getLong("size_in_bytes"));
         gaugeMetricModel.setDocument_store_byte_primary(primariesJsonObj.getJSONObject("store").getLong("size_in_bytes"));
 
