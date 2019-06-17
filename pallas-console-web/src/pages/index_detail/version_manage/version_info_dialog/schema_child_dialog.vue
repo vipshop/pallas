@@ -10,7 +10,7 @@
                     <template scope="scope">
                         <el-input class="nested-input" v-model="scope.row.fieldName" :disabled="isEditable"></el-input>
                         <el-tag type="success" v-if="checkArrayNotEmpty(scope.row.copyTo)">copy to: {{scope.row.copyTo}}</el-tag>
-                        <el-button type="warning" @click="viewSchemaMultiFields(scope.row)" v-if="scope.row.multiField.length !== 0" ><i class="fa"></i>多域字段</el-button>
+                        <el-button type="warning" @click="viewSchemaMultiFields(scope.row)" v-if="scope.row.multiField.length !== 0" ><i class="fa"></i>subFields</el-button>
                     </template>
                 </el-table-column>
                 <el-table-column label="ES类型">
@@ -50,7 +50,7 @@
                               </span>
                             <el-dropdown-menu class="dropdown-operation" slot="dropdown">
                                 <el-dropdown-item ><a @click="handleDelete(scope.row)"><span><i class="fa fa-play-circle"></i>删除</span></a></el-dropdown-item>
-                                <el-dropdown-item ><a @click="viewSchemaMultiFields(scope.row)"><span><i class="fa fa-play-circle"></i>添加多域字段</span></a></el-dropdown-item>
+                                <el-dropdown-item ><a @click="viewSchemaMultiFields(scope.row)"><span><i class="fa fa-play-circle"></i>添加subFields</span></a></el-dropdown-item>
                                 <el-dropdown-item ><a @click="viewSchemaCopyTo(scope.row)"><span><i class="fa fa-play-circle"></i>添加copyTo</span></a></el-dropdown-item>
                             </el-dropdown-menu>
                         </el-dropdown>

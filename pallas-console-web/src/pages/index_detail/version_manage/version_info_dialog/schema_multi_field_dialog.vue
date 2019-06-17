@@ -146,7 +146,7 @@ export default {
       return this.versionOperation === 'view';
     },
     childTitle() {
-      const title = `${this.schemaMultiFieldsInfo.fieldName}多域字段`;
+      const title = `${this.schemaMultiFieldsInfo.fieldName} subFields`;
       return title;
     },
   },
