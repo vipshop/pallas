@@ -9,6 +9,7 @@
                 </div>
                 <div class="pull-right" v-show="isAllPrivilege">
                     <log-monitor :template-name="templateInfo.templateName" :index-id="indexId" :index-name="indexName"></log-monitor>
+                    <el-button type="primary" @click="setCustomTemplate" size="small" v-show="isEditOperate && !templateInfo.approving">模板配置</el-button>
                     <el-select v-show="!isMacroVisible && isEditOperate" size="small" placeholder="请选择要插入的宏" v-model="selectedMacro" style="padding-right: 10px;" clearable @change="insertMacro">
                         <el-option v-for="item in macroList" :label="item.templateName" :value="item.templateName" :key="item.templateName"></el-option>
                     </el-select>
@@ -123,6 +124,13 @@
         <div v-if="isEditSaveVisible">
             <template-save-edit-dialog :index-id="indexId" :template-info="templateInfo" @close-edit-save-dialog="closeEditSaveDialog" @edit-save-success="editSaveSuccess"></template-save-edit-dialog>
         </div>
+        <div v-if="isTemplateConfigVisible">
+            <template-config-dialog
+            :metadata-list="metadataList"
+            @cover-content="coverConfigTemplate"
+            @close-dialog="closeTemplateConfigDialog">
+            </template-config-dialog>
+        </div>
     </div>
 
 </template>
@@ -132,9 +140,10 @@ import '../../../../components';
 import TemplateTest from './template_test/template_test';
 import ServiceGovernance from './service_governance/service_governance';
 import TemplateSaveEditDialog from './template_save_edit_dialog/template_save_edit_dialog';
+import TemplateConfigDialog from './template_config_dialog';
 
 export default {
-  props: ['indexId', 'indexName', 'clusters', 'isAllPrivilege', 'templateInfo', 'macroList'],
+  props: ['indexId', 'indexName', 'metadataList', 'clusters', 'isAllPrivilege', 'templateInfo', 'macroList'],
   data() {
     return {
       loading: false,
@@ -156,6 +165,7 @@ export default {
       paneHeight: {
         height: document.body.clientHeight - 298,
       },
+      isTemplateConfigVisible: false,
     };
   },
   mounted() {
@@ -166,6 +176,16 @@ export default {
     };
   },
   methods: {
+    setCustomTemplate() {
+      this.isTemplateConfigVisible = true;
+    },
+    coverConfigTemplate(data) {
+      this.templateInfo.content = data;
+      this.closeTemplateConfigDialog();
+    },
+    closeTemplateConfigDialog() {
+      this.isTemplateConfigVisible = false;
+    },
     initSql(dsId) {
       const tb = this.datasourceList[dsId].split('/')[2];
       this.sql = `select * from ${tb}`;
@@ -388,6 +408,7 @@ export default {
     'template-test': TemplateTest,
     'template-save-edit-dialog': TemplateSaveEditDialog,
     'service-governance': ServiceGovernance,
+    'template-config-dialog': TemplateConfigDialog,
   },
   created() {
     this.init();

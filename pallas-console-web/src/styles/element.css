@@ -793,3 +793,12 @@
 .el-dropdown-menu__item--divided:before {
     height: 0;
 }
+
+.el-scrollbar{
+    height: 100%;
+    overflow: hidden;
+}
+.el-scrollbar__wrap{
+    overflow: auto;
+    height: 100%;
+}
