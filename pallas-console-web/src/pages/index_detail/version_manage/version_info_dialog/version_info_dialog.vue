@@ -193,9 +193,11 @@
                                 <el-button type="text" v-show="scope.row.isNew">
                                     <span>子字段</span>
                                 </el-button>
+                                        <el-button type="warning" size="mini" @click="viewSchemaChildren(scope.row)" v-if="scope.row.children.length !== 0" ><i class="fa"></i>nested</el-button>
+                                        <el-button type="warning" size="mini" @click="viewSchemaMultiFields(scope.row)" v-if="scope.row.multiField.length !== 0" ><i class="fa"></i>subFields</el-button>
+                                        <div>
                                 <el-tag type="success" v-if="scope.row.copyTo.length > 0">copy to: {{scope.row.copyTo}}</el-tag>
-                                <el-button type="warning" @click="viewSchemaChildren(scope.row)" v-if="scope.row.children.length !== 0" ><i class="fa"></i>nested</el-button>
-                                <el-button type="warning" @click="viewSchemaMultiFields(scope.row)" v-if="scope.row.multiField.length !== 0" ><i class="fa"></i>subFields</el-button>
+                                        </div>
                             </template>
                         </el-table-column>
                         <el-table-column label="DB类型" v-if="!isMetaDataNull">
@@ -235,7 +237,7 @@
                                 操作<i class="el-icon-caret-bottom el-icon--right"></i>
                               </span>
                                     <el-dropdown-menu class="dropdown-operation" slot="dropdown">
-                                        <el-dropdown-item v-if="scope.row.multiField.length === 0 && (scope.row.fieldType === 'nested' || scope.row.fieldType === 'object')"><a @click="viewSchemaChildren(scope.row)"><span><i class="fa fa-play-circle"></i>添加nested</span></a></el-dropdown-item>
+                                                <el-dropdown-item v-if="scope.row.multiField.length === 0"><a @click="viewSchemaChildren(scope.row)"><span><i class="fa fa-play-circle"></i>添加nested/object</span></a></el-dropdown-item>
                                         <el-dropdown-item v-if="scope.row.children.length === 0 && scope.row.fieldType !== 'nested'"><a @click="viewSchemaMultiFields(scope.row)"><span><i class="fa fa-play-circle"></i>添加subFields</span></a></el-dropdown-item>
                                         <el-dropdown-item v-if="!isEditable" ><a @click="viewSchemaCopyTo(scope.row)"><span><i class="fa fa-play-circle"></i>添加copyTo</span></a></el-dropdown-item>
                                     </el-dropdown-menu>
@@ -507,6 +509,10 @@ export default {
       this.isCopyToFieldsVisible = false;
     },
     viewSchemaChildren(row) {
+      if (row.fieldType !== 'nested' && row.fieldType !== 'object') {
+        this.$message.errorMessage(`ES类型必须为nested或者object`);
+        return;
+      }
       this.isSchemaChildVisible = true;
       this.schemaExtInfo = row;
     },
@@ -549,7 +555,6 @@ export default {
       }
     },
     addSchemaChild(array) {
-      console.log(JSON.stringify(array));
       this.isSchemaChildVisible = false;
     },
     addSchemaMultiFields(array) {
