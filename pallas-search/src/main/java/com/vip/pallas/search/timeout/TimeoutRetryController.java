@@ -76,7 +76,8 @@ public class TimeoutRetryController {
 								callQueue.remove(asyncCall);
 							} else {
 								long timeLeft = asyncCall.retryMaybe();
-								if (time2sleep > timeLeft) { // save the minimal left-time
+								// save the minimal left-time
+								if (0L != timeLeft && time2sleep > timeLeft) {
 									time2sleep = timeLeft;
 								}
 							}

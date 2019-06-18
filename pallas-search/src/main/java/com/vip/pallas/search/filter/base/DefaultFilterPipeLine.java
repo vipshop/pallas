@@ -26,20 +26,23 @@ import java.util.Map;
 public class DefaultFilterPipeLine implements FilterPipeLine {
 	
 	private final Map<String, AbstractFilterContext> name2ctx = new HashMap<String, AbstractFilterContext>(16);
-	private volatile static DefaultFilterPipeLine instance;
+
+	/**
+	 * Singleton instance holder class.(For lazy load)
+	 */
+	private static class InstanceHolder {
+		private volatile static DefaultFilterPipeLine instance = new DefaultFilterPipeLine();
+
+		private static DefaultFilterPipeLine getInstance() {
+			return instance;
+		}
+	}
 
 	private DefaultFilterPipeLine() {
 	}
 
 	public static FilterPipeLine getInstance() {
-		if (instance == null) {
-			synchronized (DefaultFilterPipeLine.class) {
-				if (instance == null) {
-					instance = new DefaultFilterPipeLine();
-				}
-			}
-		}
-		return instance;
+		return InstanceHolder.getInstance();
 	}
 
 	@Override

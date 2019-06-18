@@ -19,6 +19,7 @@ package com.vip.pallas.search.launch;
 
 import com.vip.pallas.search.filter.HttpProtocolCheckFilter;
 import com.vip.pallas.search.filter.base.DefaultFilterPipeLine;
+import com.vip.pallas.search.filter.base.FilterPipeLine;
 import com.vip.pallas.search.filter.error.ErrorFilter;
 import com.vip.pallas.search.filter.post.CommonResponseHeaderFilter;
 import com.vip.pallas.search.filter.post.ResponseSendFilter;
@@ -41,22 +42,23 @@ public class BootStrap {
 
 	private static void initJavaFilters() {
 		// 前置流程
+		FilterPipeLine filterPipeLine = DefaultFilterPipeLine.getInstance();
 		if (!PallasSearchProperties.SEARCH_SKIP_ROUTING) {
-			DefaultFilterPipeLine.getInstance().addLastSegment(new HttpProtocolCheckFilter(), new RouteFilter(),
+			filterPipeLine.addLastSegment(new HttpProtocolCheckFilter(), new RouteFilter(),
 					new BalanceFilter());
 		} else {
-			DefaultFilterPipeLine.getInstance().addLastSegment(new HttpProtocolCheckFilter(), new UpStreamFilter());
+			filterPipeLine.addLastSegment(new HttpProtocolCheckFilter(), new UpStreamFilter());
 		}
 
 		// rest流程
-		DefaultFilterPipeLine.getInstance().addLastSegment(new RestRequestUriFilter(), new RestRequestBodyFilter(),
+		filterPipeLine.addLastSegment(new RestRequestUriFilter(), new RestRequestBodyFilter(),
 				new RestRequestHeaderFilter(), new FlowRecordFilter(), new RestInvokerFilter(), new RestResponseHeaderFilter());
 
 		// 后置流程
-		DefaultFilterPipeLine.getInstance().addLastSegment(new CommonResponseHeaderFilter(), new ResponseSendFilter());
+		filterPipeLine.addLastSegment(new CommonResponseHeaderFilter(), new ResponseSendFilter());
 
 		// 错误处理
-		DefaultFilterPipeLine.getInstance().addLastSegment(new ErrorFilter());
+		filterPipeLine.addLastSegment(new ErrorFilter());
 	}
 	
 }
