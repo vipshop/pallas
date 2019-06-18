@@ -47,6 +47,8 @@ public class SearchTemplate {
 
 	private String params;
 
+	private String resetParams;
+
 	private int type;
 
 	private int hisCount;
@@ -114,6 +116,14 @@ public class SearchTemplate {
 
 	public void setParams(String params) {
 		this.params = params;
+	}
+
+	public String getResetParams() {
+		return resetParams;
+	}
+
+	public void setResetParams(String resetParams) {
+		this.resetParams = resetParams;
 	}
 
 	public int getType() {

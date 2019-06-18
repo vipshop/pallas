@@ -35,6 +35,9 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.vip.pallas.console.vo.BatchSubmitVO;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -435,6 +438,13 @@ public class TemplateController {
         List<SearchTemplate> list = templateService.findAllByIndexId(indexId);
         for (SearchTemplate t : list)  {
             t.setHisCount(hisService.count(t.getId()));
+            try {
+                t.setResetParams(JSONObject.toJSONString(templateService.genParams(t), SerializerFeature.WriteMapNullValue));
+            } catch (Exception ignore) {
+                //no set the resetPrams if error
+                t.setResetParams("{\\n}");
+            }
+
         }
 
         PageResultVO<SearchTemplate> resultVO = new PageResultVO<>();

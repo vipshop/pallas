@@ -72,15 +72,18 @@
                               <el-row>
                                   <fieldset class="no-border">
                                       <span class="edit-title">参数：</span>
-                                      <div style="height: 300px;">
+                                      <span>
+                                        <el-button size="small" type="primary" @click="handleResetParmas">重置参数</el-button>
+                                      </span>
+                                      <div style="padding-top: 5px; height: 300px;">
                                           <editor ref="aceEditor2" :content="templateInfo.params" v-on:change-content="changeDebugContent" :editor-id="debugId"></editor>
                                       </div>
                                   </fieldset>
                               </el-row>
                               <el-row>
                                   <div align="center" style="padding: 5px 0">
-                                      <el-button size="small" type="primary" @click="handleRender">Render</el-button>
-                                      <el-button size="small" type="primary" @click="handleDebug">运行</el-button>
+                                      <el-button size="small" type="primary" @click="handleRender">渲染DSL</el-button>
+                                      <el-button size="small" type="primary" @click="handleDebug">执行查询</el-button>
                                   </div>
                               </el-row>
                               <el-row>
@@ -233,6 +236,9 @@ export default {
       .finally(() => {
         this.loading = false;
       });
+    },
+    handleResetParmas() {
+      this.templateInfo.params = JSON.stringify(JSON.parse(this.templateInfo.resetParams), undefined, 2);
     },
     handleExplain() {
       const dataParams = {
