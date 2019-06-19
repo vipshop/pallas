@@ -764,7 +764,10 @@
     border-radius: 8px;
     background-color: rgba(255,255,255,.5);
 }
-.el-table__body-wrapper::-webkit-scrollbar-thumb, .el-textarea__inner::-webkit-scrollbar-thumb, .el-message-box__message::-webkit-scrollbar-thumb, .el-tree::-webkit-scrollbar-thumb {
+.el-table__body-wrapper::-webkit-scrollbar-thumb,
+.el-textarea__inner::-webkit-scrollbar-thumb,
+.el-message-box__message::-webkit-scrollbar-thumb,
+.el-tree::-webkit-scrollbar-thumb {
     border-radius: 8px;
     background-color: rgba(144,147,153,.5);
 }

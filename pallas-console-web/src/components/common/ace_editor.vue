@@ -40,3 +40,16 @@ export default {
   },
 };
 </script>
+<style type="text/css">
+.ace_scrollbar-v::-webkit-scrollbar,
+.ace_scrollbar-h::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+    border-radius: 8px;
+}
+.ace_scrollbar-v::-webkit-scrollbar-thumb,
+.ace_scrollbar-h::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    background-color: rgba(144,147,153,.5);
+}
+</style>

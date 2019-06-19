@@ -64,7 +64,7 @@
                 <el-col :span="12">
                     <div class="template-config-content">
                       <div class="title">模板展示</div>
-                      <div style="height: 450px;">
+                      <div style="height: 450px;overflow: auto;">
                         <el-scrollbar>
                           <pre>{{templateContent}}</pre>
                         </el-scrollbar>
@@ -75,7 +75,7 @@
         </div>
         <div slot="footer" class="dialog-footer">    
             <el-button @click="handleClose()">取消</el-button>
-            <el-button type="confirm" @click="handleSave">覆盖模板</el-button>
+            <el-button type="confirm" @click="handleSave" v-if="JSON.stringify(templateContent) !== '{}'">生成模板</el-button>
         </div>
     </el-dialog>
 </template>

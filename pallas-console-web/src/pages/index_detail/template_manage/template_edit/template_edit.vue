@@ -3,19 +3,19 @@
         <div class="template-content" v-loading="loading" element-loading-text="请稍等···">
             <el-row>
                 <div class="pull-left template-title">
-                    当前正在编辑{{this.templateType}}：<span class="template-name">{{templateInfo.templateName}}</span>
+                    当前{{this.templateType}}：<span class="template-name">{{templateInfo.templateName}}</span>
                     <span v-show="templateInfo.approving && templateInfo.type === 1" class="template-approving">状态：<router-link tag="a" :to="{ name: 'authority_manage' }">待审核</router-link>，不可进行保存，删除等操作</span>
                     <span v-show="templateInfo.approving && templateInfo.type === 0" class="template-approving">引用该宏的模板处于待审核状态，不可进行保存、删除等操作</span>
                 </div>
                 <div class="pull-right" v-show="isAllPrivilege">
                     <log-monitor :template-name="templateInfo.templateName" :index-id="indexId" :index-name="indexName"></log-monitor>
-                    <el-button type="primary" @click="setCustomTemplate" size="small" v-show="isEditOperate && !templateInfo.approving">模板配置</el-button>
                     <el-select v-show="!isMacroVisible && isEditOperate" size="small" placeholder="请选择要插入的宏" v-model="selectedMacro" style="padding-right: 10px;" clearable @change="insertMacro">
                         <el-option v-for="item in macroList" :label="item.templateName" :value="item.templateName" :key="item.templateName"></el-option>
                     </el-select>
-                    <el-button type="danger" @click="handleDelete" size="small" v-show="isEditOperate && !templateInfo.approving">删除</el-button>
+                    <el-button type="primary" @click="setCustomTemplate" size="small" v-show="isEditOperate && !templateInfo.approving">模板配置</el-button>
                     <el-button type="primary" @click="handleSave" size="small" v-show="isEditOperate && !templateInfo.approving">保存</el-button>
                     <el-button type="primary" @click="handleApprove" size="small" v-show="isEditOperate && !templateInfo.approving && templateInfo.type === 1">提交</el-button>
+                    <el-button type="danger" @click="handleDelete" size="small" v-show="isEditOperate && !templateInfo.approving">删除</el-button>
                     <el-button type="primary" @click="handleHistoryVersion" size="small" v-show="templateInfo.hisCount > 0 && isEditOperate">{{historyVersionBtn}}</el-button>
                 </div>
             </el-row>
@@ -28,7 +28,7 @@
                             </div>
                             <div v-show="isShowHistoryVersion" class="template-history-version-content">
                                 <div style="padding-left:10px;">
-                                    <el-table :data="historyVersionList" border @row-click="handleVersionDialog">
+                                    <el-table :data="historyVersionList" border @row-click="handleVersionDialog" :max-height="650">
                                         <el-table-column label="修改日期" width="150px">
                                               <template scope="scope">{{scope.row.createdTime | formatDate}}</template>
                                         </el-table-column>
@@ -52,7 +52,7 @@
                                 </el-col>
                                 <el-col :span="2">
                                   <div :style="sqlParseBtnStyle" align="center">
-                                      <el-button size="small" title="结果仅供参考，需进一步加工" type="primary" @click="handleExplain">转 DSL</el-button></br>
+                                      <el-button size="small" title="结果仅供参考，需进一步加工" type="primary" @click="handleExplain">转 DSL</el-button><br/>
                                       <el-button title="谨慎执行，别跑挂DB了" :disabled="!isAllPrivilege" style="margin-top: 5px;margin-left: 0px;" size="small" type="primary" @click="handleExecute">查询DB</el-button>
                                   </div>
                                 </el-col>
@@ -261,7 +261,8 @@ export default {
       });
     },
     handleResetParams() {
-      this.templateInfo.params = JSON.stringify(JSON.parse(this.templateInfo.resetParams), undefined, 2);
+      this.templateInfo.params =
+      JSON.stringify(JSON.parse(this.templateInfo.resetParams), undefined, 2);
     },
     handleFormatParams() {
       const p = JSON.parse(this.templateInfo.params);
@@ -396,7 +397,6 @@ export default {
         this.loading = false;
       });
     },
-
     getDataSourceList() {
       return this.$http.post('/index/loadDbList.json', { indexId: this.indexId }).then((data) => {
         if (data) {
@@ -502,14 +502,11 @@ export default {
 .template-edit-and-version-content {
   height: 650px;
   width: 62%;
-  overflow-y: auto; 
   float:left;
 }
 .template-history-version-content {
   position: relative;
-  max-height: 650px;
   width: 38%;
-  overflow-y: auto;
   float:left;
 }
 .template-history-version-content table {
