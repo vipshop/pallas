@@ -12,7 +12,9 @@
                     <el-select v-show="!isMacroVisible && isEditOperate" size="small" placeholder="请选择要插入的宏" v-model="selectedMacro" style="padding-right: 10px;" clearable @change="insertMacro">
                         <el-option v-for="item in macroList" :label="item.templateName" :value="item.templateName" :key="item.templateName"></el-option>
                     </el-select>
-                    <el-button type="primary" @click="setCustomTemplate" size="small" v-show="isEditOperate && !templateInfo.approving">模板配置</el-button>
+                    <el-tooltip v-if="templateInfo.content === '' || templateInfo.content === '{}'" effect="dark" content="初始化自定义业务模板" placement="bottom">
+                      <el-button type="primary" @click="setCustomTemplate" size="small" v-show="isEditOperate && !templateInfo.approving">模板配置</el-button>
+                    </el-tooltip>
                     <el-button type="primary" @click="handleSave" size="small" v-show="isEditOperate && !templateInfo.approving">保存</el-button>
                     <el-button type="primary" @click="handleApprove" size="small" v-show="isEditOperate && !templateInfo.approving && templateInfo.type === 1">提交</el-button>
                     <el-button type="danger" @click="handleDelete" size="small" v-show="isEditOperate && !templateInfo.approving">删除</el-button>
@@ -101,12 +103,14 @@
                               <el-row>
                                   <fieldset class="no-border">
                                       <div class="api-content">
-                                          RestClient示例:
-                                          <br/>
-                                          <pre>{{apiContent.rest_client}}</pre>
-                                          <br/>
-                                          <pre>{{`POST: ${apiContent.path}`}}</pre>
-                                          <pre>{{apiContent.content}}</pre>
+                                          <el-scrollbar>
+                                              RestClient示例:
+                                              <br/>
+                                              <pre>{{apiContent.rest_client}}</pre>
+                                              <br/>
+                                              <pre>{{`POST: ${apiContent.path}`}}</pre>
+                                              <pre>{{apiContent.content}}</pre>
+                                          </el-scrollbar>
                                       </div>
                                   </fieldset>
                               </el-row>
@@ -483,7 +487,6 @@ export default {
 .api-content {
   padding: 5px;
   height: 600px;
-  overflow: auto;
   background-color: #222;
   color: #fff
 }
