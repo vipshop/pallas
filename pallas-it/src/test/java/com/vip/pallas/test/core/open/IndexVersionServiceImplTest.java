@@ -128,6 +128,12 @@ public class IndexVersionServiceImplTest extends BaseSpringEsTest {
         indexVersion.setFetchSlowThreshold(200l);
         indexVersion.setQuerySlowThreshold(200l);
         indexVersion.setRefreshInterval((byte)60);
+        indexVersion.setMaxResultWindow(10000l);
+        indexVersion.setSyncInterval("5s");
+        indexVersion.setFlushThresholdSize("500mb");
+        indexVersion.setTotalShardsPerNode(-1);
+        indexVersion.setTranslogDurability("async");
+
 
         ObjectNode node = JsonNodeFactory.instance.objectNode();
         node.put("fieldName", "id");

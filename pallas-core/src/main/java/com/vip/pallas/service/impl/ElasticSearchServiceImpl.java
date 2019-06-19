@@ -226,6 +226,15 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 		settings.put("search.slowlog.threshold.fetch.info", indexVersion.getFetchSlowThreshold() != -1 ? indexVersion.getFetchSlowThreshold() + "ms" : "-1");
 		settings.put("search.slowlog.threshold.query.info", indexVersion.getQuerySlowThreshold() != -1 ? indexVersion.getQuerySlowThreshold() + "ms" : "-1");
 
+		// translog
+		settings.put("index.translog.flush_threshold_size", indexVersion.getFlushThresholdSize());
+		settings.put("index.translog.sync_interval", indexVersion.getSyncInterval());
+		settings.put("index.translog.durability", indexVersion.getTranslogDurability());
+		// routing
+		settings.put("index.routing.allocation.total_shards_per_node", indexVersion.getTotalShardsPerNode());
+		// index
+		settings.put("index.max_result_window", indexVersion.getMaxResultWindow());
+
 		//设置allocation nodes
 		String nodes = extractAllocationNodes(indexVersion.getAllocationNodes(), clusterName);
 		if (StringUtils.isNotEmpty(nodes)) {

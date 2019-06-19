@@ -307,6 +307,12 @@ public abstract class IndexVersionService {
 		version.setQuerySlowThreshold(indexVersion.getQuerySlowThreshold());
 		version.setRefreshInterval(indexVersion.getRefreshInterval());
 
+		version.setMaxResultWindow(indexVersion.getMaxResultWindow());
+		version.setTotalShardsPerNode(indexVersion.getTotalShardsPerNode());
+		version.setFlushThresholdSize(indexVersion.getFlushThresholdSize());
+		version.setTranslogDurability(indexVersion.getTranslogDurability());
+		version.setSyncInterval(indexVersion.getSyncInterval());
+
 		// dual with mapping
 		List<Mapping> mappingList = mappingRepository.selectByVersionId(versionId);
 

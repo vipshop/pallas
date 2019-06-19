@@ -73,6 +73,57 @@ public class IndexVersion {
 
     private String rampUp;
 
+    private Long maxResultWindow;
+
+    private int totalShardsPerNode;
+
+    private String flushThresholdSize;
+
+    private String syncInterval;
+
+    private String translogDurability;
+
+    public Long getMaxResultWindow() {
+        return maxResultWindow;
+    }
+
+    public void setMaxResultWindow(Long maxResultWindow) {
+        this.maxResultWindow = maxResultWindow;
+    }
+
+    public int getTotalShardsPerNode() {
+        return totalShardsPerNode;
+    }
+
+    public void setTotalShardsPerNode(int totalShardsPerNode) {
+        this.totalShardsPerNode = totalShardsPerNode;
+    }
+
+
+    public String getFlushThresholdSize() {
+        return flushThresholdSize;
+    }
+
+    public void setFlushThresholdSize(String flushThresholdSize) {
+        this.flushThresholdSize = flushThresholdSize;
+    }
+
+    public String getSyncInterval() {
+        return syncInterval;
+    }
+
+    public void setSyncInterval(String syncInterval) {
+        this.syncInterval = syncInterval;
+    }
+
+    public String getTranslogDurability() {
+        return translogDurability;
+    }
+
+    public void setTranslogDurability(String translogDurability) {
+        this.translogDurability = translogDurability;
+    }
+
     public Long getId() {
         return id;
     }
@@ -309,6 +360,11 @@ public class IndexVersion {
                 ", fetchSlowThreshold=" + fetchSlowThreshold +
                 ", querySlowThreshold=" + querySlowThreshold +
                 ", refreshInterval=" + refreshInterval +
+                ", maxResultWindow=" + maxResultWindow +
+                ", totalShardsPerNode=" + totalShardsPerNode +
+                ", flushThresholdSize='" + flushThresholdSize + '\'' +
+                ", syncInterval='" + syncInterval + '\'' +
+                ", translogDurability='" + translogDurability + '\'' +
                 ", rampUp='" + rampUp + '\'' +
                 '}';
     }

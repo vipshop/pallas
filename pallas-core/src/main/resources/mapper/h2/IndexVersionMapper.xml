@@ -28,6 +28,11 @@
     <result column="query_slow_threshold" jdbcType="BIGINT" property="querySlowThreshold" />
     <result column="refresh_interval" jdbcType="TINYINT" property="refreshInterval" />
     <result column="ramp_up" jdbcType="VARCHAR" property="rampUp" />
+    <result column="max_result_window" jdbcType="BIGINT" property="maxResultWindow" />
+    <result column="total_shards_per_node" jdbcType="SMALLINT" property="totalShardsPerNode" />
+    <result column="flush_threshold_size" jdbcType="VARCHAR" property="flushThresholdSize" />
+    <result column="sync_interval" jdbcType="VARCHAR" property="syncInterval" />
+    <result column="translog_durability" jdbcType="VARCHAR" property="translogDurability" />
   </resultMap>
   
   <resultMap id="IndexParam" type="com.vip.pallas.bean.IndexParam">
@@ -59,7 +64,7 @@
     vdp_queue, routing_key, create_time, update_time, id_field, update_time_field, is_sync,
     vdp, filter_fields, prefer_executor, check_sum, allocation_nodes, dynamic,
     index_slow_threshold, fetch_slow_threshold, query_slow_threshold, refresh_interval,
-    ramp_up
+    ramp_up,max_result_window,total_shards_per_node,flush_threshold_size,sync_interval,translog_durability
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     select 
@@ -88,7 +93,7 @@
 	    v.id, index_id, version_name, is_used, sync_stat, num_of_shards, num_of_replication, 
 	    vdp_queue, routing_key, v.create_time, v.update_time, id_field, update_time_field, is_sync,
 	    vdp, filter_fields, prefer_executor, check_sum, allocation_nodes, `dynamic`,
-	    index_slow_threshold, fetch_slow_threshold, query_slow_threshold, refresh_interval from index_version v  join 
+	    index_slow_threshold, fetch_slow_threshold, query_slow_threshold, refresh_interval,max_result_window,total_shards_per_node,flush_threshold_size,sync_interval,translog_durability  from index_version v  join
 	    `index` i on v.index_id = i.id join cluster c on  c.cluster_id = i.cluster_name
 	    and index_id = #{params.indexId,jdbcType=BIGINT}
 	    ORDER BY v.id DESC
@@ -152,7 +157,7 @@
       num_of_replication, vdp_queue, routing_key, 
       create_time, update_time, id_field, 
       update_time_field, is_sync, vdp, filter_fields, check_sum, allocation_nodes, dynamic, index_slow_threshold, fetch_slow_threshold,
-      query_slow_threshold, refresh_interval)
+      query_slow_threshold, refresh_interval,max_result_window,total_shards_per_node,flush_threshold_size,sync_interval,translog_durability)
     values (#{id,jdbcType=BIGINT}, #{indexId,jdbcType=BIGINT}, #{versionName,jdbcType=VARCHAR}, 
       #{isUsed,jdbcType=BIT}, #{syncStat,jdbcType=VARCHAR}, #{numOfShards,jdbcType=TINYINT}, 
       #{numOfReplication,jdbcType=TINYINT}, #{vdpQueue,jdbcType=VARCHAR}, #{routingKey,jdbcType=VARCHAR}, 
@@ -160,7 +165,9 @@
       #{updateTimeField,jdbcType=VARCHAR}, #{isSync,jdbcType=BIT}, #{vdp,jdbcType=BIT}, #{filterFields,jdbcType=BIT},
       #{checkSum,jdbcType=BIT}, #{allocationNodes,jdbcType=VARCHAR}, #{dynamic,jdbcType=BIT},
       #{indexSlowThreshold,jdbcType=BIGINT}, #{fetchSlowThreshold,jdbcType=BIGINT},#{querySlowThreshold,jdbcType=BIGINT},
-      #{refreshInterval,jdbcType=TINYINT})
+      #{refreshInterval,jdbcType=TINYINT},#{maxResultWindow,jdbcType=BIGINT},
+      #{totalShardsPerNode,jdbcType=SMALLINT},#{flushThresholdSize,jdbcType=VARCHAR},
+      #{syncInterval,jdbcType=VARCHAR},#{translogDurability,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.vip.pallas.mybatis.entity.IndexVersion">
     insert into index_version
@@ -224,6 +231,21 @@
       </if>
       <if test="refreshInterval != null">
         refresh_interval,
+      </if>
+      <if test="maxResultWindow != null">
+        max_result_window,
+      </if>
+      <if test="totalShardsPerNode != null">
+        total_shards_per_node,
+      </if>
+      <if test="flushThresholdSize != null">
+        flush_threshold_size,
+      </if>
+      <if test="syncInterval != null">
+        sync_interval,
+      </if>
+      <if test="translogDurability != null">
+        translog_durability,
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -289,6 +311,21 @@
       </if>
       <if test="rampUp != null">
         ramp_up = #{rampUp,jdbcType=VARCHAR},
+      </if>
+      <if test="maxResultWindow != null">
+        #{maxResultWindow,jdbcType=BIGINT},
+      </if>
+      <if test="totalShardsPerNode != null">
+        #{totalShardsPerNode,jdbcType=SMALLINT},
+      </if>
+      <if test="flushThresholdSize != null">
+        #{flushThresholdSize,jdbcType=VARCHAR},
+      </if>
+      <if test="syncInterval != null">
+        #{syncInterval,jdbcType=VARCHAR},
+      </if>
+      <if test="translogDurability != null">
+        #{translogDurability,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -364,6 +401,21 @@
       <if test="rampUp != null">
         ramp_up = #{rampUp,jdbcType=VARCHAR},
       </if>
+      <if test="maxResultWindow != null">
+      max_result_window = #{maxResultWindow,jdbcType=BIGINT},
+    </if>
+      <if test="totalShardsPerNode != null">
+        total_shards_per_node = #{totalShardsPerNode,jdbcType=SMALLINT},
+      </if>
+      <if test="flushThresholdSize != null">
+        flush_threshold_size = #{flushThresholdSize,jdbcType=VARCHAR},
+      </if>
+      <if test="syncInterval != null">
+        sync_interval = #{syncInterval,jdbcType=VARCHAR},
+      </if>
+      <if test="translogDurability != null">
+        translog_durability = #{translogDurability,jdbcType=VARCHAR}
+      </if>
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
@@ -388,7 +440,12 @@
       fetch_slow_threshold = #{fetchSlowThreshold,jdbcType=BIGINT},
       query_slow_threshold = #{querySlowThreshold,jdbcType=BIGINT},
       refresh_interval = #{refreshInterval,jdbcType=TINYINT},
-      ramp_up = #{rampUp,jdbcType=VARCHAR}
+      ramp_up = #{rampUp,jdbcType=VARCHAR},
+      max_result_window = #{maxResultWindow,jdbcType=BIGINT},
+      total_shards_per_node = #{totalShardsPerNode,jdbcType=SMALLINT},
+      flush_threshold_size = #{flushThresholdSize,jdbcType=VARCHAR},
+      sync_interval = #{syncInterval,jdbcType=VARCHAR},
+      translog_durability = #{translogDurability,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
   

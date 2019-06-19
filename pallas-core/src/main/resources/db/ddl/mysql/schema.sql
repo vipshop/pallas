@@ -254,6 +254,11 @@ CREATE TABLE IF NOT EXISTS `index_version` (
   `query_slow_threshold` bigint(15) NOT NULL DEFAULT '0' COMMENT 'query slowlog threshold',
   `refresh_interval` tinyint(3) NOT NULL DEFAULT '60' COMMENT '索引刷新周期，单位秒',
   `ramp_up` VARCHAR(2048) NOT NULL DEFAULT '' COMMENT '索引预热配置',
+  `max_result_window` BIGINT(15) NOT NULL DEFAULT '10000' COMMENT '索引查询窗口，默认1w',
+  `total_shards_per_node` SMALLINT(6) NOT NULL DEFAULT '-1' COMMENT '一个节点上该index的shard数量',
+  `flush_threshold_size` VARCHAR(256) NOT NULL DEFAULT '512mb' COMMENT '当事务日志大小到达此预设值，则执行flush',
+  `sync_interval` VARCHAR(256) NOT NULL DEFAULT '5s' COMMENT 'tanslog写到磁盘间隔',
+  `translog_durability` VARCHAR(256) NOT NULL DEFAULT 'async' COMMENT 'translog同步文件方式，默认异步',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 

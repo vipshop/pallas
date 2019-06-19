@@ -13,14 +13,19 @@
                 </div>
                 <div class="label-content">
                     <el-row :gutter="20">
-                        <el-col :span="12">
+                        <el-col :span="8">
                             <el-form-item label="分片数量" prop="shardNum" label-width="120px">
                                 <el-input v-model.number="versionInfo.shardNum" :disabled="isEditable"></el-input>
                             </el-form-item>
                         </el-col>
-                        <el-col :span="12">
+                        <el-col :span="8">
                             <el-form-item label="复制数量" prop="replicationNum" label-width="120px">
                                 <el-input v-model.number="versionInfo.replicationNum" :disabled="isEditable"></el-input>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="8">
+                            <el-form-item label="ShardPerNode" prop="totalShardsPerNode" label-width="120px">
+                                <el-input v-model.number="versionInfo.totalShardsPerNode" :disabled="isEditable"></el-input>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -122,6 +127,34 @@
                     </el-row>
                 </div>
                 <div class="label-title"><span class="span-title"><i class="fa fa-th-large"></i>索引其他配置</span></div>
+                <div class="label-content">
+                    <el-row :gutter="20">
+                        <el-col :span="12">
+                            <el-form-item label="max_result_window" prop="maxResultWindow" label-width="180px">
+                                <el-input placeholder="10000" v-model.number="versionInfo.maxResultWindow" :disabled="isEditable"></el-input>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="12">
+                            <el-form-item label="flush_threshold_size" prop="flushThresholdSize" label-width="180px">
+                                <el-input placeholder="512mb" v-model="versionInfo.flushThresholdSize" :disabled="isEditable"></el-input>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                </div>
+                <div class="label-content">
+                    <el-row :gutter="20">
+                        <el-col :span="12">
+                            <el-form-item label="sync_interval" prop="syncInterval" label-width="180px">
+                                <el-input placeholder="5s" v-model="versionInfo.syncInterval" :disabled="isEditable"></el-input>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="12">
+                            <el-form-item label="translog_durability" prop="translogDurability" label-width="180px">
+                                <el-input placeholder="async" v-model="versionInfo.translogDurability" :disabled="isEditable"></el-input>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                </div>
                 <div class="label-content">
                     <el-row :gutter="20">
                         <el-col :span="8">
@@ -303,6 +336,11 @@ export default {
         fetchSlowThreshold: [{ required: true, message: 'Fetch Slow Log不能为空' }, { type: 'number', message: 'Fetch Slow Log必须为数字值' }],
         querySlowThreshold: [{ required: true, message: 'Query Slow Log不能为空' }, { type: 'number', message: 'Query Slow Log必须为数字值' }],
         refreshInterval: [{ required: true, message: 'refresh_interval不能为空' }, { type: 'number', message: 'refresh_interval必须为数字值' }],
+        maxResultWindow: [{ required: true, message: 'max_result_window不能为空' }, { type: 'number', message: 'max_result_window必须为数字值' }],
+        totalShardsPerNode: [{ required: true, message: 'total_shards_per_node不能为空' }, { type: 'number', message: 'total_shards_per_node必须为数字值' }],
+        flushThresholdSize: [{ required: true, message: 'flush_threshold_size不能为空' }],
+        syncInterval: [{ required: true, message: 'sync_interval不能为空' }],
+        translogDurability: [{ required: true, message: 'translog_durability不能为空' }],
       },
       fieldTypes: [{
         value: 'text',

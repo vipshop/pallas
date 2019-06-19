@@ -17,7 +17,8 @@ REPLACE INTO `index` (`id`, `index_name`, `description`, `cluster_name`, `stat`,
 REPLACE INTO `index_version` (`id`,`index_id`,`version_name`,`is_used`,`sync_stat`,`num_of_shards`,`num_of_replication`,`vdp_queue`,`routing_key`,
 `create_time`,`update_time`,`id_field`,`update_time_field`,`is_sync`,`is_deleted`,`vdp`,`filter_fields`,`prefer_executor`,
 `check_sum`,`real_cluster_id`,`allocation_nodes`,`dynamic`,`index_slow_threshold`,`fetch_slow_threshold`,`query_slow_threshold`,
-`refresh_interval`) VALUES(1,1,'versiontest',0,'full_ready',1,1,'q','id',now(),now(),'id','update_time',0,0,1,0,'',0,1,'',0,0,0,0,60);
+`refresh_interval`,`max_result_window`,`total_shards_per_node`,`flush_threshold_size`,`sync_interval`,`translog_durability`)
+VALUES(1,1,'versiontest',0,'full_ready',1,1,'q','id',now(),now(),'id','update_time',0,0,1,0,'',0,1,'',0,0,0,0,60,10000,-1,'512mb','5s','async');
 
 
 
