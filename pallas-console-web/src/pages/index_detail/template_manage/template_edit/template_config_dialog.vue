@@ -64,7 +64,7 @@
                 <el-col :span="12">
                     <div class="template-config-content">
                       <div class="title">模板展示</div>
-                      <div style="height: 450px;overflow: auto;">
+                      <div style="height: 450px;">
                         <el-scrollbar>
                           <pre>{{templateContent}}</pre>
                         </el-scrollbar>

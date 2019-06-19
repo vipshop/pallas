@@ -799,9 +799,9 @@
 
 .el-scrollbar{
     height: 100%;
-    overflow: hidden;
 }
 .el-scrollbar__wrap{
-    overflow: auto;
     height: 100%;
+    overflow: auto;
+    overflow-x: hidden;
 }

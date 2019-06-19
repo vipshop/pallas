@@ -2,7 +2,9 @@
     <el-dialog :title="title" v-model="isVisible" :before-close="closeDialog">
         <fieldset class="no-border">
             <div class="view-content">
-                <pre>{{content}}</pre>
+                <el-scrollbar>
+                  <pre>{{content}}</pre>
+                </el-scrollbar>
             </div>
         </fieldset>
     </el-dialog>
