@@ -74,7 +74,10 @@
                                   <fieldset class="no-border">
                                       <span class="edit-title">参数：</span>
                                       <span>
-                                        <el-button size="small" type="primary" @click="handleResetParmas">重置参数</el-button>
+                                        <el-button size="small" type="primary" @click="handleResetParams">重置参数</el-button>
+                                      </span>
+                                      <span>
+                                        <el-button size="small" type="primary" @click="handleFormatParams">格式化参数</el-button>
                                       </span>
                                       <div style="padding-top: 5px; height: 300px;">
                                           <editor ref="aceEditor2" :content="templateInfo.params" v-on:change-content="changeDebugContent" :editor-id="debugId"></editor>
@@ -257,8 +260,16 @@ export default {
         this.loading = false;
       });
     },
-    handleResetParmas() {
+    handleResetParams() {
       this.templateInfo.params = JSON.stringify(JSON.parse(this.templateInfo.resetParams), undefined, 2);
+    },
+    handleFormatParams() {
+      const p = JSON.parse(this.templateInfo.params);
+      if (p.params && p.params !== null) {
+        this.templateInfo.params = JSON.stringify(p.params, undefined, 2);
+      } else {
+        this.templateInfo.params = JSON.stringify(p, undefined, 2);
+      }
     },
     handleExplain() {
       const dataParams = {

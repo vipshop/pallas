@@ -142,15 +142,15 @@ public class PerformanceScriptServiceImpl implements PerformanceScriptService {
 			}
 			paramNameMap = new HashMap<>();
 			Object paramValue = en.getValue();
-			if (paramValue == null) {
-				paramNameMap.put(PARAM_NAME, paramKey);
-				result.add(paramNameMap);
-			} else if (paramValue instanceof Map) {
+			if (paramValue instanceof Map) {
 				Map<String, Object> paramValueMap = (Map<String, Object>) paramValue;
 				if (getMatchKey(paramValueMap) != null) {
 					paramNameMap.put(PARAM_NAME, paramKey);
 					result.add(paramNameMap);
 				}
+			} else {
+				paramNameMap.put(PARAM_NAME, paramKey);
+				result.add(paramNameMap);
 			}
 		}
 		return result;
