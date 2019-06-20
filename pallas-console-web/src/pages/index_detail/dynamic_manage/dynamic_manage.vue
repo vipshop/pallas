@@ -33,7 +33,7 @@
             </div>
         </div>
         <div class="content">
-            <el-row :gutter="20">
+            <el-row :gutter="20" v-if="isChartVisible">
                 <el-col :span="12">
                     <chart-container :title="`Request Rate(${indexSearchRateInfo.yAxisName})`" type="line">
                         <div slot="chart">
@@ -117,6 +117,7 @@ export default {
       dynamicOperation: '',
       dynamicInfoTitle: '',
       isDynamicInfoVisible: false,
+      isChartVisible: false,
       dynamicInfo: {},
       indexSearchRateInfo: {},
       indexSearchLatencyInfo: {},
@@ -213,6 +214,7 @@ export default {
           return rObj;
         });
         if (data.metric) {
+          this.isChartVisible = true;
           this.getIndexSerachRate(data.metric.indexingRate.metricModel,
             data.metric.searchRate.metricModel, data.metric.searchRate.unit);
           this.getIndexSearchLatency(data.metric.indexingLatency.metricModel,

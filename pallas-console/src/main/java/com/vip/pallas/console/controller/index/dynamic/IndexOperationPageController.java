@@ -22,14 +22,8 @@ import com.vip.pallas.bean.monitor.MetricInfoModel;
 import com.vip.pallas.bean.monitor.MonitorQueryModel;
 import com.vip.pallas.console.utils.AuthorizeUtil;
 import com.vip.pallas.exception.BusinessLevelException;
-import com.vip.pallas.mybatis.entity.Index;
-import com.vip.pallas.mybatis.entity.IndexOperationExample;
-import com.vip.pallas.mybatis.entity.IndexVersion;
-import com.vip.pallas.mybatis.entity.Page;
-import com.vip.pallas.service.IndexOperationService;
-import com.vip.pallas.service.IndexService;
-import com.vip.pallas.service.IndexVersionService;
-import com.vip.pallas.service.MonitorService;
+import com.vip.pallas.mybatis.entity.*;
+import com.vip.pallas.service.*;
 import com.vip.pallas.utils.ObjectMapTool;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +55,9 @@ public class IndexOperationPageController{
 
     @Autowired
     private IndexService indexService;
+
+    @Autowired
+    private ClusterService clusterService;
 
     @RequestMapping("/index/dynamic/page.json")
     public Map<String, Object> list(@RequestBody Map<String, Object> params) throws Exception {
@@ -124,6 +121,10 @@ public class IndexOperationPageController{
             query.setIndexName(index.getIndexName()+"_"+version.getId());
         }else {
             query.setIndexName(index.getIndexName()+"_"+versionId);
+        }
+        Cluster cluster =  clusterService.findByName(index.getClusterName());
+        if(null == cluster ||StringUtils.isNotEmpty(cluster.getRealClusters())) {
+            return null;
         }
         query.setClusterName(index.getClusterName());
         if (timeRangeList != null && timeRangeList.size() == 2 ) {
