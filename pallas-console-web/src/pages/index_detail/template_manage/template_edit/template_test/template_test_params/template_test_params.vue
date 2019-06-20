@@ -3,7 +3,7 @@
         <div class="template-test-content">
             <div class="template-test-head">设置请求参数</div>
             <div class="template-test-body">
-                <el-table :data="paramsInfo" border style="width: 100%">
+                <el-table :data="paramsInfo" border style="width: 100%" :max-height="temPanelHeight - 390">
                     <el-table-column prop="paramName" label="请求参数"></el-table-column>
                     <el-table-column label="包含">
                         <template scope="scope">
@@ -30,14 +30,14 @@
             </div>
         </div>
         <div align="center" class="template-test-content">
-            <el-button type="primary" @click="handleGen">生成测试脚本</el-button>
+            <el-button type="primary" size="small" @click="handleGen">生成测试脚本</el-button>
         </div>
     </div>
 </template>
 
 <script>
 export default {
-  props: ['indexId', 'templateName', 'paramsInfo', 'dataSource'],
+  props: ['indexId', 'templateName', 'paramsInfo', 'dataSource', 'temPanelHeight'],
   data() {
     return {
     };

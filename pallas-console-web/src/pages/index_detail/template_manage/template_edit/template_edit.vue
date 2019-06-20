@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="template-content" v-loading="loading" element-loading-text="请稍等···">
+        <div class="template-content" v-loading="loading" element-loading-text="请稍等···" :style="{ 'height': temPanelHeight }">
             <el-row>
                 <div class="pull-left template-title">
                     当前{{this.templateType}}：<span class="template-name">{{templateInfo.templateName}}</span>
@@ -21,16 +21,16 @@
                     <el-button type="primary" @click="handleHistoryVersion" size="small" v-show="templateInfo.hisCount > 0 && isEditOperate">{{historyVersionBtn}}</el-button>
                 </div>
             </el-row>
-            <div class="mrg-top-10">
+            <div>
                 <el-row>
                     <el-tabs v-model="activeTab" @tab-click="tabClick">
                         <el-tab-pane label="编辑模板" name="edit">
-                            <div :class="[isShowHistoryVersion ? 'template-edit-and-version-content' : 'template-edit-content']">
+                            <div :class="[isShowHistoryVersion ? 'template-edit-and-version-content' : 'template-edit-content']" :style="{ 'height': temPanelHeight - 85 }">
                                 <editor ref="aceEditor1" :content="templateInfo.content" v-on:change-content="changeEditContent" :editor-id="eidtorId"></editor>
                             </div>
                             <div v-show="isShowHistoryVersion" class="template-history-version-content">
                                 <div style="padding-left:10px;">
-                                    <el-table :data="historyVersionList" border @row-click="handleVersionDialog" :max-height="650">
+                                    <el-table :data="historyVersionList" border @row-click="handleVersionDialog" :max-height="temPanelHeight - 85">
                                         <el-table-column label="修改日期" width="150px">
                                               <template scope="scope">{{scope.row.createdTime | formatDate}}</template>
                                         </el-table-column>
@@ -42,28 +42,26 @@
                             </div>
                         </el-tab-pane>
                         <el-tab-pane label="sql parser" name="sql" :disabled="isMacroVisible || !isAllPrivilege">
-                              <div class="render-dblist">
+                              <div style="margin: 5px 0 10px;">
                                   <span>数据源：</span>
-                                  <el-select size="medium" v-model="datasourceId" placeholder="请选择数据源" style="margin-left: 5px;margin-bottom: 10px;width: 39%;" @change="initSql">
+                                  <el-select size="medium" v-model="datasourceId" placeholder="请选择数据源" style="width: 39%;" @change="initSql">
                                       <el-option v-for="item in Object.entries(datasourceList)" :key="item[0]" :label="item[1]" :value="item[0]"></el-option>
                                   </el-select>
                               </div>
-                              <el-row :gutter="2">
                                 <el-col :span="11">
-                                    <el-input :rows="paneHeight.height/21" class="result-content" type="textarea" v-model="sql" placeholder="请输入sql"></el-input>
+                                    <el-input :rows="temPanelHeight/26" class="result-content" type="textarea" v-model="sql" placeholder="请输入sql"></el-input>
                                 </el-col>
                                 <el-col :span="2">
-                                  <div :style="sqlParseBtnStyle" align="center">
+                                  <div :style="{'margin-top': (temPanelHeight - 240) / 2}" align="center">
                                       <el-button size="small" title="结果仅供参考，需进一步加工" type="primary" @click="handleExplain">转 DSL</el-button><br/>
                                       <el-button title="谨慎执行，别跑挂DB了" :disabled="!isAllPrivilege" style="margin-top: 5px;margin-left: 0px;" size="small" type="primary" @click="handleExecute">查询DB</el-button>
                                   </div>
                                 </el-col>
                                 <el-col :span="11">
-                                  <div :style="paneHeight">
-                                      <editor ref="aceEditor" :content="explainContent" editor-id="explainId"></editor>
+                                  <div>
+                                      <el-input :rows="temPanelHeight/26" class="result-content" readonly type="textarea" v-model="explainContent" placeholder="请输入sql"></el-input>
                                   </div>
                                 </el-col>
-                              </el-row>
                         </el-tab-pane>
                         <el-tab-pane label="调试" name="debug" :disabled="isMacroVisible || !isAllPrivilege">
                               <div class="render-cluster" v-if="clusters.length > 1">
@@ -100,23 +98,19 @@
                               </el-row>
                         </el-tab-pane>
                         <el-tab-pane label="API" name="api" :disabled="isMacroVisible || !isAllPrivilege">
-                              <el-row>
-                                  <fieldset class="no-border">
-                                      <div class="api-content">
-                                          <el-scrollbar>
-                                              RestClient示例:
-                                              <br/>
-                                              <pre>{{apiContent.rest_client}}</pre>
-                                              <br/>
-                                              <pre>{{`POST: ${apiContent.path}`}}</pre>
-                                              <pre>{{apiContent.content}}</pre>
-                                          </el-scrollbar>
-                                      </div>
-                                  </fieldset>
-                              </el-row>
+                            <div class="api-content" :style="{ 'height': temPanelHeight - 95 }">
+                                <el-scrollbar>
+                                    RestClient示例:
+                                    <br/>
+                                    <pre>{{apiContent.rest_client}}</pre>
+                                    <br/>
+                                    <pre>{{`POST: ${apiContent.path}`}}</pre>
+                                    <pre>{{apiContent.content}}</pre>
+                                </el-scrollbar>
+                            </div>
                         </el-tab-pane>
                         <el-tab-pane label="性能测试" name="test" :disabled="isMacroVisible || !isAllPrivilege">
-                            <template-test :index-id="indexId" :template-name="templateInfo.templateName" :params-info="paramsInfo"></template-test>
+                            <template-test :index-id="indexId" :template-name="templateInfo.templateName" :params-info="paramsInfo" :tem-panel-height="temPanelHeight"></template-test>
                         </el-tab-pane>
                         <el-tab-pane label="超时重试" name="timeoutRetry" :disabled="isMacroVisible || !isAllPrivilege">
                             <service-governance :index-id="indexId" :template-info="templateInfo"></service-governance>
@@ -150,7 +144,7 @@ import TemplateSaveEditDialog from './template_save_edit_dialog/template_save_ed
 import TemplateConfigDialog from './template_config_dialog';
 
 export default {
-  props: ['indexId', 'indexName', 'metadataList', 'clusters', 'isAllPrivilege', 'templateInfo', 'macroList'],
+  props: ['indexId', 'indexName', 'metadataList', 'clusters', 'isAllPrivilege', 'templateInfo', 'macroList', 'temPanelHeight'],
   data() {
     return {
       loading: false,
@@ -169,17 +163,7 @@ export default {
       datasourceId: '',
       sql: '',
       isEditSaveVisible: false,
-      paneHeight: {
-        height: document.body.clientHeight - 298,
-      },
       isTemplateConfigVisible: false,
-    };
-  },
-  mounted() {
-    this.paneHeight = { height: document.body.clientHeight - 298 };
-    const that = this;
-    window.onresize = function temp() {
-      that.paneHeight = { height: document.body.clientHeight - 298 };
     };
   },
   methods: {
@@ -453,9 +437,6 @@ export default {
       }
       return '模板';
     },
-    sqlParseBtnStyle() {
-      return { 'margin-top': `${(this.paneHeight.height / 2) - 20}px` };
-    },
   },
 };
 
@@ -486,7 +467,6 @@ export default {
 }
 .api-content {
   padding: 5px;
-  height: 600px;
   background-color: #222;
   color: #fff
 }
