@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.Min;
 
+import com.vip.pallas.console.vo.IndexVersionDynamicVO;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -432,6 +433,56 @@ public class IndexVersionController {
 
 			IndexOperation record = new IndexOperation();
 			record.setEventDetail(indexVersion + "  " + schema);
+			record.setEventName(IndexOperationEventName.UPDATE_VERSION);
+			record.setEventType(IndexOperationEventType.VERSION_EVENT);
+			record.setIndexId(index.getId());
+			record.setOperationTime(new Date());
+			record.setOperator(SessionUtil.getLoginUser(request));
+			record.setVersionId(versionId);
+			indexOperationService.insert(record);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+	}
+
+	@RequestMapping(value = "/dynamic_update.json", method = RequestMethod.POST)
+	public void update(@RequestBody @Validated IndexVersionDynamicVO params, HttpServletRequest request) throws Exception {
+		Long versionId = params.getId();
+
+		if (ObjectUtils.isEmpty(versionId)) {
+			throw new BusinessLevelException(500, "versionId不能为空");
+		}
+
+		IndexVersion indexVersion = new IndexVersion();
+		BeanUtils.copyProperties(params, indexVersion);
+		indexVersion.setId(versionId);
+		indexVersion.setUpdateTime(new Date());
+
+		Index index = indexService.findById(indexVersion.getIndexId());
+		if (index == null) {
+			throw new BusinessLevelException(500, "该索引不存在");
+		}
+
+		if (!AuthorizeUtil.authorizeIndexVersionPrivilege(request, index.getId(), index.getIndexName())) {
+			throw new BusinessLevelException(403, "无权限操作");
+		}
+
+		indexVersionService.update(indexVersion);
+		elasticSearchService.dynamicUpdateIndexSettings(index.getIndexName(),index.getId(),indexVersion);
+		try {
+			AuditLogUtil.log(
+					"add versionId: id - {0}, index - {1}, maxResultWindow - {2}, numOfReplication - {3}," +
+							" flushThresholdSize - {4}, totalShardsPerNode - {5}, syncInterval - {6}," +
+							" translogDurability - {7}, allocationNodes - {8} , indexSlowThreshold - {9}," +
+							" fetchSlowThreshold - {10}, querySlowThreshold - {11}, refreshInterval - {12}",
+					indexVersion.getId(), indexVersion.getIndexId(), indexVersion.getMaxResultWindow(),
+					indexVersion.getNumOfReplication(), indexVersion.getFlushThresholdSize(), indexVersion.getTotalShardsPerNode(),
+					indexVersion.getSyncInterval(), indexVersion.getTranslogDurability(),indexVersion.getAllocationNodes(),indexVersion.getIndexSlowThreshold(),
+					indexVersion.getFetchSlowThreshold(),indexVersion.getQuerySlowThreshold(),indexVersion.getRefreshInterval());
+
+
+			IndexOperation record = new IndexOperation();
+			record.setEventDetail(indexVersion+"");
 			record.setEventName(IndexOperationEventName.UPDATE_VERSION);
 			record.setEventType(IndexOperationEventType.VERSION_EVENT);
 			record.setIndexId(index.getId());

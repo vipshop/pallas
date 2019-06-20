@@ -44,6 +44,7 @@
                                 <el-dropdown-item v-show="!scope.row.isSync"><a @click="createIndex(scope.row)"><span><i class="fa fa-play-circle"></i>创建索引</span></a></el-dropdown-item>
                                 <el-dropdown-item v-show="!scope.row.isUsed"><a @click="enableVersion(scope.row)"><span><i class="fa fa-hand-o-right"></i>启用版本</span></a></el-dropdown-item>
                                 <el-dropdown-item><a @click="triggerDialog(scope.row, 'view')"><span><i class="fa fa-eye"></i>配置查看</span></a></el-dropdown-item>
+                                  <el-dropdown-item v-show="scope.row.isSync"><a @click="triggerDialog(scope.row, 'dynamic_edit')"><span><i class="fa fa-pencil-square-o"></i>动态配置更改</span></a></el-dropdown-item>
                                 <el-dropdown-item v-show="!scope.row.isSync"><a @click="triggerDialog(scope.row, 'edit')"><span><i class="fa fa-pencil-square-o"></i>配置更改</span></a></el-dropdown-item>
                                 <el-dropdown-item><a @click="copyVersion(scope.row, 'copy')"><span><i class="fa fa-clone"></i>版本复制</span></a></el-dropdown-item>
                                 <el-dropdown-item><a @click="preheading(scope.row)"><span><i class="fa fa-sun-o"></i>索引预热</span></a></el-dropdown-item>
@@ -62,6 +63,9 @@
         <div v-if="isVersionInfoVisible">
             <version-info-dialog :version-operation="versionOperation" :version-info-title="versionInfoTitle" :version-info="versionInfo" :is-logical="isLogical" :clusters="clusters" :is-meta-data-null="isMetaDataNull" @close-dialog="closeDialog" @template-operate-success="templateOperateSuccess"></version-info-dialog>
         </div>
+        <div v-if="isVersionDynamicInfoVisible">
+            <version-dynamic-info-dialog :version-operation="versionOperation" :version-info-title="versionInfoTitle" :version-info="versionInfo" :is-logical="isLogical" :clusters="clusters"  @close-dialog="closeDynamicDialog" @template-operate-success="dynamicUpdateOperateSuccess"></version-dynamic-info-dialog>
+        </div>
         <div v-if="isViewConfigVisible">
             <json-content-dialog :content="configInfo" :title="configTitle" @close-dialog="closeViewConfigDialog"></json-content-dialog>
         </div>
@@ -73,11 +77,13 @@
 
 <script>
 import VersionInfoDialog from './version_info_dialog/version_info_dialog';
+import VersionDynamicInfoDialog from './version_info_dialog/version_dynamic_info_dialog';
 import PreheadingDialog from './preheading_dialog';
 
 export default {
   components: {
     'version-info-dialog': VersionInfoDialog,
+    'version-dynamic-info-dialog': VersionDynamicInfoDialog,
     'preheading-dialog': PreheadingDialog,
   },
   data() {
@@ -88,6 +94,7 @@ export default {
       isMetaDataNull: false,
       isAllPrivilege: false,
       isVersionInfoVisible: false,
+      isVersionDynamicInfoVisible: false,
       versionInfoTitle: '',
       versionOperation: '',
       isStartSyncVisible: false,
@@ -243,6 +250,35 @@ export default {
           this.$set(this.versionGetInfo, 'nodes', this.getNodesArray(this.versionGetInfo.allocationNodes));
         }
         this.versionInfo = JSON.parse(JSON.stringify(this.versionGetInfo));
+        if (operation === 'dynamic_edit') {
+          this.versionInfoTitle = '编辑版本动态配置';
+          this.isVersionDynamicInfoVisible = true;
+          this.versionOperation = operation;
+          const clusterName = this.getClusterName(
+              this.$array.strToArray(row.realClusterIds)[0]);
+          this.$http.get(`/cluster/id.json?clusterId=${clusterName}`).then((clusterData) => {
+            if (clusterData) {
+              const hostParam = `http://${this.$array.strToArray(clusterData.httpAddress)[0]}`;
+              const indexParam = `${this.indexName}_${row.id}`;
+              this.$http.postCerebro('/cerebro/commons/get_index_settings', { host: hostParam, index: indexParam }).then((settings) => {
+                const settingData = settings;
+                const settingInfo = settingData[indexParam].settings.index;
+                this.versionInfo.replicationNum = +settingInfo.number_of_replicas;
+                this.versionInfo.indexSlowThreshold = +settingInfo.indexing.slowlog.threshold.index.info.replace('ms', '');
+                this.versionInfo.fetchSlowThreshold = +settingInfo.search.slowlog.threshold.fetch.info.replace('ms', '');
+                this.versionInfo.querySlowThreshold = +settingInfo.search.slowlog.threshold.query.info.replace('ms', '');
+                this.versionInfo.refreshInterval = +settingInfo.refresh_interval.replace('s', '');
+                this.versionInfo.maxResultWindow = +settingInfo.max_result_window;
+                this.versionInfo.totalShardsPerNode = +settingInfo
+                  .routing.allocation.total_shards_per_node;
+                this.versionInfo.flushThresholdSize = settingInfo.translog.flush_threshold_size;
+                this.versionInfo.syncInterval = settingInfo.translog.sync_interval;
+                this.versionInfo.translogDurability = settingInfo.translog.durability;
+              });
+            }
+          });
+          return;
+        }
         if (operation === 'edit') {
           this.versionInfoTitle = '编辑版本';
         } else if (operation === 'copy') {
@@ -340,8 +376,15 @@ export default {
     closeDialog() {
       this.isVersionInfoVisible = false;
     },
+    closeDynamicDialog() {
+      this.isVersionDynamicInfoVisible = false;
+    },
     templateOperateSuccess() {
       this.isVersionInfoVisible = false;
+      this.getVersionList();
+    },
+    dynamicUpdateOperateSuccess() {
+      this.isVersionDynamicInfoVisible = false;
       this.getVersionList();
     },
     getSchemaMetaData() {

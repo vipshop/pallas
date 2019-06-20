@@ -18,45 +18,20 @@
 package com.vip.pallas.console.vo;
 
 
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
+import java.io.Serializable;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-public class IndexVersionVO implements Serializable {
+public class IndexVersionDynamicVO implements Serializable {
     private Long id;
 
     @NotNull(message = "indexId不能为空")
     private Long indexId;
 
-    @NotNull(message = "shardNum不能为空")
-    @JsonProperty("shardNum")
-    private Byte numOfShards;
-
-    @NotNull(message = "replicationNum不能为空")
-    @JsonProperty("replicationNum")
     private Byte numOfReplication;
-
-    private String vdpQueue;
-
-    @NotEmpty(message = "routingKey不能为空")
-    private String routingKey;
-
-    @NotEmpty(message = "idField不能为空")
-    private String idField;
-
-    @NotEmpty(message = "updateTimeField不能为空")
-    private String updateTimeField;
-
-    @NotNull(message = "schema不能为空")
-    private Object schema;
-
-    private int vdp;
-
-    private Boolean filterFields;
 
     private Boolean checkSum;
 
@@ -66,20 +41,17 @@ public class IndexVersionVO implements Serializable {
 
     private String allocationNodes;
 
-    private Boolean dynamic;
-
     private Long indexSlowThreshold;
 
     private Long fetchSlowThreshold;
 
     private Long querySlowThreshold;
 
-    @Positive(message = "refresh interval必须大于0")
     private Byte refreshInterval;
 
     private Long maxResultWindow;
 
-    private Integer totalShardsPerNode;
+    private int totalShardsPerNode;
 
     private String flushThresholdSize;
 
@@ -99,7 +71,7 @@ public class IndexVersionVO implements Serializable {
         return totalShardsPerNode;
     }
 
-    public void setTotalShardsPerNode(Integer totalShardsPerNode) {
+    public void setTotalShardsPerNode(int totalShardsPerNode) {
         this.totalShardsPerNode = totalShardsPerNode;
     }
 
@@ -145,76 +117,12 @@ public class IndexVersionVO implements Serializable {
         this.indexId = indexId;
     }
 
-    public Byte getNumOfShards() {
-        return numOfShards;
-    }
-
-    public void setNumOfShards(Byte numOfShards) {
-        this.numOfShards = numOfShards;
-    }
-
     public Byte getNumOfReplication() {
         return numOfReplication;
     }
 
     public void setNumOfReplication(Byte numOfReplication) {
         this.numOfReplication = numOfReplication;
-    }
-
-    public String getVdpQueue() {
-        return vdpQueue;
-    }
-
-    public void setVdpQueue(String vdpQueue) {
-        this.vdpQueue = vdpQueue;
-    }
-
-    public String getRoutingKey() {
-        return routingKey;
-    }
-
-    public void setRoutingKey(String routingKey) {
-        this.routingKey = routingKey;
-    }
-
-    public String getIdField() {
-        return idField;
-    }
-
-    public void setIdField(String idField) {
-        this.idField = idField;
-    }
-
-    public String getUpdateTimeField() {
-        return updateTimeField;
-    }
-
-    public void setUpdateTimeField(String updateTimeField) {
-        this.updateTimeField = updateTimeField;
-    }
-
-    public Object getSchema() {
-        return schema;
-    }
-
-    public void setSchema(Object schema) {
-        this.schema = schema;
-    }
-
-    public int getVdp() {
-        return vdp;
-    }
-
-    public void setVdp(int vdp) {
-        this.vdp = vdp;
-    }
-
-    public Boolean getFilterFields() {
-        return filterFields;
-    }
-
-    public void setFilterFields(Boolean filterFields) {
-        this.filterFields = filterFields;
     }
 
     public Boolean getCheckSum() {
@@ -247,14 +155,6 @@ public class IndexVersionVO implements Serializable {
 
     public void setAllocationNodes(String allocationNodes) {
         this.allocationNodes = allocationNodes;
-    }
-
-    public Boolean getDynamic() {
-        return dynamic;
-    }
-
-    public void setDynamic(Boolean dynamic) {
-        this.dynamic = dynamic;
     }
 
     public Long getIndexSlowThreshold() {

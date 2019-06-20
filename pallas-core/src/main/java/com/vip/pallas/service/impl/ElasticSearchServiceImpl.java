@@ -216,7 +216,6 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 		settings.put("number_of_shards", indexVersion.getNumOfShards());
 		settings.put("number_of_replicas", indexVersion.getNumOfReplication());
 		settings.put("refresh_interval", indexVersion.getRefreshInterval() + "s");
-		settings.put("translog.durability", "async");
 
 		//设置slowlog
 		settings.put("indexing.slowlog.level", "info");
@@ -242,6 +241,38 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 		}
 		return settings;
 	}
+
+	public String genDynamicSettingJson(IndexVersion indexVersion, String clusterName){
+        return new Gson().toJson(constructDynamicSetting(indexVersion,clusterName));
+    }
+
+    private Map<String,Object> constructDynamicSetting(IndexVersion indexVersion, String clusterName){
+        Map<String, Object> settings = new HashMap<>();
+        settings.put("number_of_replicas", indexVersion.getNumOfReplication());
+        settings.put("refresh_interval", indexVersion.getRefreshInterval() + "s");
+
+        //设置slowlog
+        settings.put("indexing.slowlog.threshold.index.info", indexVersion.getIndexSlowThreshold() != -1 ? indexVersion.getIndexSlowThreshold() + "ms" : "-1");
+        settings.put("search.slowlog.threshold.fetch.info", indexVersion.getFetchSlowThreshold() != -1 ? indexVersion.getFetchSlowThreshold() + "ms" : "-1");
+        settings.put("search.slowlog.threshold.query.info", indexVersion.getQuerySlowThreshold() != -1 ? indexVersion.getQuerySlowThreshold() + "ms" : "-1");
+
+        // translog
+        settings.put("index.translog.flush_threshold_size", indexVersion.getFlushThresholdSize());
+        // sync_interval 无法动态更新
+//        settings.put("index.translog.sync_interval", indexVersion.getSyncInterval());
+        settings.put("index.translog.durability", indexVersion.getTranslogDurability());
+        // routing
+        settings.put("index.routing.allocation.total_shards_per_node", indexVersion.getTotalShardsPerNode());
+        // index
+        settings.put("index.max_result_window", indexVersion.getMaxResultWindow());
+
+        //设置allocation nodes
+        String nodes = extractAllocationNodes(indexVersion.getAllocationNodes(), clusterName);
+        if (StringUtils.isNotEmpty(nodes)) {
+            settings.put("index.routing.allocation.include._name", nodes);
+        }
+        return settings;
+    }
 
 	// cluster_name1:node1,node2;cluster_name2:node4;
 	private static String extractAllocationNodes(String nodes, String clusterName) {
@@ -329,28 +360,48 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 		}
 	}
 
-	@Override
-	public String createIndex(String indexName, Long indexId, Long versionId) throws IOException {
-		StringBuilder result = new StringBuilder();
-		List<Cluster> clusters = clusterRepository.selectPhysicalClustersByIndexId(indexId);
-		for (Cluster cluster : clusters) {
-			try {
-				if (this.isExistIndex(indexName, cluster.getHttpAddress(), versionId)) {
-					this.deleteIndex(cluster.getHttpAddress(), indexName + "_" + versionId);
-				}
-				NStringEntity entity = new NStringEntity(genMappingJsonByVersionIdAndClusterName(versionId, cluster.getClusterId()),
-						ContentType.APPLICATION_JSON);
-				result.append(IOUtils.toString(ElasticRestClient.build(cluster.getHttpAddress())
-						.performRequest("PUT", "/" + indexName + "_" + versionId, Collections.emptyMap(), entity)
-						.getEntity().getContent())).append("\\n");
-			} catch (IOException e) {
-				logger.error(e.getClass() + " " + e.getMessage(), e);
-				throw e;
-			}
-		}
-		return result.toString();
+    @Override
+    public String createIndex(String indexName, Long indexId, Long versionId) throws IOException {
+        StringBuilder result = new StringBuilder();
+        List<Cluster> clusters = clusterRepository.selectPhysicalClustersByIndexId(indexId);
+        for (Cluster cluster : clusters) {
+            try {
+                if (this.isExistIndex(indexName, cluster.getHttpAddress(), versionId)) {
+                    this.deleteIndex(cluster.getHttpAddress(), indexName + "_" + versionId);
+                }
+                NStringEntity entity = new NStringEntity(genMappingJsonByVersionIdAndClusterName(versionId, cluster.getClusterId()),
+                        ContentType.APPLICATION_JSON);
+                result.append(IOUtils.toString(ElasticRestClient.build(cluster.getHttpAddress())
+                        .performRequest("PUT", "/" + indexName + "_" + versionId, Collections.emptyMap(), entity)
+                        .getEntity().getContent())).append("\\n");
+            } catch (IOException e) {
+                logger.error(e.getClass() + " " + e.getMessage(), e);
+                throw e;
+            }
+        }
+        return result.toString();
 
-	}
+    }
+
+    @Override
+    public String dynamicUpdateIndexSettings(String indexName, Long indexId, IndexVersion indexVersion) throws IOException {
+        StringBuilder result = new StringBuilder();
+        List<Cluster> clusters = clusterRepository.selectPhysicalClustersByIndexId(indexId);
+        for (Cluster cluster : clusters) {
+            try {
+                NStringEntity entity = new NStringEntity(genDynamicSettingJson( indexVersion, cluster.getClusterId()),
+                        ContentType.APPLICATION_JSON);
+                result.append(IOUtils.toString(ElasticRestClient.build(cluster.getHttpAddress())
+                        .performRequest("PUT", "/" + indexName + "_" +  indexVersion.getId()+"/_settings", Collections.emptyMap(), entity)
+                        .getEntity().getContent())).append("\\n");
+            } catch (IOException e) {
+                logger.error(e.getClass() + " " + e.getMessage(), e);
+                throw e;
+            }
+        }
+        return result.toString();
+
+    }
 
 	@Override
 	public String deleteIndex(String indexName, Long indexId, Long versionId) {

@@ -548,7 +548,7 @@ export default {
     },
     viewSchemaChildren(row) {
       if (row.fieldType !== 'nested' && row.fieldType !== 'object') {
-        this.$message.errorMessage(`ES类型必须为nested或者object`);
+        this.$message.errorMessage('ES类型必须为nested或者object');
         return;
       }
       this.isSchemaChildVisible = true;
@@ -592,7 +592,7 @@ export default {
         fieldArr.splice(index, 1);
       }
     },
-    addSchemaChild(array) {
+    addSchemaChild() {
       this.isSchemaChildVisible = false;
     },
     addSchemaMultiFields(array) {

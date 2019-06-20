@@ -47,7 +47,7 @@ public class IndexVersion {
 
 	private Long maxResultWindow;
 
-	private int totalShardsPerNode;
+	private Integer totalShardsPerNode;
 
 	private String flushThresholdSize;
 
@@ -67,7 +67,7 @@ public class IndexVersion {
 		return totalShardsPerNode;
 	}
 
-	public void setTotalShardsPerNode(int totalShardsPerNode) {
+	public void setTotalShardsPerNode(Integer totalShardsPerNode) {
 		this.totalShardsPerNode = totalShardsPerNode;
 	}
 

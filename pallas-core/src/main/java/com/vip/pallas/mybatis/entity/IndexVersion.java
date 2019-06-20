@@ -49,7 +49,7 @@ public class IndexVersion {
     
     private Boolean isSync;
     
-    private int vdp;
+    private Integer vdp;
     
     private Boolean filterFields;
     
@@ -75,7 +75,7 @@ public class IndexVersion {
 
     private Long maxResultWindow;
 
-    private int totalShardsPerNode;
+    private Integer totalShardsPerNode;
 
     private String flushThresholdSize;
 
@@ -95,7 +95,7 @@ public class IndexVersion {
         return totalShardsPerNode;
     }
 
-    public void setTotalShardsPerNode(int totalShardsPerNode) {
+    public void setTotalShardsPerNode(Integer totalShardsPerNode) {
         this.totalShardsPerNode = totalShardsPerNode;
     }
 
@@ -236,11 +236,11 @@ public class IndexVersion {
 		this.isSync = isSync;
 	}
 
-	public int getVdp() {
+	public Integer getVdp() {
 		return vdp;
 	}
 
-	public void setVdp(int vdp) {
+	public void setVdp(Integer vdp) {
 		this.vdp = vdp;
 	}
 

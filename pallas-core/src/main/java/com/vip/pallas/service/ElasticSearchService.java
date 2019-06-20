@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.vip.pallas.bean.monitor.ShardInfoModel;
+import com.vip.pallas.mybatis.entity.IndexVersion;
 import org.elasticsearch.client.RestClient;
 
 import com.vip.pallas.mybatis.entity.Cluster;
@@ -116,4 +117,5 @@ public interface ElasticSearchService {
 
 	List<HashSet<String>> dynamicDevideShards2Group(String indexAliasName, String httpAddress) throws IOException;
 
+	String dynamicUpdateIndexSettings(String indexName, Long indexId, IndexVersion indexVersion) throws IOException;
 }
