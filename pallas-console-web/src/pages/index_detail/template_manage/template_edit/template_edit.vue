@@ -42,26 +42,26 @@
                             </div>
                         </el-tab-pane>
                         <el-tab-pane label="sql parser" name="sql" :disabled="isMacroVisible || !isAllPrivilege">
-                              <div style="margin: 5px 0 10px;">
-                                  <span>数据源：</span>
-                                  <el-select size="medium" v-model="datasourceId" placeholder="请选择数据源" style="width: 39%;" @change="initSql">
-                                      <el-option v-for="item in Object.entries(datasourceList)" :key="item[0]" :label="item[1]" :value="item[0]"></el-option>
-                                  </el-select>
+                            <div style="margin: 5px 0 10px;">
+                                <span>数据源：</span>
+                                <el-select size="medium" v-model="datasourceId" placeholder="请选择数据源" style="width: 39%;" @change="initSql">
+                                    <el-option v-for="item in Object.entries(datasourceList)" :key="item[0]" :label="item[1]" :value="item[0]"></el-option>
+                                </el-select>
+                            </div>
+                            <el-col :span="11">
+                                <el-input :rows="temPanelHeight/26" class="result-content" type="textarea" v-model="sql" placeholder="请输入sql"></el-input>
+                            </el-col>
+                            <el-col :span="2">
+                              <div :style="{'margin-top': (temPanelHeight - 240) / 2}" align="center">
+                                  <el-button size="small" title="结果仅供参考，需进一步加工" type="primary" @click="handleExplain">转 DSL</el-button><br/>
+                                  <el-button title="谨慎执行，别跑挂DB了" :disabled="!isAllPrivilege" style="margin-top: 5px;margin-left: 0px;" size="small" type="primary" @click="handleExecute">查询DB</el-button>
                               </div>
-                                <el-col :span="11">
-                                    <el-input :rows="temPanelHeight/26" class="result-content" type="textarea" v-model="sql" placeholder="请输入sql"></el-input>
-                                </el-col>
-                                <el-col :span="2">
-                                  <div :style="{'margin-top': (temPanelHeight - 240) / 2}" align="center">
-                                      <el-button size="small" title="结果仅供参考，需进一步加工" type="primary" @click="handleExplain">转 DSL</el-button><br/>
-                                      <el-button title="谨慎执行，别跑挂DB了" :disabled="!isAllPrivilege" style="margin-top: 5px;margin-left: 0px;" size="small" type="primary" @click="handleExecute">查询DB</el-button>
-                                  </div>
-                                </el-col>
-                                <el-col :span="11">
-                                  <div>
-                                      <el-input :rows="temPanelHeight/26" class="result-content" readonly type="textarea" v-model="explainContent" placeholder="请输入sql"></el-input>
-                                  </div>
-                                </el-col>
+                            </el-col>
+                            <el-col :span="11">
+                              <div>
+                                  <el-input :rows="temPanelHeight/26" class="result-content" readonly type="textarea" v-model="explainContent"></el-input>
+                              </div>
+                            </el-col>
                         </el-tab-pane>
                         <el-tab-pane label="调试" name="debug" :disabled="isMacroVisible || !isAllPrivilege">
                               <div class="render-cluster" v-if="clusters.length > 1">
@@ -70,32 +70,32 @@
                                       <el-option v-for="item in clusters" :key="item.id" :label="item.clusterId" :value="item.id"></el-option>
                                   </el-select>
                               </div>
-                              <el-row>
-                                  <fieldset class="no-border">
-                                      <span class="edit-title">参数：</span>
-                                      <span>
+                                <el-col :span="11">
+                                    <div class="debug-title pull-left">
+                                      <div class="pull-left" style="margin-right: 10px;">参数</div>
+                                      <div class="pull-right">
                                         <el-button size="small" type="primary" @click="handleResetParams">重置参数</el-button>
-                                      </span>
-                                      <span>
                                         <el-button size="small" type="primary" @click="handleFormatParams">格式化参数</el-button>
-                                      </span>
-                                      <div style="padding-top: 5px; height: 300px;">
-                                          <editor ref="aceEditor2" :content="templateInfo.params" v-on:change-content="changeDebugContent" :editor-id="debugId"></editor>
                                       </div>
-                                  </fieldset>
-                              </el-row>
-                              <el-row>
-                                  <div align="center" style="padding: 5px 0">
+                                    </div>
+                                    <div :style="{ 'height': temPanelHeight - 120 }">
+                                        <editor ref="aceEditor2" :content="templateInfo.params" v-on:change-content="changeDebugContent" :editor-id="debugId"></editor>
+                                    </div>
+                                </el-col>
+                                <el-col :span="2">
+                                  <div :style="{'margin-top': (temPanelHeight - 240) / 2}" align="center">
                                       <el-button size="small" type="primary" @click="handleRender">渲染DSL</el-button>
-                                      <el-button size="small" type="primary" @click="handleDebug">执行查询</el-button>
+                                      <el-button size="small" type="primary" style="margin-top: 5px;margin-left: 0px;" @click="handleDebug">执行查询</el-button>
                                   </div>
-                              </el-row>
-                              <el-row>
-                                  <fieldset class="no-border">
-                                      <span class="edit-title">结果：</span>
-                                      <el-input type="textarea" class="result-content" readonly :autosize="{ minRows: 12}" v-model="resultContent"></el-input>
-                                  </fieldset>
-                              </el-row>
+                                </el-col>
+                                <el-col :span="11">
+                                  <div class="debug-title">
+                                    <span>结果</span>
+                                  </div>
+                                  <div :style="{ 'height': temPanelHeight - 120 }">
+                                      <editor ref="debugResultEditor" :content="resultContent" :readonly="true" editor-id="debugResult"></editor>
+                                  </div>
+                                </el-col>
                         </el-tab-pane>
                         <el-tab-pane label="API" name="api" :disabled="isMacroVisible || !isAllPrivilege">
                             <div class="api-content" :style="{ 'height': temPanelHeight - 95 }">
@@ -470,11 +470,14 @@ export default {
   background-color: #222;
   color: #fff
 }
-.edit-title {
-  color: #fff;
-}
 .no-border {
   border: none;
+}
+.debug-title {
+  width: 100%;
+  margin-bottom: 5px;
+  height: 30px;
+  line-height: 30px;
 }
 .template-edit-content {
   height: 650px;

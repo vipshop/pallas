@@ -8,7 +8,7 @@ import 'brace/theme/monokai';
 import 'brace/mode/json';
 
 export default {
-  props: ['editorId', 'content'],
+  props: ['editorId', 'content', 'readonly'],
   data() {
     return {
       editor: Object,
@@ -28,6 +28,8 @@ export default {
 
     this.editor.getSession().setMode('ace/mode/json');
     this.editor.setTheme('ace/theme/monokai');
+
+    this.editor.setReadOnly(this.readonly || false);
 
     this.editor.on('change', () => {
       this.beforeContent = this.editor.getValue();
