@@ -4,6 +4,11 @@
             <el-row>
                 <div class="pull-left template-title">
                     当前{{this.templateType}}：<span class="template-name">{{templateInfo.templateName}}</span>
+                    <el-tooltip v-if="templateInfo.content === '' || templateInfo.content === '{}'" effect="dark" content="初始化自定义业务模板" placement="right">
+                      <el-button type="primary" @click="setCustomTemplate" size="small" v-show="isEditOperate && !templateInfo.approving">
+                        <i class="fa fa-hand-o-up"></i>新模板向导
+                      </el-button>
+                    </el-tooltip>
                     <span v-show="templateInfo.approving && templateInfo.type === 1" class="template-approving">状态：<router-link tag="a" :to="{ name: 'authority_manage' }">待审核</router-link>，不可进行保存，删除等操作</span>
                     <span v-show="templateInfo.approving && templateInfo.type === 0" class="template-approving">引用该宏的模板处于待审核状态，不可进行保存、删除等操作</span>
                 </div>
@@ -12,9 +17,6 @@
                     <el-select v-show="!isMacroVisible && isEditOperate" size="small" placeholder="请选择要插入的宏" v-model="selectedMacro" style="padding-right: 10px;" clearable @change="insertMacro">
                         <el-option v-for="item in macroList" :label="item.templateName" :value="item.templateName" :key="item.templateName"></el-option>
                     </el-select>
-                    <el-tooltip v-if="templateInfo.content === '' || templateInfo.content === '{}'" effect="dark" content="初始化自定义业务模板" placement="bottom">
-                      <el-button type="primary" @click="setCustomTemplate" size="small" v-show="isEditOperate && !templateInfo.approving">模板配置</el-button>
-                    </el-tooltip>
                     <el-button type="primary" @click="handleSave" size="small" v-show="isEditOperate && !templateInfo.approving">保存</el-button>
                     <el-button type="primary" @click="handleApprove" size="small" v-show="isEditOperate && !templateInfo.approving && templateInfo.type === 1">提交</el-button>
                     <el-button type="danger" @click="handleDelete" size="small" v-show="isEditOperate && !templateInfo.approving">删除</el-button>
@@ -457,6 +459,7 @@ export default {
 .template-content .template-title .template-name{
   color: #32cd32;
   font-weight: bold;
+  margin-right: 5px;
 }
 .template-content .template-title .template-approving {
   color: red;

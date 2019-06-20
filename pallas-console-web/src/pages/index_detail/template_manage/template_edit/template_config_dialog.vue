@@ -1,5 +1,5 @@
 <template>
-    <el-dialog title="自定义配置模板" size="large" v-model="visible" :before-close="handleClose" v-loading="loading" element-loading-text="请稍等···">
+    <el-dialog title="新模板向导" size="large" v-model="visible" :before-close="handleClose" v-loading="loading" element-loading-text="请稍等···">
         <div class="template-config">
             <el-row :gutter="30">
                 <el-col :span="12">
