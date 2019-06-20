@@ -341,7 +341,7 @@ export default {
       this.loading = true;
       this.$http.post('/index_template/render.json', dataParams).then((data) => {
         try {
-          this.resultContent = JSON.stringify(JSON.parse(data), undefined, 2);
+          this.resultContent = this.$common.JSONbigStringifyFormat(this.$common.JSONbigParse(data));
         } catch (e) {
           this.resultContent = `解析错误: ${data}`;
         }
@@ -359,7 +359,7 @@ export default {
       };
       this.loading = true;
       this.$http.post('/index_template/debug.json', dataParams).then((data) => {
-        this.resultContent = JSON.stringify(JSON.parse(data), undefined, 2);
+        this.resultContent = this.$common.JSONbigStringifyFormat(this.$common.JSONbigParse(data));
       })
       .finally(() => {
         this.loading = false;
