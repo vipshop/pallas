@@ -18,7 +18,7 @@
 package com.vip.pallas.console.controller.index.dynamic;
 
 import com.vip.pallas.bean.IndexOperationParams;
-import com.vip.pallas.bean.monitor.MetricInfoModel;
+import com.vip.pallas.bean.monitor.ExtMetricInfoModel;
 import com.vip.pallas.bean.monitor.MonitorQueryModel;
 import com.vip.pallas.console.utils.AuthorizeUtil;
 import com.vip.pallas.exception.BusinessLevelException;
@@ -26,6 +26,8 @@ import com.vip.pallas.mybatis.entity.*;
 import com.vip.pallas.service.*;
 import com.vip.pallas.utils.ObjectMapTool;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
@@ -43,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @Validated
 public class IndexOperationPageController{
-
+    private static Logger logger = LoggerFactory.getLogger(IndexOperationPageController.class);
     @Autowired
     private IndexOperationService indexOperationService;
 
@@ -99,10 +101,18 @@ public class IndexOperationPageController{
         long pageCount = (int) (total % pageSize == 0 ? total / pageSize : total / pageSize + 1);
 
         // 获取request rate & request latency
-        MonitorQueryModel queryModel = constructMonitorQuery(indexId,versionId,timeRangeList);
-        if (queryModel != null){
-            MetricInfoModel metricInfoModel = monitorService.getMetricInfoModel(queryModel);
-            resultMap.put("metric",metricInfoModel);
+        List<MonitorQueryModel> queryModels = constructMonitorQuery(indexId,versionId,timeRangeList);
+        if (queryModels != null&&queryModels.size()>0){
+            List<ExtMetricInfoModel> metricInfoModelList = new ArrayList<>(queryModels.size());
+            for (MonitorQueryModel query : queryModels) {
+                try{
+                    ExtMetricInfoModel metricInfoModel = new ExtMetricInfoModel(monitorService.getMetricInfoModel(query),query.getClusterName());
+                    metricInfoModelList.add(metricInfoModel);
+                }catch (Exception e){
+                    logger.info("get cluster metric error：{},clusterName:{}",e.getMessage(),query.getClusterName());
+                }
+            }
+            resultMap.put("metric",metricInfoModelList);
         }
         resultMap.put("list", indexOperationService.selectByExampleWithBLOBs(example));
         resultMap.put("total", total);
@@ -110,23 +120,37 @@ public class IndexOperationPageController{
         return resultMap;
     }
 
-    private MonitorQueryModel constructMonitorQuery(Long indexId,Integer versionId,List<String> timeRangeList) throws ParseException {
-        MonitorQueryModel query = new MonitorQueryModel();
+    private List<MonitorQueryModel> constructMonitorQuery(Long indexId,Integer versionId,List<String> timeRangeList) throws ParseException {
+        List<MonitorQueryModel> result = new ArrayList<>();
         Index index = indexService.findById(indexId);
         if (null == index)return null;
+        Cluster cluster =  clusterService.findByName(index.getClusterName());
+        if(null == cluster) return null;
+        if (StringUtils.isNotEmpty(cluster.getRealClusters())){
+            // 逻辑集群
+            String[] clusterArr =  cluster.getRealClusters().split(",");
+            for (String clusterId : clusterArr) {
+                Cluster logicCluster = clusterService.selectByPrimaryKey(Long.parseLong(clusterId));
+                result.add(getQueryModel(index,versionId,logicCluster.getClusterId(),timeRangeList));
+            }
+        }else {
+            result.add(getQueryModel(index,versionId,index.getClusterName(),timeRangeList));
+        }
+
+        return result;
+    }
+
+    private MonitorQueryModel getQueryModel(Index index,Integer versionId,String clusterName,List<String> timeRangeList) throws ParseException {
+        MonitorQueryModel query = new MonitorQueryModel();
         if (null == versionId || 0 == versionId){
             // 没传则拿启用中的
-            IndexVersion version = indexVersionService.findUsedIndexVersionByIndexId(indexId);
+            IndexVersion version = indexVersionService.findUsedIndexVersionByIndexId(index.getId());
             if (null == version)return null;
             query.setIndexName(index.getIndexName()+"_"+version.getId());
         }else {
             query.setIndexName(index.getIndexName()+"_"+versionId);
         }
-        Cluster cluster =  clusterService.findByName(index.getClusterName());
-        if(null == cluster ||StringUtils.isNotEmpty(cluster.getRealClusters())) {
-            return null;
-        }
-        query.setClusterName(index.getClusterName());
+        query.setClusterName(clusterName);
         if (timeRangeList != null && timeRangeList.size() == 2 ) {
             DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
             format.setTimeZone(TimeZone.getTimeZone("Asia/Beijing"));

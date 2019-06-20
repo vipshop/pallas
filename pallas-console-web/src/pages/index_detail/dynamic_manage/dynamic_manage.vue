@@ -33,18 +33,19 @@
             </div>
         </div>
         <div class="content">
-            <el-row :gutter="20" v-if="isChartVisible">
+            <el-row :gutter="20" v-if="isChartVisible" v-for="(chartData, index) in chartList" :key="index">
+                <el-col :span="24"><div align="center" class="grid-content bg-purple-dark">{{chartData.rate.name}}</div></el-col>
                 <el-col :span="12">
-                    <chart-container :title="`Request Rate(${indexSearchRateInfo.yAxisName})`" type="line">
+                    <chart-container :title="`Request Rate(${chartData.rate.yAxisName})`" type="line">
                         <div slot="chart">
-                            <MyLine id="indexSearchRate" :option-info="indexSearchRateInfo"></MyLine>
+                            <MyLine id="indexSearchRate" :option-info="chartData.rate"></MyLine>
                         </div>
                     </chart-container>
                 </el-col>
                 <el-col :span="12">
-                    <chart-container :title="`Request Latency(${indexSearchLatencyInfo.yAxisName})`" type="line">
+                    <chart-container :title="`Request Latency(${chartData.latency.yAxisName})`" type="line">
                         <div slot="chart">
-                            <MyLine id="indexSearchLatency" :option-info="indexSearchLatencyInfo"></MyLine>
+                            <MyLine id="indexSearchLatency" :option-info="chartData.latency"></MyLine>
                         </div>
                     </chart-container>
                 </el-col>
@@ -129,6 +130,7 @@ export default {
         eventName: '',
         timeRange: 90,
       },
+      chartList: [],
       versionIdList: [],
     };
   },
@@ -157,27 +159,37 @@ export default {
         this.loading = false;
       });
     },
-    getIndexSerachRate(indexingRate, searchRate, unit) {
-      const optionInfo = {
+    getClusterMetricChart(metricData) {
+      const indexingRate = metricData.metric.indexingRate.metricModel;
+      console.log(indexingRate);
+      const clusterName = metricData.clusterName;
+      const searchRate = metricData.metric.searchRate.metricModel;
+      const rateOption = {
         xAxis: indexingRate.map(e => e.x),
+        name: clusterName,
         seriesData: [
           { name: 'indexing', data: indexingRate.map(e => e.y.toFixed(2)) },
           { name: 'search', data: searchRate.map(e => e.y.toFixed(2)) },
         ],
-        yAxisName: unit || '个',
+        yAxisName: searchRate.unit || '个',
       };
-      this.indexSearchRateInfo = optionInfo;
-    },
-    getIndexSearchLatency(indexingLatency, searchLatency, unit) {
-      const optionInfo = {
+      const indexingLatency = metricData.metric.indexingLatency.metricModel;
+      const searchLatency = metricData.metric.searchLatency.metricModel;
+      const latencyOption = {
         xAxis: indexingLatency.map(e => e.x),
+        name: clusterName,
         seriesData: [
           { name: 'indexing', data: indexingLatency.map(e => e.y.toFixed(2)) },
           { name: 'search', data: searchLatency.map(e => e.y.toFixed(2)) },
         ],
-        yAxisName: unit || '个',
+        yAxisName: searchLatency.unit || '个',
       };
-      this.indexSearchLatencyInfo = optionInfo;
+      const chartGroup = {
+        rate: rateOption,
+        latency: latencyOption,
+      };
+      console.log(chartGroup);
+      this.chartList.push(chartGroup);
     },
     getOperationList() {
       if (JSON.stringify(this.timeRange) === '[null,null]') {
@@ -214,11 +226,10 @@ export default {
           return rObj;
         });
         if (data.metric) {
+          data.metric.forEach((metricData) => {
+            this.getClusterMetricChart(metricData);
+          });
           this.isChartVisible = true;
-          this.getIndexSerachRate(data.metric.indexingRate.metricModel,
-            data.metric.searchRate.metricModel, data.metric.searchRate.unit);
-          this.getIndexSearchLatency(data.metric.indexingLatency.metricModel,
-            data.metric.searchLatency.metricModel, data.metric.searchLatency.unit);
         }
       });
     },
@@ -283,5 +294,13 @@ export default {
     line-height: 60px;
     color: #5e7382;
     font-size: 14px;
+}
+.bg-purple-dark {
+    background: #222;
+}
+.grid-content {
+    line-height: 36px;
+    border-radius: 4px;
+    min-height: 36px;
 }
 </style>
