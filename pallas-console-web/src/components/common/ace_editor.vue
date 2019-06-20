@@ -6,9 +6,10 @@
 import ace from 'brace';
 import 'brace/theme/monokai';
 import 'brace/mode/json';
+import 'brace/mode/sql';
 
 export default {
-  props: ['editorId', 'content', 'readonly'],
+  props: ['editorId', 'content', 'readonly', 'mode'],
   data() {
     return {
       editor: Object,
@@ -23,10 +24,12 @@ export default {
     },
   },
   mounted() {
+    const modeType = this.mode || 'json';
+
     this.editor = ace.edit(this.editorId);
     this.editor.setValue(this.content, 1);
 
-    this.editor.getSession().setMode('ace/mode/json');
+    this.editor.getSession().setMode(`ace/mode/${modeType}`);
     this.editor.setTheme('ace/theme/monokai');
 
     this.editor.setReadOnly(this.readonly || false);

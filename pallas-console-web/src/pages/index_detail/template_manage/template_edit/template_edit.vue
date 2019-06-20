@@ -49,7 +49,9 @@
                                 </el-select>
                             </div>
                             <el-col :span="11">
-                                <el-input :rows="temPanelHeight/26" class="result-content" type="textarea" v-model="sql" placeholder="请输入sql"></el-input>
+                                <div :style="{ 'height': temPanelHeight - 135 }">
+                                    <editor ref="sqlEditor" :content="sql" v-on:change-content="changeSqlContent" mode="sql" editor-id="sqlEditor"></editor>
+                                </div>
                             </el-col>
                             <el-col :span="2">
                               <div :style="{'margin-top': (temPanelHeight - 240) / 2}" align="center">
@@ -58,8 +60,8 @@
                               </div>
                             </el-col>
                             <el-col :span="11">
-                              <div>
-                                  <el-input :rows="temPanelHeight/26" class="result-content" readonly type="textarea" v-model="explainContent"></el-input>
+                              <div :style="{ 'height': temPanelHeight - 135 }">
+                                  <editor ref="sqlEditorResult" :content="explainContent" :readonly="true" editor-id="sqlEditorResult"></editor>
                               </div>
                             </el-col>
                         </el-tab-pane>
@@ -230,6 +232,11 @@ export default {
         this.templateInfo.params = val;
       }
     },
+    changeSqlContent(val) {
+      if (this.sql !== val) {
+        this.sql = val;
+      }
+    },
     handleExecute() {
       const dataParams = {
         indexId: this.indexId,
@@ -334,7 +341,7 @@ export default {
       this.loading = true;
       this.$http.post('/index_template/render.json', dataParams).then((data) => {
         try {
-          this.resultContent = JSON.stringify(JSON.parse(data), undefined, 2);
+          this.resultContent = this.$common.JSONbigStringifyFormat(this.$common.JSONbigParse(data));
         } catch (e) {
           this.resultContent = `解析错误: ${data}`;
         }
@@ -352,7 +359,7 @@ export default {
       };
       this.loading = true;
       this.$http.post('/index_template/debug.json', dataParams).then((data) => {
-        this.resultContent = JSON.stringify(JSON.parse(data), undefined, 2);
+        this.resultContent = this.$common.JSONbigStringifyFormat(this.$common.JSONbigParse(data));
       })
       .finally(() => {
         this.loading = false;
