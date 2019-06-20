@@ -1,5 +1,5 @@
 <template>
-    <div class="my-tab-content">
+    <div class="my-tab-content" :style="{ 'height': temPanelHeight }">
         <div class="template_content" v-loading="loading" element-loading-text="请稍等···">
             <div class="template_tree">
                 <div v-show="isAllPrivilege">
@@ -8,13 +8,13 @@
                 　<el-button type="primary" size="small" @click="importTemplate">导入</el-button>
                 　<el-button type="primary" size="small" @click="batchSubmitTemplate">批量提交</el-button>
                 </div>
-                <div class="mrg-top-10">
-                  <el-tree node-key="id" :data="treeData" :props="defaultProps" default-expand-all :expand-on-click-node="false" highlight-current @node-click="handleNodeClick"></el-tree>
+                <div class="mrg-top-10" :style="{ 'height': temPanelHeight - 35, 'width': '260px' }">
+                  <el-tree style="overflow: auto;height: 100%;" node-key="id" :data="treeData" :props="defaultProps" default-expand-all :expand-on-click-node="false" highlight-current @node-click="handleNodeClick"></el-tree>
                 </div>
             </div>
             <div class="template-warning" v-if="!isEditable"><i class="el-icon-warning"></i>请选择模板</div>
             <div v-for="template in templateList" :key="template.templateName" class="template-body">
-                <template-edit v-if="templateInfo.templateName === template.templateName" :metadata-list="metadataList" :clusters="clusters" :index-id="indexId" :index-name="indexName" :is-all-privilege="isAllPrivilege" :template-info="templateInfo" :macro-list="macroList" @close-delete="closeDelete" @close-edit="closeEdit"></template-edit>                    
+                <template-edit v-if="templateInfo.templateName === template.templateName" :tem-panel-height="temPanelHeight" :metadata-list="metadataList" :clusters="clusters" :index-id="indexId" :index-name="indexName" :is-all-privilege="isAllPrivilege" :template-info="templateInfo" :macro-list="macroList" @close-delete="closeDelete" @close-edit="closeEdit"></template-edit>                    
             </div>
         </div>
     <div v-if="isTemplateAddVisible">
@@ -80,6 +80,9 @@ export default {
       },
       clusters: [],
       metadataList: [],
+      temPanelHeight: {
+        height: document.body.clientHeight - 210,
+      },
     };
   },
   methods: {
@@ -203,6 +206,13 @@ export default {
     'template-edit': TemplateEdit,
     'template-export-dialog': TemplateExportDialog,
     'template-batch-submit-dialog': TemplateBatchSubmitDialog,
+  },
+  mounted() {
+    this.temPanelHeight = document.body.clientHeight - 210;
+    const that = this;
+    window.onresize = function temp() {
+      that.temPanelHeight = document.body.clientHeight - 210;
+    };
   },
   created() {
     this.init();

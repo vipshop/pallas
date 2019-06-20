@@ -8,7 +8,7 @@
             </div>
             <div class="template-test-tips"><span>注意:若文件包含多列，可以定义多个参数名，参数名之间用分号隔开，例如k1;k2</span></div>
         </div>
-        <template-test-params :index-id="indexId" :template-name="templateName" :params-info="paramsInfo" :data-source="dataSource"></template-test-params>
+        <template-test-params :index-id="indexId" :template-name="templateName" :params-info="paramsInfo" :data-source="dataSource" :tem-panel-height="temPanelHeight"></template-test-params>
     </div>
 </template>
 
@@ -18,7 +18,7 @@ import TemplateTestUpload from './template_test_upload/template_test_upload';
 import TemplateTestParams from './template_test_params/template_test_params';
 
 export default {
-  props: ['indexId', 'templateName', 'paramsInfo'],
+  props: ['indexId', 'templateName', 'paramsInfo', 'temPanelHeight'],
   data() {
     return {
       addDataSource: [{
@@ -44,10 +44,10 @@ export default {
 
 <style type="text/css">
     .template-test {
-        margin: 0 20px;
+        margin: 0 10px;
     }
     .template-test .template-test-content {
-        margin: 0 0 20px 0;
+        margin: 0 0 10px 0;
     }
     .template-test .template-test-content .template-test-tips {
         margin-top: 5px;
@@ -55,8 +55,7 @@ export default {
         font-size: 13px;
     }
     .template-test .template-test-content .template-test-head {
-        margin-bottom: 10px;
-        background-color: #222;
+        background-color: gray;
         height: 25px;
         border-radius: 4px;
         padding-left: 5px;
