@@ -8,7 +8,7 @@
         <el-collapse v-model="index" v-for="(item, index) in dataSources" :key="index">
             <el-collapse-item :name="index">
                 <template slot="title">
-                    <span style="margin-right: 10px;">数据源({{item.dbname}} - {{item.tableName}})</span>
+                    <span style="margin-right: 10px;">数据源 {{item.ip}}:{{item.port}} ({{item.dbname}} - {{item.tableName}})</span>
                     <el-button type="danger" size="mini" icon="minus" @click.stop="deleteDataSource(item)"></el-button>
                     <span style="color: red;margin-left: 10px;">{{item.errorMessage}}</span>
                 </template>
@@ -38,10 +38,11 @@ export default {
   methods: {
     dbValidate(dataSource, callback) {
       const arr = this.dataSources.filter(ele =>
-        (ele.dbname === dataSource.dbname && ele.tableName === dataSource.tableName),
+        (ele.dbname === dataSource.dbname && ele.tableName === dataSource.tableName
+        && ele.ip === dataSource.ip && ele.port === dataSource.port),
       );
       if (arr.length > 1) {
-        callback(new Error('数据库名和表名需唯一，不能重复'));
+        callback(new Error('存在相同数据源，请重新填写'));
       } else {
         callback();
       }
