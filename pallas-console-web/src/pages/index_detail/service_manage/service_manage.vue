@@ -1,66 +1,36 @@
 <template>
-    <div class="my-tab-content" v-loading="loading" element-loading-text="请稍等···">
-        <div class="content">
-            <div class="data-table-filter">
-                <el-form :inline="true" class="demo-form-inline">
-                    <el-form-item label="超时时间(毫秒,需>=50ms)">
-                        <el-input-number placeholder="超时时间(毫秒)" v-model="indexInfo.timeout" :min="0"></el-input-number>
-                    </el-form-item>
-                    <el-form-item label="重试次数(上限1次)">
-                        <el-input-number placeholder="重试次数" v-model="indexInfo.retry" :min="0" :max="1"></el-input-number>
-                    </el-form-item>
-                    <el-form-item label="慢查询阈值(毫秒)">
-                        <el-input-number placeholder="慢查询阈值(毫秒)" v-model="indexInfo.slowerThan" :min="0"></el-input-number>
-                    </el-form-item>
-                    <el-form-item>
-                        <el-button type="primary" @click="handleUpdate"><i class="fa fa-refresh"></i>更新</el-button>
-                    </el-form-item>
-                </el-form>
-            </div>
-        </div>
+    <div class="my-tab-content">
+        <el-tabs v-model="tabActive">
+            <el-tab-pane label="超时重试" name="timeout_retry">
+                <timeout-retry-manage></timeout-retry-manage>
+            </el-tab-pane>
+            <el-tab-pane label="限流配置" name="throttling">
+                <throttling-manage></throttling-manage>
+            </el-tab-pane>
+        </el-tabs>
     </div>
 </template>
 
 <script>
-export default {
-  data() {
-    return {
-      loading: false,
-      indexId: this.$route.query.indexId,
-      indexInfo: {},
+    import TimeoutRetryManage from './timeout_retry_dialog/timeout_retry_manage';
+    import ThrottlingManage from './throttling_dialog/throttling_manage';
+
+    export default {
+      components: {
+        'timeout-retry-manage': TimeoutRetryManage,
+        'throttling-manage': ThrottlingManage,
+      },
+      data() {
+        return {
+          tabActive: 'config',
+          activeNames: ['1', '2'],
+          flowRecordExportParams: {},
+        };
+      },
+      methods: {
+        getFlowExport(params) {
+          this.flowRecordExportParams = JSON.parse(JSON.stringify(params));
+        },
+      },
     };
-  },
-  methods: {
-    getIndexInfo() {
-      this.loading = true;
-      this.$http.get(`/index/id.json?indexId=${this.indexId}`).then((data) => {
-        this.indexInfo = JSON.parse(JSON.stringify(data));
-        if (this.indexInfo.slowerThan == null) {
-          this.$set(this.indexInfo, 'slowerThan', '200');
-        }
-      })
-      .finally(() => {
-        this.loading = false;
-      });
-    },
-    handleUpdate() {
-      const params = {
-        indexId: this.indexId,
-        timeout: this.indexInfo.timeout,
-        retry: this.indexInfo.retry,
-        slowerThan: this.indexInfo.slowerThan,
-      };
-      this.loading = true;
-      this.$http.post('/index/update/timeout_retry.json', params).then(() => {
-        this.$message.successMessage('更新成功');
-      })
-      .finally(() => {
-        this.loading = false;
-      });
-    },
-  },
-  created() {
-    this.getIndexInfo();
-  },
-};
 </script>
