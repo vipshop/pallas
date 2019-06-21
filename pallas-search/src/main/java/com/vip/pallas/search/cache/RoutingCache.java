@@ -19,6 +19,7 @@ package com.vip.pallas.search.cache;
 
 import com.vip.pallas.search.filter.circuitbreaker.CircuitBreakerPolicy;
 import com.vip.pallas.search.filter.circuitbreaker.CircuitBreakerPolicyHelper;
+import com.vip.pallas.search.filter.throttling.ThrottlingPolicyHelper;
 import com.vip.pallas.search.model.*;
 import com.vip.pallas.search.service.ElasticSearchService;
 import com.vip.pallas.search.service.impl.ElasticSearchServiceImpl;
@@ -58,7 +59,8 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
     public static final String INDEX_CLUSTER_PORT = "INDEX_CLUSTER_PORT";
     public static final String CLUSTER_PORT = "CLUSTER_PORT";
     public static final String TEMPLATE_RETRYTIMEOUT_CONFIG = "TEMPLATE_RETRYTIMEOUT_CONFIG";
-    public static final String INDEX_CLUSTER_MAP = "INDEX_CLUSTER_MAP";
+	public static final String TEMPLATE_THROTTLING_CONFIG = "TEMPLATE_THROTTLING_CONFIG";
+	public static final String INDEX_CLUSTER_MAP = "INDEX_CLUSTER_MAP";
 	public static final String FLOW_RECORD_MAP = "FLOW_RECORD_MAP";
 	public static final String FLOW_RECORD_MAP_BY_ID = "FLOW_RECORD_MAP_BY_ID";
     public static final String RAMPUP_MAP = "RAMPUP_MAP";
@@ -84,6 +86,7 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
             cacheTargetGroup(cacheMap);
             cacheAuthorization(cacheMap);
             cacheTimeoutConfig(cacheMap);
+			cacheThrottlingConfig(cacheMap);
 			cacheFlowRecord(cacheMap);
 			cacheRampup(cacheMap);
             
@@ -379,6 +382,23 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
 			}
 
 			configMap.put(retry.getClusterName() + "_" + retry.getIndexName(), retry);
+		}
+	}
+
+	private void cacheThrottlingConfig(Map<String, Object> cacheMap) throws Exception {
+		Map<String, Object> resultMap = JsonUtil.readValue(
+				HttpClient.httpGet(
+						PallasBasicProperties.PALLAS_CONSOLE_REST_URL + "/template/throttling_configured.json"),
+				Map.class);
+		List<TemplateWithThrottling> configList = JsonUtil.readValue(JsonUtil.toJson(resultMap.get("data")),
+				List.class, TemplateWithThrottling.class);
+
+		if (configList != null && !configList.isEmpty()) {
+			// init the rateLimiter, or update it when necessary
+			configList.forEach(t -> {
+				if (null != t.getTemplateName()) {
+					ThrottlingPolicyHelper.createPolicy(t);
+				}});
 		}
 	}
 

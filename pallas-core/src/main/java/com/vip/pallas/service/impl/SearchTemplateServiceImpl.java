@@ -42,6 +42,7 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
 
+import com.vip.pallas.mybatis.entity.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.entity.ContentType;
@@ -64,13 +65,6 @@ import com.vip.pallas.bean.ApproveType;
 import com.vip.pallas.bean.TemplateImport;
 import com.vip.pallas.bean.TemplateInfo;
 import com.vip.pallas.exception.PallasException;
-import com.vip.pallas.mybatis.entity.Approve;
-import com.vip.pallas.mybatis.entity.Cluster;
-import com.vip.pallas.mybatis.entity.DataSource;
-import com.vip.pallas.mybatis.entity.Index;
-import com.vip.pallas.mybatis.entity.SearchTemplate;
-import com.vip.pallas.mybatis.entity.SearchTemplateHistory;
-import com.vip.pallas.mybatis.entity.TemplateWithTimeoutRetry;
 import com.vip.pallas.mybatis.repository.DataSourceRepository;
 import com.vip.pallas.mybatis.repository.SearchTemplateHistoryRepository;
 import com.vip.pallas.mybatis.repository.SearchTemplateRepository;
@@ -581,6 +575,11 @@ public class SearchTemplateServiceImpl implements SearchTemplateService {
 	@Override
 	public List<TemplateWithTimeoutRetry> findAllRetryTimeOutConfig() {
 		return repository.findAllRetryTimeOutConfig();
+	}
+
+	@Override
+	public List<TemplateWithThrottling> findAllThrottlingConfig() {
+		return repository.findAllThrottlingConfig();
 	}
 
 	@Override

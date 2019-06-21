@@ -24,7 +24,17 @@
     <result column="index_id" jdbcType="BIGINT" property="indexId" />
     <result column="template_id" jdbcType="BIGINT" property="templateId" />
   </resultMap>
-  
+
+  <resultMap id="TemplateWithThrottlingMap" type="com.vip.pallas.mybatis.entity.TemplateWithThrottling">
+    <result column="index_name" jdbcType="VARCHAR" property="indexName" />
+    <result column="template_name" jdbcType="VARCHAR" property="templateName" />
+    <result column="cluster_name" jdbcType="VARCHAR" property="clusterName" />
+    <result column="index_id" jdbcType="BIGINT" property="indexId" />
+    <result column="template_id" jdbcType="BIGINT" property="templateId" />
+    <result column="throttling_threshold" jdbcType="INTEGER" property="threshold" />
+    <result column="throttling_burst_secs" jdbcType="INTEGER" property="maxBurstSecs" />
+  </resultMap>
+
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="resultListMap">
     select * from `search_template` where id = #{id}
   </select>
@@ -64,6 +74,11 @@
 		i.index_name, t.template_name, t.id as template_id, i.id as index_id, i.cluster_name
 		from search_template t right join `index` i on t.index_id = i.id and (t.timeout !=0 || i.timeout !=0)
   </select>
+  <select id="findAllThrottlingConfig" resultMap="TemplateWithThrottlingMap">
+    select i.index_name, t.template_name, t.id as template_id, i.id as index_id, i.cluster_name,
+		t.throttling_threshold as throttling_threshold, t.throttling_burst_secs as throttling_burst_secs
+		from search_template t join `index` i on t.index_id = i.id and t.throttling_threshold > 0;
+  </select>
   <update id="updateByPrimaryKey" parameterType="com.vip.pallas.mybatis.entity.SearchTemplate">
     update `search_template`
     <set>
@@ -84,6 +99,12 @@
       </if>
       <if test="retry != null">
         retry = #{retry,jdbcType=INTEGER},
+      </if>
+      <if test="throttlingThreshold != null">
+        throttling_threshold = #{throttlingThreshold,jdbcType=INTEGER},
+      </if>
+      <if test="throttlingBurstSecs != null">
+        throttling_burst_secs = #{throttlingBurstSecs,jdbcType=INTEGER},
       </if>
     </set>
     where id = #{id}

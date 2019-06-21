@@ -36,6 +36,10 @@ public class TemplateVO implements Serializable {
 
     Integer timeout;
 
+    private Integer threshold;
+
+    private Integer maxBurstSecs;
+
     private String params;
 
     public String getParams() {
@@ -101,4 +105,20 @@ public class TemplateVO implements Serializable {
     public void setDescription(String description) {
         this.description = description;
     }
+
+	public Integer getThreshold() {
+		return threshold;
+	}
+
+	public void setThreshold(Integer threshold) {
+		this.threshold = threshold;
+	}
+
+	public Integer getMaxBurstSecs() {
+		return maxBurstSecs;
+	}
+
+	public void setMaxBurstSecs(Integer maxBurstSecs) {
+		this.maxBurstSecs = maxBurstSecs;
+	}
 }

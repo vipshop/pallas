@@ -31,6 +31,7 @@ import com.vip.pallas.search.filter.route.BalanceFilter;
 import com.vip.pallas.search.filter.route.FlowRecordFilter;
 import com.vip.pallas.search.filter.route.RouteFilter;
 import com.vip.pallas.search.filter.route.UpStreamFilter;
+import com.vip.pallas.search.filter.throttling.ThrottlingFilter;
 import com.vip.pallas.search.utils.PallasSearchProperties;
 
 public class BootStrap {
@@ -43,7 +44,7 @@ public class BootStrap {
 		// 前置流程
 		if (!PallasSearchProperties.SEARCH_SKIP_ROUTING) {
 			DefaultFilterPipeLine.getInstance().addLastSegment(new HttpProtocolCheckFilter(), new RouteFilter(),
-					new BalanceFilter());
+					new ThrottlingFilter(), new BalanceFilter());
 		} else {
 			DefaultFilterPipeLine.getInstance().addLastSegment(new HttpProtocolCheckFilter(), new UpStreamFilter());
 		}
