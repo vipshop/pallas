@@ -131,10 +131,17 @@ public class IndexOperationPageController{
             String[] clusterArr =  cluster.getRealClusters().split(",");
             for (String clusterId : clusterArr) {
                 Cluster logicCluster = clusterService.selectByPrimaryKey(Long.parseLong(clusterId));
-                result.add(getQueryModel(index,versionId,logicCluster.getClusterId(),timeRangeList));
+                MonitorQueryModel query = getQueryModel(index,versionId,logicCluster.getClusterId(),timeRangeList);
+                if (query!=null){
+                    result.add(query);
+                }
             }
         }else {
-            result.add(getQueryModel(index,versionId,index.getClusterName(),timeRangeList));
+            MonitorQueryModel query = getQueryModel(index,versionId,index.getClusterName(),timeRangeList);
+            if (query!=null){
+                result.add(query);
+            }
+
         }
 
         return result;
