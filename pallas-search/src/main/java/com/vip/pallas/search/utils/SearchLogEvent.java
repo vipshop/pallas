@@ -11,5 +11,6 @@ public class SearchLogEvent {
 	public static final String JDBC_EVENT = "JDBC";
 	public static final String RAMPUP_EVENT = "RAMPUP";
 	public static final String MONITOR_EVENT = "MONITOR";
+	public static final String THROTTLING_EVENT = "THROTTLING";
 }
 

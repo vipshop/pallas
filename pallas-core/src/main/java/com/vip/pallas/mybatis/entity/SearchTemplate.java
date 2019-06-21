@@ -61,6 +61,8 @@ public class SearchTemplate {
 
     private Integer timeout;
     private Integer retry;
+    private Integer throttlingThreshold;
+    private Integer throttlingBurstSecs;
 
 	public String getLastContent() {
 		return lastContent;
@@ -181,13 +183,30 @@ public class SearchTemplate {
 	public void setRetry(Integer retry) {
 		this.retry = retry;
 	}
-	
+
+	public Integer getThrottlingThreshold() {
+		return throttlingThreshold;
+	}
+
+	public void setThrottlingThreshold(Integer throttlingThreshold) {
+		this.throttlingThreshold = throttlingThreshold;
+	}
+
+	public Integer getThrottlingBurstSecs() {
+		return throttlingBurstSecs;
+	}
+
+	public void setThrottlingBurstSecs(Integer throttlingBurstSecs) {
+		this.throttlingBurstSecs = throttlingBurstSecs;
+	}
+
 	@Override
 	public String toString() {
-		return "SearchTemplate [id=" + id + ", indexId=" + indexId + ", templateName=" + templateName + ", description="
-				+ description + ", content=" + content + ", params=" + params + ", type=" + type + ", hisCount="
-				+ hisCount + ", updateTime=" + updateTime + ", isNewer=" + isNewer + ", isApproving=" + isApproving
-				+ ", timeout=" + timeout + ", retry=" + retry + "]";
+		return "SearchTemplate{" + "id=" + id + ", indexId=" + indexId + ", templateName='" + templateName + '\''
+				+ ", description='" + description + '\'' + ", content='" + content + '\'' + ", lastContent='"
+				+ lastContent + '\'' + ", params='" + params + '\'' + ", resetParams='" + resetParams + '\'' + ", type="
+				+ type + ", hisCount=" + hisCount + ", updateTime=" + updateTime + ", isNewer=" + isNewer
+				+ ", isApproving=" + isApproving + ", timeout=" + timeout + ", retry=" + retry
+				+ ", throttlingThreshold=" + throttlingThreshold + ", throttlingBurstSecs=" + throttlingBurstSecs + '}';
 	}
-	
 }

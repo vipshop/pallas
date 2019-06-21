@@ -21,6 +21,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
 
+import com.google.gson.JsonArray;
+import com.vip.pallas.mybatis.entity.TemplateWithThrottling;
+import com.vip.pallas.service.SearchTemplateService;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.FixMethodOrder;
@@ -130,6 +133,22 @@ public class IndexTemplateControllerControllerTest extends BaseSpringEsTest {
         assertThat(resultMap).containsEntry("status", 200);
         Assert.assertTrue(resultMap.get("data").toString().contains("content"));
     }
+
+	@Test
+	public void test17UpdateThrottling() throws Exception {
+		TemplateVO updateVO = new TemplateVO();
+		updateVO.setIndexId(indexVO.getIndexId());
+		updateVO.setTemplateName(templateName);
+		updateVO.setParams("");
+		updateVO.setThreshold(4);
+		updateVO.setMaxBurstSecs(2);
+
+		assertThat(callRestApi("/index_template/update.json", JSON.toJSONString(updateVO))).isNull();
+		Map resultMap = callGetApi("/template/throttling_configured.json");
+		int threshold = Integer.valueOf(JSON.parseArray(resultMap.get("data").toString()).getJSONObject(0).get("threshold").toString());
+
+		assertThat(threshold).isEqualTo(4);
+	}
 
     //提交，审核部分
     @Test

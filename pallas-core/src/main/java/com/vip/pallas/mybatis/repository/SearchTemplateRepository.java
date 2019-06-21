@@ -19,6 +19,7 @@ package com.vip.pallas.mybatis.repository;
 import java.util.List;
 import java.util.Map;
 
+import com.vip.pallas.mybatis.entity.TemplateWithThrottling;
 import org.springframework.stereotype.Repository;
 
 import com.vip.pallas.mybatis.entity.SearchTemplate;
@@ -47,4 +48,6 @@ public interface SearchTemplateRepository {
     List<SearchTemplate> selectByIndexIdAndTemplateIds(Map<String, Object> params);
 
 	List<TemplateWithTimeoutRetry> findAllRetryTimeOutConfig();
+
+	List<TemplateWithThrottling> findAllThrottlingConfig();
 }

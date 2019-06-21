@@ -100,7 +100,7 @@ public class RouteFilter extends AbstractFilter {
 		// 计算一个QPS，这里涉及排查所有的干扰，过了Token检测和路由检测之后再计算一个QPS
 		GaugeMonitorService.incQPS();
 		sessionContext.setServiceInfoList(serviceInfoList);
-		filterContext.fireFilter(sessionContext, BalanceFilter.DEFAULT_NAME);
+		filterContext.fireNext(sessionContext);
 	}
 
 	private void doESDomainCheckFromRequest(PallasRequest req) throws ExecutionException {

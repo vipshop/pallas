@@ -25,6 +25,7 @@ import com.vip.pallas.bean.TemplateImport;
 import com.vip.pallas.exception.PallasException;
 import com.vip.pallas.mybatis.entity.Approve;
 import com.vip.pallas.mybatis.entity.SearchTemplate;
+import com.vip.pallas.mybatis.entity.TemplateWithThrottling;
 import com.vip.pallas.mybatis.entity.TemplateWithTimeoutRetry;
 
 /**
@@ -71,6 +72,8 @@ public interface SearchTemplateService {
     Approve submitToApprove(String user, String historyDesc, Long templateId) throws Exception;
 
 	List<TemplateWithTimeoutRetry> findAllRetryTimeOutConfig();
+
+	List<TemplateWithThrottling> findAllThrottlingConfig();
 
 	String parseSql(String sql, Long clusterId);
 

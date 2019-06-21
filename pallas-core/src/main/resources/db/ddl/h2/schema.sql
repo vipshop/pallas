@@ -425,6 +425,8 @@ CREATE TABLE IF NOT EXISTS `search_template` (
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否己删除',
   `timeout` int(11) NOT NULL DEFAULT '0' COMMENT '超时时间，毫秒单位',
   `retry` int(11) NOT NULL DEFAULT '0' COMMENT '重试次数',
+  `throttling_threshold` int(11) NOT NULL DEFAULT '0' COMMENT '限流qps，0表示不限',
+  `throttling_burst_secs` int(11) NOT NULL DEFAULT '1' COMMENT '限流时允许最大尖峰流量，单位为秒',
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_unique_search_template` (`id`),
   UNIQUE KEY `unique_indexid_and_templatename` (`index_id`,`template_name`)
