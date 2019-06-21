@@ -35,6 +35,7 @@ public abstract class AbstractAuthProcessor {
 		"/node/state",
 		"/cluster/abnormal_node/list",
 		"/template/retrytimeout_configured",
+		"/template/throttling_configured.json",
 		"/route/index_routing/all",
 		"/route/index_routing_authorization/all",
 		"/route/index_routing_target_group/all",
