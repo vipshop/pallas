@@ -368,7 +368,7 @@ public class SearchTemplateServiceImpl implements SearchTemplateService {
             demo.append("    \"    \\\"params\\\" : {}\" +\n");
         }
         demo.append("    \"}\", ContentType.APPLICATION_JSON);\n");
-        demo.append("Response response = buildClient.performRequest(\"POST\",\"/" + index.getIndexName() + "/_search/template\", Collections.EMPTY_MAP, \""+dbEntity.getTemplateName()+"\",entity);\n");
+        demo.append("Response response = buildClient.performRequest(\"POST\",\"/" + index.getIndexName() + "/_search/template\", Collections.EMPTY_MAP, \""+index.getIndexName() + "_" + dbEntity.getTemplateName()+"\",entity);\n");
 
         return demo.toString();
     }
