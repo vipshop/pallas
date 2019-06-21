@@ -5,22 +5,27 @@
                 <div class="pull-left template-title">
                     当前{{this.templateType}}：<span class="template-name">{{templateInfo.templateName}}</span>
                     <el-tooltip v-if="templateInfo.content === '' || templateInfo.content === '{}'" effect="dark" content="初始化自定义业务模板" placement="right">
-                      <el-button type="primary" @click="setCustomTemplate" size="small" v-show="isEditOperate && !templateInfo.approving">
+                      <el-button type="primary" @click="setCustomTemplate" size="small" v-if="isEditOperate && !templateInfo.approving">
                         <i class="fa fa-hand-o-up"></i>新模板向导
                       </el-button>
                     </el-tooltip>
-                    <span v-show="templateInfo.approving && templateInfo.type === 1" class="template-approving">状态：<router-link tag="a" :to="{ name: 'authority_manage' }">待审核</router-link>，不可进行保存，删除等操作</span>
-                    <span v-show="templateInfo.approving && templateInfo.type === 0" class="template-approving">引用该宏的模板处于待审核状态，不可进行保存、删除等操作</span>
+                    <el-tooltip v-if="templateInfo.content !== '' && templateInfo.content !== '{}'" effect="dark" content="可在当前光标处，插入选择的模板字段" placement="right">
+                      <el-button type="primary" @click="insertTemplate" size="small" v-if="isEditOperate && !templateInfo.approving">
+                        <i class="fa fa-level-up"></i>模板字段插入
+                      </el-button>
+                    </el-tooltip>
+                    <span v-if="templateInfo.approving && templateInfo.type === 1" class="template-approving">状态：<router-link tag="a" :to="{ name: 'authority_manage' }">待审核</router-link>，不可进行保存，删除等操作</span>
+                    <span v-if="templateInfo.approving && templateInfo.type === 0" class="template-approving">引用该宏的模板处于待审核状态，不可进行保存、删除等操作</span>
                 </div>
-                <div class="pull-right" v-show="isAllPrivilege">
+                <div class="pull-right" v-if="isAllPrivilege">
                     <log-monitor :template-name="templateInfo.templateName" :index-id="indexId" :index-name="indexName"></log-monitor>
-                    <el-select v-show="!isMacroVisible && isEditOperate" size="small" placeholder="请选择要插入的宏" v-model="selectedMacro" style="padding-right: 10px;" clearable @change="insertMacro">
+                    <el-select v-if="!isMacroVisible && isEditOperate" size="small" placeholder="请选择要插入的宏" v-model="selectedMacro" style="padding-right: 10px;" clearable @change="insertMacro">
                         <el-option v-for="item in macroList" :label="item.templateName" :value="item.templateName" :key="item.templateName"></el-option>
                     </el-select>
-                    <el-button type="primary" @click="handleSave" size="small" v-show="isEditOperate && !templateInfo.approving">保存</el-button>
-                    <el-button type="primary" @click="handleApprove" size="small" v-show="isEditOperate && !templateInfo.approving && templateInfo.type === 1">提交</el-button>
-                    <el-button type="danger" @click="handleDelete" size="small" v-show="isEditOperate && !templateInfo.approving">删除</el-button>
-                    <el-button type="primary" @click="handleHistoryVersion" size="small" v-show="templateInfo.hisCount > 0 && isEditOperate">{{historyVersionBtn}}</el-button>
+                    <el-button type="primary" @click="handleSave" size="small" v-if="isEditOperate && !templateInfo.approving">保存</el-button>
+                    <el-button type="primary" @click="handleApprove" size="small" v-if="isEditOperate && !templateInfo.approving && templateInfo.type === 1">提交</el-button>
+                    <el-button type="danger" @click="handleDelete" size="small" v-if="isEditOperate && !templateInfo.approving">删除</el-button>
+                    <el-button type="primary" @click="handleHistoryVersion" size="small" v-if="templateInfo.hisCount > 0 && isEditOperate">{{historyVersionBtn}}</el-button>
                 </div>
             </el-row>
             <div>
@@ -136,8 +141,14 @@
             @close-dialog="closeTemplateConfigDialog">
             </template-config-dialog>
         </div>
+        <div v-if="isTemplateInsertVisible">
+            <template-insert-dialog
+            :metadata-list="metadataList"
+            @insert-template-content="insertTemplateContent"
+            @close-dialog="closeTemplateInsertDialog">
+            </template-insert-dialog>
+        </div>
     </div>
-
 </template>
 
 <script>
@@ -146,6 +157,7 @@ import TemplateTest from './template_test/template_test';
 import ServiceGovernance from './service_governance/service_governance';
 import TemplateSaveEditDialog from './template_save_edit_dialog/template_save_edit_dialog';
 import TemplateConfigDialog from './template_config_dialog';
+import TemplateInsertDialog from './template_insert_dialog';
 
 export default {
   props: ['indexId', 'indexName', 'metadataList', 'clusters', 'isAllPrivilege', 'templateInfo', 'macroList', 'temPanelHeight'],
@@ -168,9 +180,20 @@ export default {
       sql: '',
       isEditSaveVisible: false,
       isTemplateConfigVisible: false,
+      isTemplateInsertVisible: false,
     };
   },
   methods: {
+    insertTemplate() {
+      this.isTemplateInsertVisible = true;
+    },
+    insertTemplateContent(content) {
+      this.$refs.aceEditor1.editor.insert(content);
+      this.closeTemplateInsertDialog();
+    },
+    closeTemplateInsertDialog() {
+      this.isTemplateInsertVisible = false;
+    },
     setCustomTemplate() {
       this.isTemplateConfigVisible = true;
     },
@@ -417,6 +440,7 @@ export default {
     'template-save-edit-dialog': TemplateSaveEditDialog,
     'service-governance': ServiceGovernance,
     'template-config-dialog': TemplateConfigDialog,
+    'template-insert-dialog': TemplateInsertDialog,
   },
   created() {
     this.init();

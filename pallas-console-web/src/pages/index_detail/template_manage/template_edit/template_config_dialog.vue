@@ -20,7 +20,7 @@
                                   </el-col>
                                   <el-col :span="12">
                                       <el-form-item>
-                                            <el-checkbox v-model="data.size.isChecked">size
+                                            <el-checkbox v-model="data.size.isChecked" style="margin-left: 5px;">size
                                                 <el-input v-model="data.size.value"></el-input>
                                             </el-checkbox>
                                         </el-form-item>
@@ -126,10 +126,10 @@ export default {
           this.$set(obj, '_source', ['id', 'update_time']);
         }
       }
+      this.templateContent = JSON.stringify(obj, undefined, 2);
       const isQuery = this.metadatas.some(ele => ele.queryWay);
       if (isQuery) {
         this.$set(obj, 'query', { bool: { filter: ['QUERY-BODY'] } });
-        this.templateContent = JSON.stringify(obj, undefined, 2);
         const resultArray = this.metadatas.filter(e => e.queryWay !== '');
         resultArray.forEach((ele, index) => {
           let frontSpace = '';
