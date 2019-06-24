@@ -108,6 +108,7 @@ public class IndexVersion {
 		private boolean search;
 		private boolean docValue;
 		private boolean dynamic;
+		private boolean store;
 		private List<VersionField> children;
 		private List<VersionField> multiField;
 		private List<String> copyTo;
@@ -132,7 +133,15 @@ public class IndexVersion {
 			}
 			getCopyTo().add(field);
 		}
-		
+
+		public boolean isStore() {
+			return store;
+		}
+
+		public void setStore(boolean store) {
+			this.store = store;
+		}
+
 		public String getFieldName() {
 			return fieldName;
 		}

@@ -9,6 +9,7 @@
     <result column="field_type" jdbcType="VARCHAR" property="fieldType" />
     <result column="multi" jdbcType="BIT" property="multi" />
     <result column="search" jdbcType="BIT" property="search" />
+    <result column="store" jdbcType="BIT" property="store" />
     <result column="doc_value" jdbcType="BIT" property="docValue" />
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
@@ -23,7 +24,7 @@
     
   <sql id="Base_Column_List">
     id, parent_id, version_id, field_name, field_type, multi, search, doc_value, create_time, 
-    update_time, dynamic, parent_type, copy_to
+    update_time, dynamic, parent_type, copy_to, store
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     select 
@@ -63,11 +64,11 @@
     insert into mapping (id, parent_id, version_id, 
       field_name, field_type, multi, 
       search, doc_value, create_time, 
-      update_time, dynamic, parent_type, copy_to)
+      update_time, dynamic, parent_type, copy_to, store)
     values (#{id,jdbcType=BIGINT}, #{parentId,jdbcType=BIGINT}, #{versionId,jdbcType=BIGINT}, 
       #{fieldName,jdbcType=VARCHAR}, #{fieldType,jdbcType=VARCHAR}, #{multi,jdbcType=BIT}, 
       #{search,jdbcType=BIT}, #{docValue,jdbcType=BIT}, #{createTime,jdbcType=TIMESTAMP}, 
-      #{updateTime,jdbcType=TIMESTAMP},#{dynamic,jdbcType=BIT},#{parentType,jdbcType=INTEGER},#{copyTo,jdbcType=VARCHAR})
+      #{updateTime,jdbcType=TIMESTAMP},#{dynamic,jdbcType=BIT},#{parentType,jdbcType=INTEGER},#{copyTo,jdbcType=VARCHAR},#{store,jdbcType=BIT})
   </insert>
   <insert id="insertSelective" parameterType="com.vip.pallas.mybatis.entity.Mapping">
     insert into mapping
@@ -111,6 +112,9 @@
       <if test="copyTo != null">
         copy_to,
       </if>
+      <if test="store != null">
+        store,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -151,6 +155,9 @@
       </if>
       <if test="copyTo != null">
         copy_to = #{copyTo,jdbcType=VARCHAR},
+      </if>
+      <if test="store != null">
+        store = #{store,jdbcType=BIT},
       </if>
     </trim>
   </insert>
@@ -193,6 +200,9 @@
       <if test="copyTo != null">
         copy_to = #{copyTo,jdbcType=VARCHAR},
       </if>
+      <if test="store != null">
+        store = #{store,jdbcType=BIT},
+      </if>
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
@@ -209,7 +219,8 @@
       update_time = #{updateTime,jdbcType=TIMESTAMP},
       dynamic = #{dynamic,jdbcType=BIT},
       parent_type = #{parentType,jdbcType=INTEGER},
-      copy_to = #{copyTo,jdbcType=VARCHAR}
+      copy_to = #{copyTo,jdbcType=VARCHAR},
+      store = #{store,jdbcType=BIT}
     where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>

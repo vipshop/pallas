@@ -195,6 +195,9 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 	private void constructProperty(Mapping mapping,Propertie prop){
 		prop.setType(mapping.getESRealFieldType());
 		prop.setDocValues(mapping.getDocValue());
+		if (mapping.getStore()!=null&&mapping.getStore()==Boolean.TRUE){
+			prop.setStore(mapping.getStore());
+		}
 		prop.setIndex(mapping.getSearch());
 		if (mapping.isNGramText()) {
 			prop.setAnalyzer("edge_ngram_analyzer");

@@ -83,6 +83,7 @@ public class EsMappings {
     public static class Propertie{
 		@SerializedName("doc_values")
 		private Boolean docValues;
+		private Boolean store;
 		private String type;
 		private Boolean index;
 		private String format;
@@ -93,7 +94,15 @@ public class EsMappings {
 		private Map<String, Propertie> properties;
 		private Map<String, Propertie> fields;
 		private List<String> copy_to;
-		
+
+		public Boolean isStore() {
+			return store;
+		}
+
+		public void setStore(Boolean store) {
+			this.store = store;
+		}
+
 		public String getType() {
 			return type;
 		}

@@ -29,6 +29,7 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
 import org.apache.http.message.BasicHeader;
 import org.elasticsearch.client.Response;
+import org.elasticsearch.client.ResponseException;
 import org.elasticsearch.client.ResponseListener;
 import org.elasticsearch.client.RestClient;
 import org.slf4j.Logger;
@@ -144,6 +145,9 @@ public class PallasRestClient {
 		try {
 			response = holder.getRestClient().performRequest(method, endpoint, params, entity,
 					new PallasHttpAsyncResponseConsumerFactory(), newHeaders);
+		}catch (ResponseException e){ // Return ES exception detail for invokers
+			logger.error("pallas restclient performRequest error: {}", e.getMessage(), e);
+			throw e;
 		}catch (IOException e) {
 			logger.error("pallas restclient performRequest error: {}", e.getMessage(), e);
 			String message = printPerformTimeoutError(endpoint, templateId, getClientMaxTimeOutMills());

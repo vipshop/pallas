@@ -38,6 +38,11 @@
                         <el-checkbox v-model="scope.row.docValue" :disabled="isEditable">用于排序或聚合</el-checkbox>
                     </template>
                 </el-table-column>
+                <el-table-column label="是否启用store">
+                    <template scope="scope">
+                        <el-checkbox v-model="scope.row.store" :disabled="isEditable">启用store</el-checkbox>
+                    </template>
+                </el-table-column>
                 <el-table-column v-if="!isEditable" label="操作" min-width="60">
                     <template scope="scope">
                         <el-button size="small" type="danger" @click="handleDelete(scope.row)">删除</el-button>
@@ -135,6 +140,7 @@ export default {
         multiField: [],
         search: false,
         docValue: false,
+        store: false,
       };
       this.childInfo.push(addChildInfo);
     },

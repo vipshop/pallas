@@ -62,11 +62,13 @@ export default {
         rObj.children = obj.children || [];
         rObj.multiField = obj.multiField || [];
         rObj.copyTo = obj.copyTo || [];
+        rObj.store = obj.store;
         return rObj;
       });
       this.$emit('schema-import-success', arr);
     },
     submitImportSchema() {
+      console.log(this.schemaImportUrl);
       this.$refs.upload.submit();
     },
     handleClose() {
