@@ -261,6 +261,9 @@ public abstract class IndexVersionService {
 		mapping.setMulti((Boolean) node.get("multi"));
 		mapping.setSearch((Boolean) node.get("search"));
 		mapping.setDocValue((Boolean) node.get("docValue"));
+		if (node.containsKey("store")&&((Boolean) node.get("store"))==Boolean.TRUE){
+			mapping.setStore((Boolean) node.get("store"));
+		}
 		mapping.setCreateTime(indexVersion.getUpdateTime());
 		mapping.setUpdateTime(indexVersion.getUpdateTime());
 		if (node.get("copyTo") != null){
@@ -366,6 +369,9 @@ public abstract class IndexVersionService {
 		field.setFieldName(mapping.getFieldName());
 		field.setMulti(mapping.getMulti());
 		field.setDynamic(mapping.getDynamic());
+		if (mapping.getStore()!=null){
+			field.setStore(mapping.getStore());
+		}
 		if (StringUtils.isNotBlank(mapping.getCopyTo())){
 			field.setCopyTo(Arrays.asList(mapping.getCopyTo().split("\\s*,\\s*")));
 		}
@@ -442,6 +448,7 @@ public abstract class IndexVersionService {
 	private void copyVersionField(VersionField srcField, VersionField distField){
 		distField.setFieldType(srcField.getFieldType());
 		distField.setDocValue(srcField.isDocValue());
+		distField.setStore(srcField.isStore());
 		distField.setSearch(srcField.isSearch());
 		distField.setMulti(srcField.isMulti());
 		distField.setDynamic(srcField.isDynamic());

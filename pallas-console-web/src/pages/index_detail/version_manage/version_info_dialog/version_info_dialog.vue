@@ -253,14 +253,19 @@
                                 </select>
                             </template>
                         </el-table-column>
-                                <el-table-column label="是否创建索引" min-width="90">
+                        <el-table-column label="是否创建索引" min-width="90">
                             <template scope="scope">
                                         <el-checkbox v-model="scope.row.search" :disabled="isEditable || scope.row.fieldType === 'nested'">创建索引</el-checkbox>
                             </template>
                         </el-table-column>
-                                <el-table-column :render-header="renderDocValueHeader">
+                        <el-table-column :render-header="renderDocValueHeader">
                             <template scope="scope">
                                 <el-checkbox v-model="scope.row.docValue" :disabled="isEditable || scope.row.fieldType === 'nested' || scope.row.fieldType === 'text'">启用doc value</el-checkbox>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="是否启用store">
+                            <template scope="scope">
+                                <el-checkbox v-model="scope.row.store" :disabled="isEditable">启用store</el-checkbox>
                             </template>
                         </el-table-column>
                         <el-table-column label="更多操作" width="80" v-if="!isEditable">
@@ -621,6 +626,7 @@ export default {
         search: false,
         isNew: true,
         dynamic: false,
+        store: false,
       };
       this.versionInfo.schema.splice(index + 1, 0, newRow);
     },

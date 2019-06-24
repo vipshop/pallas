@@ -278,6 +278,7 @@ CREATE TABLE IF NOT EXISTS `mapping` (
   `dynamic` tinyint(1) NOT NULL DEFAULT '0' COMMENT '配置dynamic属性是否为true',
   `parent_type` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'parent_id类型:1为nested;2为object;3为multi-fields',
   `copy_to` varchar(256) DEFAULT NULL COMMENT '复制域数组',
+  `store` tinyint(1) DEFAULT NULL COMMENT '是否启用store',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
