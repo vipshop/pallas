@@ -31,12 +31,15 @@ public class ThrottlingTest extends BaseSearchTest {
 			System.out.println("i = " + i + ":" + System.currentTimeMillis());
 			assertThat(callRestApiAndReturnResponse("127.0.0.1", SERVER_PORT, "/product_comment/_search/template", header, requestBody).getStatusLine().getStatusCode()).isEqualTo(200);
 		}
-		for (int i = 0; i < 2; i ++){
+		// the duration of the request is unpredictable, increase the request qps
+		for (int i = 0; i < 6; i ++){
 			System.out.println("i = " + i + ":" + System.currentTimeMillis());
 			// make sure consume the permits
 			callRestApiAndReturnResponse("127.0.0.1", SERVER_PORT, "/product_comment/_search/template", header, requestBody).getStatusLine().getStatusCode();
 		}
 		assertThat(callRestApiAndReturnResponse("127.0.0.1", SERVER_PORT, "/product_comment/_search/template", header, requestBody).getStatusLine().getStatusCode()).isEqualTo(429);
+		Thread.sleep(1000L);
+		assertThat(callRestApiAndReturnResponse("127.0.0.1", SERVER_PORT, "/product_comment/_search/template", header, requestBody).getStatusLine().getStatusCode()).isEqualTo(200);
 	}
 
 }
