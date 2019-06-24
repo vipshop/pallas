@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.Charset;
 
 public class ApiServlet extends HttpServlet {
 
@@ -69,7 +70,7 @@ public class ApiServlet extends HttpServlet {
 		httpPost.setHeader("es-cluster", request.getHeader("es-cluster"));
 		httpPost.setHeader("es-host", request.getHeader("es-host"));
 		httpPost.setHeader("es-request", request.getHeader("es-request"));
-		httpPost.setEntity(new NStringEntity(IOUtils.toString(request.getInputStream(), "UTF-8")));
+		httpPost.setEntity(new NStringEntity(IOUtils.toString(request.getInputStream(), "UTF-8"), Charset.forName("UTF-8")));
 
 		CloseableHttpResponse httpResponse = httpClient.execute(httpPost);
 		response.getOutputStream().write(IOUtils.toString(httpResponse.getEntity().getContent(), "UTF-8").getBytes());
@@ -86,7 +87,7 @@ public class ApiServlet extends HttpServlet {
 		httpPut.setHeader("es-cluster", request.getHeader("es-cluster"));
 		httpPut.setHeader("es-host", request.getHeader("es-host"));
 		httpPut.setHeader("es-request", request.getHeader("es-request"));
-		httpPut.setEntity(new NStringEntity(IOUtils.toString(request.getInputStream(), "UTF-8")));
+		httpPut.setEntity(new NStringEntity(IOUtils.toString(request.getInputStream(), "UTF-8"), Charset.forName("UTF-8")));
 
 		CloseableHttpResponse httpResponse = httpClient.execute(httpPut);
 		response.getOutputStream().write(IOUtils.toString(httpResponse.getEntity().getContent(), "UTF-8").getBytes());
@@ -103,7 +104,7 @@ public class ApiServlet extends HttpServlet {
 		httpDelete.setHeader("es-cluster", request.getHeader("es-cluster"));
 		httpDelete.setHeader("es-host", request.getHeader("es-host"));
 		httpDelete.setHeader("es-request", request.getHeader("es-request"));
-		httpDelete.setEntity(new NStringEntity(IOUtils.toString(request.getInputStream(), "UTF-8")));
+		httpDelete.setEntity(new NStringEntity(IOUtils.toString(request.getInputStream(), "UTF-8"), Charset.forName("UTF-8")));
 
 		CloseableHttpResponse httpResponse = httpClient.execute(httpDelete);
 		response.getOutputStream().write(IOUtils.toString(httpResponse.getEntity().getContent(), "UTF-8").getBytes());
