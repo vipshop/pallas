@@ -321,12 +321,12 @@ public class TemplateController {
 
 		Integer threshold =  params.getThreshold();
 		if (!ObjectUtils.isEmpty(threshold)) {
-			dbEntity.setThrottlingThreshold(threshold);
+			dbEntity.setThreshold(threshold);
 		}
 
 		Integer maxBurstSecs =  params.getMaxBurstSecs();
 		if (!ObjectUtils.isEmpty(maxBurstSecs)) {
-			dbEntity.setTimeout(maxBurstSecs);
+			dbEntity.setMaxBurstSecs(maxBurstSecs);
 		}
 
         dbEntity.setContent(content);

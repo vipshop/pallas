@@ -22,15 +22,8 @@
       },
       data() {
         return {
-          tabActive: 'config',
-          activeNames: ['1', '2'],
-          flowRecordExportParams: {},
+          tabActive: 'timeout_retry',
         };
-      },
-      methods: {
-        getFlowExport(params) {
-          this.flowRecordExportParams = JSON.parse(JSON.stringify(params));
-        },
       },
     };
 </script>
