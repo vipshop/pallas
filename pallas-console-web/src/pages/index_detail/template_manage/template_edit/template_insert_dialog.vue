@@ -1,9 +1,9 @@
 <template>
-    <el-dialog title="模板字段插入" size="small" v-model="visible" :before-close="handleClose" v-loading="loading" element-loading-text="请稍等···">
+    <el-dialog title="查询变量插入" size="small" v-model="visible" :before-close="handleClose" v-loading="loading" element-loading-text="请稍等···">
         <el-form :model="info" ref="info" label-width="100px">
             <el-row>
                 <el-col :span="22">
-                    <el-form-item prop="field" label="模板字段选择">
+                    <el-form-item prop="field" label="查询变量">
                         <el-select v-model="info.field" style="width: 100%;">
                             <el-option label="from" value="from"></el-option>
                             <el-option label="size" value="size"></el-option>
