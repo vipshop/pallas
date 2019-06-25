@@ -24,7 +24,7 @@
       </el-collapse-item>
       <el-collapse-item title="模板级别配置" name="2">
         <template slot="title">
-            模板级别配置
+            模板级别配置（若模板超时时间为0毫秒，则以当前索引的超时时间和重试为准。）
         </template>
         <el-table :data="templateList" border style="width: 100%" v-loading="loading" element-loading-text="请稍等···">
           <el-table-column label="模板名称" min-width="380px">
