@@ -47,14 +47,14 @@
                               </div>
                               <el-table border :data="metadatas" :max-height="320">
                                   <el-table-column prop="dbFieldName" label="字段名" width="180"></el-table-column>
-                                  <el-table-column label="查询方式">
-                                    <template scope="scope">
-                                        <el-radio class="radio" v-model="scope.row.queryWay" label="">未选</el-radio>
-                                        <el-radio class="radio" v-model="scope.row.queryWay" label="term">term</el-radio>
-                                        <el-radio class="radio" v-model="scope.row.queryWay" label="multiTerm">多值term</el-radio>
-                                        <el-radio class="radio" v-model="scope.row.queryWay" label="range">range</el-radio>
-                                        <el-radio class="radio" v-model="scope.row.queryWay" label="script">script</el-radio>
-                                    </template>
+                                  <el-table-column label="查询类型">
+                                      <template scope="scope">
+                                          <el-radio class="radio" v-model="scope.row.queryWay" label="">不选</el-radio>
+                                          <el-radio class="radio" v-model="scope.row.queryWay" label="term">term</el-radio>
+                                          <el-radio class="radio" v-model="scope.row.queryWay" label="multiTerm">terms</el-radio>
+                                          <el-radio class="radio" v-model="scope.row.queryWay" label="range">range</el-radio>
+                                          <el-radio class="radio" v-model="scope.row.queryWay" label="script">script</el-radio>
+                                      </template>
                                   </el-table-column>
                               </el-table>
                           </el-form>
