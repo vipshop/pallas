@@ -53,6 +53,11 @@ public class EsMappings {
 		@JsonProperty("dynamic")
 		private boolean dynamic = false;
 
+		@SerializedName("_source")
+		@JsonProperty("_source")
+		private EsSourceMapping source;
+
+
 		private Map<String, Propertie> properties;
 
 		public boolean isIncludeInAll() {
@@ -77,6 +82,14 @@ public class EsMappings {
 
 		public void setDynamic(boolean dynamic) {
 			this.dynamic = dynamic;
+		}
+
+		public EsSourceMapping getSource() {
+			return source;
+		}
+
+		public void setSource(EsSourceMapping source) {
+			this.source = source;
 		}
 	}
 

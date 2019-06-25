@@ -249,6 +249,14 @@ export default {
         } else {
           this.$set(this.versionGetInfo, 'nodes', this.getNodesArray(this.versionGetInfo.allocationNodes));
         }
+        this.versionGetInfo.sourceIncludesArr = [];
+        this.versionGetInfo.sourceExcludesArr = [];
+        if (this.versionGetInfo.sourceIncludes && this.versionGetInfo.sourceIncludes.length > 0) {
+          this.$set(this.versionGetInfo, 'sourceIncludesArr', this.getNodesArray(this.versionGetInfo.sourceIncludes));
+        }
+        if (this.versionGetInfo.sourceExcludes && this.versionGetInfo.sourceExcludes.length > 0) {
+          this.$set(this.versionGetInfo, 'sourceExcludesArr', this.getNodesArray(this.versionGetInfo.sourceExcludes));
+        }
         this.versionInfo = JSON.parse(JSON.stringify(this.versionGetInfo));
         if (operation === 'dynamic_edit') {
           this.versionInfoTitle = '编辑版本动态配置';
@@ -315,6 +323,14 @@ export default {
           this.$set(this.versionGetInfo, 'nodes', this.getLogicClusterNodesArray(this.versionGetInfo.allocationNodes));
         } else {
           this.$set(this.versionGetInfo, 'nodes', this.getNodesArray(this.versionGetInfo.allocationNodes));
+        }
+        this.versionGetInfo.sourceIncludesArr = [];
+        this.versionGetInfo.sourceExcludesArr = [];
+        if (this.versionGetInfo.sourceIncludes && this.versionGetInfo.sourceIncludes.length > 0) {
+          this.$set(this.versionGetInfo, 'sourceIncludesArr', this.getNodesArray(this.versionGetInfo.sourceIncludes));
+        }
+        if (this.versionGetInfo.sourceExcludes && this.versionGetInfo.sourceExcludes.length > 0) {
+          this.$set(this.versionGetInfo, 'sourceExcludesArr', this.getNodesArray(this.versionGetInfo.sourceExcludes));
         }
         this.versionInfo = JSON.parse(JSON.stringify(this.versionGetInfo));
         this.versionInfoTitle = `复制版本(From ${row.id})`;

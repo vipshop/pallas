@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import com.vip.pallas.bean.*;
 import com.vip.pallas.entity.MappingParentType;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -58,13 +59,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.gson.Gson;
-import com.vip.pallas.bean.ClusterSettings;
-import com.vip.pallas.bean.EsAliases;
-import com.vip.pallas.bean.EsMappings;
 import com.vip.pallas.bean.EsMappings.Item;
 import com.vip.pallas.bean.EsMappings.Mappings;
 import com.vip.pallas.bean.EsMappings.Propertie;
-import com.vip.pallas.bean.IndexSettings;
 import com.vip.pallas.bean.monitor.ShardInfoModel;
 import com.vip.pallas.mybatis.entity.Cluster;
 import com.vip.pallas.mybatis.entity.Index;
@@ -114,8 +111,14 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 		item.setProperties(propertyMap);
 		mappings.setItem(item);
 
-		Map<String, Object> settings = constructSetting(versionId, clusterName);
+		IndexVersion indexVersion = indexVersionRepository.selectByPrimaryKey(versionId);
+		Map<String, Object> settings = constructSetting(indexVersion, clusterName);
 		esMappings.setSettings(settings);
+
+		EsSourceMapping sourceMapping = constructSourceMapping(indexVersion);
+		if (sourceMapping != null){
+			item.setSource(sourceMapping);
+		}
 		
 		Map<Long, List<Mapping>> mappingMap = new HashMap<>();
 		List<Mapping> firstLayerList = new ArrayList<>();
@@ -133,6 +136,28 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 		checkAndUpdateAnalysisSettings(mappingList,settings);
 		String s =  new Gson().toJson(esMappings);
 		return s;
+	}
+
+	private EsSourceMapping constructSourceMapping(IndexVersion indexVersion){
+		// 如果设置了 enabled = false， 则直接忽略后面的配置
+		if (indexVersion.getSourceDisabled() == Boolean.TRUE){
+			EsSourceMapping source = new EsSourceMapping();
+			source.setEnabled(false);
+			return source;
+		}
+		if (StringUtils.isNotBlank(indexVersion.getSourceIncludes())||StringUtils.isNotBlank(indexVersion.getSourceExcludes())){
+			EsSourceMapping source = new EsSourceMapping();
+			if (StringUtils.isNotBlank(indexVersion.getSourceIncludes())){
+				List<String> include = Arrays.asList(indexVersion.getSourceIncludes().split(","));
+				source.setIncludes(include);
+			}
+			if (StringUtils.isNotBlank(indexVersion.getSourceExcludes())){
+				List<String> exclude = Arrays.asList(indexVersion.getSourceExcludes().split(","));
+				source.setExcludes(exclude);
+			}
+			return source;
+		}
+		return null;
 	}
 
 	private void checkAndUpdateAnalysisSettings(List<Mapping> mappingList,Map<String, Object> settings){
@@ -213,9 +238,8 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 		}
 	}
 
-	private Map<String,Object> constructSetting(Long versionId, String clusterName){
+	private Map<String,Object> constructSetting(IndexVersion indexVersion, String clusterName){
 		Map<String, Object> settings = new HashMap<>();
-		IndexVersion indexVersion = indexVersionRepository.selectByPrimaryKey(versionId);
 		settings.put("number_of_shards", indexVersion.getNumOfShards());
 		settings.put("number_of_replicas", indexVersion.getNumOfReplication());
 		settings.put("refresh_interval", indexVersion.getRefreshInterval() + "s");
