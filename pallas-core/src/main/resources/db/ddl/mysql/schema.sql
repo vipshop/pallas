@@ -259,6 +259,9 @@ CREATE TABLE IF NOT EXISTS `index_version` (
   `flush_threshold_size` VARCHAR(256) NOT NULL DEFAULT '512mb' COMMENT '当事务日志大小到达此预设值，则执行flush',
   `sync_interval` VARCHAR(256) NOT NULL DEFAULT '5s' COMMENT 'tanslog写到磁盘间隔',
   `translog_durability` VARCHAR(256) NOT NULL DEFAULT 'async' COMMENT 'translog同步文件方式，默认异步',
+  `source_disabled` TINYINT(1) DEFAULT NULL COMMENT '是否不存储原始文档，NULL及false表示存_source，true表不存_source，默认NULL',
+  `source_includes` VARCHAR(256) DEFAULT NULL COMMENT '设置_source保存的字段，仅当source_disabled为false或者NULL时该字段有效',
+  `source_excludes` VARCHAR(256) DEFAULT NULL COMMENT '设置_source不保存的字段，仅当source_disabled为false或者NULL时该字段有效',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 

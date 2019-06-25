@@ -315,6 +315,9 @@ public abstract class IndexVersionService {
 		version.setFlushThresholdSize(indexVersion.getFlushThresholdSize());
 		version.setTranslogDurability(indexVersion.getTranslogDurability());
 		version.setSyncInterval(indexVersion.getSyncInterval());
+		version.setSourceDisabled(indexVersion.getSourceDisabled());
+		version.setSourceIncludes(indexVersion.getSourceIncludes());
+		version.setSourceExcludes(indexVersion.getSourceExcludes());
 
 		// dual with mapping
 		List<Mapping> mappingList = mappingRepository.selectByVersionId(versionId);
