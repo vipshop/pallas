@@ -194,6 +194,7 @@ function submitCurrentRequestToES() {
     saveEditorState();
 }
 
+
 submitCurrentRequestToES = autoRetryIfTokenizing(submitCurrentRequestToES);
 
 function reformatData(data, indent) {
