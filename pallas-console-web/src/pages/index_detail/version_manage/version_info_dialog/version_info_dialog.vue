@@ -184,33 +184,33 @@
                 </div>
                     </el-tab-pane>
                     <el-tab-pane label="Mapping配置" name="second">
-                <div class="label-title">
-                            <span class="span-title"><i class="fa fa-th-large"></i>ES映射关系配置</span>
-                    <el-button size="mini" type="success" @click="addField(0)" v-if="isMetaDataNull && versionInfo.schema.length === 0"><i class="fa fa-plus"></i>新增</el-button>
-                    <el-button size="mini" type="warning" v-show="!isEditable" @click="importSchema"><i class="fa fa-arrow-circle-o-down"></i>导入schema</el-button>
-                    <el-button size="mini" type="warning" v-show="isEditable" @click="exportSchema"><i class="fa fa-arrow-circle-o-up"></i>导出schema</el-button>
-                </div>
-                <div>
-                            <div style="margin: 10px">
-                                <el-alert
-                                        title="如何选择ES类型"
-                                        type="info"
-                                        description=" "
-                                        show-icon>
-                                    <div style="font-size: 12px">
-                                        1.某些数据库字段，尽管是number类型，但是在做业务查询时仅仅只是做term(s)这类非数学运算非聚合查询，我们非常建议你采用"keyword as number"类型，在这个类型下，ES将会用string格式来建索引以达到更高的检索性能，
-                                        而获取 _source 时我们仍然会以number的格式返回给 Client。
-                                        <br/>
-                                        2.当你需要做模糊匹配，比如数据库值是 AbC，但是仍然希望abc和ABC都能检索出来，那请选择"keyword[全大写处理]"类型，我们在建索引和查询都做大写处理，
-                                        而获取 _source 时我们仍然会以原值 AbC 的格式返回给 Client。
-                                        <br/>
-                                        3.所有的DB类型为TINYINT 的字段，我们都假设它是一些枚举值并且不会用于数学运算，因此我们为这些字段自动匹配了"keyword as number"类型，请自行检查。
-                                    </div>
-                                </el-alert>
-
+                            <div class="label-title">
+                                        <span class="span-title"><i class="fa fa-th-large"></i>ES映射关系配置</span>
+                                <el-button size="mini" type="success" @click="addField(0)" v-if="isMetaDataNull && versionInfo.schema.length === 0"><i class="fa fa-plus"></i>新增</el-button>
+                                <el-button size="mini" type="warning" v-show="!isEditable" @click="importSchema"><i class="fa fa-arrow-circle-o-down"></i>导入schema</el-button>
+                                <el-button size="mini" type="warning" v-show="isEditable" @click="exportSchema"><i class="fa fa-arrow-circle-o-up"></i>导出schema</el-button>
                             </div>
+                        <div>
+                    <div style="margin: 10px">
+                        <el-alert
+                                title="如何选择ES类型"
+                                type="info"
+                                description=" "
+                                show-icon>
+                            <div style="font-size: 12px">
+                                1.某些数据库字段，尽管是number类型，但是在做业务查询时仅仅只是做term(s)这类非数学运算非聚合查询，我们非常建议你采用"keyword as number"类型，在这个类型下，ES将会用string格式来建索引以达到更高的检索性能，
+                                而获取 _source 时我们仍然会以number的格式返回给 Client。
+                                <br/>
+                                2.当你需要做模糊匹配，比如数据库值是 AbC，但是仍然希望abc和ABC都能检索出来，那请选择"keyword[全大写处理]"类型，我们在建索引和查询都做大写处理，
+                                而获取 _source 时我们仍然会以原值 AbC 的格式返回给 Client。
+                                <br/>
+                                3.所有的DB类型为TINYINT 的字段，我们都假设它是一些枚举值并且不会用于数学运算，因此我们为这些字段自动匹配了"keyword as number"类型，请自行检查。
+                            </div>
+                        </el-alert>
 
-                            <el-table :data="versionInfo.schema" border style="width: 100%" :max-height="550">
+                    </div>
+
+                    <el-table :data="versionInfo.schema" border style="width: 100%" :max-height="550">
                         <el-table-column label="操作">
                           <template scope="scope">
                               <el-button size="small" type="success" @click="addField(scope.$index)" :disabled="isEditable"><i class="el-icon-plus"></i></el-button>
@@ -284,6 +284,38 @@
                         </el-table-column>
                     </el-table>
                 </div>
+                        <div class="label-title" style="margin-top: 20px;">
+                            <span class="span-title" style="margin-right: 20px;"><i class="fa fa-th-large"></i>ES _source配置</span>
+                        </div>
+                        <div class="source-setting">
+                            <el-row :gutter="20">
+                                <el-col :span="4">
+                                    <el-form-item style="display: inline-block;" label="是否disable _source:" prop="sourceDisabled" label-width="150px">
+                                        <div class="my-switch">
+                                            <el-switch v-model="versionInfo.sourceDisabled" :disabled="isEditable"></el-switch>
+                                        </div>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :span="10" v-if="!versionInfo.sourceDisabled">
+                                    <el-form-item label="includes" prop="sourceIncludes" label-width="120px">
+                                        <el-select multiple filterable v-model="versionInfo.sourceIncludesArr" placeholder="请选择_source包含的field" :disabled="isEditable" style="width: 100%">
+                                            <el-option v-for="item,index in allSourceFields" :key="index" :label="item" :value="item">
+                                                <span style="float: left">{{ item }}</span>
+                                            </el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :span="10" v-if="!versionInfo.sourceDisabled">
+                                    <el-form-item label="excludes" prop="sourceExcludes" label-width="120px">
+                                        <el-select multiple filterable v-model="versionInfo.sourceExcludesArr" placeholder="请选择_source不包含的field" :disabled="isEditable" style="width: 100%">
+                                            <el-option v-for="item,index in allSourceFields" :key="index" :label="item" :value="item">
+                                                <span style="float: left">{{ item }}</span>
+                                            </el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                        </div>
                     </el-tab-pane>
                 </el-tabs>
 
@@ -470,6 +502,12 @@ export default {
             } else {
               this.$set(this.versionInfo, 'allocationNodes', this.versionInfo.nodes.join(','));
             }
+            if (this.versionInfo.sourceIncludesArr) {
+              this.$set(this.versionInfo, 'sourceIncludes', this.versionInfo.sourceIncludesArr.join(','));
+            }
+            if (this.versionInfo.sourceExcludesArr) {
+              this.$set(this.versionInfo, 'sourceExcludes', this.versionInfo.sourceExcludesArr.join(','));
+            }
             if (this.versionOperation === 'add' || this.versionOperation === 'copy') {
               this.loading = true;
               this.$http.post('/index/version/add.json', this.versionInfo).then(() => {
@@ -648,6 +686,17 @@ export default {
       }
       return num;
     },
+    allSourceFields() {
+      const sourceFields = [];
+      this.versionInfo.schema.forEach((el) => {
+        if (el.fieldType === 'nested') {
+          this.getNestedFieldName(el, '', sourceFields);
+          return;
+        }
+        sourceFields.push(el.fieldName);
+      });
+      return sourceFields;
+    },
     clusterNodes() {
       let arr = [];
       this.clusters.forEach((ele) => {
@@ -722,5 +771,12 @@ export default {
 
 .version-info-dialog .el-checkbox {
     color: #eee;
+}
+.source-setting{
+    padding-left: 6px;
+    padding-right: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border: 1px solid gray;
 }
 </style>
