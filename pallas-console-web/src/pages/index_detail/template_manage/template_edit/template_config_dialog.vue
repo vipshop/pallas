@@ -131,7 +131,7 @@ export default {
         this.$set(obj, 'query', { bool: { filter: ['QUERY-BODY'] } });
         const resultArray = this.metadatas.filter(e => e.queryWay !== '');
         resultArray.forEach((ele, index) => {
-          let frontSpace = '';
+          let frontSpace = '{}\n        ';
           let endNewline = '\n';
           if (index > 0) {
             frontSpace = '        ';
@@ -147,7 +147,7 @@ export default {
               this.queryBody += `${frontSpace}{{#${ele.dbFieldName}}}\n        ,{\n          "terms":{"${ele.dbFieldName}":{{#toJson}}${ele.dbFieldName}.list{{/toJson}} }\n        }\n        {{/${ele.dbFieldName}}}${endNewline}`;
               break;
             case 'range':
-              this.queryBody += `${frontSpace}{{#${ele.dbFieldName}_min}}\n        ,{\n          "range": {\n            "${ele.dbFieldName}": {\n              "from": {{${ele.dbFieldName}_min}},\n              "to": {{${ele.dbFieldName}_max}}\n            }\n          }\n        }\n        {{/${ele.dbFieldName}_min}${endNewline}`;
+              this.queryBody += `${frontSpace}{{#${ele.dbFieldName}_min}}\n        ,{\n          "range": {\n            "${ele.dbFieldName}": {\n              "from": "{{${ele.dbFieldName}_min}}",\n              "to": "{{${ele.dbFieldName}_max}}"\n            }\n          }\n        }\n        {{/${ele.dbFieldName}_min}}${endNewline}`;
               break;
             case 'script':
               this.queryBody += `${frontSpace}{{#${ele.dbFieldName}}}\n        ,{\n          "script": {\n            "script": {\n              "lang": "painless",\n              "inline": "return doc['${ele.dbFieldName}'].value > 0"\n            }\n          }\n        }\n        {{/${ele.dbFieldName}}${endNewline}`;
