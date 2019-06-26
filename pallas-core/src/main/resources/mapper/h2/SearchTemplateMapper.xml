@@ -13,6 +13,8 @@
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
     <result column="timeout" jdbcType="INTEGER" property="timeout" />
     <result column="retry" jdbcType="INTEGER" property="retry" />
+    <result column="throttling_threshold" jdbcType="INTEGER" property="threshold" />
+    <result column="throttling_burst_secs" jdbcType="INTEGER" property="maxBurstSecs" />
   </resultMap>
   
   <resultMap id="TemplateWithTimeoutRetryMap" type="com.vip.pallas.mybatis.entity.TemplateWithTimeoutRetry">
@@ -100,11 +102,11 @@
       <if test="retry != null">
         retry = #{retry,jdbcType=INTEGER},
       </if>
-      <if test="throttlingThreshold != null">
-        throttling_threshold = #{throttlingThreshold,jdbcType=INTEGER},
+      <if test="threshold != null">
+        throttling_threshold = #{threshold,jdbcType=INTEGER},
       </if>
-      <if test="throttlingBurstSecs != null">
-        throttling_burst_secs = #{throttlingBurstSecs,jdbcType=INTEGER},
+      <if test="maxBurstSecs != null">
+        throttling_burst_secs = #{maxBurstSecs,jdbcType=INTEGER},
       </if>
     </set>
     where id = #{id}

@@ -1,9 +1,9 @@
 <template>
-    <el-dialog title="模板字段插入" size="small" v-model="visible" :before-close="handleClose" v-loading="loading" element-loading-text="请稍等···">
+    <el-dialog title="查询变量插入" class="template-insert-dialog" style="min-width: 700px" v-model="visible" :before-close="handleClose" v-loading="loading" element-loading-text="请稍等···">
         <el-form :model="info" ref="info" label-width="100px">
             <el-row>
-                <el-col :span="22">
-                    <el-form-item prop="field" label="模板字段选择">
+                <el-col :span="23">
+                    <el-form-item prop="field" label="查询变量">
                         <el-select v-model="info.field" style="width: 100%;">
                             <el-option label="from" value="from"></el-option>
                             <el-option label="size" value="size"></el-option>
@@ -15,7 +15,7 @@
                 </el-col>
             </el-row>
             <el-row>
-                <el-col :span="22">
+                <el-col :span="23">
                     <el-form-item prop="from" label="from" v-if="info.field === 'from'">
                         <el-input-number v-model="info.from" style="width: 100%;"></el-input-number>
                     </el-form-item>
@@ -34,17 +34,23 @@
                     </el-form-item>
                 </el-col>
             </el-row>
-            <el-table border :data="metadatas" :max-height="320" v-if="info.field === 'query'">
-                <el-table-column prop="dbFieldName" label="字段名" width="90" show-overflow-tooltip></el-table-column>
-                <el-table-column label="查询方式">
-                <template scope="scope">
-                    <el-radio class="radio" v-model="scope.row.queryWay" label="term">term</el-radio>
-                    <el-radio class="radio" v-model="scope.row.queryWay" label="multiTerm">多值term</el-radio>
-                    <el-radio class="radio" v-model="scope.row.queryWay" label="range">range</el-radio>
-                    <el-radio class="radio" v-model="scope.row.queryWay" label="script">script</el-radio>
-                </template>
-                </el-table-column>
-            </el-table>
+            <el-row>
+              <el-col :span="23">
+                  <el-form-item label-width="30px">
+                      <el-table border :data="metadatas" :max-height="320" v-if="info.field === 'query'">
+                          <el-table-column prop="dbFieldName" label="字段名" width="130" show-overflow-tooltip></el-table-column>
+                          <el-table-column label="查询方式">
+                          <template scope="scope">
+                              <el-radio class="radio" v-model="scope.row.queryWay" label="term">term</el-radio>
+                              <el-radio class="radio" v-model="scope.row.queryWay" label="multiTerm">多值term</el-radio>
+                              <el-radio class="radio" v-model="scope.row.queryWay" label="range">range</el-radio>
+                              <el-radio class="radio" v-model="scope.row.queryWay" label="script">script</el-radio>
+                          </template>
+                          </el-table-column>
+                      </el-table>
+                    </el-form-item>
+              </el-col>
+            </el-row>
         </el-form>
         <div slot="footer" class="dialog-footer">    
            <el-button @click="handleClose()">取消</el-button>
@@ -149,7 +155,11 @@ export default {
   },
 };
 </script>
-<style type="text/css" scoped>
+<style type="text/css">
+.template-insert-dialog .el-dialog--small {
+    width: auto;
+    min-width: 700px;
+}
 .template-insert {
   margin: 15px;
   color: #fff;

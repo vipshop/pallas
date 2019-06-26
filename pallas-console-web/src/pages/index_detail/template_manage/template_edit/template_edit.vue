@@ -4,14 +4,14 @@
             <el-row>
                 <div class="pull-left template-title">
                     当前{{this.templateType}}：<span class="template-name">{{templateInfo.templateName}}</span>
-                    <el-tooltip v-if="templateInfo.content === '' || templateInfo.content === '{}'" effect="dark" content="初始化自定义业务模板" placement="right">
-                      <el-button type="primary" @click="setCustomTemplate" size="small" v-if="isEditOperate && !templateInfo.approving">
-                        <i class="fa fa-hand-o-up"></i>新模板向导
+                    <el-tooltip v-if="templateInfo.content === '' || templateInfo.content === '{}'" effect="dark" content="初始化自定义业务模板" placement="bottom">
+                      <el-button type="success" @click="setCustomTemplate" size="small" v-if="isEditOperate && !templateInfo.approving">
+                        <i class="fa fa-hand-o-right"></i>模板向导
                       </el-button>
                     </el-tooltip>
-                    <el-tooltip v-if="templateInfo.content !== '' && templateInfo.content !== '{}'" effect="dark" content="可在当前光标处，插入选择的模板字段" placement="right">
+                    <el-tooltip v-if="templateInfo.content !== '' && templateInfo.content !== '{}'" effect="dark" content="可在当前光标处，插入选择的模板字段" placement="bottom">
                       <el-button type="primary" @click="insertTemplate" size="small" v-if="isEditOperate && !templateInfo.approving">
-                        <i class="fa fa-level-up"></i>模板字段插入
+                        <i class="fa fa-code"></i>插入查询变量
                       </el-button>
                     </el-tooltip>
                     <span v-if="templateInfo.approving && templateInfo.type === 1" class="template-approving">状态：<router-link tag="a" :to="{ name: 'authority_manage' }">待审核</router-link>，不可进行保存，删除等操作</span>
@@ -483,7 +483,7 @@ export default {
 .template-content .template-title .template-name{
   color: #32cd32;
   font-weight: bold;
-  margin-right: 5px;
+  margin-right: 15px;
 }
 .template-content .template-title .template-approving {
   color: red;

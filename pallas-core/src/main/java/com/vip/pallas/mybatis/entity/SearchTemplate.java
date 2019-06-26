@@ -61,8 +61,8 @@ public class SearchTemplate {
 
     private Integer timeout;
     private Integer retry;
-    private Integer throttlingThreshold;
-    private Integer throttlingBurstSecs;
+    private Integer threshold;
+    private Integer maxBurstSecs;
 
 	public String getLastContent() {
 		return lastContent;
@@ -184,20 +184,20 @@ public class SearchTemplate {
 		this.retry = retry;
 	}
 
-	public Integer getThrottlingThreshold() {
-		return throttlingThreshold;
+	public Integer getThreshold() {
+		return threshold;
 	}
 
-	public void setThrottlingThreshold(Integer throttlingThreshold) {
-		this.throttlingThreshold = throttlingThreshold;
+	public void setThreshold(Integer threshold) {
+		this.threshold = threshold;
 	}
 
-	public Integer getThrottlingBurstSecs() {
-		return throttlingBurstSecs;
+	public Integer getMaxBurstSecs() {
+		return maxBurstSecs;
 	}
 
-	public void setThrottlingBurstSecs(Integer throttlingBurstSecs) {
-		this.throttlingBurstSecs = throttlingBurstSecs;
+	public void setMaxBurstSecs(Integer maxBurstSecs) {
+		this.maxBurstSecs = maxBurstSecs;
 	}
 
 	@Override
@@ -206,7 +206,7 @@ public class SearchTemplate {
 				+ ", description='" + description + '\'' + ", content='" + content + '\'' + ", lastContent='"
 				+ lastContent + '\'' + ", params='" + params + '\'' + ", resetParams='" + resetParams + '\'' + ", type="
 				+ type + ", hisCount=" + hisCount + ", updateTime=" + updateTime + ", isNewer=" + isNewer
-				+ ", isApproving=" + isApproving + ", timeout=" + timeout + ", retry=" + retry
-				+ ", throttlingThreshold=" + throttlingThreshold + ", throttlingBurstSecs=" + throttlingBurstSecs + '}';
+				+ ", isApproving=" + isApproving + ", timeout=" + timeout + ", retry=" + retry + ", threshold="
+				+ threshold + ", maxBurstSecs=" + maxBurstSecs + '}';
 	}
 }

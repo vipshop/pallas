@@ -6,7 +6,7 @@
                     <div class="template-config-content">
                         <div class="title">
                           <span>模板选项</span>
-                          <el-button class="pull-right" type="success" size="mini" @click="handleExecute"><i class="fa fa-caret-square-o-right"></i>运行</el-button>
+                          <el-button class="pull-right" type="success" size="mini" @click="handleExecute"><i class="fa fa-caret-square-o-right"></i>调试</el-button>
                         </div>
                         <div style="margin-top: 15px;" class="">
                           <el-form label-width="0" label-position="left">
@@ -126,13 +126,12 @@ export default {
           this.$set(obj, '_source', ['id', 'update_time']);
         }
       }
-      this.templateContent = JSON.stringify(obj, undefined, 2);
       const isQuery = this.metadatas.some(ele => ele.queryWay);
       if (isQuery) {
         this.$set(obj, 'query', { bool: { filter: ['QUERY-BODY'] } });
         const resultArray = this.metadatas.filter(e => e.queryWay !== '');
         resultArray.forEach((ele, index) => {
-          let frontSpace = '';
+          let frontSpace = '{}\n        ';
           let endNewline = '\n';
           if (index > 0) {
             frontSpace = '        ';
@@ -148,7 +147,7 @@ export default {
               this.queryBody += `${frontSpace}{{#${ele.dbFieldName}}}\n        ,{\n          "terms":{"${ele.dbFieldName}":{{#toJson}}${ele.dbFieldName}.list{{/toJson}} }\n        }\n        {{/${ele.dbFieldName}}}${endNewline}`;
               break;
             case 'range':
-              this.queryBody += `${frontSpace}{{#${ele.dbFieldName}_min}}\n        ,{\n          "range": {\n            "${ele.dbFieldName}": {\n              "from": {{${ele.dbFieldName}_min}},\n              "to": {{${ele.dbFieldName}_max}}\n            }\n          }\n        }\n        {{/${ele.dbFieldName}_min}${endNewline}`;
+              this.queryBody += `${frontSpace}{{#${ele.dbFieldName}_min}}\n        ,{\n          "range": {\n            "${ele.dbFieldName}": {\n              "from": "{{${ele.dbFieldName}_min}}",\n              "to": "{{${ele.dbFieldName}_max}}"\n            }\n          }\n        }\n        {{/${ele.dbFieldName}_min}}${endNewline}`;
               break;
             case 'script':
               this.queryBody += `${frontSpace}{{#${ele.dbFieldName}}}\n        ,{\n          "script": {\n            "script": {\n              "lang": "painless",\n              "inline": "return doc['${ele.dbFieldName}'].value > 0"\n            }\n          }\n        }\n        {{/${ele.dbFieldName}}${endNewline}`;
@@ -162,6 +161,7 @@ export default {
       const expr2 = /%>"/g;
       const expr3 = /<--": "TAG-->",|<--": "TAG-->"/g;
       const expr4 = /"QUERY-BODY"/g;
+      this.templateContent = JSON.stringify(obj, undefined, 2);
       this.templateContent =
       this.templateContent.replace(expr1, '').replace(expr2, '').replace(expr3, '').replace(expr4, this.queryBody);
     },

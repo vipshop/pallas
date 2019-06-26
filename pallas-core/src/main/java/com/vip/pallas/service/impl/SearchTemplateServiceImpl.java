@@ -42,6 +42,7 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
 
+import com.google.gson.Gson;
 import com.vip.pallas.mybatis.entity.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
@@ -359,7 +360,7 @@ public class SearchTemplateServiceImpl implements SearchTemplateService {
             demo.append("    \"    \\\"params\\\" : {\\n\" +\n");
             String comma="";
             for (Map.Entry<String, Object> entry : params.entrySet()) {
-                demo.append(comma+"    \"        \\\""+entry.getKey()+"\\\": "+entry.getValue());
+                demo.append(comma+"    \"        \\\""+entry.getKey()+"\\\": "+new Gson().toJson(entry.getValue()).replace("\"","\\\""));
                 comma=",\\n\" +\n";
             }
             demo.append("\\n\" +\n");
