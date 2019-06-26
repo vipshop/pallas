@@ -159,7 +159,7 @@ public class TemplateController {
         SearchTemplate dbEntity = checkAndGetSearchTemplate(params);
         Long clusterId = params.getClusterId();
 
-        return templateService.inlineDebug(dbEntity, false, clusterId);
+        return templateService.inlineDebug(dbEntity, false, params.isProfile(), clusterId);
     }
 
     @RequestMapping(value = "/render.json", method = RequestMethod.POST)
@@ -167,7 +167,7 @@ public class TemplateController {
         SearchTemplate dbEntity = checkAndGetSearchTemplate(params);
         Long clusterId = params.getClusterId();
 
-        String result = templateService.inlineDebug(dbEntity, true, clusterId);
+        String result = templateService.inlineDebug(dbEntity, true, params.isProfile(), clusterId);
 
         if (result != null && result.startsWith("{\"template_output\":")) {
             result = result.substring("{\"template_output\":".length(), result.length()-1);

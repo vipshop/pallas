@@ -55,7 +55,7 @@ public interface SearchTemplateService {
 
     void deleteTemplate(SearchTemplate template, String templateName) throws Exception;
 
-    String inlineDebug(SearchTemplate template, boolean renderOnly, Long clusterId) throws Exception;
+    String inlineDebug(SearchTemplate template, boolean renderOnly, boolean profile, Long clusterId) throws Exception;
 
     void delateByNameAndIndexId(String templateName, Long indexId) throws Exception;
 

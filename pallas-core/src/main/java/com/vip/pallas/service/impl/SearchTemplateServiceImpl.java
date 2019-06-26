@@ -384,7 +384,7 @@ public class SearchTemplateServiceImpl implements SearchTemplateService {
     }
 
     @Override
-    public String inlineDebug(SearchTemplate t, boolean renderOnly, Long clusterId) throws Exception {
+    public String inlineDebug(SearchTemplate t, boolean renderOnly, boolean profile, Long clusterId) throws Exception {
         preCheck(t);
         Index index = indexService.findById(t.getIndexId());
 
@@ -392,7 +392,7 @@ public class SearchTemplateServiceImpl implements SearchTemplateService {
         String content = "\"" + TemplateParamsExtractUtil.renderMacrosThenFormat(t.getContent(), allFiles) + "\"";
 
         StringBuilder sb = new StringBuilder()
-                .append("{\n\"inline\":")
+                .append("{\n" + (profile ? "\"profile\": true,\n" : "") + "\"inline\":")
                 .append(content)
                 .append(",\n\"params\":")
                 .append(t.getParams())
