@@ -62,8 +62,8 @@
                             </el-col>
                             <el-col :span="2">
                               <div :style="{'margin-top': (temPanelHeight - 240) / 2}" align="center">
-                                  <el-button size="small" title="结果仅供参考，需进一步加工" type="primary" @click="handleExplain">转 DSL</el-button><br/>
-                                  <el-button title="谨慎执行，别跑挂DB了" :disabled="!isAllPrivilege" style="margin-top: 5px;margin-left: 0px;" size="small" type="primary" @click="handleExecute">查询DB</el-button>
+                                  <div><el-button size="small" style="width: 75px;" title="结果仅供参考，需进一步加工" type="primary" @click="handleExplain">转 DSL</el-button></div>
+                                  <div style="margin-top: 5px;"><el-button title="谨慎执行，别跑挂DB了" :disabled="!isAllPrivilege" style="width: 75px;" size="small" type="primary" @click="handleExecute">查询DB</el-button></div>
                               </div>
                             </el-col>
                             <el-col :span="11">
@@ -93,16 +93,20 @@
                                 </el-col>
                                 <el-col :span="2">
                                   <div :style="{'margin-top': (temPanelHeight - 240) / 2}" align="center">
-                                      <el-button size="small" type="primary" @click="handleRender">渲染DSL</el-button>
-                                      <el-button size="small" type="primary" style="margin-top: 5px;margin-left: 0px;" @click="handleDebug">执行查询</el-button>
+                                      <div><el-button size="mini" style="width: 75px;" type="primary" @click="handleRender">渲染DSL</el-button></div>
+                                      <div style="margin-top: 10px;"><el-button style="width: 75px;" size="mini" type="primary" @click="handleDebug">执行查询</el-button></div>
+                                      <div style="margin-top: 10px;"><el-button style="width: 75px;" size="mini" type="primary" @click="queryProfile">慢查询分析</el-button></div>
                                   </div>
                                 </el-col>
                                 <el-col :span="11">
-                                  <div class="debug-title">
-                                    <span>结果</span>
-                                  </div>
-                                  <div :style="{ 'height': temPanelHeight - 120 }">
-                                      <editor ref="debugResultEditor" :content="resultContent" :readonly="true" editor-id="debugResult"></editor>
+                                  <div>
+                                    <div class="debug-title">
+                                      <span>结果</span>
+                                    </div>
+                                    <div :style="{ 'height': temPanelHeight - 120 }">
+                                        <editor v-if="!isProfileVisible" ref="debugResultEditor" :content="resultContent" :readonly="true" editor-id="debugResult"></editor>
+                                        <profile-content v-else :profile-data="profileData"></profile-content>
+                                    </div>
                                   </div>
                                 </el-col>
                         </el-tab-pane>
@@ -153,6 +157,7 @@
 
 <script>
 import '../../../../components';
+import ProfileContent from './profile_content';
 import TemplateTest from './template_test/template_test';
 import ServiceGovernance from './service_governance/service_governance';
 import TemplateSaveEditDialog from './template_save_edit_dialog/template_save_edit_dialog';
@@ -181,9 +186,38 @@ export default {
       isEditSaveVisible: false,
       isTemplateConfigVisible: false,
       isTemplateInsertVisible: false,
+      profileData: {
+        profile: {
+          shards: [{
+            searches: [],
+          }],
+        },
+      },
+      isProfileVisible: false,
     };
   },
   methods: {
+    queryProfile() {
+      const params = {
+        indexId: this.indexId,
+        templateName: this.templateInfo.templateName,
+        params: this.templateInfo.params,
+        clusterId: this.clusterId,
+        profile: true,
+      };
+      this.loading = true;
+      this.$http.post('/index_template/debug.json', params).then((data) => {
+        if (data.substring(2, 7) === 'error') {
+          this.resultContent = JSON.stringify(JSON.parse(data), undefined, 2);
+        } else {
+          this.profileData = JSON.parse(data);
+          this.isProfileVisible = true;
+        }
+      })
+      .finally(() => {
+        this.loading = false;
+      });
+    },
     insertTemplate() {
       this.isTemplateInsertVisible = true;
     },
@@ -372,6 +406,7 @@ export default {
         }
       })
       .finally(() => {
+        this.isProfileVisible = false;
         this.loading = false;
       });
     },
@@ -387,6 +422,7 @@ export default {
         this.resultContent = this.$common.JSONbigStringifyFormat(this.$common.JSONbigParse(data));
       })
       .finally(() => {
+        this.isProfileVisible = false;
         this.loading = false;
       });
     },
@@ -437,6 +473,7 @@ export default {
   },
   components: {
     'template-test': TemplateTest,
+    'profile-content': ProfileContent,
     'template-save-edit-dialog': TemplateSaveEditDialog,
     'service-governance': ServiceGovernance,
     'template-config-dialog': TemplateConfigDialog,
