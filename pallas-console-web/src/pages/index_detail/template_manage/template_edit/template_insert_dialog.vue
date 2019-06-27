@@ -54,7 +54,7 @@
         </el-form>
         <div slot="footer" class="dialog-footer">    
            <el-button @click="handleClose()">取消</el-button>
-           <el-button type="confirm" @click="handleInsert()">插入模板</el-button> 
+           <el-button type="confirm" @click="handleInsert()">插入查询变量</el-button> 
         </div>
     </el-dialog>
 </template>
@@ -116,16 +116,42 @@ export default {
                 }
                 switch (ele.queryWay) {
                   case 'term':
-                    this.resultContent += `${frontSpace}{{#${ele.dbFieldName}}}\n        ,{\n          "term":{"${ele.dbFieldName}":"{{${ele.dbFieldName}}}"}\n        }\n        {{/${ele.dbFieldName}}}${endNewline}`;
+                    this.resultContent += `${frontSpace}{{#${ele.dbFieldName}}}\n`
+                                  + '        ,{\n'
+                                  + `          "term":{"${ele.dbFieldName}":"{{${ele.dbFieldName}}}"}\n`
+                                  + '        }\n'
+                                  + `        {{/${ele.dbFieldName}}}${endNewline}`;
                     break;
                   case 'multiTerm':
-                    this.resultContent += `${frontSpace}{{#${ele.dbFieldName}}}\n        ,{\n          "terms":{"${ele.dbFieldName}":{{#toJson}}${ele.dbFieldName}.list{{/toJson}} }\n        }\n        {{/${ele.dbFieldName}}}${endNewline}`;
+                    this.resultContent += `${frontSpace}{{#${ele.dbFieldName}}}\n`
+                                  + '        ,{\n'
+                                  + `          "terms":{ "${ele.dbFieldName}":{{#toJson}}${ele.dbFieldName}.list{{/toJson}} }\n`
+                                  + '        }\n'
+                                  + `        {{/${ele.dbFieldName}}}${endNewline}`;
                     break;
                   case 'range':
-                    this.resultContent += `${frontSpace}{{#${ele.dbFieldName}_min}}\n        ,{\n          "range": {\n            "${ele.dbFieldName}": {\n              "from": {{${ele.dbFieldName}_min}},\n              "to": {{${ele.dbFieldName}_max}}\n            }\n          }\n        }\n        {{/${ele.dbFieldName}_min}${endNewline}`;
+                    this.resultContent += `${frontSpace}{{#${ele.dbFieldName}_min}}\n`
+                                  + '        ,{\n'
+                                  + '          "range": {\n'
+                                  + `            "${ele.dbFieldName}": {\n`
+                                  + `              "from": "{{${ele.dbFieldName}_min}}",\n`
+                                  + `              "to": "{{${ele.dbFieldName}_max}}"\n`
+                                  + '            }\n'
+                                  + '          }\n'
+                                  + '        }\n'
+                                  + `        {{/${ele.dbFieldName}_min}}${endNewline}`;
                     break;
                   case 'script':
-                    this.resultContent += `${frontSpace}{{#${ele.dbFieldName}}}\n        ,{\n          "script": {\n            "script": {\n              "lang": "painless",\n              "inline": "return doc['${ele.dbFieldName}'].value > 0"\n            }\n          }\n        }\n        {{/${ele.dbFieldName}}${endNewline}`;
+                    this.resultContent += `${frontSpace}{{#${ele.dbFieldName}}}\n`
+                                  + '        ,{\n'
+                                  + '          "script": {\n'
+                                  + '            "script": {\n'
+                                  + '              "lang": "painless",\n'
+                                  + `              "inline": "return doc['${ele.dbFieldName}'].value > 0"\n`
+                                  + '            }\n'
+                                  + '          }\n'
+                                  + '        }\n'
+                                  + `        {{/${ele.dbFieldName}}${endNewline}`;
                     break;
                   default:
                     break;
