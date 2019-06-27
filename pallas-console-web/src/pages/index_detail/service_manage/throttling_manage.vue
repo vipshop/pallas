@@ -18,7 +18,13 @@
             </el-table-column>
             <el-table-column label="操作" width="120px">
               <template scope="scope">
-                <el-button type="primary" @click="handleUpdate(scope.row)"><i class="fa fa-refresh"></i>更新</el-button>
+                <el-button
+                  type="primary"
+                  :disabled="!allPrivilege"
+                  :title="!allPrivilege ? '权限不足' : ''"
+                  @click="handleUpdate(scope.row)">
+                  <i class="fa fa-refresh"></i>更新
+                </el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -28,7 +34,7 @@
 
 <script>
 export default {
-  props: ['templateList'],
+  props: ['templateList', 'allPrivilege'],
   data() {
     return {
       loading: false,

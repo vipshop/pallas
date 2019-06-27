@@ -2,10 +2,10 @@
     <div class="my-tab-content">
         <el-tabs v-model="tabActive" v-loading="loading" element-loading-text="请稍等···">
             <el-tab-pane label="超时重试" name="timeout_retry">
-                <timeout-retry-manage :template-list="templateList" @refresh-template="getTemplateList"></timeout-retry-manage>
+                <timeout-retry-manage :template-list="templateList" :all-privilege="allPrivilege" @refresh-template="getTemplateList"></timeout-retry-manage>
             </el-tab-pane>
             <el-tab-pane label="限流配置" name="throttling">
-                <throttling-manage :template-list="templateList" @refresh-template="getTemplateList"></throttling-manage>
+                <throttling-manage :template-list="templateList" :all-privilege="allPrivilege" @refresh-template="getTemplateList"></throttling-manage>
             </el-tab-pane>
         </el-tabs>
     </div>
@@ -26,6 +26,7 @@ export default {
       indexId: this.$route.query.indexId,
       tabActive: 'timeout_retry',
       templateList: [],
+      allPrivilege: false,
     };
   },
   methods: {
@@ -33,6 +34,7 @@ export default {
       this.loading = true;
       this.$http.get(`/index_template/list.json?indexId=${this.indexId}`).then((data) => {
         this.templateList = data.list;
+        this.allPrivilege = data.allPrivilege;
       })
       .finally(() => {
         this.loading = false;
