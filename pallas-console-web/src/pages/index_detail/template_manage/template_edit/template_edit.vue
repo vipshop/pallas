@@ -188,9 +188,7 @@ export default {
       isTemplateInsertVisible: false,
       profileData: {
         profile: {
-          shards: [{
-            searches: [],
-          }],
+          shards: [],
         },
       },
       isProfileVisible: false,
@@ -210,7 +208,15 @@ export default {
         if (data.substring(2, 7) === 'error') {
           this.resultContent = JSON.stringify(JSON.parse(data), undefined, 2);
         } else {
-          this.profileData = JSON.parse(data);
+          const resultData = JSON.parse(data);
+          this.profileData.profile.shards = resultData.profile.shards.map((obj) => {
+            const rObj = { ...obj };
+            const totalNum = obj.searches[0].query.reduce((accumulator, currentValue) =>
+            accumulator + Number(currentValue.time.replace(/([0-9]+\.[0-9]*)ms/, '$1')), 0);
+            rObj.totalTime = totalNum.toFixed(3);
+            return rObj;
+          });
+          this.profileData.profile.shards.sort((a, b) => Number(b.totalTime) - Number(a.totalTime));
           this.isProfileVisible = true;
         }
       })

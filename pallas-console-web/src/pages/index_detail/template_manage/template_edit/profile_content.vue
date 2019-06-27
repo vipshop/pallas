@@ -5,6 +5,7 @@
             <el-collapse-item v-for="item in profileData.profile.shards" :key="item.id" :name="item.id">
                 <template slot="title">
                     <span style="font-weight: bold;font-size: 14px;">{{item.id.replace(/(\[.*\])(\[.*\])(\[.*\])/g, "$1$3")}}</span>
+                    <span style="margin-right: 10px;" class="pull-right">{{item.totalTime}}ms</span>
                 </template>
                 <div class="profile-tree">
                     <div class="profile-tree-th">
@@ -41,7 +42,7 @@ export default {
         [
           h('span', { class: { 'profile-tree-type': true } }, data.type),
           h('span', { class: { 'profile-tree-desc': true }, attrs: { title: data.description } }, data.description.length > 30 ? `${data.description.substring(0, 30)}...` : data.description),
-          h('span', { class: { 'pull-right': true, 'profile-tree-time': true } }, data.time.replace(/([0-9]+\.[0-9]{3})[0-9]*/, '$1')),
+          h('span', { class: { 'pull-right': true, 'profile-tree-time': true } }, `${Number(data.time.replace(/([0-9]+\.[0-9]*)ms/, '$1')).toFixed(3)}ms`),
         ],
       );
     },
