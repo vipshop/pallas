@@ -35,6 +35,13 @@
                         </el-form-item>
                     </el-col>
                 </el-row>
+                <el-row :gutter="10">
+                    <el-col :span="12">
+                        <el-form-item label="采样率：">
+                            <span>{{rampupInfo.sampleRate}}</span>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
             </div>
             <div class="label-title">
                 <span class="span-title"><i class="fa fa-th-large"></i>开始预热</span>
@@ -42,7 +49,7 @@
             <div class="label-content">
                 <el-row :gutter="10">
                     <el-col :span="11">
-                        <el-form-item label="预热条数" prop="rampupTarget" label-width="80px">
+                        <el-form-item label="预热条数" prop="rampupTarget">
                             <el-input v-model.number="formInfo.rampupTarget" :disabled="rampupInfo.state === 'doing'"></el-input>
                         </el-form-item>
                     </el-col>
@@ -55,6 +62,13 @@
                                 type="datetime"
                                 placeholder="选择日期时间">
                             </el-date-picker>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row style="padding-top: 10px" :gutter="10">
+                    <el-col :span="11">
+                        <el-form-item label="采样率">
+                            <el-input-number v-model="formInfo.sampleRate" :min="1" :max="100"></el-input-number>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -77,12 +91,14 @@ export default {
       formInfo: {
         rampupTarget: '',
         endTime: '',
+        sampleRate: 100,
       },
       rampupInfo: {
         rampupTarget: '',
         state: '',
         beginTime: '',
         endTime: '',
+        sampleRate: 100,
       },
       rampupStatusMap: {
         doing: '正在预热',

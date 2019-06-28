@@ -29,6 +29,7 @@ import com.vip.pallas.thread.ExtendableThreadPoolExecutor;
 import com.vip.pallas.thread.PallasThreadFactory;
 import com.vip.pallas.thread.TaskQueue;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
+import io.netty.util.internal.InternalThreadLocalMap;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
@@ -118,7 +119,8 @@ public class RampupHandler {
                     }
 
                     for (IndexRampup rampup : rampupList) {
-                        if (rampup != null) {
+                        //预热脚本增加采样率计算
+                        if (rampup != null && isSample(rampup.getSampleRate())) {
                             HttpRequestBase request = HttpClientUtil.getHttpUriRequest(targetHost, outBoundRequest, httpEntity);
                             request.setURI(URI.create(requestUrl.replace(indexName, rampup.getFullIndexName())));
                             HttpClientContext httpContext = HttpClientContext.create();
@@ -131,6 +133,20 @@ public class RampupHandler {
                 LogUtils.error(LOGGER, SearchLogEvent.RAMPUP_EVENT,"index rampup error cause by {}，targetHost: {}, requestUrl: {}, indexName: {}, clusterId: {}", e.getMessage(), targetHost, requestUrl, indexName, clusterId, e);
             }
         });
+    }
+
+    /**
+     * 预热脚本的采样率值范围是 1~100，最大值表示100%采样，1表示1% 的采样率
+     * @param sampleRate
+     * @return
+     */
+    private static boolean isSample(Integer sampleRate) {
+        //可能需要向前兼容，前面版本没有值的时候需要采样
+        if (sampleRate == null) {
+            return true;
+        }
+        int selected = InternalThreadLocalMap.get().random().nextInt(100) + 1;
+        return selected <= sampleRate;
     }
 
     public static void shutdown() {
