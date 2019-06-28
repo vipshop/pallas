@@ -173,7 +173,8 @@ public abstract class IndexService {
 
 		try {
 			privilegeService.deleteIndexPrivilege(privilegeKey);
-			privilegeService.deleteIndexAsset(privilegeKey);
+			privilegeService.deleteVersionPrivilege(privilegeKey);
+			privilegeService.deleteTemplatePrivilege(privilegeKey);
 		} catch (Exception e) {
 			logger.error(e.getClass() + " " + e.getMessage(), e);
 		}

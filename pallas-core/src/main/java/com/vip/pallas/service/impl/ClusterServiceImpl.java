@@ -114,7 +114,6 @@ public class ClusterServiceImpl implements ClusterService{
 		
 		try {
 			privilegeService.deleteClusterPrivilege(clusterId);
-			privilegeService.deleteClusterAsset(clusterId);
 		} catch (Exception e){
 			logger.error(e.getClass() + " " + e.getMessage(), e);
 		}
