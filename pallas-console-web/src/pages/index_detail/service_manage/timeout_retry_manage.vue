@@ -17,7 +17,13 @@
                 <el-input-number placeholder="慢查询阈值(毫秒)" v-model="indexConfigInfo.slowerThan" :min="0"></el-input-number>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" @click="handleUpdate"><i class="fa fa-refresh"></i>更新</el-button>
+              <el-button
+                type="primary"
+                :disabled="!indexConfigInfo.hasPrivilege"
+                :title="!indexConfigInfo.hasPrivilege ? '索引权限不足' : ''"
+                @click="handleUpdate">
+                <i class="fa fa-refresh"></i>更新
+              </el-button>
             </el-form-item>
           </el-form>
         </div>
@@ -43,7 +49,13 @@
           </el-table-column>
           <el-table-column label="操作" width="120px">
             <template scope="scope">
-              <el-button type="primary" @click="handleTemplateUpdate(scope.row)"><i class="fa fa-refresh"></i>更新</el-button>
+              <el-button
+                type="primary"
+                :disabled="!allPrivilege"
+                :title="!allPrivilege ? '权限不足' : ''"
+                @click="handleTemplateUpdate(scope.row)">
+                <i class="fa fa-refresh"></i>更新
+              </el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -54,7 +66,7 @@
 
 <script>
 export default {
-  props: ['templateList'],
+  props: ['templateList', 'allPrivilege'],
   data() {
     return {
       loading: false,
