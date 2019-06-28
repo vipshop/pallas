@@ -52,6 +52,7 @@ export default {
 <style type="text/css">
 .profile-template .el-collapse-item__header {
     padding-left: 5px;
+    background-color: #272822;
 }
 .profile-template .el-collapse-item__content {
     padding: 0px 1px;
@@ -59,10 +60,12 @@ export default {
 .profile-tree .profile-tree-th {
     color: #aaa;
     font-size: xx-small;
+    background-color: #272822;
 }
 .profile-tree .el-tree {
     border: none;
     color: #eee;
+    background-color: #272822;
 }
 .profile-tree-type {
     font-size: 14px;
