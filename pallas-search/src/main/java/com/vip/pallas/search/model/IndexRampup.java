@@ -32,6 +32,7 @@ public class IndexRampup {
     private String state;
     private Long rampupTarget;
     private Long rampupNow;
+    private Integer sampleRate;
 
     public final static String STATE_FINISH = "finish";
     public final static String STATE_STOP = "stop";
@@ -111,5 +112,13 @@ public class IndexRampup {
 
     public void setClusterName(String clusterName) {
         this.clusterName = clusterName;
+    }
+
+    public Integer getSampleRate() {
+        return sampleRate;
+    }
+
+    public void setSampleRate(Integer sampleRate) {
+        this.sampleRate = sampleRate;
     }
 }
