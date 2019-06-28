@@ -102,6 +102,15 @@
                                   <div>
                                     <div class="debug-title">
                                       <span>结果</span>
+                                      <el-button
+                                      v-if="!isProfileVisible"
+                                      type="primary"
+                                      size="small"
+                                      class="pull-right"
+                                      v-clipboard:copy="resultContent"
+                                      v-clipboard:success="copySuccess"
+                                      v-clipboard:error="copyError">复制内容
+                                    </el-button>
                                     </div>
                                     <div :style="{ 'height': temPanelHeight - 120 }">
                                         <editor v-if="!isProfileVisible" ref="debugResultEditor" :content="resultContent" :readonly="true" editor-id="debugResult"></editor>
@@ -195,6 +204,12 @@ export default {
     };
   },
   methods: {
+    copySuccess() {
+      this.$message.success('已复制内容到剪贴板！');
+    },
+    copyError(e) {
+      this.$message.errorMessage(`复制appSecret失败！${e}`);
+    },
     queryProfile() {
       const params = {
         indexId: this.indexId,

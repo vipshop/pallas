@@ -1,6 +1,7 @@
 import 'babel-polyfill';
 import Vue from 'vue';
 import ElementUI from 'element-ui';
+import VueClipboard from 'vue-clipboard2';
 import 'element-ui/lib/theme-default/index.css';
 import 'font-awesome/css/font-awesome.css';
 import './components';
@@ -16,6 +17,7 @@ import './styles/element.css';
 Vue.mixin(mixins);
 Vue.use(ElementUI);
 Vue.use(Utils);
+Vue.use(VueClipboard);
 
 /* eslint-disable no-new */
 new Vue({
