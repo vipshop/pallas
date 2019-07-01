@@ -85,7 +85,6 @@ public class RestTest {
 
 	}
 
-	@Test
 	public void testScrollSearch() throws InvocationTargetException, InstantiationException, InterruptedException, IllegalAccessException, IOException {
 		final PallasRestClient buildClient = PallasRestClientBuilder.buildClient("cGKJojsqaOFLPMZJHP0Dsg==", 1000);
 		final HttpEntity entity = new NStringEntity(
@@ -96,17 +95,18 @@ public class RestTest {
 				"/yy_test/_search/template", Collections.EMPTY_MAP, "yy_test_get1id",
 				entity);
 
-        assertThat(response.getResponse().getStatusLine().getStatusCode()).isEqualTo(200);
+		assertThat(response.getResponse().getStatusLine().getStatusCode()).isEqualTo(200);
 		ScrollIterator iterator = response.getIterator();
 		try {
-			if (iterator.hasNext()){
+			if (iterator.hasNext()) {
 				Response res = iterator.next();
 				assertThat(res.getStatusLine().getStatusCode()).isEqualTo(200);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-		}finally {
+		} finally {
 			iterator.close();
 		}
 	}
+
 }
