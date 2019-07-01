@@ -17,8 +17,11 @@
 
 package com.vip.pallas.client;
 
+import com.alibaba.fastjson.JSONObject;
 import com.vip.pallas.client.exception.PallasTimeoutException;
 import com.vip.pallas.client.lz4.PallasHttpAsyncResponseConsumerFactory;
+import com.vip.pallas.client.search.PallasScrollResponse;
+import com.vip.pallas.client.search.ScrollIterator;
 import com.vip.pallas.client.thread.QueryConsoleTask;
 import com.vip.pallas.client.util.PallasRestClientProperties;
 
@@ -27,7 +30,11 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
+import org.apache.http.annotation.NotThreadSafe;
+import org.apache.http.entity.ContentType;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.nio.entity.NStringEntity;
+import org.apache.http.util.EntityUtils;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.ResponseException;
 import org.elasticsearch.client.ResponseListener;
@@ -55,6 +62,8 @@ public class PallasRestClient {
 	private static final QueryConsoleTask QUERY_CONSOLE_TASK = new QueryConsoleTask(TOKEN_SET);
 	private RestClient restClient;
 	private String clientToken;
+
+	private static final Long SCROLL_SIZE_DEFAULT = 500l;
 	
 	private static final ScheduledExecutorService CONSOLE_VISITOR_EXECUTOR = Executors
 			.newSingleThreadScheduledExecutor(new ThreadFactory() {
@@ -123,7 +132,7 @@ public class PallasRestClient {
 		}
 		this.clientToken = clientToken;
 	}
-	
+
 	/**
 	 * Add the templateId and the domainName and contentType to the headers and then perform the request by the
 	 * restClient.
@@ -342,4 +351,125 @@ public class PallasRestClient {
 			return response;
 		}
 	}
+
+
+	/**
+	 * scroll search api
+	 * @param endpoint the search url, e.g. /msearch/_search/template
+	 * @param params e.g. mykey1=1&mykey2=1
+	 * @param templateId your templateId, leave it null if you do not intend to search by a template.
+	 * @param entity query content
+	 * @param headers headers. In particular, we will add templateId, domain and contentType to headers.
+	 * @return
+	 * @throws IOException
+	 */
+	public PallasScrollResponse scrollSearch(String endpoint, Map<String, String> params, String templateId, HttpEntity entity,
+											 Header... headers) throws IOException {
+		if (!endpoint.contains("?scroll=")&&!endpoint.contains("&scroll=")){
+			endpoint += endpoint.contains("?")?"&scroll=30s":"?scroll=30s";
+		}
+		forceToUseLz4IfExistAcceptEncoding(headers);
+		Header[] newHeaders = genNewHeaderWithLz4EncodingAndClientTokenAndContentType(headers, templateId, getClientMaxTimeOutMills());
+		Response response;
+		ScrollIterator iterator;
+		try {
+			response = holder.getRestClient().performRequest("POST", endpoint, params, entity,
+					new PallasHttpAsyncResponseConsumerFactory(), newHeaders);
+			iterator = constructScrollIterator(entity,response.getEntity(),params,newHeaders);
+		}catch (ResponseException e){ // Return ES exception detail for invokers
+			logger.error("pallas restclient performRequest error: {}", e.getMessage(), e);
+			throw e;
+		}catch (IOException e) {
+			logger.error("pallas restclient performRequest error: {}", e.getMessage(), e);
+			String message = printPerformTimeoutError(endpoint, templateId, getClientMaxTimeOutMills());
+			logger.error(e.getMessage(), e);
+			throw new PallasTimeoutException(message, e);
+		}
+		return new PallasScrollResponse(response,iterator);
+	}
+
+	public ScrollIterator constructScrollIterator(HttpEntity request,HttpEntity response, Map<String, String> params, Header[] newHeaders) throws IOException {
+		String responseJson = EntityUtils.toString(response);
+		JSONObject jsonObject = JSONObject.parseObject(responseJson);
+		String scrollId = jsonObject.getString("_scroll_id");
+		long total = jsonObject.getJSONObject("hits").getLongValue("total");
+		if (StringUtils.isNotBlank(scrollId) && total > 0){
+			long size = JSONObject.parseObject(EntityUtils.toString(request)).getJSONObject("params").getLongValue("size");
+			if (size == 0)size = SCROLL_SIZE_DEFAULT;
+			long pageCount = total/size; // first page already take; It is possible that invokers had defined default value for "size" field in template, iterator.next() will recheck pageCount by hits.hits's length
+			return new PallasScrollIterator(scrollId, pageCount, params, newHeaders);
+		}
+		return null;
+	}
+
+	@NotThreadSafe
+	class PallasScrollIterator implements ScrollIterator {
+		private final String ENDPOINT = "_search/scroll";
+		private String scroll = "30s";
+		private String scrollId;
+		private long pageCount;
+		private Map<String, String> params;
+		private Header[] newHeaders;
+
+		public PallasScrollIterator(String scrollId, long pageCount, Map<String, String> params, Header[] newHeaders) {
+			this.pageCount = pageCount;
+			this.scrollId = scrollId;
+			this.params = params;
+			this.newHeaders = newHeaders;
+		}
+
+		@Override
+		public boolean hasNext(){
+			return pageCount>0;
+		}
+
+		@Override
+		public void setScroll(String scroll) {
+			this.scroll = scroll;
+		}
+
+		@Override
+		public void close() throws IOException {
+			final HttpEntity entity = new NStringEntity("{\n" + "	\"scroll_id\" : \"" + scrollId + "\"\n" + "}", ContentType.APPLICATION_JSON);
+			try {
+				holder.getRestClient().performRequest("DELETE", ENDPOINT, params, entity,
+						new PallasHttpAsyncResponseConsumerFactory(), newHeaders);
+			}catch (ResponseException e){ // Return ES exception detail for invokers
+				logger.error("pallas restclient performRequest error: {}", e.getMessage(), e);
+				throw e;
+			}catch (IOException e) {
+				logger.error("pallas restclient performRequest error: {}", e.getMessage(), e);
+				String message = printPerformTimeoutError(ENDPOINT, "", getClientMaxTimeOutMills());
+				logger.error(e.getMessage(), e);
+				throw new PallasTimeoutException(message, e);
+			}
+		}
+		@Override
+		public Response next() throws IOException {
+			final HttpEntity entity = new NStringEntity("{\n" + "    \"scroll\" : \"" + scroll + "\",\n" + "    \"scroll_id\" : \"" + scrollId + "\"\n" + "}", ContentType.APPLICATION_JSON);
+			Response response;
+			try {
+				response = holder.getRestClient().performRequest("POST", ENDPOINT, params, entity,
+						new PallasHttpAsyncResponseConsumerFactory(), newHeaders);
+			}catch (ResponseException e){ // Return ES exception detail for invokers
+				logger.error("pallas restclient performRequest error: {}", e.getMessage(), e);
+				throw e;
+			}catch (IOException e) {
+				logger.error("pallas restclient performRequest error: {}", e.getMessage(), e);
+				String message = printPerformTimeoutError(ENDPOINT, "", getClientMaxTimeOutMills());
+				logger.error(e.getMessage(), e);
+				throw new PallasTimeoutException(message, e);
+			}
+			String responseContent = EntityUtils.toString(response.getEntity());
+			JSONObject jsonObject = JSONObject.parseObject(responseContent);
+			this.scrollId = jsonObject.getString("_scroll_id");
+			pageCount--;
+			if (pageCount > 0&&jsonObject.getJSONObject("hits").getJSONArray("hits").size()<=0){
+				// recheck pageCount
+				pageCount = -1;
+			}
+			return response;
+		}
+	}
+
 }
