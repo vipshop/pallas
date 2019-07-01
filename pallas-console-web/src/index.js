@@ -1,4 +1,3 @@
-import 'babel-polyfill';
 import Vue from 'vue';
 import ElementUI from 'element-ui';
 import VueClipboard from 'vue-clipboard2';

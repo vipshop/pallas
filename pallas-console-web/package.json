@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "axios": "^0.16.1",
-    "babel-polyfill": "^6.26.0",
     "brace": "^0.10.0",
     "diff-match-patch": "^1.0.4",
     "echarts": "^4.1.0",
