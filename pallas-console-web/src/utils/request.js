@@ -1,8 +1,6 @@
 import axios from 'axios';
 import message from './message';
 
-require('promise.prototype.finally').shim();
-
 axios.defaults.baseURL = './pallas';
 
 let showError = false;

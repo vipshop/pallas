@@ -6,7 +6,7 @@
                     <div class="template-config-content">
                         <div class="title">
                           <span>模板选项</span><a style="margin-left: 10px;font-size: 13px; font-weight: normal;color: dodgerblue;" target="_blank" href="https://vipshop.github.io/pallas/#/zh-cn/1.x/Console%E6%A8%A1%E5%9D%97/%E6%A8%A1%E6%9D%BF%E7%AE%A1%E7%90%86/template">Mustache语法  <i class="fa fa-external-link" aria-hidden="true"></i></a>
-                          <el-button class="pull-right" type="success" size="mini" @click="handleExecute"><i class="fa fa-caret-square-o-right"></i>调试</el-button>
+                          <el-button class="pull-right" type="success" size="mini" @click="handleExecute"><i class="fa fa-caret-square-o-right"></i>预览</el-button>
                         </div>
                         <div style="margin-top: 15px;" class="">
                           <el-form label-width="0" label-position="left">
