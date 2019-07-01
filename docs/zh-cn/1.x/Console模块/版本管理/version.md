@@ -13,8 +13,7 @@
 ## 2 新增版本
 
   - mysql
-
-    ![](image/addVersionOpen_open.png)
+    ![](image/addVersionOpen_open.jpg)
 
     ![](image/mapping2_open.png)
     
@@ -23,6 +22,8 @@
       - 分片数量：索引的分片数量
     
       - 复制数据：索引的复制数量
+      
+      - ShardPerNode：每个节点的分片数
   
       - Routing Key：分片字段
   
@@ -43,6 +44,14 @@
       - 索引其他配置:
       
         refresh(秒): 索引刷新时间间隔
+        
+        max_result_window：就是from+size的最大值,默认大小10000
+        
+        flush_threshold_size：index.translog.flush_threshold_size参数，缓冲达到指定大小就会触发flush操作
+        
+        translog_durability：index.translog.durability参数，设置translog的写到磁盘的模式
+        
+        sync_interval：tanslog写到磁盘间隔，默认5s, 最小100ms
       
       - mapping配置
         
@@ -65,11 +74,17 @@
 
 > 当前如果有其他版本处于启用中，此操作会将之前启用的版本停掉。
 
-## 5 同步（此功能暂未开源）
+## 5 动态配置更改
+
+可以在启用版本后，继续更改部分配置
+
+> 例如slowlog和translog的配置等
+
+## 6 同步（此功能暂未开源）
 
 将数据同步到Elastic search集群中。
 
-## 6 索引预热
+## 7 索引预热
 
 > 索引在被真实使用前，通过非直接流量的请求打压，构造真实调用环境，使得索引状态达到最佳。
 
@@ -87,25 +102,25 @@
     
 > 详细设计见 Pallas search
 
-## 7 其他操作
+## 8 其他操作
 
-### 7.1 查看配置信息
+### 8.1 查看配置信息
 
 ![](image/versionMapping_open.png)
 
 查询此版本索引在es中的mapping信息。
 
-### 7.2 数据量
+### 8.2 数据量
 
 快速查看同步到ES的数据是不是符合用户期望。
 
 ![](image/quicklook_open.jpg)
 
-### 7.3. 版本复制
+### 8.3. 版本复制
 
 快速拷贝已存在的版本。
 
-### 7.4 删除操作
+### 8.4 删除操作
 
   - 删除索引
 
