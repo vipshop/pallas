@@ -511,7 +511,7 @@ public class RouteFilter extends AbstractFilter {
 
 		//never meant to go here
 		throw new HttpCodeErrorPallasException(
-				String.format("can not find any accessable routing info, index:{}, cluster:{}, availableNodes:{}, routingListSize:{}",
+				String.format("can not find any accessable routing info, index:%s, cluster:%s, availableNodes:%s, routingListSize:%s",
 						indexName, cluster, availableNodes, routingList.size()),
 				HTTP_SERVICE_UNAVAILABLE, className, classMethod);
 	}
