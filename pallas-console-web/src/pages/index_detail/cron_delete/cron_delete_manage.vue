@@ -11,15 +11,15 @@
                     <el-table-column label="scroll_size" prop="scrollSize" width="100px"></el-table-column>
                     <el-table-column label="cron表达式" prop="cron" width="140px"></el-table-column>
                     <el-table-column label="更新时间" prop="updateTime" min-width="100">
-                        <template scope="scope">{{scope.row.updateTime | formatDate}}</template>
+                        <template slot-scope="scope">{{scope.row.updateTime | formatDate}}</template>
                     </el-table-column>
                     <el-table-column label="是否启用" prop="isUsed" width="100px">
-                        <template scope="scope"> 
+                        <template slot-scope="scope"> 
                             <el-tag :type="scope.row.isSyn ? 'success' : 'danger'" close-transition>{{scope.row.isSyn}}</el-tag>
                         </template>
                     </el-table-column>
                     <el-table-column label="操作" width="300px">
-                      <template scope="scope">
+                      <template slot-scope="scope">
                           <el-tooltip content="dsl" placement="top">
                               <el-button type="text" @click="getDsl(scope.row)"><i class="fa fa-file-code-o"></i></el-button>
                           </el-tooltip>

@@ -7,21 +7,21 @@
             </div>
             <el-table :data="childInfo" border style="width: 100%">
                 <el-table-column label="字段名">
-                    <template scope="scope">
+                    <template slot-scope="scope">
                         <el-input class="nested-input" v-model="scope.row.fieldName" :disabled="isEditable"></el-input>
                         <el-tag type="success" v-if="checkArrayNotEmpty(scope.row.copyTo)">copy to: {{scope.row.copyTo}}</el-tag>
                         <el-button type="warning" @click="viewSchemaMultiFields(scope.row)" v-if="scope.row.multiField.length !== 0" ><i class="fa"></i>subFields</el-button>
                     </template>
                 </el-table-column>
                 <el-table-column label="ES类型">
-                    <template scope="scope">
+                    <template slot-scope="scope">
                         <select v-model="scope.row.fieldType" size="small" :disabled="isEditable">
                             <option v-for="item in fieldTypes" :value="item.value" :key="item.value">{{item.label}}</option>
                         </select>
                     </template>
                 </el-table-column>
                 <el-table-column label="多值/单值">
-                    <template scope="scope">
+                    <template slot-scope="scope">
                         <select v-model="scope.row.multi" size="small" :disabled="isEditable">
                             <option label="单值" :value="false">单值</option>
                             <option label="多值" :value="true">多值</option>
@@ -29,26 +29,26 @@
                     </template>
                 </el-table-column>
                 <el-table-column label="查询关键字">
-                    <template scope="scope">
+                    <template slot-scope="scope">
                         <el-checkbox v-model="scope.row.search" :disabled="isEditable">是否查询</el-checkbox>
                     </template>
                 </el-table-column>
                 <el-table-column label="排序或聚合">
-                    <template scope="scope">
+                    <template slot-scope="scope">
                         <el-checkbox v-model="scope.row.docValue" :disabled="isEditable">用于排序或聚合</el-checkbox>
                     </template>
                 </el-table-column>
                 <el-table-column label="是否启用store">
-                    <template scope="scope">
+                    <template slot-scope="scope">
                         <el-checkbox v-model="scope.row.store" :disabled="isEditable">启用store</el-checkbox>
                     </template>
                 </el-table-column>
                 <el-table-column v-if="!isEditable" label="操作" min-width="60">
-                    <template scope="scope">
+                    <template slot-scope="scope">
                         <el-button size="small" type="danger" @click="handleDelete(scope.row)">删除</el-button>
                         <el-button type="warning" @click="viewSchemaCopyTo(scope.row)">copyTo</el-button>
                     </template>
-                    <template scope="scope">
+                    <template slot-scope="scope">
                         <el-dropdown trigger="click">
                               <span class="el-dropdown-link">
                                 操作<i class="el-icon-caret-bottom el-icon--right"></i>

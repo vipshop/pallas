@@ -2,12 +2,12 @@
     <div class="template-test-upload">
         <el-table :data="addDataSource" :show-header="false">
             <el-table-column>
-                <template scope="scope">
+                <template slot-scope="scope">
                     <el-input v-model="scope.row.paramNameDef"></el-input>
                 </template>
             </el-table-column>
             <el-table-column>
-                <template scope="scope">
+                <template slot-scope="scope">
                     <el-upload
                     ref="upload"
                     action="/pallas/index_template/performance_script/upload.json"
@@ -21,7 +21,7 @@
                 </template>
             </el-table-column>
             <el-table-column>
-                <template scope="scope">
+                <template slot-scope="scope">
                     <el-button size="small" type="primary" @click="handleAdd(scope.row)">上传</el-button>
                 </template>
             </el-table-column>

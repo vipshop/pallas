@@ -6,12 +6,12 @@
                 <el-table :data="paramsInfo" border style="width: 100%" :max-height="temPanelHeight - 390">
                     <el-table-column prop="paramName" label="请求参数"></el-table-column>
                     <el-table-column label="包含">
-                        <template scope="scope">
+                        <template slot-scope="scope">
                             <el-checkbox v-model="scope.row.include"></el-checkbox>
                         </template>
                     </el-table-column>
                     <el-table-column label="请求值类型">
-                        <template scope="scope">
+                        <template slot-scope="scope">
                             <el-select v-model="scope.row.valueType" :disabled="!scope.row.include" @change="valueTypeChange(scope.row)" size="small">
                                 <el-option label="固定值" value="1" key="1">固定值</el-option>
                                 <el-option label="数据源" value="2" key="2">数据源</el-option>
@@ -19,7 +19,7 @@
                         </template>
                     </el-table-column>
                     <el-table-column label="数据源参数映射">
-                        <template scope="scope">
+                        <template slot-scope="scope">
                             <el-input v-show="scope.row.valueType === '1'" :disabled="!scope.row.include" v-model="scope.row.value"></el-input>
                             <el-select style="width:100%;" v-show="scope.row.valueType === '2'" :disabled="!scope.row.include" v-model="scope.row.value">
                                 <el-option v-for="item in paramValues" :label="item" :value="item" :key="item"></el-option>

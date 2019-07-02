@@ -3,12 +3,12 @@
       <div class="monitor-top">
         <el-table :data="gaugeMetricData" border style="width: 100%">
           <el-table-column label="Total">
-            <template scope="scope">
+            <template slot-scope="scope">
               {{bytesToSize(scope.row.document_store_byte_total)}}
             </template>
           </el-table-column>
           <el-table-column label="Primaries">
-            <template scope="scope">
+            <template slot-scope="scope">
               {{bytesToSize(scope.row.document_store_byte_primary)}}
             </template>
           </el-table-column>
