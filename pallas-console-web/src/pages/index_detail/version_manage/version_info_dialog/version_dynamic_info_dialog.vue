@@ -109,7 +109,7 @@
                                 <el-col :span="12">
                                     <el-form-item label="sync_interval" prop="syncInterval" label-width="180px">
 <!--                                        该字段无法动态更新，在这里纯展示，不做更新操作-->
-                                        <el-input placeholder="5s" v-model="versionInfo.syncInterval" :disabled="true" ></el-input>
+                                        <el-input v-model="versionInfo.syncInterval" :disabled="true" ></el-input>
                                     </el-form-item>
                                 </el-col>
                                 <el-col :span="12">
@@ -159,7 +159,6 @@ export default {
         maxResultWindow: [{ required: true, message: 'max_result_window不能为空' }, { type: 'number', message: 'max_result_window必须为数字值' }],
         totalShardsPerNode: [{ required: true, message: 'total_shards_per_node不能为空' }, { type: 'number', message: 'total_shards_per_node必须为数字值' }],
         flushThresholdSize: [{ required: true, message: 'flush_threshold_size不能为空' }],
-        syncInterval: [{ required: true, message: 'sync_interval不能为空' }],
         translogDurability: [{ required: true, message: 'translog_durability不能为空' }],
       },
     };

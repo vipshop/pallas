@@ -39,7 +39,7 @@
                                 <div style="padding-left:10px;">
                                     <el-table :data="historyVersionList" border @row-click="handleVersionDialog" :max-height="temPanelHeight - 85">
                                         <el-table-column label="修改日期" width="150px">
-                                              <template scope="scope">{{scope.row.createdTime | formatDate}}</template>
+                                              <template slot-scope="scope">{{scope.row.createdTime | formatDate}}</template>
                                         </el-table-column>
                                         <el-table-column prop="description" label="描述">
                                         </el-table-column>

@@ -8,7 +8,7 @@
                 <el-table :data="versionList" border style="width: 100%" v-loading="loading" element-loading-text="请稍等···">
                     <el-table-column label="版本id" prop="id" width="150px"></el-table-column>
                     <el-table-column label="所属集群" prop="realClusterIds">
-                        <template scope="scope">
+                        <template slot-scope="scope">
                             <div class="condition-table" v-for="item in $array.strToArray(scope.row.realClusterIds)" :key="item">
                                 <router-link tag="a" :to="{ name:'cluster_detail',query:{clusterId: getClusterName(item)} }">{{getClusterName(item)}}</router-link>
                                 <el-tooltip effect="dark" content="查看配置信息" placement="top">
@@ -18,7 +18,7 @@
                         </template>
                     </el-table-column>
                     <el-table-column label="数据量" prop="count" width="150px">
-                        <template scope="scope">
+                        <template slot-scope="scope">
                             <div class="condition-table" v-for="(item, index) in scope.row.count" :key="item">{{item}}
                                 <el-tooltip effect="dark" content="快速查看数据" placement="top">
                                     <el-button type="text" @click="retrieve(scope.row, $array.strToArray(scope.row.realClusterIds)[index])"><i class="fa fa-search-plus"></i></el-button>
@@ -27,15 +27,15 @@
                         </template>
                     </el-table-column>
                     <el-table-column label="创建时间" prop="createTime" width="200px">
-                        <template scope="scope">{{scope.row.createTime | formatDate}}</template>
+                        <template slot-scope="scope">{{scope.row.createTime | formatDate}}</template>
                     </el-table-column>
                     <el-table-column label="是否启用" prop="isUsed" width="150px">
-                        <template scope="scope"> 
+                        <template slot-scope="scope"> 
                             <el-tag :type="scope.row.isUsed ? 'success' : 'danger'" close-transition>{{scope.row.isUsed || false | translateIsUsed}}</el-tag>
                         </template>
                     </el-table-column>
                     <el-table-column label="操作" width="80" v-if="isAllPrivilege">
-                        <template scope="scope">
+                        <template slot-scope="scope">
                             <el-dropdown trigger="click">
                               <span class="el-dropdown-link">
                                 操作<i class="el-icon-caret-bottom el-icon--right"></i>
@@ -131,6 +131,11 @@ export default {
         flushThresholdSize: '512mb',
         syncInterval: '5s',
         translogDurability: 'async',
+        sourceDisabled: false,
+        sourceIncludes: '',
+        sourceExcludes: '',
+        sourceIncludesArr: [],
+        sourceExcludesArr: [],
       },
       clusters: [],
       isLogical: false,

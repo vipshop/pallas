@@ -8,32 +8,32 @@
                 <el-table :data="flowRecordConfigList" border style="width: 100%" highlight-current-row @cell-click="cellClick" v-loading="loading" element-loading-text="请稍等···">
                     <el-table-column label="规则id" prop="id" width="70px"></el-table-column>
                     <el-table-column label="目标模板" prop="template.templateName" min-width="110">
-                        <template scope="scope">
+                        <template slot-scope="scope">
                             <div v-if="scope.row.template === null">全部</div>
                             <div v-else>{{scope.row.template.templateName}}</div>
                         </template>
                     </el-table-column>
                     <el-table-column label="采集开始时间" prop="startTime" min-width="110">
-                        <template scope="scope">{{scope.row.startTime | formatDate}}</template>
+                        <template slot-scope="scope">{{scope.row.startTime | formatDate}}</template>
                     </el-table-column>
                     <el-table-column label="采集结束时间" prop="endTime" min-width="110">
-                        <template scope="scope">{{scope.row.endTime | formatDate}}</template>
+                        <template slot-scope="scope">{{scope.row.endTime | formatDate}}</template>
                     </el-table-column>
                     <el-table-column label="抽样系数" prop="sampleRate" min-width="60"></el-table-column>
                     <el-table-column label="目标采集数" prop="limit" min-width="70"></el-table-column>
                     <el-table-column label="最近更新人" min-width="110">
-                        <template scope="scope">{{scope.row.createUser || '-'}}</template>
+                        <template slot-scope="scope">{{scope.row.createUser || '-'}}</template>
                     </el-table-column>
                     <el-table-column label="最近更新时间" prop="endTime" min-width="110">
-                        <template scope="scope">{{scope.row.updateTime | formatDate}}</template>
+                        <template slot-scope="scope">{{scope.row.updateTime | formatDate}}</template>
                     </el-table-column>
                     <el-table-column label="状态" prop="isUsed" min-width="50">
-                        <template scope="scope">
+                        <template slot-scope="scope">
                             <el-tag :type="scope.row.isEnable ? 'success' : 'danger'" close-transition>{{scope.row.isEnable || false | translateIsEnable}}</el-tag>
                         </template>
                     </el-table-column>
                     <el-table-column label="操作" width="80">
-                        <template scope="scope">
+                        <template slot-scope="scope">
                             <el-dropdown trigger="click">
                               <span class="el-dropdown-link">
                                 操作<i class="el-icon-caret-bottom el-icon--right"></i>

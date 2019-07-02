@@ -433,6 +433,7 @@ public abstract class IndexVersionService {
 	}
 
 	private void initVersionSchemaByDBSchemaList(com.vip.pallas.bean.IndexVersion version,List<DBSchema> schemaList,Map<String, VersionField> fieldMap){
+		List<VersionField> newSchema = new ArrayList<>();
         for (DBSchema dbSchema : schemaList) {
             VersionField field = new VersionField();
             field.setFieldName(dbSchema.getDbFieldName());
@@ -444,8 +445,9 @@ public abstract class IndexVersionService {
             } else {
                 convertFieldType(field);
             }
-            version.addField(field);
+            newSchema.add(field);
         }
+        version.setSchema(newSchema);
     }
 
 	private void copyVersionField(VersionField srcField, VersionField distField){
