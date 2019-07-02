@@ -233,7 +233,6 @@ export default {
       this.versionAddInfo.indexId = this.indexId;
       this.versionAddInfo.clusterId = this.clusters[0].id;
       this.versionInfo = JSON.parse(JSON.stringify(this.versionAddInfo));
-      console.log(this.versionInfo);
     },
     triggerDialog(row, operation) {
       this.loading = true;

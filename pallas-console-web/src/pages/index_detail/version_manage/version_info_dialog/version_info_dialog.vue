@@ -605,7 +605,7 @@ export default {
       this.schemaExtInfo = row;
       this.validCopyToFields = [];
       this.versionInfo.schema.forEach((el) => {
-        if (el.dbFieldType === 'N/A') {
+        if (el.dbFieldType === 'N/A' || el.dbFieldType === null) {
           if (el.fieldType === 'nested') {
             this.getNestedFieldName(el, '', this.validCopyToFields);
             return;
