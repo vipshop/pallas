@@ -13,7 +13,7 @@
         </div>
         <el-table :data="pluginUpgradeList" border style="width: 100%" v-loading="loading" element-loading-text="请稍等···">
             <el-table-column type="expand">
-                <template scope="props">
+                <template slot-scope="props">
                     <el-form label-position="left" inline class="my-table-expand">
                         <el-form-item label="路径" style="width: 100%;">
                             <span>{{ props.row.packagePath }};</span>
