@@ -5,13 +5,13 @@
                 <el-table-column prop="transportAddress" label="transportAddress"></el-table-column>
                 <el-table-column prop="jvmHeapUsage" label="JVM Heap(%)"></el-table-column>
                 <el-table-column label="Free Disk">
-                  <template scope="scope">
+                  <template slot-scope="scope">
                     {{bytesToSize(scope.row.availableFS)}}
                   </template>
                 </el-table-column>
                 <el-table-column prop="documentCount" label="Documents"></el-table-column>
                 <el-table-column label="Data">
-                  <template scope="scope">
+                  <template slot-scope="scope">
                     {{bytesToSize(scope.row.documentStore)}}
                   </template>
                 </el-table-column>

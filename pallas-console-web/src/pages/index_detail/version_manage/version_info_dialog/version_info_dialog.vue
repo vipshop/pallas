@@ -212,13 +212,13 @@
 
                     <el-table :data="versionInfo.schema" border style="width: 100%" :max-height="550">
                         <el-table-column label="操作">
-                          <template scope="scope">
+                          <template slot-scope="scope">
                               <el-button size="small" type="success" @click="addField(scope.$index)" :disabled="isEditable"><i class="el-icon-plus"></i></el-button>
                               <el-button size="small" type="danger" @click="deleteField(scope.row)" :disabled="isEditable"><i class="el-icon-minus"></i></el-button>
                           </template>
                         </el-table-column>
                         <el-table-column label="字段名" min-width="180">
-                            <template scope="scope">
+                            <template slot-scope="scope">
                                 <el-button type="text" v-show="!scope.row.isNew">
                                     <span>{{scope.row.fieldName}}</span>
                                 </el-button>
@@ -234,19 +234,19 @@
                             </template>
                         </el-table-column>
                         <el-table-column label="DB类型" v-if="!isMetaDataNull">
-                            <template scope="scope">
+                            <template slot-scope="scope">
                               {{scope.row.dbFieldType || 'N/A'}}
                             </template>
                         </el-table-column>
                         <el-table-column label="ES类型">
-                            <template scope="scope">
+                            <template slot-scope="scope">
                                 <select v-model="scope.row.fieldType" size="small" :disabled="isEditable" @change="fieldTypeChange(scope.row)">
                                     <option v-for="item in fieldTypes" :value="item.value" :key="item.value">{{item.label}}</option>
                                 </select>
                             </template>
                         </el-table-column>
                         <el-table-column label="多值/单值">
-                            <template scope="scope">
+                            <template slot-scope="scope">
                                 <select v-model="scope.row.multi" size="small" :disabled="isEditable">
                                     <option label="单值" :value="false">单值</option>
                                     <option label="多值" :value="true">多值</option>
@@ -254,22 +254,22 @@
                             </template>
                         </el-table-column>
                         <el-table-column label="是否创建索引" min-width="90">
-                            <template scope="scope">
+                            <template slot-scope="scope">
                                         <el-checkbox v-model="scope.row.search" :disabled="isEditable || scope.row.fieldType === 'nested'">创建索引</el-checkbox>
                             </template>
                         </el-table-column>
                         <el-table-column :render-header="renderDocValueHeader">
-                            <template scope="scope">
+                            <template slot-scope="scope">
                                 <el-checkbox v-model="scope.row.docValue" :disabled="isEditable || scope.row.fieldType === 'nested' || scope.row.fieldType === 'text'">启用doc value</el-checkbox>
                             </template>
                         </el-table-column>
                         <el-table-column label="是否启用store">
-                            <template scope="scope">
+                            <template slot-scope="scope">
                                 <el-checkbox v-model="scope.row.store" :disabled="isEditable">启用store</el-checkbox>
                             </template>
                         </el-table-column>
                         <el-table-column label="更多操作" width="80" v-if="!isEditable">
-                            <template scope="scope">
+                            <template slot-scope="scope">
                                 <el-dropdown trigger="click">
                               <span class="el-dropdown-link">
                                 操作<i class="el-icon-caret-bottom el-icon--right"></i>
@@ -299,7 +299,7 @@
                                 <el-col :span="10" v-if="!versionInfo.sourceDisabled">
                                     <el-form-item label="includes" prop="sourceIncludes" label-width="120px">
                                         <el-select multiple filterable v-model="versionInfo.sourceIncludesArr" placeholder="请选择_source包含的field" :disabled="isEditable" style="width: 100%">
-                                            <el-option v-for="item,index in allSourceFields" :key="index" :label="item" :value="item">
+                                            <el-option v-for="(item,index) in allSourceFields" :key="index" :label="item" :value="item">
                                                 <span style="float: left">{{ item }}</span>
                                             </el-option>
                                         </el-select>
@@ -308,7 +308,7 @@
                                 <el-col :span="10" v-if="!versionInfo.sourceDisabled">
                                     <el-form-item label="excludes" prop="sourceExcludes" label-width="120px">
                                         <el-select multiple filterable v-model="versionInfo.sourceExcludesArr" placeholder="请选择_source不包含的field" :disabled="isEditable" style="width: 100%">
-                                            <el-option v-for="item,index in allSourceFields" :key="index" :label="item" :value="item">
+                                            <el-option v-for="(item,index) in allSourceFields" :key="index" :label="item" :value="item">
                                                 <span style="float: left">{{ item }}</span>
                                             </el-option>
                                         </el-select>

@@ -20,7 +20,7 @@
                 <el-table :data="tokenClusterInfo.myIndexPrivilegeArr" border style="width: 100%" :height="clusterTreeHeight.height">
                     <el-table-column prop="name" label="索引"></el-table-column>
                     <el-table-column prop="indexPrivilege" label="权限">
-                        <template scope="scope">
+                        <template slot-scope="scope">
                             <el-radio-group v-model="scope.row.indexPrivilege" size="small">
                                 <el-radio-button label="">无</el-radio-button>
                                 <el-radio-button label="ReadOnly">只读</el-radio-button>

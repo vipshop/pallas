@@ -28,14 +28,14 @@
             <el-table-column prop="id" label="升级ID" width="80px"></el-table-column>
             <el-table-column prop="clusterId" label="所属集群"></el-table-column>
             <el-table-column prop="pluginName" label="运行插件">
-                <template scope="scope">
+                <template slot-scope="scope">
                     <div class="my-a-link">
                         <router-link tag="a" :to="{ name: 'plugin_upgrade', query: {pluginName: scope.row.pluginName} }">{{scope.row.pluginName}}</router-link>
                     </div>
                 </template>
             </el-table-column>
             <el-table-column prop="pluginVersion" label="插件版本" width="120px">
-                <template scope="scope">
+                <template slot-scope="scope">
                     <div class="plugin-version" v-for="item in getPluginVersion(scope.row.nodeStates)" :key="item">
                         <el-popover trigger="hover" placement="right">
                             <div v-for="node in getNodesOfVersion(scope.row.nodeStates, item)" :key="node">{{node}}</div>
@@ -45,13 +45,13 @@
                 </template>
             </el-table-column>
             <el-table-column prop="pluginType" label="插件类型" width="130px">
-                <template scope="scope">{{pluginTypeMap[scope.row.pluginType]}}</template>
+                <template slot-scope="scope">{{pluginTypeMap[scope.row.pluginType]}}</template>
             </el-table-column>
             <el-table-column label="更新时间" width="190px">
-                <template scope="scope">{{scope.row.updateTime | formatDate}}</template>
+                <template slot-scope="scope">{{scope.row.updateTime | formatDate}}</template>
             </el-table-column>
             <el-table-column label="操作" width="70px">
-                <template scope="scope">
+                <template slot-scope="scope">
                     <el-tooltip content="升级" placement="top" v-if="scope.row.creatable">
                         <el-button type="text" @click="handleUpgrade(scope.row)"><i class="fa fa-arrow-circle-up"></i></el-button>
                     </el-tooltip>

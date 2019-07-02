@@ -36,7 +36,7 @@
             </el-table-column>
             <el-table-column prop="id" label="ID" width="60px"></el-table-column>
             <el-table-column label="所属集群" min-width="135px">
-                <template scope="scope">
+                <template slot-scope="scope">
                     <div v-if="!isAllPrivilege">{{scope.row.clusterId}}</div> 
                     <div v-else class="my-a-link">
                         <router-link tag="a" :to="{ name:'cluster_detail',query:{clusterId: scope.row.clusterId} }">{{scope.row.clusterId}}</router-link>
@@ -46,23 +46,23 @@
             <el-table-column prop="note" label="插件描述" width="95px" show-overflow-tooltip></el-table-column>
             <el-table-column prop="pluginVersion" label="插件版本"></el-table-column>
             <el-table-column prop="pluginType" label="插件类型" width="100px">
-                <template scope="scope">{{pluginTypeMap[scope.row.pluginType]}}</template>
+                <template slot-scope="scope">{{pluginTypeMap[scope.row.pluginType]}}</template>
             </el-table-column>
             <el-table-column prop="applyUser" label="申请人">
-                <template scope="scope">{{scope.row.applyUser || '-'}}</template>
+                <template slot-scope="scope">{{scope.row.applyUser || '-'}}</template>
             </el-table-column>
             <el-table-column prop="approveUser" label="审批人">
-                <template scope="scope">{{scope.row.approveUser || '-'}}</template>
+                <template slot-scope="scope">{{scope.row.approveUser || '-'}}</template>
             </el-table-column>
             <el-table-column label="状态" width="90px">
-                <template scope="scope">{{scope.row.state | translateStat}}
+                <template slot-scope="scope">{{scope.row.state | translateStat}}
                 </template>
             </el-table-column>
             <el-table-column label="更新时间" width="160px">
-                <template scope="scope">{{scope.row.updateTime | formatDate}}</template>
+                <template slot-scope="scope">{{scope.row.updateTime | formatDate}}</template>
             </el-table-column>
             <el-table-column label="操作" width="130px">
-                <template scope="scope">
+                <template slot-scope="scope">
                     <div v-if="isAllPrivilege">
                         <el-tooltip content="开始下载" placement="top" v-if="scope.row.state === 1 || scope.row.state === 5">
                             <el-button type="text" @click="handlePlugin(scope.row, 'download', '开始下载')"><i class="fa fa-download"></i></el-button>

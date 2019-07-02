@@ -6,21 +6,21 @@
                     <el-table-column label="记录id" prop="id" width="100px"></el-table-column>
                     <el-table-column label="采集规则ID" prop="configId" width="100px"></el-table-column>
                     <el-table-column label="最后更新时间" prop="updateTime" min-width="110">
-                        <template scope="scope">{{scope.row.updateTime | formatDate}}</template>
+                        <template slot-scope="scope">{{scope.row.updateTime | formatDate}}</template>
                     </el-table-column>
                     <el-table-column label="抽样系数" prop="sampleRate" min-width="110"></el-table-column>
                     <el-table-column label="目标采集数" prop="limit" min-width="110"></el-table-column>
                     <el-table-column label="当前采集数" prop="total" min-width="110"></el-table-column>
                     <el-table-column label="采集进度" min-width="110">
-                        <template scope="scope">{{scope.row.percentage}}%</template>
+                        <template slot-scope="scope">{{scope.row.percentage}}%</template>
                     </el-table-column>
                     <el-table-column label="状态" prop="state" min-width="50">
-                        <template scope="scope">
+                        <template slot-scope="scope">
                             <el-tag :type="scope.row.state != 3 ? 'success' : 'danger'">{{flowRecordStateMap[scope.row.state]}}</el-tag>
                         </template>
                     </el-table-column>
                     <el-table-column label="操作" width="80">
-                        <template scope="scope">
+                        <template slot-scope="scope">
                             <el-dropdown trigger="click">
                               <span class="el-dropdown-link">
                                 操作<i class="el-icon-caret-bottom el-icon--right"></i>

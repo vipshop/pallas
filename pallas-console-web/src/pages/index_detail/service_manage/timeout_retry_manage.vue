@@ -35,20 +35,20 @@
         </template>
         <el-table :data="templateList" border style="width: 100%">
           <el-table-column label="模板名称" show-overflow-tooltip>
-              <template scope="scope">{{scope.row.templateName}}</template>
+              <template slot-scope="scope">{{scope.row.templateName}}</template>
           </el-table-column>
           <el-table-column label="超时时间(毫秒,需>=50ms)">
-            <template scope="scope">
+            <template slot-scope="scope">
               <el-input-number v-model="scope.row.timeout" :min="0"></el-input-number>
             </template>
           </el-table-column>
           <el-table-column label="重试次数(上限1次)">
-            <template scope="scope">
+            <template slot-scope="scope">
               <el-input-number v-model="scope.row.retry" :min="0" :max="1"></el-input-number>
             </template>
           </el-table-column>
           <el-table-column label="操作" width="120px">
-            <template scope="scope">
+            <template slot-scope="scope">
               <el-button
                 type="primary"
                 :disabled="!allPrivilege"
