@@ -17,23 +17,23 @@
             <el-table-column label="规则关系" prop="conditionRelation" header-align="center" width="80px"></el-table-column>
             <el-table-column label="判断表达式" header-align="center">
                 <el-table-column label="判断参数名" min-width="150" header-align="center">
-                    <template scope="scope"> 
+                    <template slot-scope="scope"> 
                         <div class="condition-table" v-for="item in scope.row.conditions" :key="item.paramName">{{item.paramName}}</div>
                     </template>
                 </el-table-column>
                 <el-table-column label="判断运算" min-width="70" header-align="center">
-                    <template scope="scope"> 
+                    <template slot-scope="scope"> 
                         <div class="condition-table" v-for="item in scope.row.conditions" :key="item.exprOp">{{item.exprOp}}</div>
                     </template>
                 </el-table-column>
                 <el-table-column label="判断值" min-width="140" header-align="center">
-                    <template scope="scope">
+                    <template slot-scope="scope">
                         <div class="condition-table" v-for="item in scope.row.conditions" :key="item.paramValue">{{item.paramValue}}</div>
                     </template>
                 </el-table-column>
             </el-table-column>
             <el-table-column label="节点集" min-width="150" header-align="center">
-                <template scope="scope">
+                <template slot-scope="scope">
                     <div v-for="item in scope.row.targetGroups" :key="item.id" class="route-tag">
                         <el-tag class="target-group-item" type="warning">
                             <span>{{routingTargetGroupsList[item.id].name}}</span>
@@ -43,12 +43,12 @@
                 </template>
             </el-table-column>
             <el-table-column label="是否启用" header-align="center" width="80px">
-                <template scope="scope">
+                <template slot-scope="scope">
                     <el-tag :type="scope.row.enable ? 'success' : 'danger'" close-transition>{{scope.row.enable | translateEnable}}</el-tag>
                 </template>
             </el-table-column>
             <el-table-column label="路由管理" width="80px" header-align="center" v-if="privilege">
-                <template scope="scope">
+                <template slot-scope="scope">
                     <el-tooltip content="编辑" placement="top">
                         <el-button type="text" @click="handleEdit(scope.row)"><i class="fa fa-edit"></i></el-button>
                     </el-tooltip>

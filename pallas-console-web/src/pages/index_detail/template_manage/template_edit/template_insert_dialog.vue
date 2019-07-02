@@ -40,7 +40,7 @@
                       <el-table border :data="metadatas" :max-height="320" v-if="info.field === 'query'">
                           <el-table-column prop="dbFieldName" label="字段名" width="130" show-overflow-tooltip></el-table-column>
                           <el-table-column label="查询方式">
-                          <template scope="scope">
+                          <template slot-scope="scope">
                               <el-radio class="radio" v-model="scope.row.queryWay" label="term">term</el-radio>
                               <el-radio class="radio" v-model="scope.row.queryWay" label="multiTerm">多值term</el-radio>
                               <el-radio class="radio" v-model="scope.row.queryWay" label="range">range</el-radio>

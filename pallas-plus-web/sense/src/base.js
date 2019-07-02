@@ -135,8 +135,8 @@ function bigIntJSONParse(origJSON) {
       if (typeof value !== 'string') return value;
       if (!value.startsWith('uniqueprefix')) return value;
       value = value.slice('uniqueprefix'.length);
-      if (value.length < 17) return Number(value);
-      return bigInt(value);
+      if (Number.isInteger(Number(value)) && !Number.isSafeInteger(Number(value))) return bigInt(value);
+      return Number(value);
     });
     return o;
 }

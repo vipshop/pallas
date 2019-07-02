@@ -21,18 +21,18 @@
                     <el-table-column label="登录名" prop="username"></el-table-column>
                     <el-table-column label="用户名" prop="realName"></el-table-column>
                     <el-table-column label="角色" prop="roles">
-                        <template scope="scope">
+                        <template slot-scope="scope">
                             <el-tag v-for="item in scope.row.roles" :key="item.id" style="margin-right: 3px;">{{item.description}}</el-tag>
                         </template>
                     </el-table-column>
                     <el-table-column label="邮箱" prop="email">
-                        <template scope="scope">{{scope.row.email || '-'}}</template>
+                        <template slot-scope="scope">{{scope.row.email || '-'}}</template>
                     </el-table-column>
                     <el-table-column label="创建时间" prop="createTime">
-                        <template scope="scope">{{scope.row.createTime | formatDate}}</template>
+                        <template slot-scope="scope">{{scope.row.createTime | formatDate}}</template>
                     </el-table-column>
                     <el-table-column label="操作" width="80" v-if="allPrivilege">
-                        <template scope="scope">
+                        <template slot-scope="scope">
                             <el-tooltip content="编辑" placement="top">
                                 <el-button type="text" @click="handleEdit(scope.row)"><i class="fa fa-edit"></i></el-button>
                             </el-tooltip>

@@ -44,7 +44,7 @@
             <el-table-column prop="nodeName" label="节点名称"></el-table-column>
             <el-table-column prop="nodeIp" label="节点IP"></el-table-column>
             <el-table-column prop="indices" label="分片分布" width="80px">
-                <template scope="scope">
+                <template slot-scope="scope">
                     <el-popover trigger="hover" placement="right" :disabled="scope.row.indices === ''">
                         <div style="width: 600px;" v-if="scope.row.indices">
                             <el-row :gutter="10">
@@ -57,23 +57,23 @@
                 </template>
             </el-table-column>
             <el-table-column prop="nodeState" label="节点状态" width="100px">
-                <template scope="scope">
+                <template slot-scope="scope">
                     <el-tag :type="noteStateTag[scope.row.nodeState]">{{noteStateMap[scope.row.nodeState]}}</el-tag>
                 </template>
             </el-table-column>
             <el-table-column prop="nodeTime" label="状态时间">
-                <template scope="scope">{{scope.row.nodeTime | formatDate}}</template>
+                <template slot-scope="scope">{{scope.row.nodeTime | formatDate}}</template>
             </el-table-column>
             <el-table-column prop="lastStartupTime" label="最近启动时间">
-                <template scope="scope"><span class="text-danger" v-if="scope.row.isNew">新 </span>{{scope.row.lastStartupTime | formatDate}}</template>
+                <template slot-scope="scope"><span class="text-danger" v-if="scope.row.isNew">新 </span>{{scope.row.lastStartupTime | formatDate}}</template>
             </el-table-column>
             <el-table-column prop="onlyMaster" label="OnlyMaster">
-                <template scope="scope">
+                <template slot-scope="scope">
                     <el-tag :type="scope.row.onlyMaster ? 'success' : 'danger'" close-transition>{{onlyMasterMap[scope.row.onlyMaster]}}</el-tag>
                 </template>
             </el-table-column>
             <el-table-column label="操作" width="80px">
-                <template scope="scope">
+                <template slot-scope="scope">
                     <el-button size="small" type="success" @click="handleRestart(scope.row)" :disabled="!scope.row.healthy || isEnableRestart !== 'could_be_restart'">重启</el-button>
                 </template>
             </el-table-column>

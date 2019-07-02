@@ -24,7 +24,7 @@
         </div>
         <el-table :data="clusterList.list" border style="width: 100%" v-loading="loading" element-loading-text="请稍等···">
             <el-table-column label="域名" min-width="80px">
-                <template scope="scope">
+                <template slot-scope="scope">
                     <div v-if="!scope.row.hasPrivilege || scope.row.logicalCluster">{{scope.row.clusterId}}</div>
                     <div v-else class="my-a-link">
                         <router-link tag="a" :to="{ path:'cluster_detail',query:{clusterId: scope.row.clusterId} }">{{scope.row.clusterId}}</router-link>
@@ -32,10 +32,10 @@
                 </template>
             </el-table-column>
             <el-table-column label="集群类型" width="80px">
-                <template scope="scope">{{scope.row.logicalCluster | clusterType}}</template>
+                <template slot-scope="scope">{{scope.row.logicalCluster | clusterType}}</template>
             </el-table-column>
             <el-table-column label="物理集群">
-                <template scope="scope">
+                <template slot-scope="scope">
                     <div v-if="scope.row.realClusters === ''">-</div>
                     <div v-else v-for="item in getPhysicalsClusterArr(scope.row.realClusters)" :key="item.id" class="my-a-link">
                         <router-link tag="a" :to="{ path:'cluster_detail',query:{clusterId: item.clusterId} }">{{item.clusterId}}</router-link>
@@ -44,7 +44,7 @@
             </el-table-column>
             <el-table-column label="描述" prop="description" show-overflow-tooltip></el-table-column>
             <el-table-column label="HTTP地址" width="170px">
-                <template scope="scope">
+                <template slot-scope="scope">
                     <div v-if="!scope.row.httpAddress">-</div>
                     <div v-else>
                         <el-popover trigger="hover" placement="left">
@@ -58,7 +58,7 @@
                 </template>
             </el-table-column>
             <el-table-column label="CLIENT地址" width="170px">
-                <template scope="scope">
+                <template slot-scope="scope">
                     <div v-if="!scope.row.clientAddress">-</div>
                     <div v-else>
                         <el-popover trigger="hover" placement="right">
@@ -72,7 +72,7 @@
                 </template>
             </el-table-column>
             <el-table-column label="绑定代理集群">
-                <template scope="scope">
+                <template slot-scope="scope">
                     <div v-if="!scope.row.accessiblePs">-</div>
                     <div v-else v-for="item in $array.strToArray(scope.row.accessiblePs)" :key="item">
                         {{item}}
@@ -80,7 +80,7 @@
                 </template>
             </el-table-column>
             <el-table-column label="操作" width="80px">
-                <template scope="scope">
+                <template slot-scope="scope">
                     <el-dropdown trigger="click">
                       <span class="el-dropdown-link">
                         操作<i class="el-icon-caret-bottom el-icon--right"></i>

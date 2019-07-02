@@ -35,38 +35,38 @@
             <el-table-column label="IP端口" prop="ipport"></el-table-column>
             <el-table-column label="代理集群" prop="cluster"></el-table-column>
             <el-table-column label="节点集" props="pools">
-                <template scope="scope">
+                <template slot-scope="scope">
                     <span v-if="!scope.row.pools || Object.keys(JSON.parse(scope.row.pools)).length === 0" close-transition class="target-group-item">default</span>
-                    <span :key="item" v-if="scope.row.pools" v-for="item in (JSON.parse(scope.row.pools))" close-transition class="target-group-item"><div>{{item}}</div></span>
+                    <span v-if="scope.row.pools"><span :key="item" v-for="item in (JSON.parse(scope.row.pools))" close-transition class="target-group-item"><div>{{item}}</div></span></span>
                 </template>
             </el-table-column>
             <el-table-column label="节点状态" width="80px">
-                <template scope="scope"> 
+                <template slot-scope="scope"> 
                     <el-tag :type="scope.row.healthy ? 'success' : 'danger'" close-transition>{{scope.row.healthy | translateState}}</el-tag>
                 </template>
             </el-table-column>
             <el-table-column label="当前QPS" width="80px">
-                <template scope="scope">{{scope.row | currentQps}}</template>
+                <template slot-scope="scope">{{scope.row | currentQps}}</template>
             </el-table-column>
             <el-table-column label="连接数" width="60px">
-                <template scope="scope">{{scope.row | currentConns}}</template>
+                <template slot-scope="scope">{{scope.row | currentConns}}</template>
             </el-table-column>
             <el-table-column label="Req.volume" width="100px">
-                <template scope="scope">{{scope.row | currentReceiveClientThrougph}}</template>
+                <template slot-scope="scope">{{scope.row | currentReceiveClientThrougph}}</template>
             </el-table-column>
             <el-table-column label="Res.volume" width="100px">
-                <template scope="scope">{{scope.row | currentReceiveEsThrougph}}</template>
+                <template slot-scope="scope">{{scope.row | currentReceiveEsThrougph}}</template>
             </el-table-column>
             <el-table-column label="启用" width="60px">
-                <template scope="scope">
+                <template slot-scope="scope">
                     <el-tag :type="scope.row.takeTraffic ? 'success' : 'danger'" close-transition>{{scope.row.takeTraffic ? '是' : '否'}}</el-tag>
                 </template>
             </el-table-column>
             <el-table-column label="最后上报时间" width="160px">
-                <template scope="scope">{{scope.row.updateTime | formatDate}}</template>
+                <template slot-scope="scope">{{scope.row.updateTime | formatDate}}</template>
             </el-table-column>
             <el-table-column label="操作" width="100px">
-                <template scope="scope">
+                <template slot-scope="scope">
                     <el-tooltip content="节点信息" placement="top">
                         <el-button type="text" @click="getInfo(scope.row)"><i class="fa fa-envelope"></i></el-button>
                     </el-tooltip>

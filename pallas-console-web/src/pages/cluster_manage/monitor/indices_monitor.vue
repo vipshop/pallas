@@ -19,19 +19,19 @@
             <template>
                 <el-table :data="indicesList" border style="width: 100%" v-loading="loading" element-loading-text="请稍等···">
                     <el-table-column label="Name" prop="indexName">
-                        <template scope="scope">
+                        <template slot-scope="scope">
                             <router-link tag="a" :to="{ path: 'indice_monitor_detail', query: {clusterId, indice: scope.row.indexName} }">{{scope.row.indexName}}</router-link>
                         </template>
                     </el-table-column>
                     <el-table-column label="Status" prop="status" width="70px"></el-table-column>
                     <el-table-column label="Document Count" prop="documentCount"></el-table-column>
                     <el-table-column label="Document Store Primary">
-                      <template scope="scope">
+                      <template slot-scope="scope">
                         {{bytesToSize(scope.row.document_store_byte_primary)}}
                       </template>
                     </el-table-column>
                     <el-table-column label="Document Store Total">
-                      <template scope="scope">
+                      <template slot-scope="scope">
                         {{bytesToSize(scope.row.document_store_byte_total)}}
                       </template>
                     </el-table-column>

@@ -17,7 +17,7 @@
                     <el-table :data="tokenList" :show-header="false" highlight-current-row border @row-click="handleTokenClick" :height="tokenHeight.height">
                         <el-table-column label="ID" prop="id" width="50px"></el-table-column>
                         <el-table-column prop="title" label="名称" show-overflow-tooltip>
-                            <template scope="scope"> 
+                            <template slot-scope="scope"> 
                                 <div style="font-size: 16px;">{{scope.row.title}}
                                     <el-tag :type="scope.row.enabled ? 'success' : 'danger'">{{statusMap[scope.row.enabled]}}</el-tag>
                                 </div>
@@ -25,7 +25,7 @@
                             </template>
                         </el-table-column>
                         <el-table-column label="编辑" width="30px" align="center">
-                            <template scope="scope"> 
+                            <template slot-scope="scope"> 
                                 <el-button type="text" @click.stop="handleEdit(scope.row)"><i class="fa fa-pencil-square-o"></i></el-button>
                             </template>
                         </el-table-column>
@@ -174,7 +174,5 @@ export default {
 }
 .token-warning i {
   padding-right: 10px;
-}
-.token-body {
 }
 </style>

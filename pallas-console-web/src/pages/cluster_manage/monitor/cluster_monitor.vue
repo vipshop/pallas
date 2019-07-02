@@ -5,7 +5,7 @@
                 <el-table-column prop="nodeCount" label="Nodes"></el-table-column>
                 <el-table-column prop="indexCount" label="Indices"></el-table-column>
                 <el-table-column label="Memory">
-                  <template scope="scope">
+                  <template slot-scope="scope">
                       {{bytesToSize(scope.row.used_memory_byte)}} / {{bytesToSize(scope.row.total_memory_byte)}}
                   </template>
                 </el-table-column>
@@ -13,7 +13,7 @@
                 <el-table-column prop="unassignedShardCount" label="Unassigned Shards" width="150px"></el-table-column>
                 <el-table-column prop="documentCount" label="Documents"></el-table-column>
                 <el-table-column label="Data">
-                    <template scope="scope">
+                    <template slot-scope="scope">
                         {{bytesToSize(scope.row.document_store_byte)}}
                     </template>
                 </el-table-column>
