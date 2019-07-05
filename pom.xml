@@ -42,7 +42,7 @@
 		<httpclient.version>4.5.2</httpclient.version>
 
 		<orika-core.version>1.5.2</orika-core.version>
-		<fastjson.version>1.2.29</fastjson.version>
+		<fastjson.version>1.2.58</fastjson.version>
 
 		<guava.version>18.0</guava.version>
 		<commons-beanutils.version>1.9.2</commons-beanutils.version>
