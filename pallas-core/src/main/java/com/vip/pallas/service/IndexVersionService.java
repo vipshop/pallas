@@ -447,6 +447,10 @@ public abstract class IndexVersionService {
             }
             newSchema.add(field);
         }
+        // DB 不存在的那些schema 也要导入
+		for (VersionField field : fieldMap.values()) {
+			newSchema.add(field);
+		}
         version.setSchema(newSchema);
     }
 
