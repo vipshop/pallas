@@ -156,7 +156,7 @@
         </div>
         <div v-if="isTemplateInsertVisible">
             <template-insert-dialog
-            :metadata-list="metadataList"
+            :field-list="fieldList"
             @insert-template-content="insertTemplateContent"
             @close-dialog="closeTemplateInsertDialog">
             </template-insert-dialog>
@@ -174,7 +174,7 @@ import TemplateConfigDialog from './template_config_dialog';
 import TemplateInsertDialog from './template_insert_dialog';
 
 export default {
-  props: ['indexId', 'indexName', 'metadataList', 'clusters', 'isAllPrivilege', 'templateInfo', 'macroList', 'temPanelHeight'],
+  props: ['indexId', 'indexName', 'metadataList', 'fieldList', 'clusters', 'isAllPrivilege', 'templateInfo', 'macroList', 'temPanelHeight'],
   data() {
     return {
       loading: false,
@@ -478,7 +478,7 @@ export default {
       return this.$http.post('/index/loadDbList.json', { indexId: this.indexId }).then((data) => {
         if (data) {
           this.datasourceList = data;
-          if (this.datasourceList.length !== 0) {
+          if (!this.datasourceList && this.datasourceList.length !== 0) {
             this.datasourceId = Object.entries(data)[0][0];
           }
         }

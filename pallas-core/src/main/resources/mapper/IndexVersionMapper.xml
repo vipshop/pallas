@@ -491,6 +491,14 @@
     where index_id = #{indexId,jdbcType=BIGINT} and is_used = 1
   </select>
 
+  <select id="findUsedOrLastIndexVersoinByIndexId" resultType="com.vip.pallas.mybatis.entity.IndexVersion">
+    select
+    <include refid="Base_Column_List" />
+    from index_version
+    where index_id = #{indexId,jdbcType=BIGINT}
+    ORDER BY is_used DESC,id DESC LIMIT 1
+  </select>
+
   <select id="findRampupByVersionId" parameterType="java.lang.Long" resultType="java.lang.String">
     select `ramp_up`
     from index_version

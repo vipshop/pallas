@@ -14,7 +14,7 @@
             </div>
             <div class="template-warning" v-if="!isEditable"><i class="el-icon-warning"></i>请选择模板</div>
             <div v-for="template in templateList" :key="template.templateName" class="template-body">
-                <template-edit v-if="templateInfo.templateName === template.templateName" :tem-panel-height="temPanelHeight" :metadata-list="metadataList" :clusters="clusters" :index-id="indexId" :index-name="indexName" :is-all-privilege="isAllPrivilege" :template-info="templateInfo" :macro-list="macroList" @close-delete="closeDelete" @close-edit="closeEdit"></template-edit>                    
+                <template-edit v-if="templateInfo.templateName === template.templateName" :tem-panel-height="temPanelHeight" :metadata-list="metadataList" :field-list="fieldList" :clusters="clusters" :index-id="indexId" :index-name="indexName" :is-all-privilege="isAllPrivilege" :template-info="templateInfo" :macro-list="macroList" @close-delete="closeDelete" @close-edit="closeEdit"></template-edit>
             </div>
         </div>
     <div v-if="isTemplateAddVisible">
@@ -80,6 +80,7 @@ export default {
       },
       clusters: [],
       metadataList: [],
+      fieldList: [],
       temPanelHeight: {
         height: document.body.clientHeight - 210,
       },
@@ -191,6 +192,7 @@ export default {
       return this.$http.post('/index/version/metadata.json', { indexId: this.indexId }).then((data) => {
         this.clusters = data.clusters;
         this.metadataList = data.list;
+        this.fieldList = data.schema;
       });
     },
     init() {

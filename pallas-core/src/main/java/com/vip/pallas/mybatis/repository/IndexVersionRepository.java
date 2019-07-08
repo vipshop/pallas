@@ -56,6 +56,8 @@ public interface IndexVersionRepository {
 
     IndexVersion findUsedIndexVersionByIndexId(@Param("indexId") Long indexId);
 
+    IndexVersion findUsedOrLastIndexVersoinByIndexId(@Param("indexId") Long indexId);
+
 	List<IndexVersion> findAllByIndexId(@Param("indexId") Long indexId);
 
 	void enableThisVersionAndDisableOthers(@Param("indexId") Long indexId, @Param("id") Long id);

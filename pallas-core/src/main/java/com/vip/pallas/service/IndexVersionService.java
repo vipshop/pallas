@@ -492,4 +492,8 @@ public abstract class IndexVersionService {
 		return indexVersionRepository.findUsedIndexVersionByIndexId(indexId);
 	}
 
+	public  com.vip.pallas.bean.IndexVersion findUsedOrLastIndexVersoinByIndexId(Long indexId) throws PallasException, SQLException {
+		IndexVersion version = indexVersionRepository.findUsedOrLastIndexVersoinByIndexId(indexId);
+		return null==version?null:findVersionById(version.getId());
+	}
 }
