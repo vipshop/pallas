@@ -190,6 +190,8 @@ public class NodeServiceImpl implements NodeService {
             if(state == NodeState.HEALTHY.getValue() && (s == NodeState.TO_BE_RESTART.getValue() || s == NodeState.RESTARTING.getValue())){
                 return;
             }
+        }else if(state == NodeState.HEALTHY.getValue()){
+            return;
         }
 
         Node node = new Node();
