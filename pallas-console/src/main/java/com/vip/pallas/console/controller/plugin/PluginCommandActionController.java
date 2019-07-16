@@ -4,9 +4,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -57,7 +57,7 @@ public class PluginCommandActionController {
 
     @Autowired
     private PallasPluginService pluginService;
-    
+
     @Autowired
     private ClusterService clusterService;
 
@@ -66,30 +66,31 @@ public class PluginCommandActionController {
     	if (!AuthorizeUtil.authorizePluginApprovePrivilege(request)) {
     		throw new BusinessLevelException(403, "无权限操作");
     	}
-    	
+
         if (null == clusterService.findByName(plugin.getClusterId())) {
             throw new BusinessLevelException(500, "cluster不存在");
         }
 
-        sendCommand(PluginCommand.COMMAND_REMOVE, plugin.getClusterId(), plugin.getPluginName(),
-                plugin.getPluginVersion());
+		// 只有新增或升级插件时才需要根据类别将文件释放到不同目录，删除插件时无需类别
+        sendCommand("remove", plugin.getClusterId(), null, plugin.getPluginName(),
+                plugin.getPluginVersion(), null);
 
         AuditLogUtil.log("post remove plugin: clusterId - {0}, pluginName - {1}, pluginVersion - {2}",
                 plugin.getClusterId(), plugin.getPluginName(), plugin.getPluginVersion());
     }
-    
+
     @RequestMapping(path = "/upgrade/action.json")
     public void pluginAction(@RequestBody @Validated PluginAction pluginAction, HttpServletRequest request) {
 		if (!"recall".equals(pluginAction.getAction()) && !AuthorizeUtil.authorizePluginApprovePrivilege(request)) {
 			throw new BusinessLevelException(500, "cluster不存在");
 		}
-    	
+
         PluginUpgrade pUpgrade = pluginService.getPluginUpgrade(pluginAction.getPluginUpgradeId());
         if(pUpgrade == null) {
             throw new BusinessLevelException(500, "PluginUpgrade不存在");
         }
 
-        int nextState = doUpgradeAction(pluginAction.getAction(), pUpgrade);
+        int nextState = doUpgradeAction(pluginAction.getAction(), pUpgrade, pluginAction.getNodeIp());
         if(pUpgrade.getState() != nextState) {
             pluginService.setUppgradeState(SessionUtil.getLoginUser(request), pUpgrade.getId(), nextState);
         }
@@ -145,8 +146,8 @@ public class PluginCommandActionController {
 
         return resultMap;
     }
-    
-    private int doUpgradeAction(String action, PluginUpgrade pUpgrade) {
+
+    private int doUpgradeAction(String action, PluginUpgrade pUpgrade, String nodeIp) {
         if (!pUpgrade.isFinished()) {
             String actionLowcase = action.toLowerCase();
             int currentStatus = pUpgrade.getState();
@@ -165,20 +166,21 @@ public class PluginCommandActionController {
                     return UPGRADE_STATUS_CANCEL;
                 case "done":
                     return UPGRADE_STATUS_DONE;
-                case "download":
-                sendCommand(actionLowcase, pUpgrade.getClusterId(), pUpgrade.getPluginName(),
-                        pUpgrade.getPluginVersion(), pUpgrade.getPluginType());
-                    return currentStatus <= UPGRADE_STATUS_DOWNLOAD ? UPGRADE_STATUS_DOWNLOAD : currentStatus;
-                case "upgrade":
-                    sendCommand(actionLowcase, pUpgrade.getClusterId(), pUpgrade.getPluginName(),
-                            pUpgrade.getPluginVersion(), pUpgrade.getPluginType());
+				case "download":
+					sendCommand(actionLowcase, pUpgrade.getClusterId(), null,
+							pUpgrade.getPluginName(), pUpgrade.getPluginVersion(), pUpgrade.getPluginType());
+					return currentStatus <= UPGRADE_STATUS_DOWNLOAD ? UPGRADE_STATUS_DOWNLOAD : currentStatus;
+				case "upgrade":
+					// can only do upgrade-action in node level
+					sendCommand(actionLowcase, pUpgrade.getClusterId(), nodeIp,
+							pUpgrade.getPluginName(), pUpgrade.getPluginVersion(), pUpgrade.getPluginType());
                     return currentStatus <= UPGRADE_STATUS_UPGRADE ? UPGRADE_STATUS_UPGRADE : currentStatus;
                 case "remove":
                     if (currentStatus != UPGRADE_STATUS_DONE) {
                         break;
                     }
-                    sendCommand(actionLowcase, pUpgrade.getClusterId(), pUpgrade.getPluginName(),
-                            pUpgrade.getPluginVersion(), pUpgrade.getPluginType());
+                    sendCommand(actionLowcase, pUpgrade.getClusterId(), null,
+							pUpgrade.getPluginName(), pUpgrade.getPluginVersion(), pUpgrade.getPluginType());
                     return UPGRADE_STATUS_REMOVE;
                 default:
                     break;
@@ -186,51 +188,47 @@ public class PluginCommandActionController {
         }
         throw new BusinessLevelException(500, "该工单不支持该操作:" + action);
     }
-    
-    private void sendCommand(String command, String clusterId, String pluginName, String pluginVersion) {
-        List<String> nodeIpList = pluginService.getNodeIPsByCluster(clusterId);
-        for(String ip : nodeIpList) {
-            if("".equals(ip)) { //忽略虚拟Runtime状态
-                continue;
-            }
-            PluginCommand cmd = new PluginCommand();
-            cmd.setClusterId(clusterId);
-            cmd.setCreateTime(new Date());
-            cmd.setNodeIp(ip);
-            cmd.setPluginName(pluginName);
-            cmd.setPluginVersion(pluginVersion);
-            cmd.setCommand(command);
-            pluginService.addPluginCommand(cmd);
-        }
+
+    private void sendCommand(String action, String clusterId, String nodeIp, String pluginName, String pluginVersion, Integer pluginType){
+		if (null != nodeIp){
+			sendCommandByNodeIp(action, clusterId, nodeIp, pluginName, pluginVersion, pluginType);
+		} else {
+			List<String> nodeIpList = pluginService.getNodeIPsByCluster(clusterId);
+			for(String ip : nodeIpList) {
+				sendCommandByNodeIp(action, clusterId, ip, pluginName, pluginVersion, pluginType);
+			}
+		}
     }
 
-    private void sendCommand(String action, String clusterId, String pluginName, String pluginVersion, int pluginType) {
-        List<String> nodeIpList = pluginService.getNodeIPsByCluster(clusterId);
-        for(String ip : nodeIpList) {
-            if("".equals(ip)) { //忽略虚拟Runtime状态
-                continue;
-            }
-            PluginCommand cmd = new PluginCommand();
-            cmd.setClusterId(clusterId);
-            cmd.setCreateTime(new Date());
-            cmd.setNodeIp(ip);
-            cmd.setPluginName(pluginName);
-            cmd.setPluginVersion(pluginVersion);
-            cmd.setPluginType(pluginType);
-            switch (action){
-                case "download":
-                    cmd.setCommand(PluginCommand.COMMAND_DOWNLOAD);
-                    break;
-                case "upgrade":
-                    cmd.setCommand(PluginCommand.COMMAND_UPGRADE);
-                    break;
-                case "remove":
-                    cmd.setCommand(PluginCommand.COMMAND_REMOVE);
-                    break;
-                default:
-                    cmd.setCommand(PluginCommand.COMMAND_UNKNOWN);
-            }
-            pluginService.addPluginCommand(cmd);
-        }
-    }
+	private void sendCommandByNodeIp(String action, String clusterId, String ip, String pluginName, String pluginVersion,
+			Integer pluginType) {
+		if ("".equals(ip)) { //忽略虚拟Runtime状态
+			return;
+		}
+		PluginCommand cmd = new PluginCommand();
+		cmd.setClusterId(clusterId);
+		cmd.setCreateTime(new Date());
+		cmd.setNodeIp(ip);
+		cmd.setPluginName(pluginName);
+		cmd.setPluginVersion(pluginVersion);
+		// 只有新增或升级插件时才需要根据类别将文件释放到不同目录，删除插件时无需类别
+		if (null != pluginType){
+			cmd.setPluginType(pluginType);
+		}
+
+		switch (action){
+			case "download":
+				cmd.setCommand(PluginCommand.COMMAND_DOWNLOAD);
+				break;
+			case "upgrade":
+				cmd.setCommand(PluginCommand.COMMAND_UPGRADE);
+				break;
+			case "remove":
+				cmd.setCommand(PluginCommand.COMMAND_REMOVE);
+				break;
+			default:
+				cmd.setCommand(PluginCommand.COMMAND_UNKNOWN);
+		}
+		pluginService.addPluginCommand(cmd);
+	}
 }

@@ -30,6 +30,8 @@ public class PluginAction {
     @NotEmpty(message = "action不能为空")
     private String action;
 
+    private String nodeIp;
+
     public Long getPluginUpgradeId() {
         return pluginUpgradeId;
     }
@@ -45,6 +47,12 @@ public class PluginAction {
     public void setAction(String action) {
         this.action = action;
     }
-    
-    
+
+	public String getNodeIp() {
+		return nodeIp;
+	}
+
+	public void setNodeIp(String nodeIp) {
+		this.nodeIp = nodeIp;
+	}
 }
