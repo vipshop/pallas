@@ -19,6 +19,7 @@ Vue.use(ElementUI);
 Vue.use(Utils);
 Vue.use(VueClipboard);
 
+// eslint-disable-next-line no-extend-native
 Promise.prototype.finally = function f(callback) {
   const P = this.constructor;
   return this.then(
