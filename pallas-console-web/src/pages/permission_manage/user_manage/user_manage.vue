@@ -152,7 +152,8 @@ export default {
     },
     init() {
       this.loading = true;
-      Promise.all([this.getUserList(), this.getRolesList()]).then(() => {
+      Promise.all([this.getUserList(), this.getRolesList()]).then()
+      .finally(() => {
         this.loading = false;
       });
     },

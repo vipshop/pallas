@@ -447,6 +447,10 @@ public abstract class IndexVersionService {
             }
             newSchema.add(field);
         }
+        // DB 不存在的那些schema 也要导入
+		for (VersionField field : fieldMap.values()) {
+			newSchema.add(field);
+		}
         version.setSchema(newSchema);
     }
 
@@ -492,4 +496,8 @@ public abstract class IndexVersionService {
 		return indexVersionRepository.findUsedIndexVersionByIndexId(indexId);
 	}
 
+	public  com.vip.pallas.bean.IndexVersion findUsedOrLastIndexVersoinByIndexId(Long indexId) throws PallasException, SQLException {
+		IndexVersion version = indexVersionRepository.findUsedOrLastIndexVersoinByIndexId(indexId);
+		return null==version?null:findVersionById(version.getId());
+	}
 }

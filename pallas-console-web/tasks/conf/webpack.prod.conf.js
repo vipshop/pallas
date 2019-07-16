@@ -17,7 +17,7 @@ module.exports = {
   // You can exclude the *.map files from the build during deployment.
   devtool: 'source-map',
   entry: {
-    app: appConf.entry
+    app: [appConf.entry]
   },
   output: {
     path: appConf.buildRoot,

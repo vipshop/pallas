@@ -20,15 +20,12 @@ package com.vip.pallas.console.controller.index.version;
 import static java.util.stream.Collectors.toList;
 
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import javax.annotation.Resource;
 
+import com.vip.pallas.bean.DBSchema;
+import com.vip.pallas.console.vo.TemplateFieldVO;
 import org.apache.commons.collections.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
@@ -69,7 +66,21 @@ public class IndexFindMetaDataController {
 		}
 		
 		Map<String, Object> resultMap = new HashMap<>();
-		resultMap.put("list", indexVersionService.getMetaDataFromDB(indexId));
+		List<DBSchema> dbList = indexVersionService.getMetaDataFromDB(indexId);
+		resultMap.put("list", dbList);
+		com.vip.pallas.bean.IndexVersion version = indexVersionService.findUsedOrLastIndexVersoinByIndexId(indexId);
+
+		List<TemplateFieldVO> schema;
+		if (null == version){
+			schema = dbList.stream().map(filed->new TemplateFieldVO(filed.getDbFieldName())).collect(toList());
+		}else {
+			schema = new ArrayList<>();
+			 version.getSchema().stream().filter(field -> field.getFieldType()!="nested"&&field.getFieldType()!="object"&&(field.getMultiField()==null||field.getMultiField().size()==0)).forEach(field -> {
+				 schema.add(new TemplateFieldVO(field.getFieldName()));
+			});
+		}
+		resultMap.put("schema",schema);
+
 		resultMap.put("clusters", getClusters(indexId));
 		resultMap.put("isLogical", indexService.isLogicalIndex(indexId));
 		return resultMap;

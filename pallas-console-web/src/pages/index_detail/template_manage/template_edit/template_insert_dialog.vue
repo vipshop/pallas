@@ -38,7 +38,7 @@
               <el-col :span="23">
                   <el-form-item label-width="30px">
                       <el-table border :data="metadatas" :max-height="320" v-if="info.field === 'query'">
-                          <el-table-column prop="dbFieldName" label="字段名" width="130" show-overflow-tooltip></el-table-column>
+                          <el-table-column prop="field" label="字段名" width="130" show-overflow-tooltip></el-table-column>
                           <el-table-column label="查询方式">
                           <template slot-scope="scope">
                               <el-radio class="radio" v-model="scope.row.queryWay" label="term">term</el-radio>
@@ -61,7 +61,7 @@
 
 <script>
 export default {
-  props: ['metadataList'],
+  props: ['fieldList'],
   data() {
     return {
       loading: false,
@@ -116,42 +116,42 @@ export default {
                 }
                 switch (ele.queryWay) {
                   case 'term':
-                    this.resultContent += `${frontSpace}{{#${ele.dbFieldName}}}\n`
+                    this.resultContent += `${frontSpace}{{#${ele.field}}}\n`
                                   + '        ,{\n'
-                                  + `          "term":{"${ele.dbFieldName}":"{{${ele.dbFieldName}}}"}\n`
+                                  + `          "term":{"${ele.field}":"{{${ele.field}}}"}\n`
                                   + '        }\n'
-                                  + `        {{/${ele.dbFieldName}}}${endNewline}`;
+                                  + `        {{/${ele.field}}}${endNewline}`;
                     break;
                   case 'multiTerm':
-                    this.resultContent += `${frontSpace}{{#${ele.dbFieldName}}}\n`
+                    this.resultContent += `${frontSpace}{{#${ele.field}}}\n`
                                   + '        ,{\n'
-                                  + `          "terms":{ "${ele.dbFieldName}":{{#toJson}}${ele.dbFieldName}.list{{/toJson}} }\n`
+                                  + `          "terms":{ "${ele.field}":{{#toJson}}${ele.field}.list{{/toJson}} }\n`
                                   + '        }\n'
-                                  + `        {{/${ele.dbFieldName}}}${endNewline}`;
+                                  + `        {{/${ele.field}}}${endNewline}`;
                     break;
                   case 'range':
-                    this.resultContent += `${frontSpace}{{#${ele.dbFieldName}_min}}\n`
+                    this.resultContent += `${frontSpace}{{#${ele.field}_min}}\n`
                                   + '        ,{\n'
                                   + '          "range": {\n'
-                                  + `            "${ele.dbFieldName}": {\n`
-                                  + `              "from": "{{${ele.dbFieldName}_min}}",\n`
-                                  + `              "to": "{{${ele.dbFieldName}_max}}"\n`
+                                  + `            "${ele.field}": {\n`
+                                  + `              "from": "{{${ele.field}_min}}",\n`
+                                  + `              "to": "{{${ele.field}_max}}"\n`
                                   + '            }\n'
                                   + '          }\n'
                                   + '        }\n'
-                                  + `        {{/${ele.dbFieldName}_min}}${endNewline}`;
+                                  + `        {{/${ele.field}_min}}${endNewline}`;
                     break;
                   case 'script':
-                    this.resultContent += `${frontSpace}{{#${ele.dbFieldName}}}\n`
+                    this.resultContent += `${frontSpace}{{#${ele.field}}}\n`
                                   + '        ,{\n'
                                   + '          "script": {\n'
                                   + '            "script": {\n'
                                   + '              "lang": "painless",\n'
-                                  + `              "inline": "return doc['${ele.dbFieldName}'].value > 0"\n`
+                                  + `              "inline": "return doc['${ele.field}'].value > 0"\n`
                                   + '            }\n'
                                   + '          }\n'
                                   + '        }\n'
-                                  + `        {{/${ele.dbFieldName}}${endNewline}`;
+                                  + `        {{/${ele.field}}${endNewline}`;
                     break;
                   default:
                     break;
@@ -173,7 +173,7 @@ export default {
     },
   },
   created() {
-    this.metadatas = this.metadataList.map((obj) => {
+    this.metadatas = this.fieldList.map((obj) => {
       const rObj = { ...obj };
       rObj.queryWay = '';
       return rObj;

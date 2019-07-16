@@ -146,7 +146,8 @@ export default {
     },
     init() {
       this.loading = true;
-      Promise.all([this.getDataList()]).then(() => {
+      Promise.all([this.getDataList()]).then()
+      .finally(() => {
         this.loading = false;
       });
     },

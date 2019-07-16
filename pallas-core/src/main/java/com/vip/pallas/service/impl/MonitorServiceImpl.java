@@ -796,7 +796,12 @@ public class MonitorServiceImpl implements MonitorService {
             }
             result.add(metricModel);
         }
-        return result;
+        return result.stream().map(model-> {
+            if (model.getY()<0) {
+                model.setY(-1d);
+            }
+            return model;
+        }).collect(Collectors.toList());
     }
 
     /**

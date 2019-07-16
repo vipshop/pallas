@@ -226,7 +226,7 @@
                                 <el-button type="text" v-show="scope.row.isNew">
                                     <span>子字段</span>
                                 </el-button>
-                                        <el-button type="warning" size="mini" @click="viewSchemaChildren(scope.row)" v-if="scope.row.children.length !== 0" ><i class="fa"></i>nested</el-button>
+                                        <el-button type="warning" size="mini" @click="viewSchemaChildrenWithNoCheck(scope.row)" v-if="scope.row.children.length !== 0" ><i class="fa"></i>nested</el-button>
                                         <el-button type="warning" size="mini" @click="viewSchemaMultiFields(scope.row)" v-if="scope.row.multiField.length !== 0" ><i class="fa"></i>subFields</el-button>
                                         <div>
                                 <el-tag type="success" v-if="scope.row.copyTo.length > 0">copy to: {{scope.row.copyTo}}</el-tag>
@@ -588,6 +588,10 @@ export default {
     },
     closeSchemaCopyToDialog() {
       this.isCopyToFieldsVisible = false;
+    },
+    viewSchemaChildrenWithNoCheck(row) {
+      this.isSchemaChildVisible = true;
+      this.schemaExtInfo = row;
     },
     viewSchemaChildren(row) {
       if (row.fieldType !== 'nested' && row.fieldType !== 'object') {
