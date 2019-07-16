@@ -39,6 +39,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.vip.pallas.console.vo.BatchSubmitVO;
+import com.vip.pallas.utils.TemplateParamsExtractUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -446,16 +447,20 @@ public class TemplateController {
     public PageResultVO<SearchTemplate> list(@RequestParam Long indexId) { // NOSONAR
 
         List<SearchTemplate> list = templateService.findAllByIndexId(indexId);
-        for (SearchTemplate t : list)  {
-            t.setHisCount(hisService.count(t.getId()));
-            try {
-                t.setResetParams(JSONObject.toJSONString(templateService.genParams(t), SerializerFeature.WriteMapNullValue));
-            } catch (Exception ignore) {
-                //no set the resetPrams if error
-                t.setResetParams("{\\n}");
-            }
 
-        }
+        list.parallelStream().forEach(
+
+               t -> {
+                   try {
+                       t.setHisCount(hisService.count(t.getId()));
+                       String content = t.getContent() == null ? "" : t.getContent();
+                       t.setResetParams(JSONObject.toJSONString(TemplateParamsExtractUtil.getParams(content, list), SerializerFeature.WriteMapNullValue));
+                   } catch (Exception ignore) {
+                       //no set the resetPrams if error
+                       t.setResetParams("{\\n}");
+                   }
+               }
+        );
 
         PageResultVO<SearchTemplate> resultVO = new PageResultVO<>();
 
