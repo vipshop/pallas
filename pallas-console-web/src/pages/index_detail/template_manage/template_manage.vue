@@ -197,7 +197,8 @@ export default {
     },
     init() {
       this.loading = true;
-      Promise.all([this.getTemplateList(), this.getClusters()]).then(() => {
+      Promise.all([this.getTemplateList(), this.getClusters()]).then()
+      .finally(() => {
         this.loading = false;
       });
     },

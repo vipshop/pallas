@@ -254,9 +254,10 @@ export default {
     init() {
       this.loading = true;
       Promise.all([this.getClusterList(), this.getPhysicals(),
-        this.getAllPallasSearchs()]).then(() => {
-          this.loading = false;
-        });
+        this.getAllPallasSearchs()]).then()
+      .finally(() => {
+        this.loading = false;
+      });
     },
   },
   components: {

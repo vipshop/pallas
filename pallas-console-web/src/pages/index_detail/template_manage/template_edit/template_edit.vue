@@ -486,8 +486,8 @@ export default {
     },
     init() {
       this.loading = true;
-      Promise.all([this.getDataSourceList()]).then(() => {
-      }).finally(() => {
+      Promise.all([this.getDataSourceList()]).then()
+      .finally(() => {
         this.loading = false;
       });
     },
