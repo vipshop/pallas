@@ -88,7 +88,7 @@ Pallas需要部署的模块主要包括：
     
     3. 前端目录最终结构图如下：
     
-    ![pallas-console-web部署目录结构图](image/pallas_console_web.png)
+       ![pallas-console-web部署目录结构图](image/pallas_console_web.png)
 
 ## 1 Pallas Search
 
