@@ -40,6 +40,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.EMPTY_LIST;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.function.Function.identity;
@@ -209,21 +210,25 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
         Map<String, List<String>> clusterNodeListMap = clusterList.stream().collect(toMap(
                 Cluster::getClusterId,
                 cluster -> {
-                    List<String> nodeList = getNodeList(cluster.getHttpAddress());
-                    if (nodeList != null) {
-                        nodeList.removeAll(elasticSearchService.getExcludeNodeList(cluster.getHttpAddress()));
-                        nodeList.removeAll(getAbnormalNodeList(cluster.getClusterId()));
-                        return Optional.ofNullable(nodeList).orElseGet(Collections::emptyList);
+                    boolean canMonitor = cluster.getMonitorLevelModel().isPallasSearchMonitor();
+                    //#937 pallas Search应该不要去ping那些不需要search 用到的集群
+                    if (canMonitor) {
+                        List<String> nodeList = getNodeList(cluster.getHttpAddress());
+                        if (nodeList != null) {
+                            nodeList.removeAll(elasticSearchService.getExcludeNodeList(cluster.getHttpAddress()));
+                            nodeList.removeAll(getAbnormalNodeList(cluster.getClusterId()));
+                            return Optional.ofNullable(nodeList).orElseGet(Collections::emptyList);
+                        }
+                        // if sth. goes wrong, keep the former cache rather than the null value.
+                        LogUtils.info(LOGGER, SearchLogEvent.ROUTING_EVENT, "getNodeList by {} returns null, keep the former values in cache.",
+                                cluster.getHttpAddress());
+                        Map<String, List<String>> clusterNodeListMapInCache = (Map<String, List<String>>) cacheMap
+                                .get(CLUSTER_NODE_LIST);
+                        if (clusterNodeListMapInCache != null) {
+                            List<String> nodeListInCache = clusterNodeListMapInCache.get(cluster.getHttpAddress());
+                            return nodeListInCache == null ? emptyList() : nodeListInCache;
+                        }
                     }
-					// if sth. goes wrong, keep the former cache rather than the null value.
-					LogUtils.info(LOGGER, SearchLogEvent.ROUTING_EVENT, "getNodeList by {} returns null, keep the former values in cache.",
-							cluster.getHttpAddress());
-					Map<String, List<String>> clusterNodeListMapInCache = (Map<String, List<String>>) cacheMap
-							.get(CLUSTER_NODE_LIST);
-					if (clusterNodeListMapInCache != null) {
-						List<String> nodeListInCache = clusterNodeListMapInCache.get(cluster.getHttpAddress());
-						return nodeListInCache == null ? emptyList() : nodeListInCache;
-					}
 					return emptyList();
                 }
         ));
@@ -239,25 +244,29 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
 		// index -> clusterId -> shardNodeListMap
 		Map<String, Map<String, List<String>>> clusterShardNodeListMap = reverseMapKey(
 				clusterList.stream().collect(toMap(Cluster::getClusterId, cluster -> {
-					List<String[]> shardNodeList = elasticSearchService.getIndexAndNodes(cluster.getHttpAddress());
-					if (shardNodeList != null) {
-						shardNodeList.removeAll(elasticSearchService.getExcludeNodeList(cluster.getHttpAddress()));
-						shardNodeList.removeAll(getAbnormalNodeList(cluster.getClusterId()));
-						return Optional
-								.ofNullable(shardNodeList.stream()
-										.collect(groupingBy(t -> t[0], mapping(t -> t[1], toList()))))
-								.orElseGet(Collections::emptyMap);
-					}
-					// if sth. goes wrong, keep the former cache rather than the null value.
-					LogUtils.info(LOGGER, SearchLogEvent.ROUTING_EVENT, "getShards by {} returns null, keep the former values in cache.",
-							cluster.getHttpAddress());
-					Map<String, Map<String, List<String>>> clusterShardNodeListMapInCache = (Map<String, Map<String, List<String>>>) cacheMap
-							.get(SHARD_NODE_LIST);
-					if (clusterShardNodeListMapInCache != null) {
-						Map<String, List<String>> shardNodeListInCache = clusterShardNodeListMapInCache
-								.get(cluster.getHttpAddress());
-						return shardNodeListInCache == null ? emptyMap() : shardNodeListInCache;
-					}
+                    boolean canMonitor = cluster.getMonitorLevelModel().isPallasSearchMonitor();
+                    //#937 pallas Search应该不要去ping那些不需要search 用到的集群
+                    if (canMonitor) {
+                        List<String[]> shardNodeList = elasticSearchService.getIndexAndNodes(cluster.getHttpAddress());
+                        if (shardNodeList != null) {
+                            shardNodeList.removeAll(elasticSearchService.getExcludeNodeList(cluster.getHttpAddress()));
+                            shardNodeList.removeAll(getAbnormalNodeList(cluster.getClusterId()));
+                            return Optional
+                                    .ofNullable(shardNodeList.stream()
+                                            .collect(groupingBy(t -> t[0], mapping(t -> t[1], toList()))))
+                                    .orElseGet(Collections::emptyMap);
+                        }
+                        // if sth. goes wrong, keep the former cache rather than the null value.
+                        LogUtils.info(LOGGER, SearchLogEvent.ROUTING_EVENT, "getShards by {} returns null, keep the former values in cache.",
+                                cluster.getHttpAddress());
+                        Map<String, Map<String, List<String>>> clusterShardNodeListMapInCache = (Map<String, Map<String, List<String>>>) cacheMap
+                                .get(SHARD_NODE_LIST);
+                        if (clusterShardNodeListMapInCache != null) {
+                            Map<String, List<String>> shardNodeListInCache = clusterShardNodeListMapInCache
+                                    .get(cluster.getHttpAddress());
+                            return shardNodeListInCache == null ? emptyMap() : shardNodeListInCache;
+                        }
+                    }
 					return emptyMap();
 				})));
 
@@ -265,6 +274,11 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
         Map<String, Map<String, List<String>>> clusterAliaseIndexMap = reverseMapKey(clusterList.stream().collect(toMap(
             cluster -> cluster.getClusterId(),
             cluster -> {
+                boolean canMonitor = cluster.getMonitorLevelModel().isPallasSearchMonitor();
+                //#937 pallas Search应该不要去ping那些不需要search 用到的集群
+                if (!canMonitor) {
+                    return emptyMap();
+                }
                 List<String[]> aliasesList = elasticSearchService.getActualIndexs(cluster.getHttpAddress());
                 return aliasesList != null ? Optional.ofNullable(aliasesList.stream().
                         collect(groupingBy(i -> i[0], mapping(i -> i[1], toList())))).orElseGet(Collections::emptyMap) : emptyMap();
