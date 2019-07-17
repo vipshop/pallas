@@ -22,6 +22,7 @@ import java.io.Serializable;
 public class MonitorLevelModel implements Serializable {
     private byte cluster;
     private byte index;
+    private boolean pallasSearchMonitor = true;
 
     public byte getCluster() {
         return cluster;
@@ -39,6 +40,13 @@ public class MonitorLevelModel implements Serializable {
         this.index = index;
     }
 
+    public boolean isPallasSearchMonitor() {
+        return pallasSearchMonitor;
+    }
+
+    public void setPallasSearchMonitor(boolean pallasSearchMonitor) {
+        this.pallasSearchMonitor = pallasSearchMonitor;
+    }
 
     public static MonitorLevelModel getDefaultModel() {
         MonitorLevelModel  monitorLevelModel = new MonitorLevelModel();
@@ -48,6 +56,6 @@ public class MonitorLevelModel implements Serializable {
     }
     @Override
     public String toString() {
-        return "{\"cluster\": " + cluster + ",\"index\": " + index + "}";
+        return "{\"cluster\": " + cluster + ",\"index\": " + index + ",\"pallasSearchMonitor\": " + pallasSearchMonitor + "}";
     }
 }
