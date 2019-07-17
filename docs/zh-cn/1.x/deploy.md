@@ -20,13 +20,13 @@ Pallas需要部署的模块主要包括：
   
     - 软件要求
   
-      1. jdk: 1.8
+      1. jdk: 1.8+
       
       2. mysql: 版本无要求
     
   - 打包（pallas-console提供两种打包方式）
 
-    - mvn clean package -Dspringboot.package=1（集成了前端GUIpallas-console-web和第三方插件pallas-plus-web的前后端集成包，支持一键部署console前后端；）
+    - mvn clean package -Dspringboot.package=1（集成了前端pallas-console-web和第三方插件pallas-plus-web的前后端集成包，支持一键部署console前后端；）
     
     - mvn clean package (单独打包console后端)
   
@@ -44,18 +44,18 @@ Pallas需要部署的模块主要包括：
       
       3. pallas-console.jar包
       
-    - 运行参数：
-参数|含义
--|-
--Dpallas.db.type|指定运行使用的数据库类型，目前支持两种：mysql和h2
--Dspring.profiles.active=combo|如果打包方式为前后端集成包，则需要指定combo profile
-    
     - 运行：
     
       1. pallas-console.sh启动：sh ./bin/pallas-console.sh [运行参数]。如：使用h2运行的前后端集成包： sh pallas-console.sh -Dpallas.db.type=h2 -Dspring.profiles.active=combo
       
       2. pallas-console.jar启动： java [运行参数] -jar pallas-console.jar。如：使用mysql运行的单独console包： java -Dpallas.db.type=mysql -jar pallas-console.jar 
+     
+    - 运行参数：
     
+|参数|含义|
+|---|---------|
+|-Dpallas.db.type|指定运行使用的数据库类型，目前支持两种：mysql和h2|
+|-Dspring.profiles.active=combo|如果打包方式为前后端集成包，则需要指定combo profile|
   
   - 注意点
   
@@ -89,7 +89,6 @@ Pallas需要部署的模块主要包括：
     3. 前端目录最终结构图如下：
     
     ![pallas-console-web部署目录结构图](image/pallas_console_web.png)
-  
 
 ## 1 Pallas Search
 
@@ -100,22 +99,23 @@ Pallas需要部署的模块主要包括：
     - 解压目标文件，会得到： bin文件夹（包含一个启动脚本pallas-search.sh）、lib文件夹、pallas-search.jar
   
   - 部署： 
+    - 运行：
+    
+      1. java -Dpallas.search.port=输入一个端口号 -Dpallas.search.cluster=集群域名或ip地址 -Dpallas.console.rest.url=http://localhost:8080 -Dpallas.console.upload_url=http://localhost:8080/ss/upsert.json -Dfile.encoding=UTF-8 -jar pallas-search.jar
+      
+      2. sh ./bin/pallas-search.sh -Dpallas.search.port=输入一个端口号 -Dpallas.search.cluster=集群域名或ip地址 -Dpallas.console.rest.url=http://localhost:8080 -Dpallas.console.upload_url=http://localhost:8080/ss/upsert.json -Dfile.encoding=UTF-8
     
     - 运行参数
- 参数|含义
- -|-
- -Dpallas.search.port|指定pallas-search的访问端口
- -Dpallas.search.cluster|pallas-search的集群域名，也可以是ip地址
- -Dpallas.console.rest.url|console后端的地址，如果pallas-search跟pallas-console部署在同一台服务器，则格式如：http://localhost:8080
- -Dpallas.console.upload_url|pallas-search上报状态的接口，如果pallas-search跟pallas-console部署在同一台服务器,则格式如：http://localhost:8080/ss/upsert.json
- -Dfile.encoding=UTF-8|指定编码格式
+    
+ |参数|含义|
+ |---|------------|
+ |-Dpallas.search.port|指定pallas-search的访问端口|
+ |-Dpallas.search.cluster|pallas-search的集群域名，也可以是ip地址|
+ |-Dpallas.console.rest.url|console后端的地址，如果pallas-search跟pallas-console部署在同一台服务器，则格式如：http://localhost:8080|
+ |-Dpallas.console.upload_url|pallas-search上报状态的接口，如果pallas-search跟pallas-console部署在同一台服务器,则格式如：http://localhost:8080/ss/upsert.json|
+ |-Dfile.encoding=UTF-8|指定编码格式|
  
-     - 运行：
-     
-       1. java -Dpallas.search.port=输入一个端口号 -Dpallas.search.cluster=集群域名或ip地址 -Dpallas.console.rest.url=http://localhost:8080 -Dpallas.console.upload_url=http://localhost:8080/ss/upsert.json -Dfile.encoding=UTF-8 -jar pallas-search.jar
-       
-       2. sh ./bin/pallas-search.sh -Dpallas.search.port=输入一个端口号 -Dpallas.search.cluster=集群域名或ip地址 -Dpallas.console.rest.url=http://localhost:8080 -Dpallas.console.upload_url=http://localhost:8080/ss/upsert.json -Dfile.encoding=UTF-8
-       
+  
   - 验证：
   
     - 可在pallas-console的代理管理看到pallas-search已注册， 如：
