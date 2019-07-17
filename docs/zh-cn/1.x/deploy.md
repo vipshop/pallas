@@ -122,6 +122,4 @@ Pallas需要部署的模块主要包括：
     
       ![pallas-search部署成功示意图](image/pallas_search.png)
       
-      
-    
     
