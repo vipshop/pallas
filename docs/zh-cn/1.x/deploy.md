@@ -26,9 +26,9 @@ Pallas需要部署的模块主要包括：
     
   - 打包（pallas-console提供两种打包方式）
 
-    - mvn clean package -Dspringboot.package=1（集成了前端pallas-console-web和第三方插件pallas-plus-web的前后端集成包，支持一键部署console前后端；）
+    - `mvn clean package -Dspringboot.package=1`（集成了前端pallas-console-web和第三方插件pallas-plus-web的前后端集成包，支持一键部署console前后端）
     
-    - mvn clean package (单独打包console后端)
+    - `mvn clean package` (单独打包console后端)
   
   - 部署
   
@@ -38,7 +38,7 @@ Pallas需要部署的模块主要包括：
     
     - 解压zip包可见：
           
-      1. bin文件夹（包含一个pallas-console.sh脚本，包含一系列服务端调优的启动设置）
+      1. bin文件夹（包含一个pallas-console.sh脚本，脚本包含一系列服务端调优的启动设置）
       
       2. lib文件夹（console运行依赖的库）
       
@@ -46,9 +46,9 @@ Pallas需要部署的模块主要包括：
       
     - 运行：
     
-      1. pallas-console.sh启动：sh ./bin/pallas-console.sh [运行参数]。如：使用h2运行的前后端集成包： sh pallas-console.sh -Dpallas.db.type=h2 -Dspring.profiles.active=combo
+      1. 通过 pallas-console.sh 启动：`sh ./bin/pallas-console.sh [运行参数]`  如：使用h2运行的前后端集成包： sh pallas-console.sh -Dpallas.db.type=h2 -Dspring.profiles.active=combo
       
-      2. pallas-console.jar启动： java [运行参数] -jar pallas-console.jar。如：使用mysql运行的单独console包： java -Dpallas.db.type=mysql -jar pallas-console.jar 
+      2. 通过 pallas-console.jar 启动： `java [运行参数] -jar pallas-console.jar` 如：使用mysql运行的单独console包： java -Dpallas.db.type=mysql -jar pallas-console.jar 
      
     - 运行参数：
     
@@ -59,7 +59,7 @@ Pallas需要部署的模块主要包括：
   
   - 注意点
   
-    - 单独打包的方式，console默认加上pallas前缀的context-path（见src/resources/application.properties），意味着访问接口时需要如：http://xxx.com/pallas/xxx/xxx.json的方式。console前端接口默认也会带上pallas前缀，如果需要去掉，前后端都得去掉
+    - 单独打包的方式，console默认加上pallas前缀的context-path（见src/resources/application.properties），意味着访问接口时需要如：http://xxx.com/pallas/xxx/xxx.json 的方式。console前端接口默认也会带上pallas前缀，如果需要去掉，前后端都得去掉
     
     - 集成了前端GUI的打包方式，默认去掉了pallas前缀，但必须部署在host指向的目录下
     
@@ -68,7 +68,7 @@ Pallas需要部署的模块主要包括：
 
   - 打包
 
-    1. 执行指令： yarn build
+    1. 执行指令： `yarn build`
     
     2. 生成目标文件： pallas-console-web根目录->dist文件夹
   
@@ -82,7 +82,7 @@ Pallas需要部署的模块主要包括：
   
   - 注意点
 
-    1. src/utils/request.js的axios.defaults.baseURL默认加了./pallas/前缀，如果前后端部署在不同机器或者console把pallas前缀去掉了，可以通过修改baseURI指定
+    1. src/utils/request.js的axios.defaults.baseURL默认加了`./pallas/`前缀，如果前后端部署在不同机器或者console把pallas前缀去掉了，可以通过修改baseURI指定
     
     2. pallas-console-web项目必须放在host指向的目录下
     
@@ -92,7 +92,7 @@ Pallas需要部署的模块主要包括：
 
 ## 1 Pallas Search
 
-  - 打包： mvn clean package
+  - 打包： `mvn clean package`
   
     - 目标文件： pallas-search 根目录 -> target -> pallas-search-master-SNAPSHOT-zip.zip
     
@@ -101,9 +101,9 @@ Pallas需要部署的模块主要包括：
   - 部署： 
     - 运行：
     
-      1. java -Dpallas.search.port=输入一个端口号 -Dpallas.search.cluster=集群域名或ip地址 -Dpallas.console.rest.url=http://localhost:8080 -Dpallas.console.upload_url=http://localhost:8080/ss/upsert.json -Dfile.encoding=UTF-8 -jar pallas-search.jar
+      1. `java -Dpallas.search.port=输入一个端口号 -Dpallas.search.cluster=集群域名或ip地址 -Dpallas.console.rest.url=http://localhost:8080 -Dpallas.console.upload_url=http://localhost:8080/ss/upsert.json -Dfile.encoding=UTF-8 -jar pallas-search.jar`
       
-      2. sh ./bin/pallas-search.sh -Dpallas.search.port=输入一个端口号 -Dpallas.search.cluster=集群域名或ip地址 -Dpallas.console.rest.url=http://localhost:8080 -Dpallas.console.upload_url=http://localhost:8080/ss/upsert.json -Dfile.encoding=UTF-8
+      2. `sh ./bin/pallas-search.sh -Dpallas.search.port=输入一个端口号 -Dpallas.search.cluster=集群域名或ip地址 -Dpallas.console.rest.url=http://localhost:8080 -Dpallas.console.upload_url=http://localhost:8080/ss/upsert.json -Dfile.encoding=UTF-8`
     
     - 运行参数
     
