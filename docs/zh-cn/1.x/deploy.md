@@ -107,13 +107,13 @@ Pallas需要部署的模块主要包括：
     
     - 运行参数
     
-|参数|含义|
-|---|------------|
-|-Dpallas.search.port|指定pallas-search的访问端口|
-|-Dpallas.search.cluster|pallas-search的集群域名，也可以是ip地址|
-|-Dpallas.console.rest.url|console后端的地址，如果pallas-search跟pallas-console部署在同一台服务器，则格式如：http://localhost:8080|
-|-Dpallas.console.upload_url|pallas-search上报状态的接口，如果pallas-search跟pallas-console部署在同一台服务器,则格式如：http://localhost:8080/ss/upsert.json|
-|-Dfile.encoding=UTF-8|指定编码格式|
+参数|含义
+---|-----
+-Dpallas.search.port|指定pallas-search的访问端口
+-Dpallas.search.cluster|pallas-search的集群域名，也可以是ip地址
+-Dpallas.console.rest.url|console后端的地址，如果pallas-search跟pallas-console部署在同一台服务器，则格式如：http://localhost:8080
+-Dpallas.console.upload_url|pallas-search上报状态的接口，如果pallas-search跟pallas-console部署在同一台服务器,则格式如：http://localhost:8080/ss/upsert.json
+-Dfile.encoding=UTF-8|指定编码格式
  
   
   - 验证：
