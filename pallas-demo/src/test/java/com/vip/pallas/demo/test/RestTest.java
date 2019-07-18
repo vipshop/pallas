@@ -20,8 +20,10 @@ package com.vip.pallas.demo.test;
 import com.vip.pallas.client.PallasRestClient;
 import com.vip.pallas.client.PallasRestClientBuilder;
 import com.vip.pallas.search.launch.Startup;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.util.EntityUtils;
 import org.elasticsearch.client.Response;
@@ -65,9 +67,10 @@ class ProductCommentTest {
                 "    }\n" +
                 "}", ContentType.APPLICATION_JSON);
 
+        Header header = new BasicHeader("business_code","ittest");
         Response response = buildClient.performRequest("POST",
                 "/product_comment/_search/template", Collections.EMPTY_MAP, "product_comment_search",
-                entity);
+                entity,header);
 
         LOGGER.info("search result: {}", EntityUtils.toString(response.getEntity(), UTF_8));
     }

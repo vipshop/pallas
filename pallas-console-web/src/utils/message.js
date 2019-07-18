@@ -1,4 +1,4 @@
-import { MessageBox, Loading } from 'element-ui';
+import { MessageBox, Message } from 'element-ui';
 
 export default {
   errorMessage(text) {
@@ -26,11 +26,11 @@ export default {
     }).catch(() => {
     });
   },
-  loading() {
-    const loadingInstance = Loading.service({
-      body: true,
-      text: '拼命加载中',
+  success(text) {
+    Message({
+      showClose: true,
+      message: text,
+      type: 'success',
     });
-    return loadingInstance;
   },
 };

@@ -35,6 +35,9 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.vip.pallas.console.vo.BatchSubmitVO;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -156,7 +159,7 @@ public class TemplateController {
         SearchTemplate dbEntity = checkAndGetSearchTemplate(params);
         Long clusterId = params.getClusterId();
 
-        return templateService.inlineDebug(dbEntity, false, clusterId);
+        return templateService.inlineDebug(dbEntity, false, params.isProfile(), clusterId);
     }
 
     @RequestMapping(value = "/render.json", method = RequestMethod.POST)
@@ -164,7 +167,7 @@ public class TemplateController {
         SearchTemplate dbEntity = checkAndGetSearchTemplate(params);
         Long clusterId = params.getClusterId();
 
-        String result = templateService.inlineDebug(dbEntity, true, clusterId);
+        String result = templateService.inlineDebug(dbEntity, true, params.isProfile(), clusterId);
 
         if (result != null && result.startsWith("{\"template_output\":")) {
             result = result.substring("{\"template_output\":".length(), result.length()-1);
@@ -316,6 +319,16 @@ public class TemplateController {
             dbEntity.setTimeout(timeout);
         }
 
+		Integer threshold =  params.getThreshold();
+		if (!ObjectUtils.isEmpty(threshold)) {
+			dbEntity.setThreshold(threshold);
+		}
+
+		Integer maxBurstSecs =  params.getMaxBurstSecs();
+		if (!ObjectUtils.isEmpty(maxBurstSecs)) {
+			dbEntity.setMaxBurstSecs(maxBurstSecs);
+		}
+
         dbEntity.setContent(content);
         dbEntity.setParams(parameters);
 
@@ -435,6 +448,13 @@ public class TemplateController {
         List<SearchTemplate> list = templateService.findAllByIndexId(indexId);
         for (SearchTemplate t : list)  {
             t.setHisCount(hisService.count(t.getId()));
+            try {
+                t.setResetParams(JSONObject.toJSONString(templateService.genParams(t), SerializerFeature.WriteMapNullValue));
+            } catch (Exception ignore) {
+                //no set the resetPrams if error
+                t.setResetParams("{\\n}");
+            }
+
         }
 
         PageResultVO<SearchTemplate> resultVO = new PageResultVO<>();

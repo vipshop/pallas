@@ -77,6 +77,89 @@ public class IndexVersionVO implements Serializable {
     @Positive(message = "refresh interval必须大于0")
     private Byte refreshInterval;
 
+    private Long maxResultWindow;
+
+    private Integer totalShardsPerNode;
+
+    private String flushThresholdSize;
+
+    private String syncInterval;
+
+    private String translogDurability;
+
+    private Boolean sourceDisabled;
+
+    private String sourceIncludes;
+
+    private String sourceExcludes;
+
+    public Boolean getSourceDisabled() {
+        return sourceDisabled;
+    }
+
+    public void setSourceDisabled(Boolean sourceDisabled) {
+        this.sourceDisabled = sourceDisabled;
+    }
+
+
+    public String getSourceIncludes() {
+        return sourceIncludes;
+    }
+
+    public void setSourceIncludes(String sourceIncludes) {
+        this.sourceIncludes = sourceIncludes;
+    }
+
+    public String getSourceExcludes() {
+        return sourceExcludes;
+    }
+
+    public void setSourceExcludes(String sourceExcludes) {
+        this.sourceExcludes = sourceExcludes;
+    }
+
+    public Long getMaxResultWindow() {
+        return maxResultWindow;
+    }
+
+    public void setMaxResultWindow(Long maxResultWindow) {
+        this.maxResultWindow = maxResultWindow;
+    }
+
+    public int getTotalShardsPerNode() {
+        return totalShardsPerNode;
+    }
+
+    public void setTotalShardsPerNode(Integer totalShardsPerNode) {
+        this.totalShardsPerNode = totalShardsPerNode;
+    }
+
+
+    public String getFlushThresholdSize() {
+        return flushThresholdSize;
+    }
+
+    public void setFlushThresholdSize(String flushThresholdSize) {
+        this.flushThresholdSize = flushThresholdSize;
+    }
+
+    public String getSyncInterval() {
+        return syncInterval;
+    }
+
+    public void setSyncInterval(String syncInterval) {
+        this.syncInterval = syncInterval;
+    }
+
+    public String getTranslogDurability() {
+        return translogDurability;
+    }
+
+    public void setTranslogDurability(String translogDurability) {
+        this.translogDurability = translogDurability;
+    }
+
+
     public Long getId() {
         return id;
     }

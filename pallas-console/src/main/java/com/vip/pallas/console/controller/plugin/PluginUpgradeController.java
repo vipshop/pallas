@@ -97,6 +97,8 @@ public class PluginUpgradeController {
             pu.setClusterDescription(cluster == null ? "" : cluster.getDescription());
             pu.setNote(u.getNote());
             pu.setState(u.getState());
+            pu.setFlowlshNo(u.getFlowlshNo());
+            pu.setFlowlshState(u.getFlowlshState());
             pu.setUpdateTime(u.getUpdateTime());
             List<PluginNodeState> pns = pu.getNodeStates() == null ? new ArrayList<>() : pu.getNodeStates(); //NOSONAR
             List<PluginRuntime> runtimeList = pluginService.getPluginRuntimes(u.getClusterId(), u.getPluginName());

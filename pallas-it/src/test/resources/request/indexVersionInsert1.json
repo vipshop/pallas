@@ -221,5 +221,10 @@
             "dynamic":false,
             "children": []
         }
-    ]
+    ],
+    "maxResultWindow": 10000,
+    "totalShardsPerNode": -1,
+    "flushThresholdSize": "512mb",
+    "syncInterval": "5s",
+    "translogDurability": "async"
 }

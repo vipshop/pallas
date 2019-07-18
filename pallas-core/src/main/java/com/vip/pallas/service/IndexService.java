@@ -173,7 +173,8 @@ public abstract class IndexService {
 
 		try {
 			privilegeService.deleteIndexPrivilege(privilegeKey);
-			privilegeService.deleteIndexAsset(privilegeKey);
+			privilegeService.deleteVersionPrivilege(privilegeKey);
+			privilegeService.deleteTemplatePrivilege(privilegeKey);
 		} catch (Exception e) {
 			logger.error(e.getClass() + " " + e.getMessage(), e);
 		}
@@ -203,5 +204,10 @@ public abstract class IndexService {
 		Index index = findById(indexId);
 		Cluster cluster = clusterService.findByName(index.getClusterName());
 		return cluster.isLogicalCluster();
+	}
+
+	public Index findByQueueName(String queueName){
+		Long indexId = indexVersionRepository.findIndexIdByVdpQueue(queueName);
+		return indexId == null ? null : indexRepository.selectByid(indexId);
 	}
 }

@@ -30,6 +30,7 @@ public class TemplateOp extends BaseTemplateOp implements Serializable {
     private String historyDesc;
 	private String sql;
 	private Long datasourceId;
+	private boolean profile = false;
 
     public String getContent() {
         return content;
@@ -86,4 +87,12 @@ public class TemplateOp extends BaseTemplateOp implements Serializable {
 	public void setDatasourceId(Long datasourceId) {
 		this.datasourceId = datasourceId;
 	}
+
+    public boolean isProfile() {
+        return profile;
+    }
+
+    public void setProfile(boolean profile) {
+        this.profile = profile;
+    }
 }

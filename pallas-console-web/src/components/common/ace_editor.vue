@@ -6,9 +6,10 @@
 import ace from 'brace';
 import 'brace/theme/monokai';
 import 'brace/mode/json';
+import 'brace/mode/sql';
 
 export default {
-  props: ['editorId', 'content'],
+  props: ['editorId', 'content', 'readonly', 'mode'],
   data() {
     return {
       editor: Object,
@@ -23,11 +24,15 @@ export default {
     },
   },
   mounted() {
+    const modeType = this.mode || 'json';
+
     this.editor = ace.edit(this.editorId);
     this.editor.setValue(this.content, 1);
 
-    this.editor.getSession().setMode('ace/mode/json');
+    this.editor.getSession().setMode(`ace/mode/${modeType}`);
     this.editor.setTheme('ace/theme/monokai');
+
+    this.editor.setReadOnly(this.readonly || false);
 
     this.editor.on('change', () => {
       this.beforeContent = this.editor.getValue();
@@ -40,3 +45,16 @@ export default {
   },
 };
 </script>
+<style type="text/css">
+.ace_scrollbar-v::-webkit-scrollbar,
+.ace_scrollbar-h::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+    border-radius: 8px;
+}
+.ace_scrollbar-v::-webkit-scrollbar-thumb,
+.ace_scrollbar-h::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    background-color: rgba(144,147,153,.5);
+}
+</style>

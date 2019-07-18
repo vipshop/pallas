@@ -51,6 +51,8 @@ public interface PallasPluginService {
 
     int setUppgradeState(String loginUser, long id, int nextState);
 
+    int setUpgradeFlowlshAndState(long id, String flowlsh, int state);
+
     int addPluginCommand(PluginCommand command);
 
     int deleteCommand(Long... ids);

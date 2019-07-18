@@ -90,8 +90,8 @@ public class VersionApiController {
 
     @RequestMapping(value = "/rampup/start.json", method = RequestMethod.GET)
     public void start(@RequestParam @NotNull(message = "versionId不能为空") Long versionId,
-                      String endTime, Long rampupTarget) throws Exception {
-        if(StringUtils.isBlank(endTime) && rampupTarget == 0){
+                      String endTime, Long rampupTarget, Integer sampleRate) throws Exception {
+        if(StringUtils.isBlank(endTime) && rampupTarget == null){
             throw new Exception("预热结束时间与目标预热条数不能同时为空");
         }
 
@@ -118,10 +118,14 @@ public class VersionApiController {
             }
         }
 
-        if(rampupTarget != null){
+        if(rampupTarget != null && rampupTarget != 0){
             rampupVO.setRampupTarget(rampupTarget);
         }else{
             rampupVO.setRampupTarget(-1L);
+        }
+
+        if (sampleRate != null && sampleRate > 0 && sampleRate <= 100) {
+            rampupVO.setSampleRate(sampleRate);
         }
 
         indexVersion.setRampUp(JsonUtil.toJson(rampupVO));

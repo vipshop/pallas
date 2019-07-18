@@ -26,27 +26,27 @@ import com.google.common.collect.Lists;
 
 public abstract class AbstractAuthProcessor {
 
-	protected List<String> excludeAuthUrls = Lists.newArrayList(new String[] {
-		"/_health_check",
-		"/index/list/all",
-		"/version/list/all",
-		"/version/rampup/increment",
-		"/cluster/all/physicals",
-		"/node/state",
-		"/cluster/abnormal_node/list",
-		"/template/retrytimeout_configured",
-		"/route/index_routing/all",
-		"/route/index_routing_authorization/all",
-		"/route/index_routing_target_group/all",
-		"/record/flow_record/available/list",
-		"/record/flow_record/update_num",
-		"/record/flow_record/export",
-		"/rest/plugin/keepalive",
-		"/plugin/sync",
-		"/plugin/upgrade/fileDownload",
-		"/ss/query_pslist_and_domain",
-		"/ss/upsert"
-	});
+	protected List<String> excludeAuthUrls = Lists.newArrayList("/_health_check",
+			"/index/list/all",
+			"/version/list/all",
+			"/version/rampup/increment",
+			"/version/rampup/start",
+			"/cluster/all/physicals",
+			"/node/state",
+			"/cluster/abnormal_node/list",
+			"/template/retrytimeout_configured",
+			"/template/throttling_configured.json",
+			"/route/index_routing/all",
+			"/route/index_routing_authorization/all",
+			"/route/index_routing_target_group/all",
+			"/record/flow_record/available/list",
+			"/record/flow_record/update_num",
+			"/record/flow_record/export",
+			"/rest/plugin/keepalive",
+			"/plugin/sync",
+			"/plugin/upgrade/fileDownload",
+			"/ss/query_pslist_and_domain",
+			"/ss/upsert");
 	
 	public abstract void process(HttpServletRequest request, HttpServletResponse response);
 }

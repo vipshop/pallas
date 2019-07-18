@@ -45,8 +45,8 @@ export default {
   data() {
     return {
       rules: {
-        ip: [{ required: true, message: '请输入数据库地址', trigger: 'blur' }],
-        port: [{ validator: this.$validate.validatePort, trigger: 'blur' }],
+        ip: [{ required: true, message: '请输入数据库地址', trigger: 'blur' }, { validator: this.dbnameValidate, trigger: 'blur' }],
+        port: [{ validator: this.$validate.validatePort, trigger: 'blur' }, { validator: this.dbnameValidate, trigger: 'blur' }],
         username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
         password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
         dbname: [{ required: true, message: '请输入数据库名', trigger: 'blur' }, { validator: this.dbnameValidate, trigger: 'blur' }],

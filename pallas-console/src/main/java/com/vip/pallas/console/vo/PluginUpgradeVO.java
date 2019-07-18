@@ -49,6 +49,14 @@ public class PluginUpgradeVO {
 
     protected List<PluginNodeState> nodeStates = new LinkedList<>();
 
+    private String flowlshNo;
+
+    private int flowlshState = 0;
+
+    private boolean canExecuteFlowlsh = false;
+
+    private String flowlshMessage = null;
+
     public String getNote() {
         return note;
     }
@@ -152,6 +160,36 @@ public class PluginUpgradeVO {
     public void setNodeStates(List<PluginNodeState> nodeStates) {
         this.nodeStates = nodeStates;
     }
-    
-    
+
+    public String getFlowlshNo() {
+        return flowlshNo;
+    }
+
+    public void setFlowlshNo(String flowlshNo) {
+        this.flowlshNo = flowlshNo;
+    }
+
+    public int getFlowlshState() {
+        return flowlshState;
+    }
+
+    public void setFlowlshState(int flowlshState) {
+        this.flowlshState = flowlshState;
+    }
+
+    public boolean isCanExecuteFlowlsh() {
+        return canExecuteFlowlsh;
+    }
+
+    public void setCanExecuteFlowlsh(boolean canExecuteFlowlsh) {
+        this.canExecuteFlowlsh = canExecuteFlowlsh;
+    }
+
+    public String getFlowlshMessage() {
+        return flowlshMessage;
+    }
+
+    public void setFlowlshMessage(String flowlshMessage) {
+        this.flowlshMessage = flowlshMessage;
+    }
 }

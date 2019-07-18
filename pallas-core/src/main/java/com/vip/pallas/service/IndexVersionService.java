@@ -24,15 +24,12 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.annotation.Resource;
 
+import com.vip.pallas.entity.MappingParentType;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -218,38 +215,64 @@ public abstract class IndexVersionService {
 	}
 
 	private void insertMappings(IndexVersion indexVersion, ArrayList<Map> schemaArrayNode) {
-		Date date = indexVersion.getUpdateTime();
+
 		for (Map node : schemaArrayNode) {
-			Mapping mapping = new Mapping();
-			mapping.setVersionId(indexVersion.getId());
-			mapping.setFieldName((String) node.get("fieldName"));
-			mapping.setFieldType((String) node.get("fieldType"));
-			mapping.setMulti((Boolean) node.get("multi"));
-			mapping.setSearch((Boolean) node.get("search"));
-			mapping.setDocValue((Boolean) node.get("docValue"));
+			Mapping mapping = initMapping(node, indexVersion);
 			Boolean dynamicNode = (Boolean) node.get("dynamic");
 			mapping.setDynamic(dynamicNode != null && dynamicNode);
-			mapping.setCreateTime(date);
-			mapping.setUpdateTime(date);
 			mappingRepository.insert(mapping);
-
+			// 检查是否有多域
+			checkAndAddMultiFieldsMapping(node, mapping.getId(), indexVersion);
 			List<Map> childNode = (List<Map>) node.get("children");
 			for (Map _childNode : childNode) {
-				Mapping childMapping = new Mapping();
-				childMapping.setVersionId(indexVersion.getId());
-				childMapping.setFieldName((String) _childNode.get("fieldName"));
-				childMapping.setFieldType((String) _childNode.get("fieldType"));
-				childMapping.setMulti((Boolean) _childNode.get("multi"));
-				childMapping.setSearch((Boolean) _childNode.get("search"));
-				childMapping.setDocValue((Boolean) _childNode.get("docValue"));
+				Mapping childMapping = initMapping(_childNode, indexVersion);
 				childMapping.setParentId(mapping.getId());
-				childMapping.setCreateTime(date);
-				childMapping.setUpdateTime(date);
 				childMapping.setDynamic(Boolean.FALSE);
-
+				if (mapping.getFieldType().equals("object")){
+					childMapping.setParentType(MappingParentType.OBJECT.val());
+				}else {
+					childMapping.setParentType(MappingParentType.NESTED.val());
+				}
 				mappingRepository.insert(childMapping);
+				// 检查nested域是否有多域
+				checkAndAddMultiFieldsMapping(_childNode, childMapping.getId(), indexVersion);
 			}
 		}
+	}
+
+	private void checkAndAddMultiFieldsMapping(Map map, Long parentId, IndexVersion indexVersion){
+		if (null == map.get("multiField"))return;
+		List<Map> multiFieldNodes = (List<Map>) map.get("multiField");
+		// 增加multi-field
+		for (Map _node : multiFieldNodes) {
+			Mapping multiFieldsMapping = initMapping(_node, indexVersion);
+			multiFieldsMapping.setParentId(parentId);
+			multiFieldsMapping.setDynamic(Boolean.FALSE);
+			multiFieldsMapping.setParentType(MappingParentType.MULTI_FIELDS.val());
+			mappingRepository.insert(multiFieldsMapping);
+		}
+	}
+
+	private Mapping initMapping(Map node, IndexVersion indexVersion) {
+		Mapping mapping = new Mapping();
+		mapping.setVersionId(indexVersion.getId());
+		mapping.setFieldName((String) node.get("fieldName"));
+		mapping.setFieldType((String) node.get("fieldType"));
+		mapping.setMulti((Boolean) node.get("multi"));
+		mapping.setSearch((Boolean) node.get("search"));
+		mapping.setDocValue((Boolean) node.get("docValue"));
+		if (node.containsKey("store")&&((Boolean) node.get("store"))==Boolean.TRUE){
+			mapping.setStore((Boolean) node.get("store"));
+		}
+		mapping.setCreateTime(indexVersion.getUpdateTime());
+		mapping.setUpdateTime(indexVersion.getUpdateTime());
+		if (node.get("copyTo") != null){
+			List<String> copyTo = (List<String>)node.get("copyTo");
+			if (!copyTo.isEmpty()){
+				mapping.setCopyTo(String.join(",", copyTo));
+			}
+		}
+		return mapping;
 	}
 
 	public Map<String, String> getSchemaMappingAsMap(long versionId) throws SQLException, PallasException {
@@ -287,6 +310,15 @@ public abstract class IndexVersionService {
 		version.setQuerySlowThreshold(indexVersion.getQuerySlowThreshold());
 		version.setRefreshInterval(indexVersion.getRefreshInterval());
 
+		version.setMaxResultWindow(indexVersion.getMaxResultWindow());
+		version.setTotalShardsPerNode(indexVersion.getTotalShardsPerNode());
+		version.setFlushThresholdSize(indexVersion.getFlushThresholdSize());
+		version.setTranslogDurability(indexVersion.getTranslogDurability());
+		version.setSyncInterval(indexVersion.getSyncInterval());
+		version.setSourceDisabled(indexVersion.getSourceDisabled());
+		version.setSourceIncludes(indexVersion.getSourceIncludes());
+		version.setSourceExcludes(indexVersion.getSourceExcludes());
+
 		// dual with mapping
 		List<Mapping> mappingList = mappingRepository.selectByVersionId(versionId);
 
@@ -306,33 +338,47 @@ public abstract class IndexVersionService {
 			}
 
 			for (Mapping mapping : firstLayerList) {
-				VersionField field = new VersionField();
-				field.setFieldType(mapping.getFieldType());
+				VersionField field = initVersionFieldByMapping(mapping);
 				field.setDbFieldType(schemaMap.get(mapping.getFieldName()));
-				field.setDocValue(mapping.getDocValue());
-				field.setSearch(mapping.getSearch());
-				field.setFieldName(mapping.getFieldName());
-				field.setMulti(mapping.getMulti());
-				field.setDynamic(mapping.getDynamic());
 				version.addField(field);
+				// 检查是否有嵌套字段或者multi_field
+				checkAndFillNestedOrMultiField(field, mapping, mappingMap);
+			}
+		}
+		return version;
+	}
 
-				List<Mapping> nestedMappings = mappingMap.get(mapping.getId());
-
-				if (nestedMappings != null) {
-					for (Mapping nestedMapping : nestedMappings) {
-						VersionField childField = new VersionField();
-						childField.setFieldType(nestedMapping.getFieldType());
-						childField.setDocValue(nestedMapping.getDocValue());
-						childField.setSearch(nestedMapping.getSearch());
-						childField.setFieldName(nestedMapping.getFieldName());
-						childField.setMulti(nestedMapping.getMulti());
-						field.addField(childField);
-					}
+	private void checkAndFillNestedOrMultiField(VersionField parentField, Mapping parentMapping, Map<Long, List<Mapping>> mappingMap){
+		List<Mapping> subMappings = mappingMap.get(parentMapping.getId());
+		if (subMappings != null) {
+			for (Mapping subFieldMapping : subMappings) {
+				VersionField subField = initVersionFieldByMapping(subFieldMapping);
+				if (subFieldMapping.getParentType() == MappingParentType.MULTI_FIELDS.val()){
+					parentField.addMultiField(subField);
+				}else {
+					parentField.addField(subField);
+					// 如果是nested或者object field，检查是否有下层
+					checkAndFillNestedOrMultiField(subField, subFieldMapping, mappingMap);
 				}
 			}
 		}
+	}
 
-		return version;
+	public VersionField initVersionFieldByMapping(Mapping mapping){
+		VersionField field = new VersionField();
+		field.setFieldType(mapping.getFieldType());
+		field.setDocValue(mapping.getDocValue());
+		field.setSearch(mapping.getSearch());
+		field.setFieldName(mapping.getFieldName());
+		field.setMulti(mapping.getMulti());
+		field.setDynamic(mapping.getDynamic());
+		if (mapping.getStore()!=null){
+			field.setStore(mapping.getStore());
+		}
+		if (StringUtils.isNotBlank(mapping.getCopyTo())){
+			field.setCopyTo(Arrays.asList(mapping.getCopyTo().split("\\s*,\\s*")));
+		}
+		return field;
 	}
 
 	public com.vip.pallas.bean.IndexVersion copyVersion(Long indexId, Long versionId)
@@ -344,53 +390,7 @@ public abstract class IndexVersionService {
 				.collect(toMap(field -> field.getFieldName() + "#" + field.getDbFieldType(), field -> field));
 
 		List<DBSchema> schemaList = this.getMetaDataFromDB(indexId);
-		List<VersionField> newVersionField = new ArrayList<>();
-
-		for (DBSchema dbSchema : schemaList) {
-			VersionField field = new VersionField();
-			field.setFieldName(dbSchema.getDbFieldName());
-			field.setDbFieldType(dbSchema.getDbFieldType());
-
-			String fieldKey = field.getFieldName() + "#" + field.getDbFieldType();
-
-			if (fieldMap.containsKey(fieldKey)) {
-				VersionField versionField = fieldMap.get(fieldKey);
-				field.setFieldType(versionField.getFieldType());
-				field.setDocValue(versionField.isDocValue());
-				field.setSearch(versionField.isSearch());
-				field.setMulti(versionField.isMulti());
-				field.setDynamic(versionField.isDynamic());
-				field.setChildren(versionField.getChildren());
-			} else {
-				switch (field.getDbFieldType()) {
-				case "TINYINT":
-				case "SMALLINT":
-					field.setFieldType("short");
-					break;
-				case "INTEGER":
-					field.setFieldType("integer");
-					break;
-				case "BIGINT":
-					field.setFieldType("long");
-					break;
-				case "DATE":
-				case "TIMESTAMP":
-					field.setFieldType("date");
-					break;
-				case "DOUBLE":
-				case "DECIMAL":
-					field.setFieldType("double");
-					break;
-				default:
-					field.setFieldType("keyword");
-					break;
-				}
-			}
-
-			newVersionField.add(field);
-		}
-
-		version.setSchema(newVersionField);
+        initVersionSchemaByDBSchemaList(version, schemaList, fieldMap);
 		return version;
 	}
 
@@ -418,62 +418,72 @@ public abstract class IndexVersionService {
 			logger.error(e.toString(), e);
 			return importSchema;
 		}
-
 		com.vip.pallas.bean.IndexVersion version = new com.vip.pallas.bean.IndexVersion();
 
-		for (DBSchema dbSchema : schemaList) {
-			VersionField field = new VersionField();
-			field.setFieldName(dbSchema.getDbFieldName());
-			field.setDbFieldType(dbSchema.getDbFieldType());
-
-			String fieldKey = field.getFieldName() + "#" + field.getDbFieldType();
-
-			if (fieldMap.containsKey(fieldKey)) {
-				VersionField versionField = fieldMap.remove(fieldKey);
-				field.setFieldType(versionField.getFieldType());
-				field.setDocValue(versionField.isDocValue());
-				field.setSearch(versionField.isSearch());
-				field.setMulti(versionField.isMulti());
-				field.setDynamic(versionField.isDynamic());
-				field.setChildren(versionField.getChildren());
-			} else {
-				switch (field.getDbFieldType()) {
-				case "TINYINT":
-				case "SMALLINT":
-					field.setFieldType("short");
-					break;
-				case "INTEGER":
-					field.setFieldType("integer");
-					break;
-				case "BIGINT":
-					field.setFieldType("long");
-					break;
-				case "DATE":
-				case "TIMESTAMP":
-					field.setFieldType("date");
-					break;
-				case "DOUBLE":
-				case "DECIMAL":
-					field.setFieldType("double");
-					break;
-				default:
-					field.setFieldType("keyword");
-					break;
-				}
-			}
-
-			version.addField(field);
-		}
+        initVersionSchemaByDBSchemaList(version, schemaList, fieldMap);
 
 		// DB 不存在的那些schema 也要导入
 		for (VersionField field : fieldMap.values()) {
 			version.addField(field);
 		}
-
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		resultMap.put("schema", version.getSchema());
 
 		return JsonUtil.toJson(resultMap);
+	}
+
+	private void initVersionSchemaByDBSchemaList(com.vip.pallas.bean.IndexVersion version,List<DBSchema> schemaList,Map<String, VersionField> fieldMap){
+        for (DBSchema dbSchema : schemaList) {
+            VersionField field = new VersionField();
+            field.setFieldName(dbSchema.getDbFieldName());
+            field.setDbFieldType(dbSchema.getDbFieldType());
+            String fieldKey = field.getFieldName() + "#" + field.getDbFieldType();
+            if (fieldMap.containsKey(fieldKey)) {
+                VersionField versionField = fieldMap.remove(fieldKey);
+                copyVersionField(versionField,field);
+            } else {
+                convertFieldType(field);
+            }
+            version.addField(field);
+        }
+    }
+
+	private void copyVersionField(VersionField srcField, VersionField distField){
+		distField.setFieldType(srcField.getFieldType());
+		distField.setDocValue(srcField.isDocValue());
+		distField.setStore(srcField.isStore());
+		distField.setSearch(srcField.isSearch());
+		distField.setMulti(srcField.isMulti());
+		distField.setDynamic(srcField.isDynamic());
+		distField.setChildren(srcField.getChildren());
+		distField.setCopyTo(srcField.getCopyTo());
+		distField.setMultiField(srcField.getMultiField());
+	}
+
+	private void convertFieldType(VersionField field){
+		switch (field.getDbFieldType()) {
+			case "TINYINT":
+			case "SMALLINT":
+				field.setFieldType("keyword_as_number");
+				break;
+			case "INTEGER":
+				field.setFieldType("integer");
+				break;
+			case "BIGINT":
+				field.setFieldType("long");
+				break;
+			case "DATE":
+			case "TIMESTAMP":
+				field.setFieldType("date");
+				break;
+			case "DOUBLE":
+			case "DECIMAL":
+				field.setFieldType("double");
+				break;
+			default:
+				field.setFieldType("keyword");
+				break;
+		}
 	}
 
 	public IndexVersion findUsedIndexVersionByIndexId(Long indexId) {

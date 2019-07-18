@@ -17,6 +17,7 @@
 
 package com.vip.pallas.bean;
 
+import java.util.List;
 import java.util.Map;
 
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -52,6 +53,11 @@ public class EsMappings {
 		@JsonProperty("dynamic")
 		private boolean dynamic = false;
 
+		@SerializedName("_source")
+		@JsonProperty("_source")
+		private EsSourceMapping source;
+
+
 		private Map<String, Propertie> properties;
 
 		public boolean isIncludeInAll() {
@@ -77,11 +83,20 @@ public class EsMappings {
 		public void setDynamic(boolean dynamic) {
 			this.dynamic = dynamic;
 		}
+
+		public EsSourceMapping getSource() {
+			return source;
+		}
+
+		public void setSource(EsSourceMapping source) {
+			this.source = source;
+		}
 	}
 
     public static class Propertie{
 		@SerializedName("doc_values")
 		private Boolean docValues;
+		private Boolean store;
 		private String type;
 		private Boolean index;
 		private String format;
@@ -90,7 +105,17 @@ public class EsMappings {
 		private String normalizer;
 
 		private Map<String, Propertie> properties;
-		
+		private Map<String, Propertie> fields;
+		private List<String> copy_to;
+
+		public Boolean isStore() {
+			return store;
+		}
+
+		public void setStore(Boolean store) {
+			this.store = store;
+		}
+
 		public String getType() {
 			return type;
 		}
@@ -138,6 +163,23 @@ public class EsMappings {
 		public void setProperties(Map<String, Propertie> properties) {
 			this.properties = properties;
 		}
+
+		public Map<String, Propertie> getFields() {
+			return fields;
+		}
+
+		public void setFields(Map<String, Propertie> fields) {
+			this.fields = fields;
+		}
+
+		public List<String> getCopy_to() {
+			return copy_to;
+		}
+
+		public void setCopy_to(List<String> copy_to) {
+			this.copy_to = copy_to;
+		}
+
 		public boolean isDateType(){
 			return "date".equals(type);
 		}

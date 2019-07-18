@@ -197,6 +197,11 @@ public class TemplateParamsExtractUtil {
         }
         String[] names = name.split("\\.");
         if (names.length == 1) {
+            if (name.equals("from")) {
+                value = 0;
+            } else if (name.equals("size")) {
+                value = 100;
+            }
             paramMap.put(name, value);
             return;
         }

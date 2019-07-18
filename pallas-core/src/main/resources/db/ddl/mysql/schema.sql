@@ -254,6 +254,14 @@ CREATE TABLE IF NOT EXISTS `index_version` (
   `query_slow_threshold` bigint(15) NOT NULL DEFAULT '0' COMMENT 'query slowlog threshold',
   `refresh_interval` tinyint(3) NOT NULL DEFAULT '60' COMMENT '索引刷新周期，单位秒',
   `ramp_up` VARCHAR(2048) NOT NULL DEFAULT '' COMMENT '索引预热配置',
+  `max_result_window` BIGINT(15) NOT NULL DEFAULT '10000' COMMENT '索引查询窗口，默认1w',
+  `total_shards_per_node` SMALLINT(6) NOT NULL DEFAULT '-1' COMMENT '一个节点上该index的shard数量',
+  `flush_threshold_size` VARCHAR(256) NOT NULL DEFAULT '512mb' COMMENT '当事务日志大小到达此预设值，则执行flush',
+  `sync_interval` VARCHAR(256) NOT NULL DEFAULT '5s' COMMENT 'tanslog写到磁盘间隔',
+  `translog_durability` VARCHAR(256) NOT NULL DEFAULT 'async' COMMENT 'translog同步文件方式，默认异步',
+  `source_disabled` TINYINT(1) DEFAULT NULL COMMENT '是否不存储原始文档，NULL及false表示存_source，true表不存_source，默认NULL',
+  `source_includes` VARCHAR(256) DEFAULT NULL COMMENT '设置_source保存的字段，仅当source_disabled为false或者NULL时该字段有效',
+  `source_excludes` VARCHAR(256) DEFAULT NULL COMMENT '设置_source不保存的字段，仅当source_disabled为false或者NULL时该字段有效',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
@@ -271,6 +279,9 @@ CREATE TABLE IF NOT EXISTS `mapping` (
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否删除',
   `dynamic` tinyint(1) NOT NULL DEFAULT '0' COMMENT '配置dynamic属性是否为true',
+  `parent_type` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'parent_id类型:1为nested;2为object;3为multi-fields',
+  `copy_to` varchar(256) DEFAULT NULL COMMENT '复制域数组',
+  `store` tinyint(1) DEFAULT NULL COMMENT '是否启用store',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
@@ -356,6 +367,8 @@ CREATE TABLE IF NOT EXISTS `plugin_upgrade` (
   `approve_time` timestamp NULL DEFAULT NULL COMMENT '审批时间',
   `create_time` timestamp NOT NULL DEFAULT '1980-01-01 01:01:01' COMMENT '创建时间',
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `flowlsh_no` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '审批流程工单号',
+  `flowlsh_state` tinyint(2) NOT NULL DEFAULT '3' COMMENT '0:init；1:created；2:start；3:end',
   `is_deleted` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '是否己删除',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='审批表';
@@ -416,6 +429,8 @@ CREATE TABLE IF NOT EXISTS `search_template` (
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否己删除',
   `timeout` int(11) NOT NULL DEFAULT '0' COMMENT '超时时间，毫秒单位',
   `retry` int(11) NOT NULL DEFAULT '0' COMMENT '重试次数',
+  `throttling_threshold` int(11) NOT NULL DEFAULT '0' COMMENT '限流qps，0表示不限',
+  `throttling_burst_secs` int(11) NOT NULL DEFAULT '1' COMMENT '限流时允许最大尖峰流量，单位为秒',
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   UNIQUE KEY `unique_indexid_and_templatename` (`index_id`,`template_name`) USING BTREE

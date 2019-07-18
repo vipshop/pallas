@@ -127,7 +127,20 @@ public class IndexController {
 
     @RequestMapping(value = "/id.json", method = RequestMethod.GET)
 	public Index findById(@RequestParam @NotNull(message = "indexId不能为空") @Min(value = 1, message = "indexId必须大于0") Long indexId) {
-        return indexService.findById(indexId);
+        Index indexInfo = indexService.findById(indexId);
+
+		if(null != indexInfo){
+			List<String> privileges = AuthorizeUtil.loadPrivileges();
+			if(CollectionUtils.isNotEmpty(privileges)){
+				if(privileges.contains("index.all") || privileges.contains("index." + indexInfo.getId() + "-" + indexInfo.getIndexName())){
+					indexInfo.setHasPrivilege(true);
+				}
+				if(privileges.contains("cluster.all") || privileges.contains("cluster."+ indexInfo.getClusterName())){
+					indexInfo.setHasClusterPrivilege(true);
+				}
+			}
+		}
+		return indexInfo;
     }
 
     @RequestMapping(value = "add.json", method = RequestMethod.POST)

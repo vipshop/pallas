@@ -5,20 +5,27 @@
               <span>{{versionInfoTitle}}</span>
             </span>
             <el-form :model="versionInfo" :rules="rules" ref="versionInfo" label-position="left">
+                <el-tabs value="first">
+                    <el-tab-pane label="索引配置" name="first">
                 <div class="label-title">
-                  <span class="span-title"><i class="fa fa-th-large"></i>索引配置</span>
+                            <span class="span-title"><i class="fa fa-th-large"></i>分片路由属性</span>
                   <span v-if="isLogical" style="color: #C8C8C8;">（所属集群：{{clusterArray.join()}}）</span>
                 </div>
                 <div class="label-content">
                     <el-row :gutter="20">
-                        <el-col :span="12">
+                        <el-col :span="8">
                             <el-form-item label="分片数量" prop="shardNum" label-width="120px">
                                 <el-input v-model.number="versionInfo.shardNum" :disabled="isEditable"></el-input>
                             </el-form-item>
                         </el-col>
-                        <el-col :span="12">
+                        <el-col :span="8">
                             <el-form-item label="复制数量" prop="replicationNum" label-width="120px">
                                 <el-input v-model.number="versionInfo.replicationNum" :disabled="isEditable"></el-input>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="8">
+                            <el-form-item label="ShardPerNode" prop="totalShardsPerNode" label-width="120px">
+                                <el-input v-model.number="versionInfo.totalShardsPerNode" :disabled="isEditable"></el-input>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -122,6 +129,34 @@
                 <div class="label-title"><span class="span-title"><i class="fa fa-th-large"></i>索引其他配置</span></div>
                 <div class="label-content">
                     <el-row :gutter="20">
+                        <el-col :span="12">
+                            <el-form-item label="max_result_window" prop="maxResultWindow" label-width="180px">
+                                <el-input placeholder="10000" v-model.number="versionInfo.maxResultWindow" :disabled="isEditable"></el-input>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="12">
+                            <el-form-item label="flush_threshold_size" prop="flushThresholdSize" label-width="180px">
+                                <el-input placeholder="512mb" v-model="versionInfo.flushThresholdSize" :disabled="isEditable"></el-input>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                </div>
+                <div class="label-content">
+                    <el-row :gutter="20">
+                        <el-col :span="12">
+                            <el-form-item label="sync_interval" prop="syncInterval" label-width="180px">
+                                <el-input placeholder="5s" v-model="versionInfo.syncInterval" :disabled="isEditable"></el-input>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="12">
+                            <el-form-item label="translog_durability" prop="translogDurability" label-width="180px">
+                                <el-input placeholder="async" v-model="versionInfo.translogDurability" :disabled="isEditable"></el-input>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                </div>
+                <div class="label-content">
+                    <el-row :gutter="20">
                         <el-col :span="8">
                             <el-form-item label="refresh（秒）" prop="refreshInterval" label-width="120px">
                                 <el-input v-model.number="versionInfo.refreshInterval" :disabled="isEditable"></el-input>
@@ -147,14 +182,35 @@
                         </div>
                     </el-row>
                 </div>
-                <div class="label-title">
-                    <span class="span-title"><i class="fa fa-th-large"></i>mapping配置</span>
-                    <el-button size="mini" type="success" @click="addField(0)" v-if="isMetaDataNull && versionInfo.schema.length === 0"><i class="fa fa-plus"></i>新增</el-button>
-                    <el-button size="mini" type="warning" v-show="!isEditable" @click="importSchema"><i class="fa fa-arrow-circle-o-down"></i>导入schema</el-button>
-                    <el-button size="mini" type="warning" v-show="isEditable" @click="exportSchema"><i class="fa fa-arrow-circle-o-up"></i>导出schema</el-button>
-                </div>
-                <div>
-                    <el-table :data="versionInfo.schema" border style="width: 100%" :max-height="280">
+                    </el-tab-pane>
+                    <el-tab-pane label="Mapping配置" name="second">
+                            <div class="label-title">
+                                        <span class="span-title"><i class="fa fa-th-large"></i>ES映射关系配置</span>
+                                <el-button size="mini" type="success" @click="addField(0)" v-if="isMetaDataNull && versionInfo.schema.length === 0"><i class="fa fa-plus"></i>新增</el-button>
+                                <el-button size="mini" type="warning" v-show="!isEditable" @click="importSchema"><i class="fa fa-arrow-circle-o-down"></i>导入schema</el-button>
+                                <el-button size="mini" type="warning" v-show="isEditable" @click="exportSchema"><i class="fa fa-arrow-circle-o-up"></i>导出schema</el-button>
+                            </div>
+                        <div>
+                    <div style="margin: 10px">
+                        <el-alert
+                                title="如何选择ES类型"
+                                type="info"
+                                description=" "
+                                show-icon>
+                            <div style="font-size: 12px">
+                                1.某些数据库字段，尽管是number类型，但是在做业务查询时仅仅只是做term(s)这类非数学运算非聚合查询，我们非常建议你采用"keyword as number"类型，在这个类型下，ES将会用string格式来建索引以达到更高的检索性能，
+                                而获取 _source 时我们仍然会以number的格式返回给 Client。
+                                <br/>
+                                2.当你需要做模糊匹配，比如数据库值是 AbC，但是仍然希望abc和ABC都能检索出来，那请选择"keyword[全大写处理]"类型，我们在建索引和查询都做大写处理，
+                                而获取 _source 时我们仍然会以原值 AbC 的格式返回给 Client。
+                                <br/>
+                                3.所有的DB类型为TINYINT 的字段，我们都假设它是一些枚举值并且不会用于数学运算，因此我们为这些字段自动匹配了"keyword as number"类型，请自行检查。
+                            </div>
+                        </el-alert>
+
+                    </div>
+
+                    <el-table :data="versionInfo.schema" border style="width: 100%" :max-height="550">
                         <el-table-column label="操作">
                           <template scope="scope">
                               <el-button size="small" type="success" @click="addField(scope.$index)" :disabled="isEditable"><i class="el-icon-plus"></i></el-button>
@@ -163,14 +219,18 @@
                         </el-table-column>
                         <el-table-column label="字段名" min-width="180">
                             <template scope="scope">
-                                <el-button type="text" @click="viewSchemaChildren(scope.row)"  v-show="!scope.row.isNew">
-                                    <span v-if="scope.row.children.length !== 0" class="red">*</span>
+                                <el-button type="text" v-show="!scope.row.isNew">
                                     <span>{{scope.row.fieldName}}</span>
                                 </el-button>
                                 <el-input style="width:50%" v-model="scope.row.fieldName" placeholder="请输入字段名" v-show="scope.row.isNew"></el-input>
-                                <el-button type="text" @click="viewSchemaChildren(scope.row)"  v-show="scope.row.isNew">
+                                <el-button type="text" v-show="scope.row.isNew">
                                     <span>子字段</span>
                                 </el-button>
+                                        <el-button type="warning" size="mini" @click="viewSchemaChildren(scope.row)" v-if="scope.row.children.length !== 0" ><i class="fa"></i>nested</el-button>
+                                        <el-button type="warning" size="mini" @click="viewSchemaMultiFields(scope.row)" v-if="scope.row.multiField.length !== 0" ><i class="fa"></i>subFields</el-button>
+                                        <div>
+                                <el-tag type="success" v-if="scope.row.copyTo.length > 0">copy to: {{scope.row.copyTo}}</el-tag>
+                                        </div>
                             </template>
                         </el-table-column>
                         <el-table-column label="DB类型" v-if="!isMetaDataNull">
@@ -193,18 +253,73 @@
                                 </select>
                             </template>
                         </el-table-column>
-                        <el-table-column label="是否查询关键字" min-width="90">
+                        <el-table-column label="是否创建索引" min-width="90">
                             <template scope="scope">
-                                <el-checkbox v-model="scope.row.search" :disabled="isEditable || scope.row.fieldType === 'nested'">查询关键字</el-checkbox>
+                                        <el-checkbox v-model="scope.row.search" :disabled="isEditable || scope.row.fieldType === 'nested'">创建索引</el-checkbox>
                             </template>
                         </el-table-column>
-                        <el-table-column label="排序或聚合">
+                        <el-table-column :render-header="renderDocValueHeader">
                             <template scope="scope">
-                                <el-checkbox v-model="scope.row.docValue" :disabled="isEditable || scope.row.fieldType === 'nested' || scope.row.fieldType === 'text'">用于排序或聚合</el-checkbox>
+                                <el-checkbox v-model="scope.row.docValue" :disabled="isEditable || scope.row.fieldType === 'nested' || scope.row.fieldType === 'text'">启用doc value</el-checkbox>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="是否启用store">
+                            <template scope="scope">
+                                <el-checkbox v-model="scope.row.store" :disabled="isEditable">启用store</el-checkbox>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="更多操作" width="80" v-if="!isEditable">
+                            <template scope="scope">
+                                <el-dropdown trigger="click">
+                              <span class="el-dropdown-link">
+                                操作<i class="el-icon-caret-bottom el-icon--right"></i>
+                              </span>
+                                    <el-dropdown-menu class="dropdown-operation" slot="dropdown">
+                                                <el-dropdown-item v-if="scope.row.multiField.length === 0"><a @click="viewSchemaChildren(scope.row)"><span><i class="fa fa-play-circle"></i>添加nested/object</span></a></el-dropdown-item>
+                                        <el-dropdown-item v-if="scope.row.children.length === 0 && scope.row.fieldType !== 'nested'"><a @click="viewSchemaMultiFields(scope.row)"><span><i class="fa fa-play-circle"></i>添加subFields</span></a></el-dropdown-item>
+                                        <el-dropdown-item v-if="!isEditable" ><a @click="viewSchemaCopyTo(scope.row)"><span><i class="fa fa-play-circle"></i>添加copyTo</span></a></el-dropdown-item>
+                                    </el-dropdown-menu>
+                                </el-dropdown>
                             </template>
                         </el-table-column>
                     </el-table>
                 </div>
+                        <div class="label-title" style="margin-top: 20px;">
+                            <span class="span-title" style="margin-right: 20px;"><i class="fa fa-th-large"></i>ES _source配置</span>
+                        </div>
+                        <div class="source-setting">
+                            <el-row :gutter="20">
+                                <el-col :span="4">
+                                    <el-form-item style="display: inline-block;" label="是否disable _source:" prop="sourceDisabled" label-width="150px">
+                                        <div class="my-switch">
+                                            <el-switch v-model="versionInfo.sourceDisabled" :disabled="isEditable"></el-switch>
+                                        </div>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :span="10" v-if="!versionInfo.sourceDisabled">
+                                    <el-form-item label="includes" prop="sourceIncludes" label-width="120px">
+                                        <el-select multiple filterable v-model="versionInfo.sourceIncludesArr" placeholder="请选择_source包含的field" :disabled="isEditable" style="width: 100%">
+                                            <el-option v-for="item,index in allSourceFields" :key="index" :label="item" :value="item">
+                                                <span style="float: left">{{ item }}</span>
+                                            </el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                </el-col>
+                                <el-col :span="10" v-if="!versionInfo.sourceDisabled">
+                                    <el-form-item label="excludes" prop="sourceExcludes" label-width="120px">
+                                        <el-select multiple filterable v-model="versionInfo.sourceExcludesArr" placeholder="请选择_source不包含的field" :disabled="isEditable" style="width: 100%">
+                                            <el-option v-for="item,index in allSourceFields" :key="index" :label="item" :value="item">
+                                                <span style="float: left">{{ item }}</span>
+                                            </el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                        </div>
+                    </el-tab-pane>
+                </el-tabs>
+
+
             </el-form>
             <div slot="footer" class="dialog-footer">                
                 <el-button @click="closeDialog()">取 消</el-button>
@@ -212,7 +327,9 @@
             </div>
         </el-dialog>
 
-        <schema-child-dialog :is-schema-child-visible="isSchemaChildVisible" :schema-child-info="schemaChildInfo" :version-operation="versionOperation" :schema-parent-field-name="schemaParentFieldName" @close-schema-dialog="closeSchemaDialog" @add-schema-child="addSchemaChild"></schema-child-dialog>
+        <schema-child-dialog :is-schema-child-visible="isSchemaChildVisible" :schema-child-info="schemaExtInfo" :version-operation="versionOperation" :schema-parent-field-name="schemaParentFieldName" :version-info="versionInfo" @close-schema-dialog="closeSchemaDialog" @add-schema-child="addSchemaChild"></schema-child-dialog>
+        <schema-multi-field-dialog :is-schema-multi-fields-visible="isSchemaMultiFieldsVisible" :schema-multi-fields-info="schemaExtInfo" :version-operation="versionOperation" :schema-parent-field-name="schemaParentFieldName" @close-schema-dialog="closeSchemaMultiFieldsDialog" @add-schema-multi-field="addSchemaMultiFields"></schema-multi-field-dialog>
+        <schema-copy-to-dialog :is-copy-to-fields-visible="isCopyToFieldsVisible" :schema-copy-to-info="schemaExtInfo" :copy-to-list="validCopyToFields" :schema-parent-field-name="schemaParentFieldName" @close-schema-dialog="closeSchemaCopyToDialog" @add-schema-copy-to="addSchemaCopyTo" ></schema-copy-to-dialog>
         <div v-if="isSchemaImportVisible">
             <schema-import-dialog :schema-import-title="schemaImportTitle" :schema-import-url="schemaImportUrl" @schema-import-success="schemaImportSuccess" @close-schema-import-dialog="closeSchemaImportDialog"></schema-import-dialog>
         </div>
@@ -221,11 +338,15 @@
 
 <script>
 import SchemaChildDialog from './schema_child_dialog';
+import SchemaMultiFieldDialog from './schema_multi_field_dialog';
+import SchemaCopyToDialog from './schema_copy_to_dialog';
 import SchemaImportDialog from './schema_import_dialog';
 
 export default {
   components: {
     'schema-child-dialog': SchemaChildDialog,
+    'schema-multi-field-dialog': SchemaMultiFieldDialog,
+    'schema-copy-to-dialog': SchemaCopyToDialog,
     'schema-import-dialog': SchemaImportDialog,
   },
   props: ['versionOperation', 'versionInfo', 'versionInfoTitle', 'isMetaDataNull', 'clusters', 'isLogical'],
@@ -237,7 +358,10 @@ export default {
       schemaImportTitle: '',
       schemaImportUrl: '',
       isSchemaChildVisible: false,
-      schemaChildInfo: {},
+      isSchemaMultiFieldsVisible: false,
+      isCopyToFieldsVisible: false,
+      schemaExtInfo: {},
+      validCopyToFields: [],
       schemaParentFieldName: '',
       rules: {
         shardNum: [{ required: true, message: '分片数量不能为空' }, { type: 'number', message: '分片数量必须为数字值' }],
@@ -249,6 +373,11 @@ export default {
         fetchSlowThreshold: [{ required: true, message: 'Fetch Slow Log不能为空' }, { type: 'number', message: 'Fetch Slow Log必须为数字值' }],
         querySlowThreshold: [{ required: true, message: 'Query Slow Log不能为空' }, { type: 'number', message: 'Query Slow Log必须为数字值' }],
         refreshInterval: [{ required: true, message: 'refresh_interval不能为空' }, { type: 'number', message: 'refresh_interval必须为数字值' }],
+        maxResultWindow: [{ required: true, message: 'max_result_window不能为空' }, { type: 'number', message: 'max_result_window必须为数字值' }],
+        totalShardsPerNode: [{ required: true, message: 'total_shards_per_node不能为空' }, { type: 'number', message: 'total_shards_per_node必须为数字值' }],
+        flushThresholdSize: [{ required: true, message: 'flush_threshold_size不能为空' }],
+        syncInterval: [{ required: true, message: 'sync_interval不能为空' }],
+        translogDurability: [{ required: true, message: 'translog_durability不能为空' }],
       },
       fieldTypes: [{
         value: 'text',
@@ -299,6 +428,20 @@ export default {
     };
   },
   methods: {
+    renderDocValueHeader(h) {
+      return h(
+        'span',
+        [
+          h('span', { slot: 'reference', style: { 'font-size': '14px', 'margin-right': '5px' } }, '是否启用doc value'),
+          h('el-popover', { props: { placement: 'top', trigger: 'hover' } },
+            [
+              h('div', '是否需要用到 Sort,Aggs,Script 查询'),
+              h('i', { slot: 'reference', class: { fa: true, 'fa-question-circle': true } }),
+            ],
+          ),
+        ],
+      );
+    },
     clusterChange() {
       this.versionInfo.nodes = [];
     },
@@ -358,6 +501,12 @@ export default {
               this.$set(this.versionInfo, 'allocationNodes', this.getLogicClusterAllocationNodes());
             } else {
               this.$set(this.versionInfo, 'allocationNodes', this.versionInfo.nodes.join(','));
+            }
+            if (this.versionInfo.sourceIncludesArr) {
+              this.$set(this.versionInfo, 'sourceIncludes', this.versionInfo.sourceIncludesArr.join(','));
+            }
+            if (this.versionInfo.sourceExcludesArr) {
+              this.$set(this.versionInfo, 'sourceExcludes', this.versionInfo.sourceExcludesArr.join(','));
             }
             if (this.versionOperation === 'add' || this.versionOperation === 'copy') {
               this.loading = true;
@@ -434,13 +583,68 @@ export default {
     closeSchemaDialog() {
       this.isSchemaChildVisible = false;
     },
-    viewSchemaChildren(row) {
-      this.isSchemaChildVisible = true;
-      this.schemaChildInfo = row;
+    closeSchemaMultiFieldsDialog() {
+      this.isSchemaMultiFieldsVisible = false;
     },
-    addSchemaChild(array) {
-      console.log(JSON.stringify(array));
+    closeSchemaCopyToDialog() {
+      this.isCopyToFieldsVisible = false;
+    },
+    viewSchemaChildren(row) {
+      if (row.fieldType !== 'nested' && row.fieldType !== 'object') {
+        this.$message.errorMessage('ES类型必须为nested或者object');
+        return;
+      }
+      this.isSchemaChildVisible = true;
+      this.schemaExtInfo = row;
+    },
+    viewSchemaMultiFields(row) {
+      this.isSchemaMultiFieldsVisible = true;
+      this.schemaExtInfo = row;
+    },
+    viewSchemaCopyTo(row) {
+      this.schemaExtInfo = row;
+      this.validCopyToFields = [];
+      this.versionInfo.schema.forEach((el) => {
+        if (el.dbFieldType === 'N/A') {
+          if (el.fieldType === 'nested') {
+            this.getNestedFieldName(el, '', this.validCopyToFields);
+            return;
+          }
+          this.validCopyToFields.push(el.fieldName);
+        }
+      });
+      this.copyToListFilter(this.validCopyToFields, row.fieldName);
+      this.isCopyToFieldsVisible = true;
+    },
+    getNestedFieldName(field, parentFieldName, fieldArr) {
+      if (field.fieldType !== 'nested') {
+        fieldArr.push(`${parentFieldName}${field.fieldName}`);
+        return;
+      }
+      field.children.forEach((child) => {
+        if (child.fieldType === 'nested') {
+          this.getNestedFieldName(child, `${parentFieldName}${field.fieldName}.`, fieldArr);
+        } else {
+          fieldArr.push(`${parentFieldName}${field.fieldName}.${child.fieldName}`);
+        }
+      });
+    },
+    copyToListFilter(fieldArr, fieldName) {
+      const index = fieldArr.indexOf(fieldName);
+      if (index >= 0) {
+        fieldArr.splice(index, 1);
+      }
+    },
+    addSchemaChild() {
       this.isSchemaChildVisible = false;
+    },
+    addSchemaMultiFields(array) {
+      console.log(JSON.stringify(array));
+      this.isSchemaMultiFieldsVisible = false;
+    },
+    addSchemaCopyTo(array) {
+      console.log(JSON.stringify(array));
+      this.isCopyToFieldsVisible = false;
     },
     deleteField(row) {
       this.$message.confirmMessage(`确定删除字段${row.fieldName}吗?`, () => {
@@ -455,9 +659,12 @@ export default {
         fieldType: 'keyword',
         multi: false,
         children: [],
+        multiField: [],
+        copyTo: [],
         search: false,
         isNew: true,
         dynamic: false,
+        store: false,
       };
       this.versionInfo.schema.splice(index + 1, 0, newRow);
     },
@@ -478,6 +685,17 @@ export default {
         num = 8;
       }
       return num;
+    },
+    allSourceFields() {
+      const sourceFields = [];
+      this.versionInfo.schema.forEach((el) => {
+        if (el.fieldType === 'nested') {
+          this.getNestedFieldName(el, '', sourceFields);
+          return;
+        }
+        sourceFields.push(el.fieldName);
+      });
+      return sourceFields;
     },
     clusterNodes() {
       let arr = [];
@@ -553,5 +771,12 @@ export default {
 
 .version-info-dialog .el-checkbox {
     color: #eee;
+}
+.source-setting{
+    padding-left: 6px;
+    padding-right: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border: 1px solid gray;
 }
 </style>

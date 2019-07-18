@@ -42,6 +42,8 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
 
+import com.google.gson.Gson;
+import com.vip.pallas.mybatis.entity.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.entity.ContentType;
@@ -64,13 +66,6 @@ import com.vip.pallas.bean.ApproveType;
 import com.vip.pallas.bean.TemplateImport;
 import com.vip.pallas.bean.TemplateInfo;
 import com.vip.pallas.exception.PallasException;
-import com.vip.pallas.mybatis.entity.Approve;
-import com.vip.pallas.mybatis.entity.Cluster;
-import com.vip.pallas.mybatis.entity.DataSource;
-import com.vip.pallas.mybatis.entity.Index;
-import com.vip.pallas.mybatis.entity.SearchTemplate;
-import com.vip.pallas.mybatis.entity.SearchTemplateHistory;
-import com.vip.pallas.mybatis.entity.TemplateWithTimeoutRetry;
 import com.vip.pallas.mybatis.repository.DataSourceRepository;
 import com.vip.pallas.mybatis.repository.SearchTemplateHistoryRepository;
 import com.vip.pallas.mybatis.repository.SearchTemplateRepository;
@@ -365,7 +360,7 @@ public class SearchTemplateServiceImpl implements SearchTemplateService {
             demo.append("    \"    \\\"params\\\" : {\\n\" +\n");
             String comma="";
             for (Map.Entry<String, Object> entry : params.entrySet()) {
-                demo.append(comma+"    \"        \\\""+entry.getKey()+"\\\": "+entry.getValue());
+                demo.append(comma+"    \"        \\\""+entry.getKey()+"\\\": "+new Gson().toJson(entry.getValue()).replace("\"","\\\""));
                 comma=",\\n\" +\n";
             }
             demo.append("\\n\" +\n");
@@ -374,7 +369,7 @@ public class SearchTemplateServiceImpl implements SearchTemplateService {
             demo.append("    \"    \\\"params\\\" : {}\" +\n");
         }
         demo.append("    \"}\", ContentType.APPLICATION_JSON);\n");
-        demo.append("Response response = buildClient.performRequest(\"POST\",\"/" + index.getIndexName() + "/_search/template\", Collections.EMPTY_MAP, \""+dbEntity.getTemplateName()+"\",entity);\n");
+        demo.append("Response response = buildClient.performRequest(\"POST\",\"/" + index.getIndexName() + "/_search/template\", Collections.EMPTY_MAP, \""+index.getIndexName() + "_" + dbEntity.getTemplateName()+"\",entity);\n");
 
         return demo.toString();
     }
@@ -390,7 +385,7 @@ public class SearchTemplateServiceImpl implements SearchTemplateService {
     }
 
     @Override
-    public String inlineDebug(SearchTemplate t, boolean renderOnly, Long clusterId) throws Exception {
+    public String inlineDebug(SearchTemplate t, boolean renderOnly, boolean profile, Long clusterId) throws Exception {
         preCheck(t);
         Index index = indexService.findById(t.getIndexId());
 
@@ -398,7 +393,7 @@ public class SearchTemplateServiceImpl implements SearchTemplateService {
         String content = "\"" + TemplateParamsExtractUtil.renderMacrosThenFormat(t.getContent(), allFiles) + "\"";
 
         StringBuilder sb = new StringBuilder()
-                .append("{\n\"inline\":")
+                .append("{\n" + (profile ? "\"profile\": true,\n" : "") + "\"inline\":")
                 .append(content)
                 .append(",\n\"params\":")
                 .append(t.getParams())
@@ -581,6 +576,11 @@ public class SearchTemplateServiceImpl implements SearchTemplateService {
 	@Override
 	public List<TemplateWithTimeoutRetry> findAllRetryTimeOutConfig() {
 		return repository.findAllRetryTimeOutConfig();
+	}
+
+	@Override
+	public List<TemplateWithThrottling> findAllThrottlingConfig() {
+		return repository.findAllThrottlingConfig();
 	}
 
 	@Override

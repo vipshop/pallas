@@ -30,7 +30,9 @@ public class IndexMetricInfoModel extends MetricInfoModel implements Serializabl
     private MonitorMetricModel<Date, Double> index_disk_primary;
 
     private MonitorMetricModel<Date, Long> segmentCount;
+    private MonitorMetricModel<Date, Long> primarySegmentCount;
     private MonitorMetricModel<Date, Long> documentCount;
+    private MonitorMetricModel<Date, Long> primaryDocumentCount;
 
     public IndexGaugeMetricModel getGaugeMetric() {
         return gaugeMetric;
@@ -86,5 +88,21 @@ public class IndexMetricInfoModel extends MetricInfoModel implements Serializabl
 
     public void setIndex_disk_primary(MonitorMetricModel<Date, Double> index_disk_primary) {
         this.index_disk_primary = index_disk_primary;
+    }
+
+    public MonitorMetricModel<Date, Long> getPrimarySegmentCount() {
+        return primarySegmentCount;
+    }
+
+    public void setPrimarySegmentCount(MonitorMetricModel<Date, Long> primarySegmentCount) {
+        this.primarySegmentCount = primarySegmentCount;
+    }
+
+    public MonitorMetricModel<Date, Long> getPrimaryDocumentCount() {
+        return primaryDocumentCount;
+    }
+
+    public void setPrimaryDocumentCount(MonitorMetricModel<Date, Long> primaryDocumentCount) {
+        this.primaryDocumentCount = primaryDocumentCount;
     }
 }

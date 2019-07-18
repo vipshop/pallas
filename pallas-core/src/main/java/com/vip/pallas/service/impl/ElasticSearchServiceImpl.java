@@ -41,6 +41,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import com.vip.pallas.bean.*;
+import com.vip.pallas.entity.MappingParentType;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -57,13 +59,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.gson.Gson;
-import com.vip.pallas.bean.ClusterSettings;
-import com.vip.pallas.bean.EsAliases;
-import com.vip.pallas.bean.EsMappings;
 import com.vip.pallas.bean.EsMappings.Item;
 import com.vip.pallas.bean.EsMappings.Mappings;
 import com.vip.pallas.bean.EsMappings.Propertie;
-import com.vip.pallas.bean.IndexSettings;
 import com.vip.pallas.bean.monitor.ShardInfoModel;
 import com.vip.pallas.mybatis.entity.Cluster;
 import com.vip.pallas.mybatis.entity.Index;
@@ -100,23 +98,151 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 	@Override
 	public String genMappingJsonByVersionIdAndClusterName(Long versionId, String clusterName) {
 		List<Mapping> mappingList = mappingRepository.selectByVersionId(versionId);
-		IndexVersion indexVersion = indexVersionRepository.selectByPrimaryKey(versionId);
 		if(mappingList == null){
 			return null;
 		}
-		
 		EsMappings esMappings = new EsMappings();
 		Mappings mappings = new Mappings();
-		Item item = new Item();
-		Map<String, Propertie> propertieMap = new HashMap<String, Propertie>();
-		
 		esMappings.setMappings(mappings);
+		Item item = new Item();
+		item.setIncludeInAll(false);
+		item.setDynamic(false);
+		Map<String, Propertie> propertyMap = new HashMap<>();
+		item.setProperties(propertyMap);
+		mappings.setItem(item);
+
+		IndexVersion indexVersion = indexVersionRepository.selectByPrimaryKey(versionId);
+		Map<String, Object> settings = constructSetting(indexVersion, clusterName);
+		esMappings.setSettings(settings);
+
+		EsSourceMapping sourceMapping = constructSourceMapping(indexVersion);
+		if (sourceMapping != null){
+			item.setSource(sourceMapping);
+		}
 		
+		Map<Long, List<Mapping>> mappingMap = new HashMap<>();
+		List<Mapping> firstLayerList = new ArrayList<>();
+		constructMappings(mappingList, firstLayerList, mappingMap);
+		
+		addSourceField(firstLayerList);
+
+		for (Mapping mapping : firstLayerList) {
+			Propertie prop = new Propertie();
+			propertyMap.put(mapping.getFieldName(), prop);
+			convertMappingToProperty(mapping, prop, mappingMap);
+		}
+
+		//#538 pallas-console版本管理，索引字段支持es自有分词插件及ik插件的选择
+		checkAndUpdateAnalysisSettings(mappingList,settings);
+		String s =  new Gson().toJson(esMappings);
+		return s;
+	}
+
+	private EsSourceMapping constructSourceMapping(IndexVersion indexVersion){
+		// 如果设置了 enabled = false， 则直接忽略后面的配置
+		if (indexVersion.getSourceDisabled() == Boolean.TRUE){
+			EsSourceMapping source = new EsSourceMapping();
+			source.setEnabled(false);
+			return source;
+		}
+		if (StringUtils.isNotBlank(indexVersion.getSourceIncludes())||StringUtils.isNotBlank(indexVersion.getSourceExcludes())){
+			EsSourceMapping source = new EsSourceMapping();
+			if (StringUtils.isNotBlank(indexVersion.getSourceIncludes())){
+				List<String> include = Arrays.asList(indexVersion.getSourceIncludes().split(","));
+				source.setIncludes(include);
+			}
+			if (StringUtils.isNotBlank(indexVersion.getSourceExcludes())){
+				List<String> exclude = Arrays.asList(indexVersion.getSourceExcludes().split(","));
+				source.setExcludes(exclude);
+			}
+			return source;
+		}
+		return null;
+	}
+
+	private void checkAndUpdateAnalysisSettings(List<Mapping> mappingList,Map<String, Object> settings){
+		boolean hasNgramAnalyzer = false;
+		boolean hasNormalizedKeyword = false;
+		for (Mapping mapping: mappingList){
+			if (mapping.isNGramText()){
+				hasNgramAnalyzer = true;
+			}
+			if (mapping.isNormalizedKeyword()){
+				hasNormalizedKeyword = true;
+			}
+			if (hasNgramAnalyzer&&hasNormalizedKeyword){
+				break;
+			}
+		}
+		if (hasNgramAnalyzer || hasNormalizedKeyword) {
+			addAnalysisSettings(settings, hasNgramAnalyzer, hasNormalizedKeyword);
+		}
+	}
+
+	/**
+	 * 递归检查是否有嵌套field或者multi_field
+	 * @param parentMapping
+	 * @param parentProp
+	 * @param mappingMap
+	 */
+	private void convertMappingToProperty(Mapping parentMapping, Propertie parentProp, Map<Long, List<Mapping>> mappingMap){
+		List<Mapping> subFieldMappings = mappingMap.get(parentMapping.getId());
+		if (subFieldMappings==null){
+			constructProperty(parentMapping,parentProp);
+			return;
+		}
+		// 有嵌套域或者multi_fields
+		Map<String, Propertie> subFieldPropertyMap = new HashMap<>();
+		if (StringUtils.isNotBlank(parentMapping.getCopyTo())) {
+			parentProp.setCopy_to(Arrays.asList(parentMapping.getCopyTo().split("\\s*,\\s*")));
+		}
+		if (!subFieldMappings.isEmpty() && subFieldMappings.get(0).getParentType() == MappingParentType.MULTI_FIELDS.val()){
+			constructProperty(parentMapping,parentProp);
+			parentProp.setFields(subFieldPropertyMap);
+		}else {
+			if (parentMapping.getDynamic()) {
+				parentProp.setDynamic(Boolean.TRUE);
+			}
+			if (!"object".equals(parentMapping.getFieldType())) {
+				parentProp.setType("nested");
+				parentProp.setDocValues(null);
+				parentProp.setIndex(null);
+			}
+			parentProp.setProperties(subFieldPropertyMap);
+		}
+		for (Mapping subMapping : subFieldMappings) {
+			Propertie subProp = new Propertie();
+			subFieldPropertyMap.put(subMapping.getFieldName(), subProp);
+			convertMappingToProperty(subMapping, subProp, mappingMap);
+		}
+	}
+
+	private void constructProperty(Mapping mapping,Propertie prop){
+		prop.setType(mapping.getESRealFieldType());
+		prop.setDocValues(mapping.getDocValue());
+		if (mapping.getStore()!=null&&mapping.getStore()==Boolean.TRUE){
+			prop.setStore(mapping.getStore());
+		}
+		prop.setIndex(mapping.getSearch());
+		if (mapping.isNGramText()) {
+			prop.setAnalyzer("edge_ngram_analyzer");
+		}
+		if (mapping.isNormalizedKeyword()) {
+			prop.setNormalizer("uppercase_normalizer");
+		}
+		if (StringUtils.isNotBlank(mapping.getCopyTo())) {
+			prop.setCopy_to(Arrays.asList(mapping.getCopyTo().split("\\s*,\\s*")));
+		}
+		if(prop.isDateType()){
+			prop.setFormat("yyyy-MM-dd'T'HH:mm:ssZ||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss'.0'||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd||epoch_millis");
+		}
+	}
+
+	private Map<String,Object> constructSetting(IndexVersion indexVersion, String clusterName){
 		Map<String, Object> settings = new HashMap<>();
 		settings.put("number_of_shards", indexVersion.getNumOfShards());
 		settings.put("number_of_replicas", indexVersion.getNumOfReplication());
 		settings.put("refresh_interval", indexVersion.getRefreshInterval() + "s");
-		settings.put("translog.durability", "async");
 
 		//设置slowlog
 		settings.put("indexing.slowlog.level", "info");
@@ -126,92 +252,54 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 		settings.put("search.slowlog.threshold.fetch.info", indexVersion.getFetchSlowThreshold() != -1 ? indexVersion.getFetchSlowThreshold() + "ms" : "-1");
 		settings.put("search.slowlog.threshold.query.info", indexVersion.getQuerySlowThreshold() != -1 ? indexVersion.getQuerySlowThreshold() + "ms" : "-1");
 
+		// translog
+		settings.put("index.translog.flush_threshold_size", indexVersion.getFlushThresholdSize());
+		settings.put("index.translog.sync_interval", indexVersion.getSyncInterval());
+		settings.put("index.translog.durability", indexVersion.getTranslogDurability());
+		// routing
+		settings.put("index.routing.allocation.total_shards_per_node", indexVersion.getTotalShardsPerNode());
+		// index
+		settings.put("index.max_result_window", indexVersion.getMaxResultWindow());
+
 		//设置allocation nodes
 		String nodes = extractAllocationNodes(indexVersion.getAllocationNodes(), clusterName);
 		if (StringUtils.isNotEmpty(nodes)) {
 			settings.put("index.routing.allocation.include._name", nodes);
 		}
-		esMappings.setSettings(settings);
-		
-		item.setIncludeInAll(false);
-		item.setDynamic(false);
-		item.setProperties(propertieMap);
-		
-		mappings.setItem(item);
-		
-		Map<Long, List<Mapping>> mappingMap = new HashMap<>();
-		List<Mapping> firstLayerList = new ArrayList<>();
-
-		constructMappings(mappingList, firstLayerList, mappingMap);
-		
-		addSourceField(firstLayerList);
-		// addIdField(firstLayerList);
-		
-		boolean hasNgramAnalyzer = false;
-		boolean hasNormalizedKeyword = false;
-
-		for (Mapping mapping : firstLayerList) {
-			List<Mapping> nestedMappings = mappingMap.get(mapping.getId());
-			Propertie prop = new Propertie();
-			
-			if(nestedMappings == null){
-				prop.setType(mapping.getESRealFieldType());
-				prop.setDocValues(mapping.getDocValue());
-				prop.setIndex(mapping.getSearch());
-				if (mapping.isNGramText()) {
-					hasNgramAnalyzer = true;
-					prop.setAnalyzer("edge_ngram_analyzer");
-				}
-				if (mapping.isNormalizedKeyword()) {
-					hasNormalizedKeyword = true;
-					prop.setNormalizer("uppercase_normalizer");
-				}
-			}
-			
-			if(prop.isDateType()){
-				prop.setFormat("yyyy-MM-dd'T'HH:mm:ssZ||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss'.0'||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd||epoch_millis");
-			}
-			propertieMap.put(mapping.getFieldName(), prop);
-			
-			if(nestedMappings != null){
-				Map<String, Propertie> nestedPropertieMap = new HashMap<>();
-				if (mapping.getDynamic()) {
-					prop.setDynamic(Boolean.TRUE);
-				}
-				if (!"object".equals(mapping.getFieldType())) {
-					prop.setType("nested");
-					prop.setDocValues(null);
-					prop.setIndex(null);
-				}
-
-				prop.setProperties(nestedPropertieMap);
-				
-				for (Mapping nestedMapping : nestedMappings) {
-					Propertie nestedProp = new Propertie();
-					nestedProp.setType(nestedMapping.getESRealFieldType());
-					nestedProp.setDocValues(nestedMapping.getDocValue());
-					nestedProp.setIndex(nestedMapping.getSearch());
-					if(nestedProp.isDateType()){
-						nestedProp.setFormat("yyyy-MM-dd'T'HH:mm:ssZ||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss'.0'||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd||epoch_millis");
-					}
-					if (nestedMapping.isNGramText()) {
-						hasNgramAnalyzer = true;
-					}
-					if (nestedMapping.isNormalizedKeyword()) {
-						hasNormalizedKeyword = true;
-					}
-					nestedPropertieMap.put(nestedMapping.getFieldName(), nestedProp);
-				}
-			}
-		}
-
-		//#538 pallas-console版本管理，索引字段支持es自有分词插件及ik插件的选择
-		if (hasNgramAnalyzer || hasNormalizedKeyword) {
-			addAnalysisSettings(settings, hasNgramAnalyzer, hasNormalizedKeyword);
-		}
-		String s =  new Gson().toJson(esMappings);
-		return s;
+		return settings;
 	}
+
+	public String genDynamicSettingJson(IndexVersion indexVersion, String clusterName){
+        return new Gson().toJson(constructDynamicSetting(indexVersion,clusterName));
+    }
+
+    private Map<String,Object> constructDynamicSetting(IndexVersion indexVersion, String clusterName){
+        Map<String, Object> settings = new HashMap<>();
+        settings.put("number_of_replicas", indexVersion.getNumOfReplication());
+        settings.put("refresh_interval", indexVersion.getRefreshInterval() + "s");
+
+        //设置slowlog
+        settings.put("indexing.slowlog.threshold.index.info", indexVersion.getIndexSlowThreshold() != -1 ? indexVersion.getIndexSlowThreshold() + "ms" : "-1");
+        settings.put("search.slowlog.threshold.fetch.info", indexVersion.getFetchSlowThreshold() != -1 ? indexVersion.getFetchSlowThreshold() + "ms" : "-1");
+        settings.put("search.slowlog.threshold.query.info", indexVersion.getQuerySlowThreshold() != -1 ? indexVersion.getQuerySlowThreshold() + "ms" : "-1");
+
+        // translog
+        settings.put("index.translog.flush_threshold_size", indexVersion.getFlushThresholdSize());
+        // sync_interval 无法动态更新
+//        settings.put("index.translog.sync_interval", indexVersion.getSyncInterval());
+        settings.put("index.translog.durability", indexVersion.getTranslogDurability());
+        // routing
+        settings.put("index.routing.allocation.total_shards_per_node", indexVersion.getTotalShardsPerNode());
+        // index
+        settings.put("index.max_result_window", indexVersion.getMaxResultWindow());
+
+        //设置allocation nodes
+        String nodes = extractAllocationNodes(indexVersion.getAllocationNodes(), clusterName);
+        if (StringUtils.isNotEmpty(nodes)) {
+            settings.put("index.routing.allocation.include._name", nodes);
+        }
+        return settings;
+    }
 
 	// cluster_name1:node1,node2;cluster_name2:node4;
 	private static String extractAllocationNodes(String nodes, String clusterName) {
@@ -289,38 +377,58 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 			if(mapping.getParentId() == null){
 				firstLayerList.add(mapping);
 			}else{
-				List<Mapping> nestedMappings = mappingMap.get(mapping.getParentId());
-				if(nestedMappings == null){
-					nestedMappings = new ArrayList<Mapping>();
-					mappingMap.put(mapping.getParentId(), nestedMappings);
+				List<Mapping> subFieldMappings = mappingMap.get(mapping.getParentId());
+				if(subFieldMappings == null){
+					subFieldMappings = new ArrayList<>();
+					mappingMap.put(mapping.getParentId(), subFieldMappings);
 				}
-				nestedMappings.add(mapping);
+				subFieldMappings.add(mapping);
 			}
 		}
 	}
 
-	@Override
-	public String createIndex(String indexName, Long indexId, Long versionId) throws IOException {
-		StringBuilder result = new StringBuilder();
-		List<Cluster> clusters = clusterRepository.selectPhysicalClustersByIndexId(indexId);
-		for (Cluster cluster : clusters) {
-			try {
-				if (this.isExistIndex(indexName, cluster.getHttpAddress(), versionId)) {
-					this.deleteIndex(cluster.getHttpAddress(), indexName + "_" + versionId);
-				}
-				NStringEntity entity = new NStringEntity(genMappingJsonByVersionIdAndClusterName(versionId, cluster.getClusterId()),
-						ContentType.APPLICATION_JSON);
-				result.append(IOUtils.toString(ElasticRestClient.build(cluster.getHttpAddress())
-						.performRequest("PUT", "/" + indexName + "_" + versionId, Collections.emptyMap(), entity)
-						.getEntity().getContent())).append("\\n");
-			} catch (IOException e) {
-				logger.error(e.getClass() + " " + e.getMessage(), e);
-				throw e;
-			}
-		}
-		return result.toString();
+    @Override
+    public String createIndex(String indexName, Long indexId, Long versionId) throws IOException {
+        StringBuilder result = new StringBuilder();
+        List<Cluster> clusters = clusterRepository.selectPhysicalClustersByIndexId(indexId);
+        for (Cluster cluster : clusters) {
+            try {
+                if (this.isExistIndex(indexName, cluster.getHttpAddress(), versionId)) {
+                    this.deleteIndex(cluster.getHttpAddress(), indexName + "_" + versionId);
+                }
+                NStringEntity entity = new NStringEntity(genMappingJsonByVersionIdAndClusterName(versionId, cluster.getClusterId()),
+                        ContentType.APPLICATION_JSON);
+                result.append(IOUtils.toString(ElasticRestClient.build(cluster.getHttpAddress())
+                        .performRequest("PUT", "/" + indexName + "_" + versionId, Collections.emptyMap(), entity)
+                        .getEntity().getContent())).append("\\n");
+            } catch (IOException e) {
+                logger.error(e.getClass() + " " + e.getMessage(), e);
+                throw e;
+            }
+        }
+        return result.toString();
 
-	}
+    }
+
+    @Override
+    public String dynamicUpdateIndexSettings(String indexName, Long indexId, IndexVersion indexVersion) throws IOException {
+        StringBuilder result = new StringBuilder();
+        List<Cluster> clusters = clusterRepository.selectPhysicalClustersByIndexId(indexId);
+        for (Cluster cluster : clusters) {
+            try {
+                NStringEntity entity = new NStringEntity(genDynamicSettingJson( indexVersion, cluster.getClusterId()),
+                        ContentType.APPLICATION_JSON);
+                result.append(IOUtils.toString(ElasticRestClient.build(cluster.getHttpAddress())
+                        .performRequest("PUT", "/" + indexName + "_" +  indexVersion.getId()+"/_settings", Collections.emptyMap(), entity)
+                        .getEntity().getContent())).append("\\n");
+            } catch (IOException e) {
+                logger.error(e.getClass() + " " + e.getMessage(), e);
+                throw e;
+            }
+        }
+        return result.toString();
+
+    }
 
 	@Override
 	public String deleteIndex(String indexName, Long indexId, Long versionId) {

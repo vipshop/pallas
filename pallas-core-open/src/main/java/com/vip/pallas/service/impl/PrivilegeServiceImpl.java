@@ -57,15 +57,19 @@ public class PrivilegeServiceImpl implements PrivilegeService {
 	public void deleteIndexPrivilege(String indexIdAndName) throws Exception {}
 
 	@Override
-	public void deleteIndexAsset(String indexIdAndName) throws Exception {}
-
-	@Override
 	public void deleteClusterPrivilege(String clusterId) throws Exception {}
 
 	@Override
-	public void deleteClusterAsset(String clusterId) throws Exception {}
+	public void deleteVersionPrivilege(String privilegeName) throws Exception {
 
-    @Override
+	}
+
+	@Override
+	public void deleteTemplatePrivilege(String privilegeName) throws Exception {
+
+	}
+
+	@Override
     public Map<String, List<PrivilegeResultModel>> getPrivilegeByUsers(List<String> userAccountIds)
             throws Exception {
         Map<String, List<PrivilegeResultModel>> privilegeResultMap = new HashMap<>(); 

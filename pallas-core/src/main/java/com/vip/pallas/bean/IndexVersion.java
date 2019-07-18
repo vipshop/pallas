@@ -45,6 +45,86 @@ public class IndexVersion {
 	private Byte refreshInterval;
 	private String realClusterIds;
 
+	private Long maxResultWindow;
+
+	private Integer totalShardsPerNode;
+
+	private String flushThresholdSize;
+
+	private String syncInterval;
+
+	private String translogDurability;
+
+	private Boolean sourceDisabled;
+
+	private String sourceIncludes;
+
+	private String sourceExcludes;
+
+	public Boolean getSourceDisabled() {
+		return sourceDisabled;
+	}
+
+	public void setSourceDisabled(Boolean sourceDisabled) {
+		this.sourceDisabled = sourceDisabled;
+	}
+
+	public String getSourceIncludes() {
+		return sourceIncludes;
+	}
+
+	public void setSourceIncludes(String sourceIncludes) {
+		this.sourceIncludes = sourceIncludes;
+	}
+
+	public String getSourceExcludes() {
+		return sourceExcludes;
+	}
+
+	public void setSourceExcludes(String sourceExcludes) {
+		this.sourceExcludes = sourceExcludes;
+	}
+
+	public Long getMaxResultWindow() {
+		return maxResultWindow;
+	}
+
+	public void setMaxResultWindow(Long maxResultWindow) {
+		this.maxResultWindow = maxResultWindow;
+	}
+
+	public int getTotalShardsPerNode() {
+		return totalShardsPerNode;
+	}
+
+	public void setTotalShardsPerNode(Integer totalShardsPerNode) {
+		this.totalShardsPerNode = totalShardsPerNode;
+	}
+
+
+	public String getFlushThresholdSize() {
+		return flushThresholdSize;
+	}
+
+	public void setFlushThresholdSize(String flushThresholdSize) {
+		this.flushThresholdSize = flushThresholdSize;
+	}
+
+	public String getSyncInterval() {
+		return syncInterval;
+	}
+
+	public void setSyncInterval(String syncInterval) {
+		this.syncInterval = syncInterval;
+	}
+
+	public String getTranslogDurability() {
+		return translogDurability;
+	}
+
+	public void setTranslogDurability(String translogDurability) {
+		this.translogDurability = translogDurability;
+	}
 
     public void addField(VersionField field){
     	getSchema().add(field);
@@ -58,15 +138,40 @@ public class IndexVersion {
 		private boolean search;
 		private boolean docValue;
 		private boolean dynamic;
+		private boolean store;
 		private List<VersionField> children;
-		
+		private List<VersionField> multiField;
+		private List<String> copyTo;
+
 		public void addField(VersionField field){
-	    	if(this.children == null){
-	    		setChildren(new ArrayList<>());
-	    	}
-	    	getChildren().add(field);
-	    }
-		
+			if(this.children == null){
+				setChildren(new ArrayList<>());
+			}
+			getChildren().add(field);
+		}
+
+		public void addMultiField(VersionField field){
+			if(this.multiField == null){
+				setMultiField(new ArrayList<>());
+			}
+			getMultiField().add(field);
+		}
+
+		public void addCopyToField(String field){
+			if(this.copyTo == null){
+				setCopyTo(new ArrayList<>());
+			}
+			getCopyTo().add(field);
+		}
+
+		public boolean isStore() {
+			return store;
+		}
+
+		public void setStore(boolean store) {
+			this.store = store;
+		}
+
 		public String getFieldName() {
 			return fieldName;
 		}
@@ -120,6 +225,22 @@ public class IndexVersion {
 
 		public void setDynamic(boolean dynamic) {
 			this.dynamic = dynamic;
+		}
+
+		public List<VersionField> getMultiField() {
+			return multiField;
+		}
+
+		public void setMultiField(List<VersionField> multiField) {
+			this.multiField = multiField;
+		}
+
+		public List<String> getCopyTo() {
+			return copyTo;
+		}
+
+		public void setCopyTo(List<String> copyTo) {
+			this.copyTo = copyTo;
 		}
 
 		@Override

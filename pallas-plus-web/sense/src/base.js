@@ -129,6 +129,18 @@ function callES(server, url, method, data, successCallback, completeCallback, re
     });
 }
 
+function bigIntJSONParse(origJSON) {
+    const stringedJSON = origJSON.replace(/:\s*([-+Ee0-9.]+)/g, ': "uniqueprefix$1"');
+    const o = JSON.parse(stringedJSON, (key, value) => {
+      if (typeof value !== 'string') return value;
+      if (!value.startsWith('uniqueprefix')) return value;
+      value = value.slice('uniqueprefix'.length);
+      if (value.length < 17) return Number(value);
+      return bigInt(value);
+    });
+    return o;
+}
+
 function submitCurrentRequestToES() {
     var req = sense.utils.getCurrentRequest();
     if (!req) return;
@@ -157,7 +169,7 @@ function submitCurrentRequestToES() {
                     jsonStr = value.substring(jsonStart),
                     json;
                 try {
-                    json = JSON.parse(jsonStr);
+                    json = bigIntJSONParse(jsonStr);
                     jsonStr = JSON.stringify(json, null, 3);
                     sense.output.getSession().setValue(firstLine + "\n" + jsonStr);
                 }

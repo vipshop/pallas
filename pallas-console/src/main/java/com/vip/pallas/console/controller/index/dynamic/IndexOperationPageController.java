@@ -18,14 +18,16 @@
 package com.vip.pallas.console.controller.index.dynamic;
 
 import com.vip.pallas.bean.IndexOperationParams;
+import com.vip.pallas.bean.monitor.ExtMetricInfoModel;
+import com.vip.pallas.bean.monitor.MonitorQueryModel;
 import com.vip.pallas.console.utils.AuthorizeUtil;
 import com.vip.pallas.exception.BusinessLevelException;
-import com.vip.pallas.mybatis.entity.IndexOperationExample;
-import com.vip.pallas.mybatis.entity.IndexVersion;
-import com.vip.pallas.mybatis.entity.Page;
-import com.vip.pallas.service.IndexOperationService;
+import com.vip.pallas.mybatis.entity.*;
+import com.vip.pallas.service.*;
 import com.vip.pallas.utils.ObjectMapTool;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
@@ -35,15 +37,29 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @Validated
 public class IndexOperationPageController{
-
+    private static Logger logger = LoggerFactory.getLogger(IndexOperationPageController.class);
     @Autowired
     private IndexOperationService indexOperationService;
+
+    @Autowired
+    private MonitorService monitorService;
+
+    @Autowired
+    private IndexVersionService indexVersionService;
+
+    @Autowired
+    private IndexService indexService;
+
+    @Autowired
+    private ClusterService clusterService;
 
     @RequestMapping("/index/dynamic/page.json")
     public Map<String, Object> list(@RequestBody Map<String, Object> params) throws Exception {
@@ -84,11 +100,78 @@ public class IndexOperationPageController{
         long total = indexOperationService.countByExample(example);
         long pageCount = (int) (total % pageSize == 0 ? total / pageSize : total / pageSize + 1);
 
+        // 获取request rate & request latency
+        List<MonitorQueryModel> queryModels = constructMonitorQuery(indexId,versionId,timeRangeList);
+        if (queryModels != null&&queryModels.size()>0){
+            List<ExtMetricInfoModel> metricInfoModelList = new ArrayList<>(queryModels.size());
+            for (MonitorQueryModel query : queryModels) {
+                try{
+                    ExtMetricInfoModel metricInfoModel = new ExtMetricInfoModel(monitorService.getMetricInfoModel(query),query.getClusterName());
+                    metricInfoModelList.add(metricInfoModel);
+                }catch (Exception e){
+                    logger.info("get cluster metric error：{},clusterName:{}",e.getMessage(),query.getClusterName());
+                }
+            }
+            resultMap.put("metric",metricInfoModelList);
+        }
         resultMap.put("list", indexOperationService.selectByExampleWithBLOBs(example));
         resultMap.put("total", total);
         resultMap.put("pageCount", pageCount);
-
         return resultMap;
+    }
+
+    private List<MonitorQueryModel> constructMonitorQuery(Long indexId,Integer versionId,List<String> timeRangeList) throws ParseException {
+        List<MonitorQueryModel> result = new ArrayList<>();
+        Index index = indexService.findById(indexId);
+        if (null == index)return null;
+        Cluster cluster =  clusterService.findByName(index.getClusterName());
+        if(null == cluster) return null;
+        if (StringUtils.isNotEmpty(cluster.getRealClusters())){
+            // 逻辑集群
+            String[] clusterArr =  cluster.getRealClusters().split(",");
+            for (String clusterId : clusterArr) {
+                Cluster logicCluster = clusterService.selectByPrimaryKey(Long.parseLong(clusterId));
+                MonitorQueryModel query = getQueryModel(index,versionId,logicCluster.getClusterId(),timeRangeList);
+                if (query!=null){
+                    result.add(query);
+                }
+            }
+        }else {
+            MonitorQueryModel query = getQueryModel(index,versionId,index.getClusterName(),timeRangeList);
+            if (query!=null){
+                result.add(query);
+            }
+
+        }
+
+        return result;
+    }
+
+    private MonitorQueryModel getQueryModel(Index index,Integer versionId,String clusterName,List<String> timeRangeList) throws ParseException {
+        MonitorQueryModel query = new MonitorQueryModel();
+        if (null == versionId || 0 == versionId){
+            // 没传则拿启用中的
+            IndexVersion version = indexVersionService.findUsedIndexVersionByIndexId(index.getId());
+            if (null == version)return null;
+            query.setIndexName(index.getIndexName()+"_"+version.getId());
+        }else {
+            query.setIndexName(index.getIndexName()+"_"+versionId);
+        }
+        query.setClusterName(clusterName);
+        if (timeRangeList != null && timeRangeList.size() == 2 ) {
+            DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+            format.setTimeZone(TimeZone.getTimeZone("Asia/Beijing"));
+            Date start = format.parse(timeRangeList.get(0).replaceAll("\"", ""));
+            Date end = format.parse(timeRangeList.get(1).replaceAll("\"", ""));
+            query.setFrom(start.getTime());
+            query.setTo(end.getTime());
+        }else {
+            // set last day time
+            long cur = System.currentTimeMillis();
+            query.setFrom(cur-TimeUnit.DAYS.toMillis(1));
+            query.setTo(cur);
+        }
+        return query;
     }
 
     @RequestMapping("/index/dynamic/delete.json")

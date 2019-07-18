@@ -49,7 +49,7 @@ public class IndexVersion {
     
     private Boolean isSync;
     
-    private int vdp;
+    private Integer vdp;
     
     private Boolean filterFields;
     
@@ -72,6 +72,88 @@ public class IndexVersion {
     private Byte refreshInterval;
 
     private String rampUp;
+
+    private Long maxResultWindow;
+
+    private Integer totalShardsPerNode;
+
+    private String flushThresholdSize;
+
+    private String syncInterval;
+
+    private String translogDurability;
+
+    private Boolean sourceDisabled;
+
+    private String sourceIncludes;
+
+    private String sourceExcludes;
+
+    public Boolean getSourceDisabled() {
+        return sourceDisabled;
+    }
+
+    public void setSourceDisabled(Boolean sourceDisabled) {
+        this.sourceDisabled = sourceDisabled;
+    }
+
+
+    public String getSourceIncludes() {
+        return sourceIncludes;
+    }
+
+    public void setSourceIncludes(String sourceIncludes) {
+        this.sourceIncludes = sourceIncludes;
+    }
+
+    public String getSourceExcludes() {
+        return sourceExcludes;
+    }
+
+    public void setSourceExcludes(String sourceExcludes) {
+        this.sourceExcludes = sourceExcludes;
+    }
+
+    public Long getMaxResultWindow() {
+        return maxResultWindow;
+    }
+
+    public void setMaxResultWindow(Long maxResultWindow) {
+        this.maxResultWindow = maxResultWindow;
+    }
+
+    public int getTotalShardsPerNode() {
+        return totalShardsPerNode;
+    }
+
+    public void setTotalShardsPerNode(Integer totalShardsPerNode) {
+        this.totalShardsPerNode = totalShardsPerNode;
+    }
+
+
+    public String getFlushThresholdSize() {
+        return flushThresholdSize;
+    }
+
+    public void setFlushThresholdSize(String flushThresholdSize) {
+        this.flushThresholdSize = flushThresholdSize;
+    }
+
+    public String getSyncInterval() {
+        return syncInterval;
+    }
+
+    public void setSyncInterval(String syncInterval) {
+        this.syncInterval = syncInterval;
+    }
+
+    public String getTranslogDurability() {
+        return translogDurability;
+    }
+
+    public void setTranslogDurability(String translogDurability) {
+        this.translogDurability = translogDurability;
+    }
 
     public Long getId() {
         return id;
@@ -185,11 +267,11 @@ public class IndexVersion {
 		this.isSync = isSync;
 	}
 
-	public int getVdp() {
+	public Integer getVdp() {
 		return vdp;
 	}
 
-	public void setVdp(int vdp) {
+	public void setVdp(Integer vdp) {
 		this.vdp = vdp;
 	}
 
@@ -309,6 +391,11 @@ public class IndexVersion {
                 ", fetchSlowThreshold=" + fetchSlowThreshold +
                 ", querySlowThreshold=" + querySlowThreshold +
                 ", refreshInterval=" + refreshInterval +
+                ", maxResultWindow=" + maxResultWindow +
+                ", totalShardsPerNode=" + totalShardsPerNode +
+                ", flushThresholdSize='" + flushThresholdSize + '\'' +
+                ", syncInterval='" + syncInterval + '\'' +
+                ", translogDurability='" + translogDurability + '\'' +
                 ", rampUp='" + rampUp + '\'' +
                 '}';
     }

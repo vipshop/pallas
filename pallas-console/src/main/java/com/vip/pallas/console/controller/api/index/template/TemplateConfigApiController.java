@@ -17,6 +17,7 @@
 
 package com.vip.pallas.console.controller.api.index.template;
 
+import com.vip.pallas.mybatis.entity.TemplateWithThrottling;
 import com.vip.pallas.mybatis.entity.TemplateWithTimeoutRetry;
 import com.vip.pallas.service.SearchTemplateService;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,4 +36,10 @@ public class TemplateConfigApiController {
     public List<TemplateWithTimeoutRetry> findAllRetryTimeOutConfig() {
         return templateService.findAllRetryTimeOutConfig();
     }
+
+	@RequestMapping("/template/throttling_configured.json")
+	public List<TemplateWithThrottling> findAllThrottlingConfig() {
+		List<TemplateWithThrottling> configs = templateService.findAllThrottlingConfig();
+		return configs;
+	}
 }

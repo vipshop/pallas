@@ -1,17 +1,17 @@
 <template>
     <el-dialog title="新建模板" v-model="isTemplateAddVisible" :before-close="closeDialog" size="tiny" v-loading="loading" element-loading-text="请稍等···">
-        <el-form :model="templateAddInfo" :rules="rules" ref="templateAddInfo" label-width="140px">
+        <el-form :model="templateAddInfo" :rules="rules" ref="templateAddInfo" label-width="90px">
             <el-row>
-                <el-col :span="23">
-                    <el-form-item label="templateName" prop="templateName">
+                <el-col :span="22">
+                    <el-form-item label="名称" prop="templateName">
                         <el-input v-model="templateAddInfo.templateName"></el-input>
                     </el-form-item>
                 </el-col>
             </el-row>
             <el-row>
-                <el-col>
-                    <el-form-item label="type" prop="type">
-                        <el-select v-model="templateAddInfo.type">
+                <el-col :span="22">
+                    <el-form-item label="类型" prop="type">
+                        <el-select v-model="templateAddInfo.type" style="width: 100%">
                             <el-option label="模板" value="1" key="1"></el-option>
                             <el-option label="宏" value="0" key="0"></el-option>
                         </el-select>
@@ -19,7 +19,7 @@
                 </el-col>
             </el-row>
             <el-row>
-                <el-col :span="23">
+                <el-col :span="22">
                     <el-form-item label="描述" prop="description">
                         <el-input type="textarea" v-model="templateAddInfo.description"></el-input>
                     </el-form-item>

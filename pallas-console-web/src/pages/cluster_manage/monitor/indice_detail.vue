@@ -12,7 +12,7 @@
               {{bytesToSize(scope.row.document_store_byte_primary)}}
             </template>
           </el-table-column>
-          <el-table-column prop="documentCount" label="Documents"></el-table-column>
+          <el-table-column prop="primaryDocumentCount" label="Documents(Primary)"></el-table-column>
           <el-table-column prop="totalShardCount" label="Total Shards"></el-table-column>
           <el-table-column prop="unassignedShardCount" label="Unassigned Shards"></el-table-column>            
           <el-table-column prop="health" label="Health"></el-table-column>
@@ -103,21 +103,23 @@ export default {
       };
       this.indexDiskInfo = optionInfo;
     },
-    getSegmentCount(segmentCount, unit) {
+    getSegmentCount(total, primary, unit) {
       const optionInfo = {
-        xAxis: segmentCount.map(e => e.x),
+        xAxis: total.map(e => e.x),
         seriesData: [
-          { name: 'segment count', data: segmentCount.map(e => e.y) },
+          { name: 'segment-primary', data: primary.map(e => e.y) },
+          { name: 'segment-total', data: total.map(e => e.y) },
         ],
         yAxisName: unit || '个',
       };
       this.segmentCountInfo = optionInfo;
     },
-    getDocumentCount(documentCount, unit) {
+    getDocumentCount(total, primary, unit) {
       const optionInfo = {
-        xAxis: documentCount.map(e => e.x),
+        xAxis: total.map(e => e.x),
         seriesData: [
-          { name: 'document count', data: documentCount.map(e => e.y) },
+          { name: 'document-primary', data: primary.map(e => e.y) },
+          { name: 'document-total', data: total.map(e => e.y) },
         ],
         yAxisName: unit || '个',
       };
@@ -160,8 +162,10 @@ export default {
           this.getIndexDisk(data.index_disk_total.metricModel,
             data.index_disk_primary.metricModel,
             data.index_disk_total.unit);
-          this.getSegmentCount(data.segmentCount.metricModel, data.segmentCount.unit);
-          this.getDocumentCount(data.documentCount.metricModel, data.documentCount.unit);
+          this.getSegmentCount(data.segmentCount.metricModel,
+            data.primarySegmentCount.metricModel, data.segmentCount.unit);
+          this.getDocumentCount(data.documentCount.metricModel,
+            data.primaryDocumentCount.metricModel, data.documentCount.unit);
           this.getIndexSerachRate(data.indexingRate.metricModel,
             data.searchRate.metricModel, data.searchRate.unit);
           this.getIndexSearchLatency(data.indexingLatency.metricModel,

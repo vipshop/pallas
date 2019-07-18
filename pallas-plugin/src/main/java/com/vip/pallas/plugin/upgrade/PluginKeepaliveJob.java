@@ -347,7 +347,7 @@ public class PluginKeepaliveJob implements Job {
         String version = plugin.getVersion();
 
         String pluginDir = version != null && !"".equals(version) ? pluginName + "-" + version : pluginName;
-        File pluginRuntimePath = new File(plugin.getWorkDir() + pluginDir);
+        File pluginRuntimePath = new File(plugin.getWorkDir() + '/' + pluginDir);
 
         if(pluginRuntimePath.exists()){
             removePlugin0(plugin, pluginRuntimePath);

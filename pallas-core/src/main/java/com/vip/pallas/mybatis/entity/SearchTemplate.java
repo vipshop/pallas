@@ -47,6 +47,8 @@ public class SearchTemplate {
 
 	private String params;
 
+	private String resetParams;
+
 	private int type;
 
 	private int hisCount;
@@ -59,6 +61,8 @@ public class SearchTemplate {
 
     private Integer timeout;
     private Integer retry;
+    private Integer threshold;
+    private Integer maxBurstSecs;
 
 	public String getLastContent() {
 		return lastContent;
@@ -116,6 +120,14 @@ public class SearchTemplate {
 		this.params = params;
 	}
 
+	public String getResetParams() {
+		return resetParams;
+	}
+
+	public void setResetParams(String resetParams) {
+		this.resetParams = resetParams;
+	}
+
 	public int getType() {
 		return type;
 	}
@@ -171,13 +183,30 @@ public class SearchTemplate {
 	public void setRetry(Integer retry) {
 		this.retry = retry;
 	}
-	
+
+	public Integer getThreshold() {
+		return threshold;
+	}
+
+	public void setThreshold(Integer threshold) {
+		this.threshold = threshold;
+	}
+
+	public Integer getMaxBurstSecs() {
+		return maxBurstSecs;
+	}
+
+	public void setMaxBurstSecs(Integer maxBurstSecs) {
+		this.maxBurstSecs = maxBurstSecs;
+	}
+
 	@Override
 	public String toString() {
-		return "SearchTemplate [id=" + id + ", indexId=" + indexId + ", templateName=" + templateName + ", description="
-				+ description + ", content=" + content + ", params=" + params + ", type=" + type + ", hisCount="
-				+ hisCount + ", updateTime=" + updateTime + ", isNewer=" + isNewer + ", isApproving=" + isApproving
-				+ ", timeout=" + timeout + ", retry=" + retry + "]";
+		return "SearchTemplate{" + "id=" + id + ", indexId=" + indexId + ", templateName='" + templateName + '\''
+				+ ", description='" + description + '\'' + ", content='" + content + '\'' + ", lastContent='"
+				+ lastContent + '\'' + ", params='" + params + '\'' + ", resetParams='" + resetParams + '\'' + ", type="
+				+ type + ", hisCount=" + hisCount + ", updateTime=" + updateTime + ", isNewer=" + isNewer
+				+ ", isApproving=" + isApproving + ", timeout=" + timeout + ", retry=" + retry + ", threshold="
+				+ threshold + ", maxBurstSecs=" + maxBurstSecs + '}';
 	}
-	
 }

@@ -122,9 +122,9 @@ pre {
 }
 
 .view-content {
+    height: 600px;
     width: 700px;
     color: #fff;
-    overflow: auto;
 }
 
 .text-danger {

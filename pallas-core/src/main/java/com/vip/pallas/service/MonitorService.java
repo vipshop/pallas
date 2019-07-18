@@ -39,4 +39,5 @@ public interface MonitorService {
 
     List<IndexGaugeMetricModel> queryIndicesInfo(MonitorQueryModel queryModel) throws Exception;
 
+    MetricInfoModel getMetricInfoModel(MonitorQueryModel queryModel) throws Exception;
 }

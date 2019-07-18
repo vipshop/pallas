@@ -22,6 +22,7 @@ import java.io.IOException;
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -94,39 +95,61 @@ public class HttpClient {
         }
 	}
 
-	public static String httpGet(String urlStr) throws Exception {
-		CloseableHttpClient httpClient = HttpClients.createDefault();
-//		httpClient.getParams().setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 30000); 
+    public static String httpGet(String urlStr) throws Exception {
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+//		httpClient.getParams().setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 30000);
 //		httpClient.getParams().setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 30000);
-		
-        try {
-        	HttpGet httpGet = new HttpGet(urlStr);
 
-        	httpGet.setHeader("Authorization", processor.getString("saturn.rest.authorization.key", ""));
-            CloseableHttpResponse httpResponse = httpClient.execute(httpGet);
-            HttpEntity entity = httpResponse.getEntity();
-            if(entity != null) {
-            	String responseBody = EntityUtils.toString(httpResponse.getEntity(), Consts.UTF_8);
-                StatusLine statusLine = httpResponse.getStatusLine();
-                if(statusLine != null && statusLine.getStatusCode() >= 200 && statusLine.getStatusCode() < 300) {
-                	return responseBody;
-                } else {
-                	throw new Exception(statusLine + " " + responseBody);
-                }
-            } else {
-            	throw new Exception("httpGet error");
-            }
+        try {
+            HttpGet httpGet = new HttpGet(urlStr);
+            httpGet.setHeader("Authorization", processor.getString("saturn.rest.authorization.key", ""));
+            return httpExecute(httpClient,httpGet);
         } catch (IOException e) {
-        	logger.error(e.getClass() + " " + e.getMessage(), e);
+            logger.error(e.getClass() + " " + e.getMessage(), e);
             throw e;
         } finally {
             try {
                 httpClient.close();
             } catch (IOException e) {
-            	logger.error(e.getClass() + " " + e.getMessage(), e);
+                logger.error(e.getClass() + " " + e.getMessage(), e);
             }
         }
-	}
+    }
+
+    public static String httpGet(String urlStr, RequestConfig requestConfig) throws Exception {
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        try {
+            HttpGet httpGet = new HttpGet(urlStr);
+            httpGet.setConfig(requestConfig);
+            return httpExecute(httpClient,httpGet);
+        } catch (IOException e) {
+            logger.error(e.getClass() + " " + e.getMessage(), e);
+            throw e;
+        } finally {
+            try {
+                httpClient.close();
+            } catch (IOException e) {
+                logger.error(e.getClass() + " " + e.getMessage(), e);
+            }
+        }
+    }
+    private static String httpExecute(CloseableHttpClient httpClient,HttpGet httpGet) throws Exception {
+        CloseableHttpResponse httpResponse = httpClient.execute(httpGet);
+        HttpEntity entity = httpResponse.getEntity();
+        if(entity != null) {
+            String responseBody = EntityUtils.toString(httpResponse.getEntity(), Consts.UTF_8);
+            StatusLine statusLine = httpResponse.getStatusLine();
+            if(statusLine != null && statusLine.getStatusCode() >= 200 && statusLine.getStatusCode() < 300) {
+                return responseBody;
+            } else {
+                throw new Exception(statusLine + " " + responseBody);
+            }
+        } else {
+            throw new Exception("httpGet error");
+        }
+    }
+
+
 
 	private static String getResponseBody(CloseableHttpResponse httpResponse, String urlStr) throws Exception {
         HttpEntity entity = httpResponse.getEntity();

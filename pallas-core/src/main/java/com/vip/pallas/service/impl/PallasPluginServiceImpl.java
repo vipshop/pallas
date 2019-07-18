@@ -147,6 +147,17 @@ public class PallasPluginServiceImpl implements PallasPluginService {
     }
 
     @Override
+    public int setUpgradeFlowlshAndState(long id, String flowlsh, int state) {
+        PluginUpgrade db = upgradeRepository.getById(id);
+        if(db != null) {
+            db.setFlowlshState(state);
+            db.setFlowlshNo(flowlsh);
+            return upgradeRepository.updateUpgrade(db);
+        }
+        return -1;
+    }
+
+    @Override
     public int addPluginCommand(PluginCommand command) {
         return commandRepository.insert(command);
     }

@@ -42,6 +42,12 @@ public class Mapping {
 
     private Boolean dynamic;
 
+    private byte parentType;
+
+    private String copyTo;
+
+    private Boolean store;
+
     public Long getId() {
         return id;
     }
@@ -150,5 +156,29 @@ public class Mapping {
 
     public void setDynamic(Boolean dynamic) {
         this.dynamic = dynamic;
+    }
+
+    public byte getParentType() {
+        return parentType;
+    }
+
+    public void setParentType(byte parentType) {
+        this.parentType = parentType;
+    }
+
+    public String getCopyTo() {
+        return copyTo;
+    }
+
+    public void setCopyTo(String copyTo) {
+        this.copyTo = copyTo;
+    }
+
+    public Boolean getStore() {
+        return store;
+    }
+
+    public void setStore(Boolean store) {
+        this.store = store;
     }
 }

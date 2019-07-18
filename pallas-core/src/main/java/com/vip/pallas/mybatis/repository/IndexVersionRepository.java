@@ -59,4 +59,6 @@ public interface IndexVersionRepository {
 	List<IndexVersion> findAllByIndexId(@Param("indexId") Long indexId);
 
 	void enableThisVersionAndDisableOthers(@Param("indexId") Long indexId, @Param("id") Long id);
+
+    Long findIndexIdByVdpQueue(String vdpQueue);
 }

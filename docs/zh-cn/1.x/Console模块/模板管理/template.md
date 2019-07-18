@@ -18,7 +18,15 @@
 
 >[Elasticsearch Reference [5.5] » Deleted pages » Painless Syntax](https://www.elastic.co/guide/en/elasticsearch/reference/5.5/modules-scripting-painless-syntax.html)
 
+>[Mustache语法]（https://www.cnblogs.com/DF-fzh/p/5979093.html）
+
+>**查询Demo**见文末
+
+当创建一个新的空白模板时，上方会出现`模板向导`帮助你快速创建一个普通类型的查询模板。
 ![](image/create.png)
+
+通过`模板向导`你可以快速选择一些比较通用的关键字，以及你希望从数据库字段引用用于查询的field。
+![](image/guide.png)
 
 ## 2 调试
 
@@ -28,15 +36,20 @@
 
 在参数区域填写模板里面需要传参的所有参数（Json格式），参数区域最终会被构造成ES模板查询请求中的`params`的值。
 
-当填写好参数后，可以选择点击`Render`按钮进行渲染ES request来查看，或者是点击`运行`按钮把请求发送到ES进行debug。
+当填写好参数后，可以选择点击`渲染DSL`按钮进行渲染ES request来查看，或者是点击`执行查询`按钮把请求发送到ES进行debug。
 
-Render:
+又或者，如果你希望对你的查询模板进行一些慢查询排查的话，你可以通过`慢查询分析`来进行一次`profile`操作。
+
+渲染DSL:
 
 ![](image/render.png)
 
-运行：
+执行查询：
 
 ![](image/debug.png)
+
+慢查询分析：
+![](image/profile.png)
 
 ## 3 提交审批
 
@@ -85,6 +98,13 @@ Render:
 
   注意：点击更新之后 Pallas Search 需要每30s 访问Pallas Console得到最新的配置并刷新本地缓存，因此配置最晚的生效时间是30s左右。关于Pallas Search 更详细的逻辑请参考Pallas Search相关章节。
 
+  > 优化：最大重试次数为1；以分组的形式重试（关于分组详情，参考索引路由设计和Pallas Search超时重试设计）
+  
 ### 5.4 sql parser
 
   提供sql转DSL的功能，为业务人员将sql转为查询查询模板提供帮助。
+
+## 6 Sql转ES DSL例子
+![](image/sql2esdsl.png)
+
+>注意：name为字符串类型，记得加引号：即 "{{name}}"

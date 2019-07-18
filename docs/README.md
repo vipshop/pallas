@@ -4,7 +4,7 @@
 
 Pallas, the VIP.com's uniform search platform, built on top of the [elasticsearch](https://github.com/elastic/elasticsearch), aiming to solve all kinds of search-problem, such as full-text search with scoring, database sharding search, big-data search, complex aggregation search along with performance, scalability and high avaliability required, which are hard to sovled by the tradition SQL or NoSQL database. Shinning features include:
 * ES visualization management & monitoring tools based on [Cerebro](https://github.com/lmenezes/cerebro), [bigdesk](http://bigdesk.org/), [sense](https://github.com/StephaneBour/sense-chrome). You can get them all by visiting http://localhost:8081.
-* ES search template management based on index level.
+* ES search template management based on index level.     
     * CURD, render and debug the templates.
     * Import and export.
     * Include syntax, highlighting, json fromat.
