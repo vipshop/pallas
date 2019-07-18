@@ -41,6 +41,11 @@ public class RestRequestHeaderFilter extends AbstractFilter {
 
 		// 用于http转发
 		request.setHeader(HttpHeaders.Names.HOST, sessionContext.getServiceInfo().getBackendAddress());
+
+		// 默认开启gzip压缩(覆盖PallasRestClient端强制加的lz4压缩)
+		request.setHeader(HttpHeaders.Names.ACCEPT_ENCODING,HttpHeaders.Values.GZIP_DEFLATE);
+
+
 		super.run(filterContext, sessionContext);
 	}
 

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "node tasks/dev.js",
     "build": "node tasks/build.js",
+    "build-jar": "node tasks/build-jar.js",
     "lint": "eslint --ext .js,.vue src"
   },
   "dependencies": {

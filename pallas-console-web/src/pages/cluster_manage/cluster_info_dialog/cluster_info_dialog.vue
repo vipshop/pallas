@@ -52,6 +52,13 @@
             </el-row>
             <el-row>
                 <el-col :span="22">
+                    <el-form-item label="允许代理集群监控" prop="pallasSearchMonitor">
+                        <span style="margin-right: 20px;"><el-switch v-model="clusterInfo.monitorLevelModel.pallasSearchMonitor" :on-value=true :off-value=false></el-switch></span>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="22">
                     <el-form-item label="描述" prop="description">
                         <el-input type="textarea" v-model="clusterInfo.description"></el-input>
                     </el-form-item>

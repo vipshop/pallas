@@ -19,6 +19,7 @@ package com.vip.pallas.search.model;
 
 import java.util.Date;
 
+import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.apache.commons.lang3.StringUtils;
 
@@ -55,6 +56,27 @@ public class Cluster {
 	private Date createTime;
 	private Date updateTime;
 	private String monitorLevel;
+
+	private MonitorLevelModel monitorLevelModel;
+
+	public MonitorLevelModel getMonitorLevelModel() {
+		if (monitorLevelModel == null) {
+			setMonitorLevelModel();
+		}
+		return monitorLevelModel;
+	}
+
+	public void setMonitorLevelModel(MonitorLevelModel monitorLevelModel) {
+		this.monitorLevelModel = monitorLevelModel;
+	}
+
+	public void setMonitorLevelModel() {
+		if(StringUtils.isNotEmpty(monitorLevel)) {
+			this.monitorLevelModel = JSON.parseObject(monitorLevel, MonitorLevelModel.class);
+		} else {
+			this.monitorLevelModel = MonitorLevelModel.getDefaultModel();
+		}
+	}
 
 
 	public Date getCreateTime() {

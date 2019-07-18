@@ -2,6 +2,7 @@
 - [快速开始](zh-cn/1.x/tutorial.md)
 - [适用人群(user case)](zh-cn/1.x/usercase.md)
 - [代码运行](zh-cn/1.x/run.md)
+- [打包部署](zh-cn/1.x/deploy.md)
 - Console模块
     - 索引管理
       - [索引管理](zh-cn/1.x/Console模块/索引管理/index.md)

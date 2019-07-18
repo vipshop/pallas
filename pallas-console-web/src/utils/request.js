@@ -1,7 +1,7 @@
 import axios from 'axios';
 import message from './message';
 
-axios.defaults.baseURL = './pallas';
+axios.defaults.baseURL = process.env.NODE_ENV === 'springboot_package' ? './' : './pallas';
 
 let showError = false;
 

@@ -15,7 +15,7 @@
  * </p>
  */
 
-package com.vip.pallas.bean.monitor;
+package com.vip.pallas.search.model;
 
 import java.io.Serializable;
 
