@@ -57,6 +57,8 @@ public class PluginUpgradeVO {
 
     private String flowlshMessage = null;
 
+    private String greyIps = null;
+
     public String getNote() {
         return note;
     }
@@ -192,4 +194,12 @@ public class PluginUpgradeVO {
     public void setFlowlshMessage(String flowlshMessage) {
         this.flowlshMessage = flowlshMessage;
     }
+
+	public String getGreyIps() {
+		return greyIps;
+	}
+
+	public void setGreyIps(String greyIps) {
+		this.greyIps = greyIps;
+	}
 }

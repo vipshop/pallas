@@ -42,7 +42,9 @@ public class PluginUpgrade {
 
     public static final int UPGRADE_STATUS_UPGRADE = 6; //升级
 
-    public static final int UPGRADE_STATUS_UPGRADE_DONE = 61; //升级完成
+	public static final int UPGRADE_STATUS_UPGRADE_GREY = 60; //升级
+
+	public static final int UPGRADE_STATUS_UPGRADE_DONE = 61; //升级完成
 
     public static final int UPGRADE_STATUS_REMOVE = 7; //移除插件
 
@@ -92,6 +94,8 @@ public class PluginUpgrade {
     private String flowlshNo;
 
     private int flowlshState;
+
+    private String greyIps;
 
     public long getId() {
         return id;
@@ -221,7 +225,15 @@ public class PluginUpgrade {
         this.flowlshState = flowlshState;
     }
 
-    public boolean isFinished() {
+	public String getGreyIps() {
+		return greyIps;
+	}
+
+	public void setGreyIps(String greyIps) {
+		this.greyIps = greyIps;
+	}
+
+	public boolean isFinished() {
         return state == UPGRADE_STATUS_CREATE || state == UPGRADE_STATUS_DENY || state == UPGRADE_STATUS_CANCEL || state == UPGRADE_STATUS_DONE;
     }
 }

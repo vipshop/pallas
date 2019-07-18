@@ -369,6 +369,7 @@ CREATE TABLE IF NOT EXISTS `plugin_upgrade` (
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `flowlsh_no` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '审批流程工单号',
   `flowlsh_state` tinyint(2) NOT NULL DEFAULT '3' COMMENT '0:init；1:created；2:start；3:end',
+  `grey_ips` varchar(4096) NOT NULL DEFAULT '' COMMENT '正在灰度的插件ip列表',
   `is_deleted` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '是否己删除',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='审批表';

@@ -19,6 +19,7 @@
     <result column="approve_time" jdbcType="TIMESTAMP" property="approveTime" />
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="grey_ips" jdbcType="VARCHAR" property="greyIps" />
   </resultMap>
 
   <select id="selectPage" parameterType="com.vip.pallas.mybatis.entity.Page" resultMap="resultListMap">
@@ -42,6 +43,9 @@
   <update id="updateUpgradeState">
     update `plugin_upgrade` set state = #{state} where id = #{id};
   </update>
+  <update id="concatGreyIps">
+    update `plugin_upgrade` set grey_ips = CONCAT(grey_ips, ',', #{greyIp}) where id = #{id};
+  </update>
   <update id="updateUpgrade">
     update `plugin_upgrade`
     <set>
@@ -62,9 +66,13 @@
       </if>
       <if test="flowlshNo != null">
         flowlsh_no = #{flowlshNo},
-      </if><if test="flowlshState != null">
-      flowlsh_state = #{flowlshState},
-    </if>
+      </if>
+      <if test="flowlshState != null">
+        flowlsh_state = #{flowlshState},
+      </if>
+      <if test="greyIps != null">
+        grey_ips = #{greyIps},
+      </if>
     </set>
     where id = #{id}
   </update>
@@ -97,6 +105,9 @@
     </if>
     <if test="flowlshNo != null">
       flowlsh_no,
+    </if>
+    <if test="greyIps != null">
+      grey_ips,
     </if>
     <if test="note != null">
       note,

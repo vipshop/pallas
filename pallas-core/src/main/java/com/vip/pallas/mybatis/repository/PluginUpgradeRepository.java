@@ -37,6 +37,8 @@ public interface PluginUpgradeRepository {
 
     int updateUpgrade(PluginUpgrade upgrade);
 
+    int concatGreyIps(@Param("id") long id, @Param("greyIp") String greyIp);
+
     List<PluginUpgrade> selectPage(Page<PluginUpgrade> page);
 
     PluginUpgrade findLatestUpgrade(@Param("clusterId") String clusterId, @Param("pluginName") String pluginName);

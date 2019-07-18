@@ -129,14 +129,14 @@ public class PallasPluginServiceImpl implements PallasPluginService {
     }
 
     @Override
-    public int setUppgradeState(String loginUser, long id, int nextState) {
+    public int setUpgradeState(String loginUser, long id, int nextState) {
         PluginUpgrade db = upgradeRepository.getById(id);
         if(db != null) {
             db.setState(nextState);
             if (nextState == PluginUpgrade.UPGRADE_STATUS_DOWNLOAD) {
                 db.setApproveUser(loginUser);
                 db.setApproveTime(new Date());
-            } else if (nextState == PluginUpgrade.UPGRADE_STATUS_UPGRADE) {
+            } else if (nextState == PluginUpgrade.UPGRADE_STATUS_UPGRADE || nextState == PluginUpgrade.UPGRADE_STATUS_UPGRADE_GREY) {
                 db.setApplyUser(loginUser);
                 db.setApplyTime(new Date());
             }
@@ -146,7 +146,12 @@ public class PallasPluginServiceImpl implements PallasPluginService {
 
     }
 
-    @Override
+	@Override
+	public int concatGreyIps(long id, String ip) {
+    	return upgradeRepository.concatGreyIps(id, ip);
+	}
+
+	@Override
     public int setUpgradeFlowlshAndState(long id, String flowlsh, int state) {
         PluginUpgrade db = upgradeRepository.getById(id);
         if(db != null) {

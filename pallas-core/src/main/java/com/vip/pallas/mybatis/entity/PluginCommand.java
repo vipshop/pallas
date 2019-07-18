@@ -123,4 +123,12 @@ public class PluginCommand {
     public void setPluginType(int pluginType) {
         this.pluginType = pluginType;
     }
+
+	@Override
+	public String toString() {
+		return "PluginCommand{" + "id=" + id + ", clusterId='" + clusterId + '\'' + ", nodeIp='" + nodeIp + '\''
+				+ ", pluginName='" + pluginName + '\'' + ", pluginVersion='" + pluginVersion + '\'' + ", pluginType="
+				+ pluginType + ", command='" + command + '\'' + ", createTime=" + createTime + ", updateTime="
+				+ updateTime + '}';
+	}
 }

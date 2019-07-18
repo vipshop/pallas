@@ -17,11 +17,6 @@
 
 package com.vip.pallas.console.controller.plugin;
 
-import static com.vip.pallas.mybatis.entity.PluginUpgrade.UPGRADE_STATUS_DOWNLOAD;
-import static com.vip.pallas.mybatis.entity.PluginUpgrade.UPGRADE_STATUS_DOWNLOAD_DONE;
-import static com.vip.pallas.mybatis.entity.PluginUpgrade.UPGRADE_STATUS_UPGRADE;
-import static com.vip.pallas.mybatis.entity.PluginUpgrade.UPGRADE_STATUS_UPGRADE_DONE;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
@@ -50,6 +45,8 @@ import com.vip.pallas.mybatis.entity.PluginUpgrade;
 import com.vip.pallas.service.ClusterService;
 import com.vip.pallas.service.PallasPluginService;
 import com.vip.vjtools.vjkit.collection.ListUtil;
+
+import static com.vip.pallas.mybatis.entity.PluginUpgrade.*;
 
 @Validated
 @RestController
@@ -99,6 +96,7 @@ public class PluginUpgradeController {
             pu.setState(u.getState());
             pu.setFlowlshNo(u.getFlowlshNo());
             pu.setFlowlshState(u.getFlowlshState());
+            pu.setGreyIps(u.getGreyIps());
             pu.setUpdateTime(u.getUpdateTime());
             List<PluginNodeState> pns = pu.getNodeStates() == null ? new ArrayList<>() : pu.getNodeStates(); //NOSONAR
             List<PluginRuntime> runtimeList = pluginService.getPluginRuntimes(u.getClusterId(), u.getPluginName());
@@ -142,11 +140,15 @@ public class PluginUpgradeController {
                 if(downloadCount == totalNodesCount) {
                     pu.setState(UPGRADE_STATUS_DOWNLOAD_DONE);
                 }
-            } else if (currentState == UPGRADE_STATUS_UPGRADE) {
+			} else if (currentState == UPGRADE_STATUS_UPGRADE_GREY) {
                 node.setState(UPGRADE_STATUS_DOWNLOAD);
                 for(String avaiVer : node.getAvalibleVersionArray()) {
                     if(applyVer.equals(avaiVer)) {
-                        node.setState(UPGRADE_STATUS_UPGRADE);
+						if (null != pu.getGreyIps() && pu.getGreyIps().contains(getRealIp(node.getNodeIp()))){
+							node.setState(UPGRADE_STATUS_UPGRADE);
+						} else {
+							node.setState(UPGRADE_STATUS_DOWNLOAD_DONE);
+						}
                         break;
                     }
                 }
@@ -157,10 +159,29 @@ public class PluginUpgradeController {
                 if(upgradeCount == totalNodesCount) {
                     pu.setState(UPGRADE_STATUS_UPGRADE_DONE);
                 }
-            }
+            } else if (currentState == UPGRADE_STATUS_UPGRADE) {
+				node.setState(UPGRADE_STATUS_DOWNLOAD);
+				for(String avaiVer : node.getAvalibleVersionArray()) {
+					if(applyVer.equals(avaiVer)) {
+						node.setState(UPGRADE_STATUS_UPGRADE);
+						break;
+					}
+				}
+				if(applyVer.equals(node.getPluginVersion())) {
+					upgradeCount++;
+					node.setState(UPGRADE_STATUS_UPGRADE_DONE);
+				}
+				if(upgradeCount == totalNodesCount) {
+					pu.setState(UPGRADE_STATUS_UPGRADE_DONE);
+				}
+			}
         }
     }
-    
+
+    private String getRealIp(String nodeIpAndName){
+		return nodeIpAndName.split(" ")[0];
+	}
+
     @RequestMapping(path="/add.json", method = {RequestMethod.POST})
     public void createPlugin(@RequestBody PluginUpgrade pluginUpgrade){
         if (null == clusterService.findByName(pluginUpgrade.getClusterId())) {

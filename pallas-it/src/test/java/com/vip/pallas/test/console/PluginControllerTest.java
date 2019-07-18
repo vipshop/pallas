@@ -19,8 +19,11 @@ package com.vip.pallas.test.console;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
 import java.util.Map;
 
+import com.vip.pallas.mybatis.entity.PluginCommand;
+import com.vip.pallas.mybatis.repository.PluginCommandRepository;
 import org.junit.AfterClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -35,6 +38,8 @@ import com.vip.pallas.console.vo.RemovePlugin;
 import com.vip.pallas.mybatis.entity.PluginUpgrade;
 import com.vip.pallas.test.base.BaseSpringEsTest;
 
+import javax.annotation.Resource;
+
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class PluginControllerTest extends BaseSpringEsTest {
     private static Long id = null;
@@ -43,6 +48,9 @@ public class PluginControllerTest extends BaseSpringEsTest {
     private static String packagePath = "";
     private static PluginAction action = new PluginAction();
     private static Long removeId = null;
+
+	@Resource
+	private PluginCommandRepository commandRepository;
 
     @Test
     public void test21FieUpload() throws Exception {
@@ -64,7 +72,7 @@ public class PluginControllerTest extends BaseSpringEsTest {
         pluginUpgrade.setPluginType(0);
         pluginUpgrade.setNote("it is a test");
         pluginUpgrade.setPackagePath(packagePath);
-        assertThat(callRestApi("/plugin/upgrade/add.json", JSON.toJSONString(pluginUpgrade)));
+        assertThat(callRestApi("/plugin/upgrade/add.json", JSON.toJSONString(pluginUpgrade))).isNull();
         //再次插入报500
         // assertThat(callRestApi("/plugin/upgrade/add.json", JSON.toJSONString(pluginUpgrade))).containsEntry("status", 500);
     }
@@ -84,12 +92,28 @@ public class PluginControllerTest extends BaseSpringEsTest {
     public void test24DownloadAction() throws Exception {
         action.setAction("download");
         assertThat(callRestApi("/plugin/upgrade/action.json", JSON.toJSONString(action))).isNull();
-    }
+		int commandNum = getCommandCount(PluginCommand.COMMAND_DOWNLOAD, null);
+		assertThat(commandNum).isEqualTo(1);
+	}
 
-    @Test
-    public void test25Update() throws Exception {
+	@Test
+	public void test251UpdateInNodeLevel() throws Exception {
+		action.setAction("upgrade");
+		String nodeIp = CLUSTER_HTTPADDRESS.split(":")[0];
+		action.setNodeIp(nodeIp);
+		callRestApi("/plugin/upgrade/action.json", JSON.toJSONString(action));
+
+		int commandNum = getCommandCount(PluginCommand.COMMAND_UPGRADE, nodeIp);
+		assertThat(commandNum).isEqualTo(1);
+	}
+
+	@Test
+    public void test252Update() throws Exception {
         action.setAction("upgrade");
         assertThat(callRestApi("/plugin/upgrade/action.json", JSON.toJSONString(action))).isNull();
+
+		int commandNum = getCommandCount(PluginCommand.COMMAND_UPGRADE, null);
+		assertThat(commandNum).isEqualTo(2);
     }
 
     @Test
@@ -130,14 +154,22 @@ public class PluginControllerTest extends BaseSpringEsTest {
         removePlugin.setPluginUpgradeId(removeId);
         removePlugin.setPluginVersion("");
         assertThat(callRestApi("/plugin/remove.json", JSON.toJSONString(removePlugin))).isNull();
-//
-//        //delete plugin_runtime
-//        List<PluginRuntime> availableNodes = runtimeRepository.findByClusterAndPluginName(clusterId, pluginName);
-//        for(PluginRuntime pluginRuntime : availableNodes) {
-//            runtimeRepository.deleteByPrimaryKey(pluginRuntime.getId());
-//        }
 
+		int commandNum = getCommandCount(PluginCommand.COMMAND_REMOVE, null);
+		assertThat(commandNum).isEqualTo(1);
     }
+
+    private int getCommandCount(String command, String nodeIp){
+		List<PluginCommand> commandList = commandRepository.selectByClusterAndPluginName(EMBEDDED_CLUTER_ID, pluginName);
+		int commandNum = 0;
+		for (PluginCommand commandInDb : commandList){
+			if (pluginName.equals(commandInDb.getPluginName())  && command.equals(commandInDb.getCommand())
+					&& (null == nodeIp || nodeIp.equals(commandInDb.getNodeIp())) ){
+				commandNum++;
+			}
+		}
+		return commandNum;
+	}
 
 	@AfterClass
 	public static void cleanData() throws Exception {

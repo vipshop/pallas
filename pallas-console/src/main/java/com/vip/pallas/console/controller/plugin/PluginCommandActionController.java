@@ -92,8 +92,11 @@ public class PluginCommandActionController {
 
         int nextState = doUpgradeAction(pluginAction.getAction(), pUpgrade, pluginAction.getNodeIp());
         if(pUpgrade.getState() != nextState) {
-            pluginService.setUppgradeState(SessionUtil.getLoginUser(request), pUpgrade.getId(), nextState);
+            pluginService.setUpgradeState(SessionUtil.getLoginUser(request), pUpgrade.getId(), nextState);
         }
+        if (null != pluginAction.getNodeIp()){
+        	pluginService.concatGreyIps(pUpgrade.getId(), pluginAction.getNodeIp());
+		}
     }
 
     @RequestMapping(value = "/sync.json", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
@@ -174,6 +177,9 @@ public class PluginCommandActionController {
 					// can only do upgrade-action in node level
 					sendCommand(actionLowcase, pUpgrade.getClusterId(), nodeIp,
 							pUpgrade.getPluginName(), pUpgrade.getPluginVersion(), pUpgrade.getPluginType());
+					if (null != nodeIp){
+						currentStatus = UPGRADE_STATUS_UPGRADE_GREY;
+					}
                     return currentStatus <= UPGRADE_STATUS_UPGRADE ? UPGRADE_STATUS_UPGRADE : currentStatus;
                 case "remove":
                     if (currentStatus != UPGRADE_STATUS_DONE) {

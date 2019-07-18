@@ -49,7 +49,9 @@ public interface PallasPluginService {
 
     PluginUpgrade getPluginUpgrade(Long id);
 
-    int setUppgradeState(String loginUser, long id, int nextState);
+    int setUpgradeState(String loginUser, long id, int nextState);
+
+	int concatGreyIps(long id, String ip);
 
     int setUpgradeFlowlshAndState(long id, String flowlsh, int state);
 

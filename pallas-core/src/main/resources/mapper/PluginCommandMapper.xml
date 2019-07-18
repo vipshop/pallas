@@ -5,7 +5,7 @@
   <resultMap id="resultListMap" type="com.vip.pallas.mybatis.entity.PluginCommand">
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="cluster_id" jdbcType="VARCHAR" property="clusterId" />
-    <result column="node_id" jdbcType="VARCHAR" property="nodeIp" />
+    <result column="node_ip" jdbcType="VARCHAR" property="nodeIp" />
     <result column="plugin_name" jdbcType="VARCHAR" property="pluginName" />
     <result column="plugin_version" jdbcType="VARCHAR" property="pluginVersion" />
     <result column="plugin_type" jdbcType="TINYINT" property="pluginType" />
@@ -15,7 +15,7 @@
   </resultMap>
 
   <select id="selectByClusterAndPluginName" resultMap="resultListMap">
-    select * from `plugin_command` where cluster_id = #{clusterId} and plugin_name = #{pluginName} where order by id asc
+    select * from `plugin_command` where cluster_id = #{clusterId} and plugin_name = #{pluginName} order by id asc
   </select>
 
   <select id="selectByNodeIp" resultMap="resultListMap">
