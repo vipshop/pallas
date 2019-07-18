@@ -23,11 +23,17 @@
                                 <el-form-item label="IP" style="width: 40%;">
                                     <span>{{ item.nodeIp }}</span>
                                 </el-form-item>
-                                <el-form-item label="版本" style="width: 30%;">
+                                <el-form-item label="版本" style="width: 20%;">
                                     <span>{{ item.pluginVersion }}</span>
                                 </el-form-item>
-                                <el-form-item label="状态" style="width: 30%;">
+                                <el-form-item label="状态" style="width: 20%;">
                                     <span>{{ item.state | translateStat }}</span>
+                                </el-form-item>
+                                <el-form-item label="操作" style="width: 20%;">
+                                  <el-tooltip content="升级单个节点" placement="top" v-if="item.state === 51 && validateItilState(props.row)">
+                                    <el-button type="text" @click="handlePlugin(props.row, 'upgrade', '开始升级', 
+                                    item.nodeIp.match(/((\d{1,3}\.){3}\d{1,3})/g)[0])"><i class="fa fa-arrow-circle-up"></i></el-button>
+                                  </el-tooltip>
                                 </el-form-item>
                             </div>
                         </div>
@@ -70,7 +76,7 @@
                         <el-tooltip content="强制升级" placement="top" v-if="scope.row.state === 5">
                             <el-button type="text" @click="handlePlugin(scope.row, 'upgrade', '强制升级')"><i class="fa fa-arrow-up"></i></el-button>
                         </el-tooltip>
-                        <el-tooltip content="开始升级" placement="top" v-if="scope.row.state === 51">
+                        <el-tooltip content="开始升级" placement="top" v-if="(scope.row.state === 51 || scope.row.state === 60) ">
                             <el-button type="text" @click="handlePlugin(scope.row, 'upgrade', '开始升级')"><i class="fa fa-arrow-circle-up"></i></el-button>
                         </el-tooltip>
                         <el-tooltip content="标记完成" placement="top" v-if="scope.row.state === 61 || scope.row.state === 5 || scope.row.state === 51 || scope.row.state === 6">
@@ -137,12 +143,16 @@ export default {
         this.total = data.total;
       });
     },
-    handlePlugin(row, operation, text) {
+    handlePlugin(row, operation, text, nodeIp) {
       const params = {
         pluginUpgradeId: row.id,
         action: operation,
+        nodeIp: nodeIp,
       };
-      this.$message.confirmMessage(`确定${text}插件${row.pluginName}吗?`, () => {
+      const involveItems = nodeIp == null ? row.clusterId : nodeIp;
+      const msg = this.$createElement('span', null, [this.$createElement('span', null, `确定${text}插件${row.pluginName}吗?`),
+      this.$createElement('br', null), this.$createElement('span', null, `升级对象: ${involveItems}`)]);
+      this.$message.confirmMessage(msg, () => {
         this.loading = true;
         this.$http.post('/plugin/upgrade/action.json', params).then(() => {
           this.$message.successMessage('操作成功', () => {
@@ -201,7 +211,7 @@ export default {
   },
   filters: {
     translateStat(data) {
-      const NODE_STATUS = { 0: '创建', 1: '待审批', 2: '审批不通过', 3: '取消', 4: '标记完成', 5: '下载中', 51: '下载完成', 6: '升级中', 61: '升级完成', 7: '插件已移除' };
+      const NODE_STATUS = { 0: '创建', 1: '待审批', 2: '审批不通过', 3: '取消', 4: '标记完成', 5: '下载中', 51: '下载完成', 6: '升级中', 60: '灰度升级中', 61: '升级完成', 7: '插件已移除' };
       return NODE_STATUS[data];
     },
   },
