@@ -19,7 +19,7 @@
             <template>
                 <el-table :data="nodesList" border style="width: 100%" v-loading="loading" element-loading-text="请稍等···">
                     <el-table-column label="Name" prop="nodeName">
-                        <template scope="scope">
+                        <template slot-scope="scope">
                             <router-link tag="a" :to="{ path: 'node_monitor_detail', query: {clusterId, node: scope.row.nodeName} }">{{scope.row.nodeName}}</router-link>
                         </template>
                     </el-table-column>

@@ -130,13 +130,13 @@ function callES(server, url, method, data, successCallback, completeCallback, re
 }
 
 function bigIntJSONParse(origJSON) {
-    const stringedJSON = origJSON.replace(/:\s*([-+Ee0-9.]+)/g, ': "uniqueprefix$1"');
+    const stringedJSON = origJSON.replace(/"\s*:\s*([-+Ee0-9.]+)/g, '": "uniqueprefix$1"');
     const o = JSON.parse(stringedJSON, (key, value) => {
       if (typeof value !== 'string') return value;
       if (!value.startsWith('uniqueprefix')) return value;
       value = value.slice('uniqueprefix'.length);
-      if (value.length < 17) return Number(value);
-      return bigInt(value);
+      if (Number.isInteger(Number(value)) && !Number.isSafeInteger(Number(value))) return bigInt(value);
+      return Number(value);
     });
     return o;
 }

@@ -30,7 +30,7 @@
         </div>
         <el-table :data="indexList.list" border style="width: 100%" v-loading="loading" element-loading-text="请稍等···">
             <el-table-column type="expand">
-              <template scope="props">
+              <template slot-scope="props">
                 <el-form label-position="left" inline class="my-table-expand">
                   <el-form-item label="id">
                     <span>{{ props.row.id}}</span>
@@ -66,7 +66,7 @@
               </template>
             </el-table-column>
             <el-table-column label="id" width="80px">
-              <template scope="scope">
+              <template slot-scope="scope">
                   <div v-if="!scope.row.hasPrivilege">{{scope.row.id}}</div>
                   <div v-else class="my-a-link">
                       <router-link tag="a" :to="{ path: 'index_detail', query: {indexId: scope.row.id, indexName: scope.row.indexName} }">{{scope.row.id}}</router-link>
@@ -74,7 +74,7 @@
               </template>
             </el-table-column>
             <el-table-column label="索引名" min-width="100px">
-              <template scope="scope">
+              <template slot-scope="scope">
                   <div v-if="!scope.row.hasPrivilege">{{scope.row.indexName}}</div>
                   <div v-else class="my-a-link">
                       <router-link tag="a" :to="{ path: 'index_detail', query: {indexId: scope.row.id, indexName: scope.row.indexName} }">{{scope.row.indexName}}</router-link>
@@ -82,10 +82,10 @@
               </template>
             </el-table-column>
             <el-table-column label="索引描述" show-overflow-tooltip>
-              <template scope="scope">{{scope.row.description || '-'}}</template>
+              <template slot-scope="scope">{{scope.row.description || '-'}}</template>
             </el-table-column>
             <el-table-column label="所属集群" min-width="100px">
-              <template scope="scope">
+              <template slot-scope="scope">
                   <div v-if="!scope.row.hasClusterPrivilege || !scope.row.httpAddress">{{scope.row.clusterName}}</div>
                   <div v-else class="my-a-link">
                       <router-link tag="a" :to="{ path:'cluster_detail',query:{clusterId: scope.row.clusterName} }">{{scope.row.clusterName}}</router-link>
@@ -93,16 +93,16 @@
               </template>
             </el-table-column>
             <el-table-column label="数据源" width="70px">
-              <template scope="scope">{{scope.row.dataSourceList.length}}</template>
+              <template slot-scope="scope">{{scope.row.dataSourceList.length}}</template>
             </el-table-column>
             <el-table-column label="创建人">
-              <template scope="scope">{{scope.row.createUser || '-'}}</template>
+              <template slot-scope="scope">{{scope.row.createUser || '-'}}</template>
             </el-table-column>
             <el-table-column label="更新时间" prop="updateTime" width="160px">
-                <template scope="scope">{{scope.row.updateTime | formatDate}}</template>
+                <template slot-scope="scope">{{scope.row.updateTime | formatDate}}</template>
             </el-table-column>
             <el-table-column label="操作" width="100px">
-                <template scope="scope">
+                <template slot-scope="scope">
                     <el-tooltip content="编辑" placement="top" v-if="scope.row.hasPrivilege">
                         <el-button type="text" @click="handleEdit(scope.row)"><i class="fa fa-edit"></i></el-button>
                     </el-tooltip>

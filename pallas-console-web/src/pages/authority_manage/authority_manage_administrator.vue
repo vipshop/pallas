@@ -32,7 +32,7 @@
             <el-table-column prop="id" label="审批ID" width="70px"></el-table-column>
             <el-table-column prop="title" label="标题" width="80px" show-overflow-tooltip></el-table-column>
             <el-table-column label="索引名称">
-              <template scope="scope">
+              <template slot-scope="scope">
                   <div class="my-a-link">
                       <router-link tag="a" :to="{ path: 'index_detail', query: {indexId: scope.row.indexId, indexName: scope.row.indexName} }">{{scope.row.indexName}}</router-link>
                   </div>
@@ -41,26 +41,26 @@
             <el-table-column prop="templateName" label="模板名称"></el-table-column>
             <el-table-column prop="clusterId" label="所属集群"></el-table-column>
             <el-table-column prop="approveState" label="当前状态" width="80px">
-                <template scope="scope">{{scope.row.approveState | translateStat}}</template>
+                <template slot-scope="scope">{{scope.row.approveState | translateStat}}</template>
             </el-table-column>
             <el-table-column prop="applyUser" label="提交人" width="80px"></el-table-column>
             <el-table-column label="提交时间" width="160px">
-                <template scope="scope">{{scope.row.createTime | formatDate}}</template>
+                <template slot-scope="scope">{{scope.row.createTime | formatDate}}</template>
             </el-table-column>
             <el-table-column label="审批人" width="80px">
-                <template scope="scope">
+                <template slot-scope="scope">
                   <span v-if="scope.row.approveState === 1 || scope.row.approveState === 2">{{scope.row.approveUser}}</span>
                   <span v-else>-</span>
                 </template>
             </el-table-column>
             <el-table-column label="审批时间" width="160px">
-                <template scope="scope">
+                <template slot-scope="scope">
                   <span v-if="scope.row.approveState === 1 || scope.row.approveState === 2">{{scope.row.approveTime | formatDate}}</span>
                   <span v-else>-</span>
                 </template>
             </el-table-column>
             <el-table-column label="操作" width="70px">
-                <template scope="scope">
+                <template slot-scope="scope">
                   <div v-show="scope.row.approveState === 0">
                     <el-tooltip content="查看" placement="top">
                         <el-button type="text" @click="handleView(scope.row)"><i class="fa fa-eye"></i></el-button>

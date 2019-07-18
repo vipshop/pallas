@@ -1,7 +1,7 @@
 <template>
     <el-table :data="dataSource" border style="width: 100%" v-loading="loading" element-loading-text="请稍等···">
         <el-table-column label="数据源参数">
-            <template scope="scope">
+            <template slot-scope="scope">
                 <el-popover trigger="hover" placement="top" popper-class="template-test-popper">
                     <div class="pull-left"><el-input v-model="scope.row.editParamNameDef"></el-input></div>
                     <div class="popper-button"><el-button size="small" @click="handleSave(scope.row)">保存</el-button></div>
@@ -13,7 +13,7 @@
         </el-table-column>
         <el-table-column prop="fileName" label="数据源文件"></el-table-column>
         <el-table-column label="操作">
-            <template scope="scope">
+            <template slot-scope="scope">
                 <el-button size="small" type="danger" @click="handleDelete(scope.row)">删除</el-button>
             </template>
         </el-table-column>
