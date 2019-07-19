@@ -18,10 +18,14 @@
 package com.vip.pallas.test.console;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.filter;
 
 import java.util.List;
 import java.util.Map;
 
+import com.vip.pallas.bean.NodeState;
+import com.vip.pallas.console.vo.PluginNodeState;
+import com.vip.pallas.console.vo.PluginUpgradeVO;
 import com.vip.pallas.mybatis.entity.PluginCommand;
 import com.vip.pallas.mybatis.repository.PluginCommandRepository;
 import org.junit.AfterClass;
@@ -89,7 +93,7 @@ public class PluginControllerTest extends BaseSpringEsTest {
     }
 
     @Test
-    public void test24DownloadAction() throws Exception {
+    public void test31DownloadAction() throws Exception {
         action.setAction("download");
         assertThat(callRestApi("/plugin/upgrade/action.json", JSON.toJSONString(action))).isNull();
 		int commandNum = getCommandCount(PluginCommand.COMMAND_DOWNLOAD, null);
@@ -97,7 +101,7 @@ public class PluginControllerTest extends BaseSpringEsTest {
 	}
 
 	@Test
-	public void test251UpdateInNodeLevel() throws Exception {
+	public void test41UpdateInNodeLevel() throws Exception {
 		action.setAction("upgrade");
 		String nodeIp = CLUSTER_HTTPADDRESS.split(":")[0];
 		action.setNodeIp(nodeIp);
@@ -105,10 +109,12 @@ public class PluginControllerTest extends BaseSpringEsTest {
 
 		int commandNum = getCommandCount(PluginCommand.COMMAND_UPGRADE, nodeIp);
 		assertThat(commandNum).isEqualTo(1);
+		PluginUpgradeVO result = getPluginResult(pluginName);
+		assertThat(result.getState()).isEqualTo(PluginUpgrade.UPGRADE_STATUS_UPGRADE_GREY);
 	}
 
 	@Test
-    public void test252Update() throws Exception {
+    public void test42Update() throws Exception {
         action.setAction("upgrade");
         assertThat(callRestApi("/plugin/upgrade/action.json", JSON.toJSONString(action))).isNull();
 
@@ -117,13 +123,13 @@ public class PluginControllerTest extends BaseSpringEsTest {
     }
 
     @Test
-    public void test26MarkComplete() throws Exception {
+    public void test51MarkComplete() throws Exception {
         action.setAction("done");
         assertThat(callRestApi("/plugin/upgrade/action.json", JSON.toJSONString(action))).isNull();
     }
 
     @Test
-    public void test27Recall() throws Exception{
+    public void test61Recall() throws Exception{
         test22AddPlugin();
         test23UpgradeList();
         action.setAction("recall");
@@ -131,7 +137,7 @@ public class PluginControllerTest extends BaseSpringEsTest {
     }
 
     @Test
-    public void test28Deny() throws Exception {
+    public void test71Deny() throws Exception {
         test22AddPlugin();
         test23UpgradeList();
         action.setAction("deny");
@@ -139,7 +145,7 @@ public class PluginControllerTest extends BaseSpringEsTest {
     }
 
     @Test
-    public void test41PluginStateList() throws Exception {
+    public void test81PluginStateList() throws Exception {
         Map resultMap = callGetApi("/plugin/runtime/list.json?currentPage=1&pageSize=10&pluginName" + pluginName);
         JSONArray jsonArray = ((JSONObject) resultMap.get("data")).getJSONArray("list");
         removeId = jsonArray.getJSONObject(0).getLong("id");
@@ -147,7 +153,7 @@ public class PluginControllerTest extends BaseSpringEsTest {
     }
 
     @Test
-    public void test42remove() throws Exception {
+    public void test91remove() throws Exception {
         RemovePlugin removePlugin = new RemovePlugin();
         removePlugin.setClusterId(EMBEDDED_CLUTER_ID);
         removePlugin.setPluginName(pluginName);
@@ -169,6 +175,19 @@ public class PluginControllerTest extends BaseSpringEsTest {
 			}
 		}
 		return commandNum;
+	}
+
+	private PluginUpgradeVO getPluginResult(String pluginName) throws Exception{
+		Map resultMap = callGetApi("/plugin/upgrade/list.json?currentPage=1&pageSize=10&pluginName=" + pluginName);
+		JSONArray jsonArray = ((JSONObject) resultMap.get("data")).getJSONArray("list");
+		List<PluginUpgradeVO> result = JSONArray.parseArray(((JSONObject) resultMap.get("data")).getString("list"), PluginUpgradeVO.class);
+		for (PluginUpgradeVO pluginUpgradeVO : result){
+			if (pluginName.equals(pluginUpgradeVO.getPluginName())){
+				System.out.println("pluginUpgradeVO = " + pluginUpgradeVO);
+				return pluginUpgradeVO;
+			}
+		}
+		return null;
 	}
 
 	@AfterClass

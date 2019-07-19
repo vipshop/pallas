@@ -202,4 +202,15 @@ public class PluginUpgradeVO {
 	public void setGreyIps(String greyIps) {
 		this.greyIps = greyIps;
 	}
+
+	@Override
+	public String toString() {
+		return "PluginUpgradeVO{" + "id=" + id + ", clusterId='" + clusterId + '\'' + ", clusterDescription='"
+				+ clusterDescription + '\'' + ", pluginName='" + pluginName + '\'' + ", pluginType=" + pluginType
+				+ ", state=" + state + ", note='" + note + '\'' + ", applyUser='" + applyUser + '\'' + ", approveUser='"
+				+ approveUser + '\'' + ", packagePath='" + packagePath + '\'' + ", pluginVersion='" + pluginVersion
+				+ '\'' + ", updateTime=" + updateTime + ", nodeStates=" + nodeStates + ", flowlshNo='" + flowlshNo
+				+ '\'' + ", flowlshState=" + flowlshState + ", canExecuteFlowlsh=" + canExecuteFlowlsh
+				+ ", flowlshMessage='" + flowlshMessage + '\'' + ", greyIps='" + greyIps + '\'' + '}';
+	}
 }

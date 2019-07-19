@@ -66,4 +66,10 @@ public class PluginNodeState {
     public void setAvailableVersions(String availableVersions) {
         this.availableVersions = availableVersions;
     }
+
+	@Override
+	public String toString() {
+		return "PluginNodeState{" + "nodeIp='" + nodeIp + '\'' + ", state=" + state + ", pluginVersion='"
+				+ pluginVersion + '\'' + ", availableVersions='" + availableVersions + '\'' + '}';
+	}
 }
