@@ -61,7 +61,7 @@
             </div>
         </div>
         <div v-if="isVersionInfoVisible">
-            <version-info-dialog :version-operation="versionOperation" :version-info-title="versionInfoTitle" :version-info="versionInfo" :is-logical="isLogical" :clusters="clusters" :is-meta-data-null="isMetaDataNull" @close-dialog="closeDialog" @template-operate-success="templateOperateSuccess"></version-info-dialog>
+            <version-info-dialog :version-list="versionList" :version-operation="versionOperation" :version-info-title="versionInfoTitle" :version-info="versionInfo" :is-logical="isLogical" :clusters="clusters" :is-meta-data-null="isMetaDataNull" @close-dialog="closeDialog" @template-operate-success="templateOperateSuccess"></version-info-dialog>
         </div>
         <div v-if="isVersionDynamicInfoVisible">
             <version-dynamic-info-dialog :version-operation="versionOperation" :version-info-title="versionInfoTitle" :version-info="versionInfo" :is-logical="isLogical" :clusters="clusters"  @close-dialog="closeDynamicDialog" @template-operate-success="dynamicUpdateOperateSuccess"></version-dynamic-info-dialog>

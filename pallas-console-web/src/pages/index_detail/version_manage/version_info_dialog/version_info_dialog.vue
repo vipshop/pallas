@@ -189,6 +189,10 @@
                                 <el-button size="mini" type="success" @click="addField(0)" v-if="isMetaDataNull && versionInfo.schema.length === 0"><i class="fa fa-plus"></i>新增</el-button>
                                 <el-button size="mini" type="warning" v-show="!isEditable" @click="importSchema"><i class="fa fa-arrow-circle-o-down"></i>导入schema</el-button>
                                 <el-button size="mini" type="warning" v-show="isEditable" @click="exportSchema"><i class="fa fa-arrow-circle-o-up"></i>导出schema</el-button>
+                                <el-select v-if="versionList.length>0" v-model="selectedVersion" @change="diffCurVersion">
+                                    <el-option v-for="item in versionList" v-if="item.id != versionInfo.id" :label="item.id" :value="item.id" :key="item.id"></el-option>
+                                    <el-option label="请选择要对比的版本" value="-1"></el-option>
+                                </el-select>
                             </div>
                         <div>
                     <div style="margin: 10px">
@@ -333,6 +337,9 @@
         <div v-if="isSchemaImportVisible">
             <schema-import-dialog :schema-import-title="schemaImportTitle" :schema-import-url="schemaImportUrl" @schema-import-success="schemaImportSuccess" @close-schema-import-dialog="closeSchemaImportDialog"></schema-import-dialog>
         </div>
+        <div v-if="isDiffDialogVisible">
+            <json-diff :json-diff-info="jsonDiffInfo" @close-dialog="closeViewContentDialog"></json-diff>
+        </div>
     </div>
 </template>
 
@@ -349,9 +356,13 @@ export default {
     'schema-copy-to-dialog': SchemaCopyToDialog,
     'schema-import-dialog': SchemaImportDialog,
   },
-  props: ['versionOperation', 'versionInfo', 'versionInfoTitle', 'isMetaDataNull', 'clusters', 'isLogical'],
+  props: ['versionList', 'versionOperation', 'versionInfo', 'versionInfoTitle', 'isMetaDataNull', 'clusters', 'isLogical'],
   data() {
     return {
+      jsonDiffInfo: {},
+      isDiffDialogVisible: false,
+      selectedVersion: {},
+      diffVersionInfo: {},
       loading: false,
       isVersionInfoVisible: true,
       isSchemaImportVisible: false,
@@ -428,6 +439,33 @@ export default {
     };
   },
   methods: {
+    diffCurVersion() {
+      this.loading = true;
+      this.$http.get(`/index/version/id.json?versionId=${this.selectedVersion}`).then((data) => {
+        this.diffVersionInfo = data;
+        Object.keys(this.diffVersionInfo.schema).forEach((element, index) => {
+          this.diffVersionInfo.schema[index].children =
+              this.diffVersionInfo.schema[index].children || [];
+          this.diffVersionInfo.schema[index].multiField =
+              this.diffVersionInfo.schema[index].multiField || [];
+          this.diffVersionInfo.schema[index].copyTo =
+              this.diffVersionInfo.schema[index].copyTo || [];
+        });
+        const leftDiff = {};
+        const rightDiff = {};
+        leftDiff.schema = this.versionInfo.schema;
+        rightDiff.schema = this.diffVersionInfo.schema;
+        this.jsonDiffInfo.left = JSON.stringify(rightDiff, null, 2);
+        this.jsonDiffInfo.right = JSON.stringify(leftDiff, null, 2);
+        this.isDiffDialogVisible = true;
+      })
+      .finally(() => {
+        this.loading = false;
+      });
+    },
+    closeViewContentDialog() {
+      this.isDiffDialogVisible = false;
+    },
     renderDocValueHeader(h) {
       return h(
         'span',
