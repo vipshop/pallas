@@ -26,6 +26,8 @@ import java.util.concurrent.TimeUnit;
 
 import com.vip.pallas.utils.LogUtils;
 import com.vip.pallas.search.utils.SearchLogEvent;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaderValues;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
@@ -143,6 +145,9 @@ public final class RestInvokerFilter extends AbstractFilter {
 			aspect.beforeRestStart(sessionContext, outBoundRequest.headers());
 		}
 
+		// 添加通用header
+		addCommonRequestHeaders(outBoundRequest);
+
 		try {
 			HttpHost targetHost = constractAtargetHost(sessionContext.getServiceInfo().getBackendAddress());
 			PallasRequest pallasRequest = sessionContext.getRequest();
@@ -193,6 +198,11 @@ public final class RestInvokerFilter extends AbstractFilter {
 			LogUtils.error(logger, SearchLogEvent.NORMAL_EVENT, ex.getLocalizedMessage(), ex);
 			throw ex;
 		}
+	}
+
+	private void addCommonRequestHeaders(DefaultFullHttpRequest outBoundRequest){
+		// #103 默认加Accept-Encoding:gzip,deflate 头
+		outBoundRequest.headers().add(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.GZIP_DEFLATE.toString());
 	}
 
 	public static HttpHost constractAtargetHost(final String address)

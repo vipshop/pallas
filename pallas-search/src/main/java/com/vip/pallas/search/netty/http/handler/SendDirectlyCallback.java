@@ -19,14 +19,18 @@ package com.vip.pallas.search.netty.http.handler;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.zip.DeflaterInputStream;
+import java.util.zip.GZIPInputStream;
 
 import com.vip.pallas.utils.LogUtils;
+import io.netty.handler.codec.http.*;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import org.apache.http.client.HttpResponseException;
+import org.apache.http.client.entity.DecompressingEntity;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.concurrent.FutureCallback;
@@ -52,13 +56,8 @@ import com.vip.pallas.search.timeout.TimeoutRetryController;
 import com.vip.pallas.search.trace.TraceAspect;
 
 import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.http.DefaultFullHttpRequest;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.internal.ThrowableUtil;
+import org.springframework.http.HttpHeaders;
 
 public class SendDirectlyCallback implements FutureCallback<HttpResponse> {
 
@@ -133,6 +132,8 @@ public class SendDirectlyCallback implements FutureCallback<HttpResponse> {
 			return;
 		}
 		try {
+			// #103 默认加gzip头，es返回时需要解压
+			autoDecompression(response);
 			HttpEntity entity = response.getEntity();
 			byte[] content = null;
  			//#296 _scroll支持
@@ -165,6 +166,19 @@ public class SendDirectlyCallback implements FutureCallback<HttpResponse> {
 		} catch (Exception ex) {
 			handleFailed(ex);
 		}
+	}
+
+	private void autoDecompression(HttpResponse response){
+		Header contentEncoding= response.getLastHeader(HttpHeaders.CONTENT_ENCODING);
+		if (contentEncoding != null){
+			// decompression
+			if (contentEncoding.getValue().equals(HttpHeaderValues.GZIP.toString())||contentEncoding.getValue().equals(HttpHeaderValues.X_GZIP.toString())){
+				response.setEntity(new DecompressingEntity(response.getEntity(), GZIPInputStream::new));
+			}else if (contentEncoding.getValue().equals(HttpHeaderValues.DEFLATE.toString())){
+				response.setEntity(new DecompressingEntity(response.getEntity(), DeflaterInputStream::new));
+			}
+		}
+
 	}
 
 	private void setKeyTimeStamp() {
