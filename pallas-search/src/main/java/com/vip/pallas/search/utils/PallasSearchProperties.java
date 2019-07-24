@@ -134,7 +134,10 @@ public class PallasSearchProperties extends PallasBasicProperties {
 	
 	private static final String NAME_HTTP_HEADER_REMOTE_ADDRESS = "pallas.http.header.remote.address";
 	public static final String HTTP_HEADER_REMOTE_ADDRESS = processor.getString(NAME_HTTP_HEADER_REMOTE_ADDRESS, "");
-	
+
 	private static final String NAME_POOL_NAME = "pool.name";
 	public static final String SEARCH_POOL_NAME = processor.getString(NAME_POOL_NAME, "");
+
+	private static final String NAME_GZIP_COMPRESSION = "pallas.search.gzip.compression";
+	public static final Boolean SEARCH_GZIP_COMPRESSION = processor.getBoolean(NAME_GZIP_COMPRESSION, true);
 }

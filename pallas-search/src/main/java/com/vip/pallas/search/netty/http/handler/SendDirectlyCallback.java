@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.util.zip.DeflaterInputStream;
 import java.util.zip.GZIPInputStream;
 
+import com.vip.pallas.search.utils.PallasSearchProperties;
 import com.vip.pallas.utils.LogUtils;
 import io.netty.handler.codec.http.*;
 import org.apache.http.Header;
@@ -134,6 +135,7 @@ public class SendDirectlyCallback implements FutureCallback<HttpResponse> {
 		try {
 			// #103 默认加gzip头，es返回时需要解压
 			autoDecompression(response);
+
 			HttpEntity entity = response.getEntity();
 			byte[] content = null;
  			//#296 _scroll支持
@@ -169,15 +171,17 @@ public class SendDirectlyCallback implements FutureCallback<HttpResponse> {
 	}
 
 	private void autoDecompression(HttpResponse response){
-		Header contentEncoding= response.getLastHeader(HttpHeaders.CONTENT_ENCODING);
-		if (contentEncoding != null){
-			// decompression
-			if (contentEncoding.getValue().equals(HttpHeaderValues.GZIP.toString())||contentEncoding.getValue().equals(HttpHeaderValues.X_GZIP.toString())){
-				response.setEntity(new DecompressingEntity(response.getEntity(), GZIPInputStream::new));
-			}else if (contentEncoding.getValue().equals(HttpHeaderValues.DEFLATE.toString())){
-				response.setEntity(new DecompressingEntity(response.getEntity(), DeflaterInputStream::new));
-			}
-		}
+        if (PallasSearchProperties.SEARCH_GZIP_COMPRESSION) {
+            Header contentEncoding = response.getLastHeader(HttpHeaders.CONTENT_ENCODING);
+            if (contentEncoding != null) {
+                // decompression
+                if (contentEncoding.getValue().equals(HttpHeaderValues.GZIP.toString()) || contentEncoding.getValue().equals(HttpHeaderValues.X_GZIP.toString())) {
+                    response.setEntity(new DecompressingEntity(response.getEntity(), GZIPInputStream::new));
+                } else if (contentEncoding.getValue().equals(HttpHeaderValues.DEFLATE.toString())) {
+                    response.setEntity(new DecompressingEntity(response.getEntity(), DeflaterInputStream::new));
+                }
+            }
+        }
 
 	}
 

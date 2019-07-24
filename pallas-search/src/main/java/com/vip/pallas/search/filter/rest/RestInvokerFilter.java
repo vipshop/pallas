@@ -202,7 +202,9 @@ public final class RestInvokerFilter extends AbstractFilter {
 
 	private void addCommonRequestHeaders(DefaultFullHttpRequest outBoundRequest){
 		// #103 默认加Accept-Encoding:gzip,deflate 头
-		outBoundRequest.headers().add(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.GZIP_DEFLATE.toString());
+        if (PallasSearchProperties.SEARCH_GZIP_COMPRESSION){
+            outBoundRequest.headers().add(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.GZIP_DEFLATE.toString());
+        }
 	}
 
 	public static HttpHost constractAtargetHost(final String address)
