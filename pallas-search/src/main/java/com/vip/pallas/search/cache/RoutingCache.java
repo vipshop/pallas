@@ -225,7 +225,7 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
                         Map<String, List<String>> clusterNodeListMapInCache = (Map<String, List<String>>) cacheMap
                                 .get(CLUSTER_NODE_LIST);
                         if (clusterNodeListMapInCache != null) {
-                            List<String> nodeListInCache = clusterNodeListMapInCache.get(cluster.getHttpAddress());
+                            List<String> nodeListInCache = clusterNodeListMapInCache.get(cluster.getClusterId());
                             return nodeListInCache == null ? emptyList() : nodeListInCache;
                         }
                     }
@@ -263,7 +263,7 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
                                 .get(SHARD_NODE_LIST);
                         if (clusterShardNodeListMapInCache != null) {
                             Map<String, List<String>> shardNodeListInCache = clusterShardNodeListMapInCache
-                                    .get(cluster.getHttpAddress());
+                                    .get(cluster.getClusterId());
                             return shardNodeListInCache == null ? emptyMap() : shardNodeListInCache;
                         }
                     }
