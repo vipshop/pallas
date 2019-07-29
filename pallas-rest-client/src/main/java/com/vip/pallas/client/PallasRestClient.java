@@ -185,7 +185,10 @@ public class PallasRestClient {
 			holder.getRestClient().performRequestAsync(method, endpoint, params, entity, new PallasHttpAsyncResponseConsumerFactory(),
 					responseListener, newHeaders);
 			response = responseListener.get();
-		} catch (IOException e) {
+		} catch (ResponseException e){ // Return ES exception detail for invokers
+			logger.error("pallas restclient performRequest error: {}", e.getMessage(), e);
+			throw e;
+		}catch (IOException e) {
 			String message = printPerformTimeoutError(endpoint, templateId, maxTimeoutMils);
 			logger.error(e.getMessage(), e);
 			throw new PallasTimeoutException(message, e);
