@@ -493,7 +493,7 @@ public class RouteFilter extends AbstractFilter {
 		}
 
 		if(availableNodes == null || availableNodes.isEmpty()){
-			throw new HttpCodeErrorPallasException("no available nodes with " + indexName, HTTP_SERVICE_UNAVAILABLE, className, classMethod);
+			throw new HttpCodeErrorPallasException("no available nodes with " + indexName+" isIndexRouting:"+isIndexRouting, HTTP_SERVICE_UNAVAILABLE, className, classMethod);
 		}
 
 		if (!routingList.isEmpty()){

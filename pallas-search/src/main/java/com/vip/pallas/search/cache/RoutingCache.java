@@ -250,8 +250,7 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
         ));
 
         //clusterId -> shardNodeListMap
-		Map<String, Map<String, List<String>>> clusterShardNodeListMapRaw = reverseMapKey(
-				clusterList.stream().collect(toMap(Cluster::getClusterId, cluster -> {
+		Map<String, Map<String, List<String>>> clusterShardNodeListMapRaw = clusterList.stream().collect(toMap(Cluster::getClusterId, cluster -> {
                     boolean canMonitor = cluster.getMonitorLevelModel().isPallasSearchMonitor();
                     //#937 pallas Search应该不要去ping那些不需要search 用到的集群
                     if (canMonitor) {
@@ -279,7 +278,7 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
                         }
                     }
 					return emptyMap();
-				})));
+				}));
 
         // index -> clusterId -> shardNodeListMap
         Map<String, Map<String, List<String>>> clusterShardNodeListMap = reverseMapKey(clusterShardNodeListMapRaw);
