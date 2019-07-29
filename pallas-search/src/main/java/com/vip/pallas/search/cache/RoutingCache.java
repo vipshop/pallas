@@ -268,7 +268,7 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
                         Map<String, Map<String, List<String>>> clusterShardNodeListMapRawInCache = (Map<String, Map<String, List<String>>>) cacheMap
                                 .get(SHARD_NODE_LIST_RAW);
                         LogUtils.warn(LOGGER, SearchLogEvent.ROUTING_EVENT, "getShards by {} returns null, keep the former values in clusterShardNodeListMapRawInCache:{}",
-                                cluster.getClusterId(), new Gson().toJson(clusterShardNodeListMapRawInCache));
+                                cluster.getClusterId(), clusterShardNodeListMapRawInCache);
 
                         if (clusterShardNodeListMapRawInCache != null) {
                             Map<String, List<String>> shardNodeListInCache = clusterShardNodeListMapRawInCache.getOrDefault(cluster.getClusterId(), emptyMap());
@@ -300,10 +300,12 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
                         Map<String, Map<String, List<String>>> clusterAliaseIndexMapCache = (Map<String, Map<String, List<String>>>) cacheMap
                                 .get(ALIASE_INDEX_MAP_RAW);
 
-                        Map<String, List<String>> cache = clusterAliaseIndexMapCache.getOrDefault(cluster.getClusterId(), emptyMap());
-                        if (cache.isEmpty()) {
-                            LogUtils.warn(LOGGER, SearchLogEvent.ROUTING_EVENT, "cluster {} is empty in clusterAliaseIndexMapCache.", cluster.getClusterId());
-                            return cache;
+                        if (clusterAliaseIndexMapCache != null) {
+                            Map<String, List<String>> cache = clusterAliaseIndexMapCache.getOrDefault(cluster.getClusterId(), emptyMap());
+                            if (cache.isEmpty()) {
+                                LogUtils.warn(LOGGER, SearchLogEvent.ROUTING_EVENT, "cluster {} is empty in clusterAliaseIndexMapCache.", cluster.getClusterId());
+                                return cache;
+                            }
                         }
                     }
                     return aliasesList != null ? Optional.ofNullable(aliasesList.stream().
