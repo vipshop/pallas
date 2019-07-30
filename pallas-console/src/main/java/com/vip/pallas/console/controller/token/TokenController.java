@@ -76,6 +76,15 @@ public class TokenController {
         return authService.selectAll();
     }
 
+
+    @RequestMapping(path="/delete/id.json", method={RequestMethod.POST})
+    public void deleteToken(HttpServletRequest request,@RequestParam Long tokenId){
+        if (!AuthorizeUtil.authorizeTokenPrivilege(request, null)) {
+            throw new BusinessLevelException(403, "无权限操作");
+        }
+        authService.deleteById(tokenId);
+    }
+
     @RequestMapping(path="/insert.json", method={RequestMethod.POST})
     public void createOrUpdateToken(@RequestBody @Validated SearchAuthorization token, HttpServletRequest request){
     	if (!AuthorizeUtil.authorizeTokenPrivilege(request, null)) {

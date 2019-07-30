@@ -24,9 +24,10 @@
                                 <div style="color: gray;font-size: 12px;">{{scope.row.clientToken}}</div>
                             </template>
                         </el-table-column>
-                        <el-table-column label="编辑" width="30px" align="center">
+                        <el-table-column label="编辑" width="80px" align="center">
                             <template slot-scope="scope"> 
                                 <el-button type="text" @click.stop="handleEdit(scope.row)"><i class="fa fa-pencil-square-o"></i></el-button>
+                                <el-button type="text" @click="handleDelete(scope.row)"><i class="fa fa-trash"></i></el-button>
                             </template>
                         </el-table-column>
                     </el-table>
@@ -85,6 +86,19 @@ export default {
     };
   },
   methods: {
+    handleDelete(row) {
+      this.$message.confirmMessage(`确定删除token: ${row.clientToken}吗?`, () => {
+        this.loading = true;
+        this.$http.post(`/token/delete/id.json?tokenId=${row.id}`).then(() => {
+          this.$message.successMessage('删除成功', () => {
+            this.refreshPage();
+          });
+        })
+        .finally(() => {
+          this.loading = false;
+        });
+      });
+    },
     handleSearch() {
       let filtered = this.initTokenList;
       filtered = filtered.filter((e) => {
@@ -143,6 +157,9 @@ export default {
         this.initTokenList = data;
         this.isPrivilege = true;
       });
+    },
+    refreshPage() {
+      this.init();
     },
     init() {
       this.loading = true;
