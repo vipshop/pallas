@@ -61,7 +61,7 @@ public class VersionApiController {
                           @RequestParam @NotNull(message = "increment不能为空") @Min(value = 1, message = "increment必须为正数") Long increment) throws Exception {
         String rampupInfo = versionService.getRampupByVersionId(versionId);
 
-        if(rampupInfo != null && StringUtils.isNotBlank(rampupInfo)){
+        if(StringUtils.isNotBlank(rampupInfo)){
             IndexRampupVO rampupVO = JsonUtil.readValue(rampupInfo, IndexRampupVO.class);
 
             if(rampupVO.needRampup()){
@@ -90,7 +90,7 @@ public class VersionApiController {
 
     @RequestMapping(value = "/rampup/start.json", method = RequestMethod.GET)
     public void start(@RequestParam @NotNull(message = "versionId不能为空") Long versionId,
-                      String endTime, Long rampupTarget, Integer sampleRate) throws Exception {
+                      @RequestParam String endTime, @RequestParam Long rampupTarget,@RequestParam Integer sampleRate,@RequestParam(defaultValue = "") String fullIndexName) throws Exception {
         if(StringUtils.isBlank(endTime) && rampupTarget == null){
             throw new Exception("预热结束时间与目标预热条数不能同时为空");
         }
@@ -103,7 +103,11 @@ public class VersionApiController {
         rampupVO.setIndexId(index.getId());
         rampupVO.setVersionId(versionId);
         rampupVO.setClusterName(index.getClusterName());
-        rampupVO.setFullIndexName(index.getIndexName() + "_" + versionId);
+        if (StringUtils.isNotBlank(fullIndexName)) {
+            rampupVO.setFullIndexName(fullIndexName);
+        } else {
+            rampupVO.setFullIndexName(index.getIndexName() + "_" + versionId);
+        }
         rampupVO.setBeginTime(new Date());
         rampupVO.setState(IndexRampupVO.STATE_DOING);
 

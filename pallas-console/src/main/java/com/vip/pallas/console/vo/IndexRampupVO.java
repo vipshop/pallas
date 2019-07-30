@@ -9,6 +9,7 @@ public class IndexRampupVO {
     private Long indexId;
     private Long versionId;
     private String clusterName;
+    // 默认格式：indexAlias_versionId, 支持自定义
     private String fullIndexName;
     private Date beginTime;
     private Date endTime;
