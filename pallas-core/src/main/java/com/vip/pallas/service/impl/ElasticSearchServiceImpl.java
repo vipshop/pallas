@@ -138,6 +138,30 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 		return s;
 	}
 
+
+	@Override
+	public String genMappingJsonByMappingList(List<Mapping> mappings) {
+		if(mappings == null){
+			return null;
+		}
+		EsMappingsUpdateModel esMappings=new EsMappingsUpdateModel();
+		Map<String, Propertie> propertyMap = new HashMap<>();
+		esMappings.setProperties(propertyMap);
+		Map<Long, List<Mapping>> mappingMap = new HashMap<>();
+		List<Mapping> firstLayerList = new ArrayList<>();
+		constructMappings(mappings, firstLayerList, mappingMap);
+
+		addSourceField(firstLayerList);
+
+		for (Mapping mapping : firstLayerList) {
+			Propertie prop = new Propertie();
+			propertyMap.put(mapping.getFieldName(), prop);
+			convertMappingToProperty(mapping, prop, mappingMap);
+		}
+		String s =  new Gson().toJson(esMappings);
+		return s;
+	}
+
 	private EsSourceMapping constructSourceMapping(IndexVersion indexVersion){
 		// 如果设置了 enabled = false， 则直接忽略后面的配置
 		if (indexVersion.getSourceDisabled() == Boolean.TRUE){
@@ -385,6 +409,30 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 				subFieldMappings.add(mapping);
 			}
 		}
+	}
+
+	@Override
+	public String updateEsMapping(String indexName, Long indexId, Long versionId,List<Mapping> mappings) throws IOException {
+		StringBuilder result = new StringBuilder();
+		List<Cluster> clusters = clusterRepository.selectPhysicalClustersByIndexId(indexId);
+		for (Cluster cluster : clusters) {
+			try {
+				if (!this.isExistIndex(indexName, cluster.getHttpAddress(), versionId)) {
+					logger.error("try update mapping,but index not exist,indexName:{},httpAddress:{},versoinId:{}",indexName,cluster.getHttpAddress(),versionId);
+					continue;
+				}
+				NStringEntity entity = new NStringEntity(genMappingJsonByMappingList(mappings),
+						ContentType.APPLICATION_JSON);
+				result.append(IOUtils.toString(ElasticRestClient.build(cluster.getHttpAddress())
+						.performRequest("PUT", "/" + indexName + "_" + versionId+"/_mapping/item", Collections.emptyMap(), entity)
+						.getEntity().getContent())).append("\\n");
+			} catch (IOException e) {
+				logger.error(e.getClass() + " " + e.getMessage(), e);
+				throw e;
+			}
+		}
+		return result.toString();
+
 	}
 
     @Override

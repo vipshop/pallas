@@ -59,6 +59,17 @@ public class IndexVersionDynamicVO implements Serializable {
 
     private String translogDurability;
 
+    private Object schema;
+
+    @NotNull(message = "schema不能为null")
+    public Object getSchema() {
+        return schema;
+    }
+
+    public void setSchema(Object schema) {
+        this.schema = schema;
+    }
+
     public Long getMaxResultWindow() {
         return maxResultWindow;
     }

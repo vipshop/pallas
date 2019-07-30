@@ -24,6 +24,7 @@ import java.util.Map;
 
 import com.vip.pallas.bean.monitor.ShardInfoModel;
 import com.vip.pallas.mybatis.entity.IndexVersion;
+import com.vip.pallas.mybatis.entity.Mapping;
 import org.elasticsearch.client.RestClient;
 
 import com.vip.pallas.mybatis.entity.Cluster;
@@ -31,6 +32,10 @@ import com.vip.pallas.mybatis.entity.Cluster;
 public interface ElasticSearchService {
 	
 	public String genMappingJsonByVersionIdAndClusterName(Long versionId, String clusterName);
+
+	public String genMappingJsonByMappingList(List<Mapping> mappings);
+
+	public String updateEsMapping(String indexName, Long indexId, Long versionId,List<Mapping> mappings) throws IOException;
 	
 	public String createIndex(String indexName, Long indexId, Long versionId) throws IOException;
 	

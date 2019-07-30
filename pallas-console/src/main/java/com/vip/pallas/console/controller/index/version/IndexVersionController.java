@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.Min;
 
 import com.vip.pallas.console.vo.IndexVersionDynamicVO;
+import com.vip.pallas.mybatis.entity.*;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,11 +55,6 @@ import com.vip.pallas.console.vo.PageResultVO;
 import com.vip.pallas.console.vo.base.BaseIndexVersionOp;
 import com.vip.pallas.exception.BusinessLevelException;
 import com.vip.pallas.exception.PallasException;
-import com.vip.pallas.mybatis.entity.Cluster;
-import com.vip.pallas.mybatis.entity.Index;
-import com.vip.pallas.mybatis.entity.IndexOperation;
-import com.vip.pallas.mybatis.entity.IndexVersion;
-import com.vip.pallas.mybatis.entity.Page;
 import com.vip.pallas.service.ClusterService;
 import com.vip.pallas.service.ElasticSearchService;
 import com.vip.pallas.service.IndexOperationService;
@@ -467,8 +463,13 @@ public class IndexVersionController {
 			throw new BusinessLevelException(403, "无权限操作");
 		}
 
-		indexVersionService.update(indexVersion);
+		Object schema = params.getSchema();
+		List<Mapping> mappingList = indexVersionService.updateDynamic(indexVersion,(ArrayList)schema);
 		elasticSearchService.dynamicUpdateIndexSettings(index.getIndexName(),index.getId(),indexVersion);
+		if (mappingList.size()>0){
+			elasticSearchService.updateEsMapping(index.getIndexName(),index.getId(),versionId,mappingList);
+		}
+
 		try {
 			AuditLogUtil.log(
 					"add versionId: id - {0}, index - {1}, maxResultWindow - {2}, numOfReplication - {3}," +

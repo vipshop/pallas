@@ -147,11 +147,11 @@ export default {
       const params = {
         pluginUpgradeId: row.id,
         action: operation,
-        nodeIp: nodeIp,
+        nodeIp,
       };
       const involveItems = nodeIp == null ? row.clusterId : nodeIp;
       const msg = this.$createElement('span', null, [this.$createElement('span', null, `确定${text}插件${row.pluginName}吗?`),
-      this.$createElement('br', null), this.$createElement('span', null, `升级对象: ${involveItems}`)]);
+        this.$createElement('br', null), this.$createElement('span', null, `升级对象: ${involveItems}`)]);
       this.$message.confirmMessage(msg, () => {
         this.loading = true;
         this.$http.post('/plugin/upgrade/action.json', params).then(() => {

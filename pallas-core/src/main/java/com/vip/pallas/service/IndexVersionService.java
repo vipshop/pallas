@@ -94,9 +94,6 @@ public abstract class IndexVersionService {
 		insertMappings(indexVersion, schemaArrayNode);
 	}
 
-	public void update(IndexVersion indexVersion) {
-		indexVersionRepository.updateByPrimaryKeySelective(indexVersion);
-	}
 
 	public IndexVersion findById(Long id) {
 		return indexVersionRepository.selectByPrimaryKey(id);
@@ -204,6 +201,17 @@ public abstract class IndexVersionService {
 
 	}
 
+	public void update(IndexVersion indexVersion){
+		indexVersionRepository.updateByPrimaryKeySelective(indexVersion);
+	}
+
+	public  List<Mapping> updateDynamic(IndexVersion indexVersion,ArrayList schemaArrayNode) {
+		Date date = new Date();
+		indexVersion.setUpdateTime(date);
+		indexVersionRepository.updateByPrimaryKeySelective(indexVersion);
+		return insertMappings(indexVersion, schemaArrayNode);
+	}
+
 	public void update(IndexVersion indexVersion, ArrayList schemaArrayNode) {
 		Date date = new Date();
 		indexVersion.setUpdateTime(date);
@@ -214,15 +222,16 @@ public abstract class IndexVersionService {
 		insertMappings(indexVersion, schemaArrayNode);
 	}
 
-	private void insertMappings(IndexVersion indexVersion, ArrayList<Map> schemaArrayNode) {
-
+	private List<Mapping> insertMappings(IndexVersion indexVersion, ArrayList<Map> schemaArrayNode) {
+		List<Mapping> mappingList = new ArrayList<>(schemaArrayNode.size());
 		for (Map node : schemaArrayNode) {
 			Mapping mapping = initMapping(node, indexVersion);
 			Boolean dynamicNode = (Boolean) node.get("dynamic");
 			mapping.setDynamic(dynamicNode != null && dynamicNode);
+			mappingList.add(mapping);
 			mappingRepository.insert(mapping);
 			// 检查是否有多域
-			checkAndAddMultiFieldsMapping(node, mapping.getId(), indexVersion);
+			mappingList.addAll(checkAndAddMultiFieldsMapping(node, mapping.getId(), indexVersion));
 			List<Map> childNode = (List<Map>) node.get("children");
 			for (Map _childNode : childNode) {
 				Mapping childMapping = initMapping(_childNode, indexVersion);
@@ -233,24 +242,30 @@ public abstract class IndexVersionService {
 				}else {
 					childMapping.setParentType(MappingParentType.NESTED.val());
 				}
+				mappingList.add(childMapping);
 				mappingRepository.insert(childMapping);
 				// 检查nested域是否有多域
-				checkAndAddMultiFieldsMapping(_childNode, childMapping.getId(), indexVersion);
+				mappingList.addAll(checkAndAddMultiFieldsMapping(_childNode, childMapping.getId(), indexVersion));
 			}
 		}
+		return mappingList;
 	}
 
-	private void checkAndAddMultiFieldsMapping(Map map, Long parentId, IndexVersion indexVersion){
-		if (null == map.get("multiField"))return;
+	private List<Mapping> checkAndAddMultiFieldsMapping(Map map, Long parentId, IndexVersion indexVersion){
+		if (null == map.get("multiField"))return Collections.emptyList();
+
 		List<Map> multiFieldNodes = (List<Map>) map.get("multiField");
+		List<Mapping> mappings = new ArrayList<>(multiFieldNodes.size());
 		// 增加multi-field
 		for (Map _node : multiFieldNodes) {
 			Mapping multiFieldsMapping = initMapping(_node, indexVersion);
 			multiFieldsMapping.setParentId(parentId);
 			multiFieldsMapping.setDynamic(Boolean.FALSE);
 			multiFieldsMapping.setParentType(MappingParentType.MULTI_FIELDS.val());
+			mappings.add(multiFieldsMapping);
 			mappingRepository.insert(multiFieldsMapping);
 		}
+		return mappings;
 	}
 
 	private Mapping initMapping(Map node, IndexVersion indexVersion) {
