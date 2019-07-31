@@ -17,7 +17,6 @@
 
 package com.vip.pallas.search.cache;
 
-import com.google.gson.Gson;
 import com.vip.pallas.search.filter.circuitbreaker.CircuitBreakerPolicy;
 import com.vip.pallas.search.filter.circuitbreaker.CircuitBreakerPolicyHelper;
 import com.vip.pallas.search.filter.throttling.ThrottlingPolicyHelper;
@@ -41,7 +40,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static java.util.Collections.EMPTY_LIST;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.function.Function.identity;
@@ -300,11 +298,11 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
                                 .get(ALIASE_INDEX_MAP_RAW);
 
                         if (clusterAliaseIndexMapCache != null) {
-                            Map<String, List<String>> cache = clusterAliaseIndexMapCache.getOrDefault(cluster.getClusterId(), emptyMap());
-                            if (cache.isEmpty()) {
+                            Map<String, List<String>> previousAliasMapCache = clusterAliaseIndexMapCache.getOrDefault(cluster.getClusterId(), emptyMap());
+                            if (previousAliasMapCache.isEmpty()) {
                                 LogUtils.warn(LOGGER, SearchLogEvent.ROUTING_EVENT, "cluster {} is empty in clusterAliaseIndexMapCache.", cluster.getClusterId());
-                                return cache;
                             }
+                            return previousAliasMapCache;
                         }
                     }
                     return aliasesList != null ? Optional.ofNullable(aliasesList.stream().
