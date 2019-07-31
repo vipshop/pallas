@@ -26,6 +26,7 @@ import com.vip.pallas.search.service.impl.ElasticSearchServiceImpl;
 import com.vip.pallas.search.utils.*;
 import com.vip.pallas.utils.LogUtils;
 import com.vip.pallas.utils.PallasBasicProperties;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
@@ -72,7 +73,7 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RoutingCache.class);
     private static ElasticSearchService elasticSearchService = new ElasticSearchServiceImpl();
 
-    private volatile Map<String, Object> lastCache;
+    private volatile Map<String, Object> lastCache = Collections.emptyMap();
 
     public RoutingCache() {
         super();
@@ -224,7 +225,7 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
                             return nodeList;
                         }
                         // if sth. goes wrong, keep the former cache rather than the null value.
-                        Map<String, List<String>> clusterNodeListMapInCache = (Map<String, List<String>>) cacheMap.get(CLUSTER_NODE_LIST);
+                        Map<String, List<String>> clusterNodeListMapInCache = (Map<String, List<String>>) lastCache.get(CLUSTER_NODE_LIST);
                         LogUtils.warn(LOGGER, SearchLogEvent.ROUTING_EVENT, "getNodeList by {} returns null, keep the former values in clusterNodeListMapInCache",
                                 cluster.getClusterId(), clusterNodeListMapInCache);
                         if (clusterNodeListMapInCache != null) {
@@ -253,7 +254,7 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
                     //#937 pallas Search应该不要去ping那些不需要search 用到的集群
                     if (canMonitor) {
                         List<String[]> shardNodeList = elasticSearchService.getIndexAndNodes(cluster.getHttpAddress());
-                        if (shardNodeList != null) {
+                        if (CollectionUtils.isNotEmpty(shardNodeList)) {
                             shardNodeList.removeAll(elasticSearchService.getExcludeNodeList(cluster.getHttpAddress()));
                             shardNodeList.removeAll(getAbnormalNodeList(cluster.getClusterId()));
                             return Optional
@@ -262,7 +263,7 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
                                     .orElseGet(Collections::emptyMap);
                         }
                         // if sth. goes wrong, keep the former cache rather than the null value.
-                        Map<String, Map<String, List<String>>> clusterShardNodeListMapRawInCache = (Map<String, Map<String, List<String>>>) cacheMap
+                        Map<String, Map<String, List<String>>> clusterShardNodeListMapRawInCache = (Map<String, Map<String, List<String>>>) lastCache
                                 .get(SHARD_NODE_LIST_RAW);
                         LogUtils.warn(LOGGER, SearchLogEvent.ROUTING_EVENT, "getShards by {} returns null, keep the former values in clusterShardNodeListMapRawInCache:{}",
                                 cluster.getClusterId(), clusterShardNodeListMapRawInCache);
@@ -294,7 +295,7 @@ public class RoutingCache extends AbstractCache<String, Map<String, Object>> {
                     if (aliasesList == null || aliasesList.isEmpty()) {
                         LogUtils.warn(LOGGER, SearchLogEvent.ROUTING_EVENT, "aliasesList by {} returns null, keep the former values in clusterAliaseIndexMapCache",
                                 cluster.getClusterId());
-                        Map<String, Map<String, List<String>>> clusterAliaseIndexMapCache = (Map<String, Map<String, List<String>>>) cacheMap
+                        Map<String, Map<String, List<String>>> clusterAliaseIndexMapCache = (Map<String, Map<String, List<String>>>) lastCache
                                 .get(ALIASE_INDEX_MAP_RAW);
 
                         if (clusterAliaseIndexMapCache != null) {
