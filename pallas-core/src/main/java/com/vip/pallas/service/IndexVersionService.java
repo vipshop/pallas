@@ -436,11 +436,6 @@ public abstract class IndexVersionService {
 		com.vip.pallas.bean.IndexVersion version = new com.vip.pallas.bean.IndexVersion();
 
         initVersionSchemaByDBSchemaList(version, schemaList, fieldMap);
-
-		// DB 不存在的那些schema 也要导入
-		for (VersionField field : fieldMap.values()) {
-			version.addField(field);
-		}
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		resultMap.put("schema", version.getSchema());
 

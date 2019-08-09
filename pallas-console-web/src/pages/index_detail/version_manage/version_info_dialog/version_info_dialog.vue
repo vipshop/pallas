@@ -546,6 +546,10 @@ export default {
             if (this.versionInfo.sourceExcludesArr) {
               this.$set(this.versionInfo, 'sourceExcludes', this.versionInfo.sourceExcludesArr.join(','));
             }
+            if (this.checkDuplicateField(this.versionInfo.schema).length > 0) {
+              this.$message.errorMessage(`有重复字段，请检查以下字段： ${this.checkDuplicateField(this.versionInfo.schema)}`);
+              return;
+            }
             if (this.versionOperation === 'add' || this.versionOperation === 'copy') {
               this.loading = true;
               this.$http.post('/index/version/add.json', this.versionInfo).then(() => {
@@ -570,6 +574,12 @@ export default {
           }
         }
       });
+    },
+    checkDuplicateField(schemaParam) {
+      const keyArr = [];
+      schemaParam.forEach(el => keyArr.push(el.fieldName));
+      const findDuplicates = arr => arr.filter((item, index) => arr.indexOf(item) !== index);
+      return findDuplicates(keyArr);
     },
     isSchemaSelectError() {
       return this.versionInfo.schema.some((element) => {
