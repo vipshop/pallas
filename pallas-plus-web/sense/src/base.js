@@ -76,7 +76,7 @@ function callES(server, url, method, data, successCallback, completeCallback, re
     var uname = url_parts[2];
     var password = url_parts[3];
     console.log("Calling " + url + "  (uname: " + uname + " pwd: " + password + ")");
-    if (data && method == "GET") method = "POST";
+    // if (data && method == "GET") method = "POST";
 	
 	var urlbase = getSearchUrlVar("host");
 	var currentHost = urlbase;
