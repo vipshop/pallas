@@ -116,7 +116,11 @@ public class AuthorizeUtil {
 		}
 		return false;
 	}
-	
+
+	public static boolean authorizeEsCommandLineWirteAuth(HttpServletRequest request) {
+		return authorizeModulePrivilege(request, "cluster.commandline");
+	}
+
 	public static boolean authorizeTemplateApprovePrivilege(HttpServletRequest request) {
 		return authorizeModulePrivilege(request, "template.all") ? true : authorizeModulePrivilege(request, "template.approve");
 	}

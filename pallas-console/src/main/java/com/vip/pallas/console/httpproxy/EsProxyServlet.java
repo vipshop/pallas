@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.vip.pallas.exception.BusinessLevelException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -74,7 +75,8 @@ public class EsProxyServlet extends HttpServlet {
 			writeReponseBody(res,new ErrorResponse(HttpStatus.SC_UNAUTHORIZED, PallasConsoleProperties.PALLAS_LOGIN_URL));
 			return;
 		}
-		
+
+
 
 		if (ThrottleUtil.esClusterInc(clusterId) > PallasConsoleProperties.PROXY_THROTTLE) {
 			ThrottleUtil.esClusterDesc(clusterId);
@@ -88,6 +90,15 @@ public class EsProxyServlet extends HttpServlet {
 			String queryParams = req.getQueryString();
 			path = path.replaceFirst("/pallas", "");
 			path = path.replaceFirst("/esproxy", "");
+
+			// #955 针对集群管理-命令控制台的非get操作做权限验证
+			if(!(method.equalsIgnoreCase("get")||(method.equalsIgnoreCase("post")&&(path.contains("_search")||path.contains("_render"))))){
+				if (!AuthorizeUtil.authorizeEsCommandLineWirteAuth(req)) {
+					writeReponseBody(res, new ErrorResponse(HttpStatus.SC_UNAUTHORIZED, "no write auth "));
+					return;
+				}
+			}
+
 			if (StringUtils.isNotBlank(queryParams)) {
 				if (path.indexOf("?") < 0) {
 					path += "?" + queryParams;
