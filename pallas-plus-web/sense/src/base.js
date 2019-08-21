@@ -559,8 +559,11 @@ function init() {
     sense.autocomplete.init();
     $("#send").tooltip();
     $("#send").click(function () {
-        submitCurrentRequestToES();
-        return false;
+        var req = sense.utils.getCurrentRequest();
+        if(confirm('确定发送请求 ' + req.url +' 吗?')) {
+            submitCurrentRequestToES();
+            return false;  
+        }
     });
 
     $("#copy_as_curl").click(function (e) {
