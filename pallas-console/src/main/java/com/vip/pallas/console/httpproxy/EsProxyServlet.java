@@ -94,7 +94,7 @@ public class EsProxyServlet extends HttpServlet {
 			// #955 针对集群管理-命令控制台的非get操作做权限验证
 			if(!(method.equalsIgnoreCase("get")||(method.equalsIgnoreCase("post")&&(path.contains("_search")||path.contains("_render"))))){
 				if (!AuthorizeUtil.authorizeEsCommandLineWirteAuth(req)) {
-					writeReponseBody(res, new ErrorResponse(HttpStatus.SC_UNAUTHORIZED, "no write auth "));
+					writeReponseBody(res, new ErrorResponse(HttpStatus.SC_UNAUTHORIZED, "You don't have [WRITE] privilege!"));
 					return;
 				}
 			}
