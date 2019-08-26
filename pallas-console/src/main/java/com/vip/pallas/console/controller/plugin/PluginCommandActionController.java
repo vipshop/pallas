@@ -27,6 +27,7 @@ import com.vip.pallas.console.utils.AuthorizeUtil;
 import com.vip.pallas.console.utils.SessionUtil;
 import com.vip.pallas.console.vo.PluginAction;
 import com.vip.pallas.console.vo.RemovePlugin;
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
 import com.vip.pallas.exception.BusinessLevelException;
 import com.vip.pallas.mybatis.entity.PluginCommand;
 import com.vip.pallas.mybatis.entity.PluginRuntime;
@@ -64,11 +65,11 @@ public class PluginCommandActionController {
     @RequestMapping(path = "/remove.json")
     public void pluginRemoveAction(@RequestBody @Validated RemovePlugin plugin, HttpServletRequest request) {
     	if (!AuthorizeUtil.authorizePluginApprovePrivilege(request)) {
-    		throw new BusinessLevelException(403, "无权限操作");
+    		throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
     	}
 
         if (null == clusterService.findByName(plugin.getClusterId())) {
-            throw new BusinessLevelException(500, "cluster不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "cluster不存在");
         }
 
 		// 只有新增或升级插件时才需要根据类别将文件释放到不同目录，删除插件时无需类别
@@ -82,12 +83,12 @@ public class PluginCommandActionController {
     @RequestMapping(path = "/upgrade/action.json")
     public void pluginAction(@RequestBody @Validated PluginAction pluginAction, HttpServletRequest request) {
 		if (!"recall".equals(pluginAction.getAction()) && !AuthorizeUtil.authorizePluginApprovePrivilege(request)) {
-			throw new BusinessLevelException(500, "cluster不存在");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "cluster不存在");
 		}
 
         PluginUpgrade pUpgrade = pluginService.getPluginUpgrade(pluginAction.getPluginUpgradeId());
         if(pUpgrade == null) {
-            throw new BusinessLevelException(500, "PluginUpgrade不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "PluginUpgrade不存在");
         }
 
         int nextState = doUpgradeAction(pluginAction.getAction(), pUpgrade, pluginAction.getNodeIp());
@@ -192,7 +193,7 @@ public class PluginCommandActionController {
                     break;
             }
         }
-        throw new BusinessLevelException(500, "该工单不支持该操作:" + action);
+        throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "该工单不支持该操作:" + action);
     }
 
     private void sendCommand(String action, String clusterId, String nodeIp, String pluginName, String pluginVersion, Integer pluginType){

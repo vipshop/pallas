@@ -24,6 +24,7 @@ import java.util.List;
 
 import javax.validation.constraints.Min;
 
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
@@ -185,12 +186,12 @@ public class PluginUpgradeController {
     @RequestMapping(path="/add.json", method = {RequestMethod.POST})
     public void createPlugin(@RequestBody PluginUpgrade pluginUpgrade){
         if (null == clusterService.findByName(pluginUpgrade.getClusterId())) {
-            throw new BusinessLevelException(500, "cluster不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "cluster不存在");
         }
 
         PluginUpgrade upgrade = pluginService.getLatestUpgrade(pluginUpgrade.getClusterId(), pluginUpgrade.getPluginName());
         if (upgrade != null && !upgrade.isFinished()) {
-            throw new BusinessLevelException(500, "存在未完成的升级流程");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "存在未完成的升级流程");
         }
 
         Date date = new Date();

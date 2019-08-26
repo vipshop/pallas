@@ -26,6 +26,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Min;
 
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -63,14 +64,14 @@ public class UserController {
         try {
             keywords = URLDecoder.decode(keywords, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            throw new BusinessLevelException(500, "keywords无法正常解析");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "keywords无法正常解析");
         }
         
         PageResultVO<UserModel> result = new PageResultVO<>();
         List<String> privileges = AuthorizeUtil.loadPrivileges();
 
         if(privileges == null || !privileges.contains("user.all")) {
-            throw new BusinessLevelException(403, "无权限操作");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         } else {
         	result.setAllPrivilege(true);
         }
@@ -116,7 +117,7 @@ public class UserController {
 		UserModel user = userService.findById(id);
 		String loginUser = SessionUtil.getLoginUser();
 		if (null != loginUser && user != null && loginUser.equals(user.getUsername())) {
-			throw new BusinessLevelException(500, "不允许删除自己");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "不允许删除自己");
 		}
 		userService.deleteUserById(id);
 	}

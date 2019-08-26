@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -54,7 +55,7 @@ public class ClusterApiController {
         String clusterName = ObjectMapTool.getString(params, "clusterName");
 
         if (clusterName == null) {
-            throw new BusinessLevelException(500, "clusterName不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "clusterName不能为空");
         }
 
         Map<String, Object> resultMap = new HashMap<>();

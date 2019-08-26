@@ -17,6 +17,8 @@
 
 package com.vip.pallas.exception;
 
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
+
 public class BusinessLevelException extends RuntimeException {
 
 	/**
@@ -48,9 +50,18 @@ public class BusinessLevelException extends RuntimeException {
 
 	}
 
+	/**
+	 * use {@link BusinessLevelException#BusinessLevelException(BusinessLevelExceptionCode, String)} instead
+	 */
+	@Deprecated
 	public BusinessLevelException(int errorCode, String message){
 		this.errorCode = errorCode;
 		this.message = message;
+	}
+
+	public BusinessLevelException(BusinessLevelExceptionCode code,String message){
+		this.errorCode = code.val();
+		this.message=message;
 	}
 	
 	public BusinessLevelException(String msg) {

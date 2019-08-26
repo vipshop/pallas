@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotBlank;
 
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +58,7 @@ public class LoginController {
     		AuditLogUtil.getAuditLog().info("{} logged in, ip {}. ", user.getRealName(), SessionUtil.getRemoteAddr(request));
 		} catch (Exception e) {
 			logger.error(e.toString());
-			throw new BusinessLevelException(500, e.getMessage());
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, e.getMessage());
 		}
     }
 }

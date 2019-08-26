@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -120,7 +121,7 @@ public class ClusterController {
     @RequestMapping(value = "/add.json", method = RequestMethod.POST)
     public void add(@RequestBody ClusterVO params, HttpServletRequest request) throws Exception {
     	if (!AuthorizeUtil.authorizeClusterPrivilege(request, null)) {
-    		throw new BusinessLevelException(403, "无权限操作");
+    		throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
     	}
         Cluster cluster = getCluser(params);
         cluster.setCreateTime(new Date());
@@ -131,10 +132,10 @@ public class ClusterController {
     @RequestMapping(value = "/update.json", method = RequestMethod.POST)
     public void update(@RequestBody ClusterVO params, HttpServletRequest request) {
     	if (!AuthorizeUtil.authorizeClusterPrivilege(request, params.getClusterId())) {
-    		throw new BusinessLevelException(403, "无权限操作");
+    		throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
     	}
         if(params.getId() == null) {
-            throw new BusinessLevelException(500,"id不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR,"id不能为空");
         }
         Cluster cluster = getCluser(params);
         cluster.setUpdateTime(new Date());
@@ -151,10 +152,10 @@ public class ClusterController {
         String clusterId = params.getClusterId();
         Cluster cluster = clusterService.findByName(clusterId);
         if (cluster == null) {
-            throw new BusinessLevelException(500, "cluster不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "cluster不存在");
         }
         if (!AuthorizeUtil.authorizeClusterPrivilege(request, cluster.getClusterId())) {
-    		throw new BusinessLevelException(403, "无权限操作");
+    		throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
     	}
 
         Page<Index> page = new Page<>();
@@ -162,7 +163,7 @@ public class ClusterController {
         page.setPageSize(10);
         List<Index> indexList = indexService.findPage(page, "", clusterId);
         if (indexList != null && !indexList.isEmpty()) {
-            throw new BusinessLevelException(500, "该集群存在" + page.getTotalRecord() + "个索引，不能删除");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "该集群存在" + page.getTotalRecord() + "个索引，不能删除");
         }
 
         clusterService.deleteByClusterId(clusterId);
@@ -190,7 +191,7 @@ public class ClusterController {
 	public Map<String, Object> resetSettings(@RequestParam @NotBlank(message = "clusterName不能为空") String clusterName,
 			HttpServletRequest request) throws Exception {
     	if (!AuthorizeUtil.authorizeClusterPrivilege(request, clusterName)) {
-    		throw new BusinessLevelException(403, "无权限操作");
+    		throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
     	}
     	Map<String, Object> resultMap = new HashMap<>();
     	String result = nodeService.resetClusterDefaultSettings(clusterName);
@@ -201,10 +202,10 @@ public class ClusterController {
     private Cluster getCluser(ClusterVO params) {
         if(StringUtils.isEmpty(params.getRealClusters())) {
             if(StringUtils.isEmpty(params.getHttpAddress())) {
-                throw new BusinessLevelException(500, "httpAddress不能为空");
+                throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "httpAddress不能为空");
             }
             if(StringUtils.isEmpty(params.getClientAddress())) {
-                throw new BusinessLevelException(500, "clientAddress");
+                throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "clientAddress");
             }
 
         } else {

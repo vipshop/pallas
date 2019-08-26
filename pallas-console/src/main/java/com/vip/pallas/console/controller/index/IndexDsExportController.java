@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,10 +50,10 @@ public class IndexDsExportController {
 			HttpServletRequest request, HttpServletResponse response) throws IOException {
         Index index = indexService.findById(indexId);
         if (null == index){
-        	throw new BusinessLevelException(500, "index不存在");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "index不存在");
         }
         if (!AuthorizeUtil.authorizeIndexPrivilege(request, indexId, index.getIndexName())) {
-        	throw new BusinessLevelException(403, "无权限操作");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
         response.setStatus(200);
         response.setContentType("application/text");
