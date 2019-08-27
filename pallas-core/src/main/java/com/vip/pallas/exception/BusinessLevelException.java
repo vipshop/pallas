@@ -60,6 +60,7 @@ public class BusinessLevelException extends RuntimeException {
 	}
 
 	public BusinessLevelException(BusinessLevelExceptionCode code,String message){
+
 		this.errorCode = code.val();
 		this.message=message;
 	}
