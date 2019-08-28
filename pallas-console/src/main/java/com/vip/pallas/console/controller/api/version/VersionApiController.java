@@ -90,7 +90,11 @@ public class VersionApiController {
 
     @RequestMapping(value = "/rampup/start.json", method = RequestMethod.GET)
     public void start(@RequestParam @NotNull(message = "versionId不能为空") Long versionId,
-                      @RequestParam String endTime, @RequestParam Long rampupTarget,@RequestParam Integer sampleRate,@RequestParam(defaultValue = "") String fullIndexName) throws Exception {
+                      @RequestParam String originIndexName,
+                      @RequestParam String endTime,
+                      @RequestParam Long rampupTarget,
+                      @RequestParam Integer sampleRate,
+                      @RequestParam(defaultValue = "") String fullIndexName) throws Exception {
         if(StringUtils.isBlank(endTime) && rampupTarget == null){
             throw new Exception("预热结束时间与目标预热条数不能同时为空");
         }
@@ -98,6 +102,10 @@ public class VersionApiController {
         IndexVersion indexVersion = versionService.findById(versionId);
 
         Index index = indexService.findById(indexVersion.getIndexId());
+
+        if (StringUtils.isBlank(originIndexName) || !index.getIndexName().equals(originIndexName)) {
+            throw new Exception("找不到匹配的索引和对应的版本");
+        }
 
         IndexRampupVO rampupVO = new IndexRampupVO();
         rampupVO.setIndexId(index.getId());

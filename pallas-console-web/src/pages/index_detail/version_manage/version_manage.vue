@@ -146,6 +146,7 @@ export default {
   methods: {
     preheading(row) {
       this.preheadingInfo = {
+        indexName: this.indexName,
         versionId: row.id,
         isUsed: row.isUsed,
       };
