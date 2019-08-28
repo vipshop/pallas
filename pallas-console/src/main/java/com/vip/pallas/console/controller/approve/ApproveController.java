@@ -25,6 +25,7 @@ import com.vip.pallas.console.utils.SessionUtil;
 import com.vip.pallas.console.utils.AuthorizeUtil;
 import com.vip.pallas.console.vo.ApproveOp;
 import com.vip.pallas.console.vo.PageResultVO;
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
 import com.vip.pallas.exception.BusinessLevelException;
 import com.vip.pallas.exception.PallasException;
 import com.vip.pallas.mybatis.entity.Approve;
@@ -98,11 +99,11 @@ public class ApproveController{
     public void cancel(@RequestBody ApproveOp params, HttpServletRequest req)throws Exception{
         Long id =  params.getId();
         if(id == null) {
-            throw new BusinessLevelException(500, "id不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "id不能为空");
         }
         Approve approve = approveService.findById(id);
         if (null == approve) {
-        	throw new BusinessLevelException(500, "approve不存在");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "approve不存在");
         }
         
         if(approve.getApproveState() != (byte) ApproveState.PENDING_APPROVE.getValue()){
@@ -110,7 +111,7 @@ public class ApproveController{
         }
         
         if (!SessionUtil.getLoginUser(req).equals(approve.getApplyUser())) {
-        	throw new BusinessLevelException(403, "无权限操作");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
 
         approve.setApproveState((byte)ApproveState.NOT_COMMITED.getValue());
@@ -146,22 +147,22 @@ public class ApproveController{
     @RequestMapping(path = "/approve.json", method = RequestMethod.POST)
     public void approve(HttpServletRequest req, @RequestBody ApproveOp params) throws Exception{
         if(!AuthorizeUtil.authorizeTemplateApprovePrivilege(req)){
-        	throw new BusinessLevelException(403, "无权限操作");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
 
         String ids = params.getIds();
         if(ObjectUtils.isEmpty(ids)){
-            throw new BusinessLevelException(500, "id不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "id不能为空");
         }
 
         String state =  params.getState();
         if(ObjectUtils.isEmpty(state)){
-            throw new BusinessLevelException(500, "state不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "state不能为空");
         }
 
         String note =  params.getNote();
         if(ObjectUtils.isEmpty(note)){
-            throw new BusinessLevelException(500, "note不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "note不能为空");
         }
 
         String currentUser = SessionUtil.getLoginUser(req);

@@ -21,6 +21,7 @@ import com.vip.pallas.bean.PluginActionType;
 import com.vip.pallas.bean.PluginCommands;
 import com.vip.pallas.bean.PluginStates;
 import com.vip.pallas.bean.PluginType;
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
 import com.vip.pallas.exception.BusinessLevelException;
 import com.vip.pallas.mybatis.entity.Cluster;
 import com.vip.pallas.mybatis.entity.PluginCommand;
@@ -104,7 +105,7 @@ public class PluginApiController {
             }
         } catch (Exception e) {
             LOGGER.error(e.toString(), e);
-            throw new BusinessLevelException(500, "解析Request 错误：" + e.getMessage());
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "解析Request 错误：" + e.getMessage());
         }
 
         List<PluginCommand> commandList = pluginService.getCommandsByIp(pluginStates.getClusterId(), nodeIp);

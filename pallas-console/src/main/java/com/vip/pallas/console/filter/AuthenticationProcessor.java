@@ -22,6 +22,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
 import org.apache.http.HttpStatus;
 
 import com.google.common.collect.Lists;
@@ -42,7 +43,7 @@ public class AuthenticationProcessor extends AbstractAuthProcessor {
 		if (PallasConsoleProperties.PALLAS_SECURITY_ENABLE && !SessionUtil.isAuthorization(request)) {
 			String uri = request.getRequestURI();
 			if (!excludeAuthUrls.stream().anyMatch(excludeUrl -> uri.indexOf(excludeUrl) >= 0)) {
-				throw new BusinessLevelException(HttpStatus.SC_UNAUTHORIZED, PallasConsoleProperties.PALLAS_LOGIN_URL);
+				throw new BusinessLevelException(BusinessLevelExceptionCode.SC_UNAUTHORIZED, PallasConsoleProperties.PALLAS_LOGIN_URL);
 			}
 		}
 	}

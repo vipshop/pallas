@@ -37,6 +37,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -106,7 +107,7 @@ public class PerformanceController extends PerformanceBaseController{
             performanceScriptService.zipFiles(testname, jmxScript, hps,pds, response.getOutputStream());
         } catch (Exception e) {
             logger.error("生成压缩包的时候出错", e);
-            throw new BusinessLevelException(SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
@@ -121,18 +122,18 @@ public class PerformanceController extends PerformanceBaseController{
 			HttpServletRequest request) { // NOSONAR
     	Index index = indexService.findById(indexId);
     	if (index == null) {
-            throw new BusinessLevelException(500, "index不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "index不存在");
         }
         if (!AuthorizeUtil.authorizeIndexPrivilege(request, index.getId(), index.getIndexName())) {
-        	throw new BusinessLevelException(403, "无权限操作");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
         
         SearchTemplate template = templateService.findByNameAndIndexId(templateName, indexId);
         if (template == null) {
-            throw new BusinessLevelException(SC_INTERNAL_SERVER_ERROR, "模板不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "模板不存在");
         }
         if (template.getType() != SearchTemplate.TYPE_TEMPLATE) {
-            throw new BusinessLevelException(SC_INTERNAL_SERVER_ERROR, "该模板类型不正确");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "该模板类型不正确");
         }
         
         paramNameDef = paramNameDef.replace(';', ',');
@@ -151,18 +152,18 @@ public class PerformanceController extends PerformanceBaseController{
         Long indexId = ObjectMapTool.getLong(params, "indexId");
     	Index index = indexService.findById(indexId);
     	if (index == null) {
-            throw new BusinessLevelException(500, "index不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "index不存在");
         }
         if (!AuthorizeUtil.authorizeIndexPrivilege(request, index.getId(), index.getIndexName())) {
-        	throw new BusinessLevelException(403, "无权限操作");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
         String fileName = ObjectMapTool.getString(params, "fileName");
         String paramNameDef = ObjectMapTool.getString(params, "paramNameDef");
         if (ObjectUtils.isEmpty(paramNameDef)) {
-            throw new BusinessLevelException(SC_INTERNAL_SERVER_ERROR, "paramNameDef不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "paramNameDef不能为空");
         }
         if (ObjectUtils.isEmpty(fileName)) {
-            throw new BusinessLevelException(SC_INTERNAL_SERVER_ERROR, "fileName不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "fileName不能为空");
         }
         paramNameDef = paramNameDef.replace(';', ',');
         updatePerformanceData(template, request, paramNameDef, fileName);
@@ -192,14 +193,14 @@ public class PerformanceController extends PerformanceBaseController{
     	Long indexId = ObjectMapTool.getLong(params, "indexId");
     	Index index = indexService.findById(indexId);
     	if (index == null) {
-            throw new BusinessLevelException(500, "index不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "index不存在");
         }
         if (!AuthorizeUtil.authorizeIndexPrivilege(request, index.getId(), index.getIndexName())) {
-        	throw new BusinessLevelException(403, "无权限操作");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
         String fileName = ObjectMapTool.getString(params, "fileName");
         if (ObjectUtils.isEmpty(fileName)) {
-            throw new BusinessLevelException(SC_INTERNAL_SERVER_ERROR, "fileName不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "fileName不能为空");
         }
         deleteDataFile(template, request, fileName);
     }
@@ -232,7 +233,7 @@ public class PerformanceController extends PerformanceBaseController{
         } catch (IOException ioe) {
             String errorMsg = "保存文件的时候出错,文件:" + fileName;
             logger.error(errorMsg, ioe);
-            throw new BusinessLevelException(SC_INTERNAL_SERVER_ERROR, errorMsg);
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, errorMsg);
         }
         return toSaveFile.getAbsolutePath();
     }
@@ -247,7 +248,7 @@ public class PerformanceController extends PerformanceBaseController{
         } else {
             dataCacheMap = (Map<String, PerformanceData>) dataObj;
             if (dataCacheMap.containsKey(dataKey)) {
-                throw new BusinessLevelException(SC_INTERNAL_SERVER_ERROR, "已经存在同名文件," + performanceData.getFileName());
+                throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "已经存在同名文件," + performanceData.getFileName());
             }
             checkReqParamName(dataCacheMap,performanceData.getParamNameDef(),null);
         }
@@ -294,7 +295,7 @@ public class PerformanceController extends PerformanceBaseController{
         } catch (IOException e) {
             String errorMsg = "在初始化清空数据文件临时保存目录的时候报错，" + dir.getAbsolutePath();
             logger.error(errorMsg, e);
-            throw new BusinessLevelException(SC_INTERNAL_SERVER_ERROR, errorMsg);
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, errorMsg);
         }
         request.getSession().removeAttribute(DATA_CACHE_KEY);
     }

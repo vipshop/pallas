@@ -21,6 +21,7 @@ import com.vip.pallas.bean.FlowRecordState;
 import com.vip.pallas.console.utils.AuthorizeUtil;
 import com.vip.pallas.console.vo.PageResultVO;
 import com.vip.pallas.console.vo.base.BaseFlowRecordOp;
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
 import com.vip.pallas.exception.BusinessLevelException;
 import com.vip.pallas.mybatis.entity.*;
 import com.vip.pallas.service.ElasticSearchService;
@@ -65,7 +66,7 @@ public class FlowRecordController{
     	PageResultVO<FlowRecord> resultVO = new PageResultVO<>();
     	Index index = indexService.findById(indexId);
     	if (ObjectUtils.isEmpty(index)) {
-    		throw new BusinessLevelException(500, "index不存在");
+    		throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "index不存在");
     	}
     	if (AuthorizeUtil.authorizeIndexPrivilege(req, indexId, index.getIndexName())) {
     		resultVO.setAllPrivilege(true);
@@ -103,24 +104,24 @@ public class FlowRecordController{
     	Index index = indexService.findById(params.getIndexId());
     	
     	if (ObjectUtils.isEmpty(index)) {
-    		throw new BusinessLevelException(500, "index不存在");
+    		throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "index不存在");
     	}
     	
     	if (! AuthorizeUtil.authorizeIndexPrivilege(request, params.getIndexId(), index.getIndexName())) {
-    		throw new BusinessLevelException(403, "无权限操作");
+    		throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
     	}
     	
         Long recordId = params.getRecordId();
         FlowRecord flowRecord = flowRecordService.findFlowRecordById(recordId);
 
         if(flowRecord == null) {
-            throw new BusinessLevelException(500, "根据recordId + " + recordId + "找不到相关记录");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "根据recordId + " + recordId + "找不到相关记录");
         }
 
         int state = flowRecord.getState();
         if(state != FlowRecordState.FINISH.getValue()
                 && state != FlowRecordState.STOP.getValue()) {
-            throw new BusinessLevelException(500, "当前不处于完成或者停止状态，不允许删除");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "当前不处于完成或者停止状态，不允许删除");
         }
 
         flowRecord.setIsDeleted(Boolean.TRUE);
@@ -143,18 +144,18 @@ public class FlowRecordController{
     	Index index = indexService.findById(params.getIndexId());
     	
     	if (ObjectUtils.isEmpty(index)) {
-    		throw new BusinessLevelException(500, "index不存在");
+    		throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "index不存在");
     	}
     	
     	if (!AuthorizeUtil.authorizeIndexPrivilege(request, params.getIndexId(), index.getIndexName())) {
-    		throw new BusinessLevelException(403, "无权限操作");
+    		throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
     	}
     	
         Long recordId = params.getRecordId();
         FlowRecord flowRecord = flowRecordService.findFlowRecordById(recordId);
 
         if(flowRecord == null) {
-            throw new BusinessLevelException(500, "根据recordId + " + recordId + "找不到相关记录");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "根据recordId + " + recordId + "找不到相关记录");
         }
 
         flowRecord.setState((int) FlowRecordState.STOP.getValue());

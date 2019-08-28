@@ -20,6 +20,7 @@ package com.vip.pallas.console.controller.api.cluster;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -47,19 +48,19 @@ public class ClusterNodeApiController {
         boolean isRestart = ObjectMapTool.getBoolean(params, "isRestart");
 
         if(clusterName == null) {
-            throw new BusinessLevelException(500, "clusterName不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "clusterName不能为空");
         }
 
         if(nodeName == null) {
-            throw new BusinessLevelException(500, "nodeName不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "nodeName不能为空");
         }
 
         if(nodeIp == null) {
-            throw new BusinessLevelException(500, "nodeIp不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "nodeIp不能为空");
         }
 
         if(state == null) {
-            throw new BusinessLevelException(500, "state不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "state不能为空");
         }
 
         nodeService.stateNode(clusterName, nodeName, nodeIp, state, isRestart);

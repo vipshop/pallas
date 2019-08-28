@@ -18,6 +18,7 @@
 package com.vip.pallas.console.controller.index.template;
 
 import com.vip.pallas.bean.PerformanceData;
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
 import com.vip.pallas.exception.BusinessLevelException;
 import com.vip.pallas.mybatis.entity.Index;
 import com.vip.pallas.mybatis.entity.SearchTemplate;
@@ -59,17 +60,17 @@ public class PerformanceBaseController{
         String templateName = ObjectMapTool.getString(params, "templateName");
         Long indexId =  ObjectMapTool.getLong(params, "indexId");
         if (ObjectUtils.isEmpty(indexId)) {
-            throw new BusinessLevelException(SC_INTERNAL_SERVER_ERROR, "indexId不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "indexId不能为空");
         }
         if (ObjectUtils.isEmpty(templateName)) {
-            throw new BusinessLevelException(SC_INTERNAL_SERVER_ERROR, "templateName不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "templateName不能为空");
         }
         SearchTemplate template = templateService.findByNameAndIndexId(templateName, indexId);
         if (template == null) {
-            throw new BusinessLevelException(SC_INTERNAL_SERVER_ERROR, "模板不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "模板不存在");
         }
         if (template.getType() != SearchTemplate.TYPE_TEMPLATE) {
-            throw new BusinessLevelException(SC_INTERNAL_SERVER_ERROR, "该模板类型不正确");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "该模板类型不正确");
         }
 
         return template;
@@ -131,7 +132,7 @@ public class PerformanceBaseController{
         String[] reqParamNameArr = newParamNameDef.split(",");
         for (String reqParamName : reqParamNameArr) {
             if (cacheReqParamNames.contains(reqParamName.trim())) {
-                throw new BusinessLevelException(SC_INTERNAL_SERVER_ERROR, "已经存在同名的参数定义," + reqParamName);
+                throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "已经存在同名的参数定义," + reqParamName);
             }
         }
     }

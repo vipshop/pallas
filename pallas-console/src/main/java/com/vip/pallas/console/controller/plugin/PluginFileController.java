@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +69,7 @@ public class PluginFileController {
             Files.deleteIfExists(Paths.get(path));
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
-            throw new BusinessLevelException(500, "删除旧的临时文件发生错误：" + e.getMessage());
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "删除旧的临时文件发生错误：" + e.getMessage());
         }
         String packagePath = "";
         File tmpFile = new File(path);
@@ -76,7 +77,7 @@ public class PluginFileController {
             FileUtils.copyInputStreamToFile(bis, tmpFile);
 
             if(!validateZipFileFormat(pluginFileName, tmpFile)) {
-                throw new BusinessLevelException(500, "上传文件不符合格式,文件夹结构必须按照格式：" + pluginFileName);
+                throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "上传文件不符合格式,文件夹结构必须按照格式：" + pluginFileName);
             }
 
             if(!"test".equals(justForJenkinsTest)) {
@@ -87,13 +88,13 @@ public class PluginFileController {
             throw e;
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            throw new BusinessLevelException(500, "读取上传文件发生错误：" + e.getMessage());
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "读取上传文件发生错误：" + e.getMessage());
         } finally {
             try {
                 Files.deleteIfExists(Paths.get(path));
             } catch (IOException e) {
                 LOGGER.error(e.getMessage(), e);
-                throw new BusinessLevelException(500, "删除上传临时文件发生错误：" + e.getMessage()); //NOSONAR
+                throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "删除上传临时文件发生错误：" + e.getMessage()); //NOSONAR
             }
         }
         return packagePath;

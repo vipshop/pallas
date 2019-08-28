@@ -23,6 +23,7 @@ import java.util.List;
 
 import javax.validation.constraints.Min;
 
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -54,7 +55,7 @@ public class RoleController {
         try {
             keywords = URLDecoder.decode(keywords, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            throw new BusinessLevelException(500, "keywords无法正常解析");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "keywords无法正常解析");
         }
         Page<RoleModel> search = new Page<>();
 		search.setPageNo(currentPage);

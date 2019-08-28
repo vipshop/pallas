@@ -21,6 +21,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,7 +50,7 @@ public class FlowRecordApiController{
     public void export(@RequestParam Long recordId, HttpServletResponse response) throws Exception{
         FlowRecord flowRecord = flowRecordService.getFlowRecordById(recordId);
         if(flowRecord == null) {
-            throw new BusinessLevelException(500, "根据recordId + " + recordId + "找不到相关记录");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "根据recordId + " + recordId + "找不到相关记录");
         }
 
         response.setStatus(200);
@@ -80,13 +81,13 @@ public class FlowRecordApiController{
         Integer recordNum = params.getRecordNum();
 
         if(recordNum == null) {
-            throw new BusinessLevelException(500, "recordNum不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "recordNum不能为空");
         }
 
         FlowRecord flowRecord = flowRecordService.findFlowRecordById(recordId);
 
         if(flowRecord == null) {
-            throw new BusinessLevelException(500, "根据recordId + " + recordId + "找不到相关记录");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "根据recordId + " + recordId + "找不到相关记录");
         }
 
         if(flowRecord.getState() == FlowRecordState.PENDING.getValue()){

@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Min;
 
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
 import com.vip.pallas.mybatis.entity.SearchAuthorization;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -85,7 +86,7 @@ public class ServerController {
 			@RequestParam(required = false) String selectedCluster, @RequestParam(required = false) String selectedPool,
 			HttpServletRequest request) { // NOSONAR
 		if (!AuthorizeUtil.authorizePSearchPrivilege(request, null)) {
-        	throw new BusinessLevelException(403, "无权限操作");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
 
         PageResultVO<SearchServer> resultVO = new PageResultVO<>();
@@ -134,7 +135,7 @@ public class ServerController {
     @RequestMapping(value = "/traffic.json", method = RequestMethod.POST)
     public void deleteTraffic(@RequestBody Map<String, Object> params, HttpServletRequest request) {
     	if (!AuthorizeUtil.authorizePSearchPrivilege(request, null)){
-        	throw new BusinessLevelException(403, "无权限操作");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
 
         Long id = ObjectMapTool.getLong(params, "id");
@@ -147,7 +148,7 @@ public class ServerController {
     @RequestMapping(value = "/remote_update.json", method = RequestMethod.POST)
     public void remoteUpdate(@RequestBody Map<String, Object> params, HttpServletRequest request) throws Exception {
     	if (!AuthorizeUtil.authorizePSearchPrivilege(request, null)){
-        	throw new BusinessLevelException(403, "无权限操作");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
 
         String ids = ObjectMapTool.getString(params, "ssIds");
@@ -162,7 +163,7 @@ public class ServerController {
     @RequestMapping(value = "/update_routing.json", method = RequestMethod.POST)
     public Map<String, Object> updateRouting(HttpServletRequest request) {
     	if (!AuthorizeUtil.authorizePSearchPrivilege(request, null)){
-        	throw new BusinessLevelException(403, "无权限操作");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
 
         List<SearchServer> ssList = searchServerService.selectHealthyServers(SearchServerService.HEALTHY_UPLOAD_INTERVAL_TOLERANCE);
@@ -189,7 +190,7 @@ public class ServerController {
     @RequestMapping(value = "/delete.json", method = RequestMethod.POST)
     public void delete(@RequestBody Map<String, Object> params, HttpServletRequest request) {
     	if (!AuthorizeUtil.authorizePSearchPrivilege(request, null)){
-        	throw new BusinessLevelException(403, "无权限操作");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
 
         Long id = ObjectMapTool.getLong(params, "id");

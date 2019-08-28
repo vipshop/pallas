@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
@@ -70,7 +71,7 @@ public class FlowRecordConfigController {
     	PageResultVO<FlowRecordConfig> resultVO = new PageResultVO<>();
     	Index index = indexService.findById(indexId);
     	if (ObjectUtils.isEmpty(index)) {
-    		throw new BusinessLevelException(500, "index不存在");
+    		throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "index不存在");
     	}
     	if (AuthorizeUtil.authorizeIndexPrivilege(req, indexId, index.getIndexName())) {
     		resultVO.setAllPrivilege(true);
@@ -99,10 +100,10 @@ public class FlowRecordConfigController {
     public void addConfig(HttpServletRequest req, @RequestBody @Validated FlowRecordConfigVO params) throws Exception {
     	Index index = indexService.findById(params.getIndexId());
     	if (ObjectUtils.isEmpty(index)) {
-    		throw new BusinessLevelException(500, "index不存在");
+    		throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "index不存在");
     	}
     	if (!AuthorizeUtil.authorizeIndexPrivilege(req, params.getIndexId(), index.getIndexName())) {
-    		throw new BusinessLevelException(403, "无权限操作");
+    		throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
     	}
     	
         FlowRecordConfig config = getFlowRecordConfig(req, params);
@@ -113,15 +114,15 @@ public class FlowRecordConfigController {
     public void editConfig(HttpServletRequest req, @RequestBody @Validated FlowRecordConfigVO params) throws Exception{
     	Long id = params.getId();
         if(id == null) {
-            throw new BusinessLevelException(500, "id不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "id不能为空");
         }
         
     	Index index = indexService.findById(params.getIndexId());
     	if (ObjectUtils.isEmpty(index)) {
-    		throw new BusinessLevelException(500, "index不存在");
+    		throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "index不存在");
     	}
     	if (!AuthorizeUtil.authorizeIndexPrivilege(req, params.getIndexId(), index.getIndexName())) {
-    		throw new BusinessLevelException(403, "无权限操作");
+    		throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
     	}
 
         FlowRecordConfig config = getFlowRecordConfig(req, params);
@@ -133,23 +134,23 @@ public class FlowRecordConfigController {
     public void enableConfig(@RequestBody @Validated BaseFlowRecordConfigOp params, HttpServletRequest req) {
     	Index index = indexService.findById(params.getIndexId());
     	if (ObjectUtils.isEmpty(index)) {
-    		throw new BusinessLevelException(500, "index不存在");
+    		throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "index不存在");
     	}
     	if (!AuthorizeUtil.authorizeIndexPrivilege(req, params.getIndexId(), index.getIndexName())) {
-    		throw new BusinessLevelException(403, "无权限操作");
+    		throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
     	}
     	
         FlowRecordConfig config = flowRecordService.findFlowRecordConfigById(params.getConfigId());
         if(config == null) {
-            throw new BusinessLevelException(500, "找不到相关记录");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "找不到相关记录");
         }
 
         if(config.getIsEnable()){
-            throw new BusinessLevelException(500, "当前已经是启用状态");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "当前已经是启用状态");
         }
 
         if(System.currentTimeMillis() > config.getEndTime().getTime()){
-            throw new BusinessLevelException(500, "采集结束时间早于当前时间，请修改后再启用");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "采集结束时间早于当前时间，请修改后再启用");
         }
 
         config.setIsEnable(Boolean.TRUE);
@@ -176,19 +177,19 @@ public class FlowRecordConfigController {
     public void disableConfig(@RequestBody @Validated BaseFlowRecordConfigOp params, HttpServletRequest req) {
     	Index index = indexService.findById(params.getIndexId());
     	if (ObjectUtils.isEmpty(index)) {
-    		throw new BusinessLevelException(500, "index不存在");
+    		throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "index不存在");
     	}
     	if (!AuthorizeUtil.authorizeIndexPrivilege(req, params.getIndexId(), index.getIndexName())) {
-    		throw new BusinessLevelException(403, "无权限操作");
+    		throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
     	}
 
         FlowRecordConfig config = flowRecordService.findFlowRecordConfigById(params.getConfigId());
         if(config == null) {
-            throw new BusinessLevelException(500, "找不到相关记录");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "找不到相关记录");
         }
 
         if(!config.getIsEnable()){
-            throw new BusinessLevelException(500, "当前已经是禁用状态");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "当前已经是禁用状态");
         }
 
         config.setIsEnable(Boolean.FALSE);
@@ -207,21 +208,21 @@ public class FlowRecordConfigController {
     public void deleteConfig(@RequestBody @Validated BaseFlowRecordConfigOp params, HttpServletRequest req) {
     	Index index = indexService.findById(params.getIndexId());
     	if (ObjectUtils.isEmpty(index)) {
-    		throw new BusinessLevelException(500, "index不存在");
+    		throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "index不存在");
     	}
     	if (!AuthorizeUtil.authorizeIndexPrivilege(req, params.getIndexId(), index.getIndexName())) {
-    		throw new BusinessLevelException(403, "无权限操作");
+    		throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
     	}
 
         Long configId = params.getConfigId();
         FlowRecordConfig config = flowRecordService.findFlowRecordConfigById(configId);
 
         if(config == null) {
-            throw new BusinessLevelException(500, "找不到相关记录");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "找不到相关记录");
         }
 
         if(config.getIsDeleted()){
-            throw new BusinessLevelException(500, "记录已经被删除");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "记录已经被删除");
         }
 
         config.setIsDeleted(Boolean.TRUE);
@@ -241,13 +242,13 @@ public class FlowRecordConfigController {
         String clusterName = params.getClusterName();
 
         if(clusterName == null) {
-            throw new BusinessLevelException(500, "clusterName不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "clusterName不能为空");
         }
 
         String indexName = params.getIndexName();
 
         if(indexName == null) {
-            throw new BusinessLevelException(500, "indexName不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "indexName不能为空");
         }
 
         List<FlowRecordConfig> list = flowRecordService.findFlowRecordConfigByClusterAndIndex(clusterName, indexName);
@@ -260,7 +261,7 @@ public class FlowRecordConfigController {
         FlowRecordConfig config = flowRecordService.findFlowRecordConfigById(configId);
 
         if(config == null) {
-            throw new BusinessLevelException(500, "找不到相关记录");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "找不到相关记录");
         }
 
         return config;
@@ -268,7 +269,7 @@ public class FlowRecordConfigController {
 
     private FlowRecordConfig getFlowRecordConfig(HttpServletRequest req,FlowRecordConfigVO params) throws Exception{
         if(params.getSampleRate()  <= 0 || params.getSampleRate() > 1) {
-            throw new BusinessLevelException(500, "sampleRate必须介于0到1之间");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "sampleRate必须介于0到1之间");
         }
 
         FlowRecordConfig config = new FlowRecordConfig();
@@ -295,11 +296,11 @@ public class FlowRecordConfigController {
         config.setCreateUser(currentUser);
 
         if(config.getEndTime().getTime() < config.getStartTime().getTime()) {
-            throw new BusinessLevelException(500, "结束时间必须大于开始时间");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "结束时间必须大于开始时间");
         }
 
         if(config.getEndTime().getTime() <= System.currentTimeMillis()) {
-            throw new BusinessLevelException(500, "结束时间不能晚于当前时间");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "结束时间不能晚于当前时间");
         }
         return config;
     }
