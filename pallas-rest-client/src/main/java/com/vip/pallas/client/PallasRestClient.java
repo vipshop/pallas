@@ -60,6 +60,7 @@ public class PallasRestClient {
 	public static final Header LZ4_HEADER = new BasicHeader(HttpHeaders.ACCEPT_ENCODING, "lz4");
 	public static final Header JSON_HEADER = new BasicHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8");
 	public static final Set<String> TOKEN_SET = new ConcurrentHashSet<>();
+
 	private static final QueryConsoleTask QUERY_CONSOLE_TASK = new QueryConsoleTask(TOKEN_SET);
 	private RestClient restClient;
 	private String clientToken;
