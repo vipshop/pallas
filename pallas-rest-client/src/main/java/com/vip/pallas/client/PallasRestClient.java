@@ -25,6 +25,7 @@ import com.vip.pallas.client.search.ScrollIterator;
 import com.vip.pallas.client.thread.QueryConsoleTask;
 import com.vip.pallas.client.util.PallasRestClientProperties;
 
+import com.vip.vjtools.vjkit.collection.type.ConcurrentHashSet;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -58,7 +59,7 @@ public class PallasRestClient {
 	public static final String HOST_HEADER = "Host";
 	public static final Header LZ4_HEADER = new BasicHeader(HttpHeaders.ACCEPT_ENCODING, "lz4");
 	public static final Header JSON_HEADER = new BasicHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8");
-	public static final HashSet<String> TOKEN_SET = new HashSet<>();
+	public static final Set<String> TOKEN_SET = new ConcurrentHashSet<>();
 	private static final QueryConsoleTask QUERY_CONSOLE_TASK = new QueryConsoleTask(TOKEN_SET);
 	private RestClient restClient;
 	private String clientToken;

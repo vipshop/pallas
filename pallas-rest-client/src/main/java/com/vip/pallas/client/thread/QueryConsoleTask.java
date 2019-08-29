@@ -17,10 +17,7 @@
 
 package com.vip.pallas.client.thread;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
@@ -49,7 +46,7 @@ public class QueryConsoleTask implements Runnable {
 
 	public static volatile Map<String, List<String>> psListMap = new ConcurrentHashMap<>();
 
-	private HashSet<String> tokenSet;
+	private Set<String> tokenSet;
 	
 	public static String addSuffixIfNecessary(String consoleQueryUrl) {
 		if (!consoleQueryUrl.endsWith(".json")) {
@@ -59,42 +56,42 @@ public class QueryConsoleTask implements Runnable {
 		return consoleQueryUrl;
 	}
 
-	public QueryConsoleTask(HashSet<String> tokenSet) {
+	public QueryConsoleTask(Set<String> tokenSet) {
 		this.tokenSet = tokenSet;
 	}
 
 	@Override
 	public void run() {
-		Iterator<String> iterator = tokenSet.iterator();
-		while (iterator.hasNext()) {
-			try {
-				String token = iterator.next();
-				JSONObject jsonObject = JSON.parseObject(
-						HttpClient.httpPost(consoleQueryUrl,
-								String.format(PARAMS, token)));
-				if (jsonObject != null) {
-					JSONObject data = jsonObject.getJSONObject("data");
-					if (data != null) {
-						String domain = data.getString("domain");
-						if (domain != null && !domain.equals(esDomainMap.get(token))) { //NOSONAR
-							log.warn("esDomain changed from {} to {}", esDomainMap.get(token), domain);
-							esDomainMap.put(token, domain);
-						}
-						JSONArray ipArray = data.getJSONArray("psList");
-						List<String> newPsList = ipArray.toJavaList(String.class);
-						List<String> oldPsList = psListMap.get(token);
+		try {
+			Iterator<String> iterator = tokenSet.iterator();
+			while (iterator.hasNext()) {
+					String token = iterator.next();
+					JSONObject jsonObject = JSON.parseObject(
+							HttpClient.httpPost(consoleQueryUrl,
+									String.format(PARAMS, token)));
+					if (jsonObject != null) {
+						JSONObject data = jsonObject.getJSONObject("data");
+						if (data != null) {
+							String domain = data.getString("domain");
+							if (domain != null && !domain.equals(esDomainMap.get(token))) { //NOSONAR
+								log.warn("esDomain changed from {} to {}", esDomainMap.get(token), domain);
+								esDomainMap.put(token, domain);
+							}
+							JSONArray ipArray = data.getJSONArray("psList");
+							List<String> newPsList = ipArray.toJavaList(String.class);
+							List<String> oldPsList = psListMap.get(token);
 
-						if ((newPsList != null && oldPsList == null) || (newPsList != null && oldPsList != null
-								&& (!newPsList.containsAll(oldPsList) || (!oldPsList.containsAll(newPsList))))) { //NOSONAR
-							log.warn("psList changed from {} to {}", oldPsList, newPsList);
-							psListMap.put(token, newPsList);
-							PallasRestClientBuilder.rebuildInternalRestClient(token);
+							if ((newPsList != null && oldPsList == null) || (newPsList != null && oldPsList != null
+									&& (!newPsList.containsAll(oldPsList) || (!oldPsList.containsAll(newPsList))))) { //NOSONAR
+								log.warn("psList changed from {} to {}", oldPsList, newPsList);
+								psListMap.put(token, newPsList);
+								PallasRestClientBuilder.rebuildInternalRestClient(token);
+							}
 						}
 					}
-				}
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
 			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
 		}
 	}
 
