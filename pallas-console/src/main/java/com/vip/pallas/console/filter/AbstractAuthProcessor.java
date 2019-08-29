@@ -31,6 +31,8 @@ public abstract class AbstractAuthProcessor {
 			"/version/list/all",
 			"/version/rampup/increment",
 			"/version/rampup/start",
+			"/version/rampup/id",
+			"/version/rampup/stop",
 			"/cluster/all/physicals",
 			"/node/state",
 			"/cluster/abnormal_node/list",

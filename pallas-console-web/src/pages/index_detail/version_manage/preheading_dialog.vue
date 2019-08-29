@@ -152,6 +152,7 @@ export default {
       } else {
         const params = {
           versionId: this.preheadingInfo.versionId,
+          originIndexName: this.preheadingInfo.indexName,
           ...this.formInfo,
         };
         this.loading = true;
