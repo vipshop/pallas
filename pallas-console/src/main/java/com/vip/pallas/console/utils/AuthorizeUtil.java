@@ -24,6 +24,7 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
+import com.vip.pallas.exception.BusinessLevelException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,9 +70,14 @@ public class AuthorizeUtil {
 		authorizeModel.setAssetCode(PallasConsoleProperties.PALLAS_AUTHROIZE_APP + "." + module);
 		authorizeModel.setActionTypeName("write");
 		authorizeModel.setApplicationName(PallasConsoleProperties.PALLAS_AUTHROIZE_APP);
+		authorizeModel.setMethod(request.getMethod().toUpperCase());
+		authorizeModel.setRequestPath(request.getServletPath());
 		try {
 			return authorizeUtil.privilegeService.authorize(authorizeModel);
-		} catch (Exception e) {//NOSONAR
+		}catch (BusinessLevelException e){
+			throw e;
+		}
+		catch (Exception e) {//NOSONAR
 			logger.error("authorize " + module + " error! request:" + request.getRequestURI(), e.getCause());
 			return false;
 		}

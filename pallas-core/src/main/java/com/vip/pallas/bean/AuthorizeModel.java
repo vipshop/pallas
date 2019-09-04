@@ -17,6 +17,7 @@
 
 package com.vip.pallas.bean;
 
+
 public class AuthorizeModel {
 
     private String userId;
@@ -30,6 +31,10 @@ public class AuthorizeModel {
     private String applicationName;
     
     private String actionTypeName;
+
+    private String requestPath;
+
+    private String method;
 
     public String getUserId() {
         return userId;
@@ -78,6 +83,20 @@ public class AuthorizeModel {
     public void setActionTypeName(String actionTypeName) {
         this.actionTypeName = actionTypeName;
     }
-    
-    
+
+    public String getRequestPath() {
+        return requestPath;
+    }
+
+    public void setRequestPath(String requestPath) {
+        this.requestPath = requestPath;
+    }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public void setMethod(String method) {
+        this.method = method;
+    }
 }
