@@ -71,7 +71,7 @@ public class AuthorizeUtil {
 		authorizeModel.setActionTypeName("write");
 		authorizeModel.setApplicationName(PallasConsoleProperties.PALLAS_AUTHROIZE_APP);
 		authorizeModel.setMethod(request.getMethod().toUpperCase());
-		authorizeModel.setRequestPath(request.getServletPath());
+		authorizeModel.setRequestPath(request.getRequestURI());
 		try {
 			return authorizeUtil.privilegeService.authorize(authorizeModel);
 		}catch (BusinessLevelException e){
