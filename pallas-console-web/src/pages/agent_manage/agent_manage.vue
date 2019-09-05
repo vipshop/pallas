@@ -115,6 +115,11 @@ export default {
       interval: 0,
     };
   },
+  beforeDestroy() {
+    if (this.interval) {
+      clearInterval(this.interval);
+    }
+  },
   methods: {
     heartbeat() {
       this.interval = setInterval(() => {
@@ -364,9 +369,6 @@ export default {
       const NODE_STATUS = { true: '在线', false: '离线' };
       return NODE_STATUS[data];
     },
-  },
-  destroyed() {
-    clearInterval(this.interval);
   },
 };
 
