@@ -50,16 +50,20 @@ public class UploadInfoService {
 
 	private Runnable uploadInfo() {
 		return () -> {
-			if (!PallasNettyServer.online) {
-				return;
+			try {
+				if (!PallasNettyServer.online) {
+					return;
+				}
+				long time = System.currentTimeMillis()/1000;
+				// #474 每 03、13、23、33、43、53 上报统计信息
+				if (time % 10 != 3) {
+					return;
+				}
+				JSONObject info = serverWatch.buildAllInfo();
+				internalUpload(info, null);
+			}catch (Exception e){
+				logger.error("sth wrong when upload pallas-search info,msg:{}",e.getMessage());
 			}
-			long time = System.currentTimeMillis()/1000;
-			// #474 每 03、13、23、33、43、53 上报统计信息
-			if (time % 10 != 3) {
-				return;
-			}
-			JSONObject info = serverWatch.buildAllInfo();
-			internalUpload(info, null);
 		};
 	}
 
