@@ -402,7 +402,7 @@ public abstract class IndexVersionService {
 		List<VersionField> fieldList = version.getSchema();
 
 		Map<String, VersionField> fieldMap = fieldList.stream()
-				.collect(toMap(field -> field.getFieldName() + "#" + field.getDbFieldType(), field -> field));
+				.collect(toMap(field -> field.getFieldName() + "#" + field.getDbFieldType(), field -> field,(e1, e2)->e1,LinkedHashMap::new));
 
 		List<DBSchema> schemaList = this.getMetaDataFromDB(indexId);
         initVersionSchemaByDBSchemaList(version, schemaList, fieldMap);
@@ -423,7 +423,7 @@ public abstract class IndexVersionService {
 		List<VersionField> fieldList = JsonUtil.readValue(JsonUtil.toJson(map.get("schema")), List.class,
 				VersionField.class);
 		Map<String, VersionField> fieldMap = fieldList.stream()
-				.collect(toMap(field -> field.getFieldName() + "#" + field.getDbFieldType(), field -> field));
+				.collect(toMap(field -> field.getFieldName() + "#" + field.getDbFieldType(), field -> field,(e1, e2)->e1,LinkedHashMap::new));
 
 		List<DBSchema> schemaList;
 
