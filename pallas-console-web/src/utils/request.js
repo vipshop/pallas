@@ -14,8 +14,8 @@ export default {
     return this.request(url, data, 'POST');
   },
 
-  postCerebro(url, data) {
-    return this.requestCerebro(url, data, 'POST');
+  postCerebro(url, data, reqHeaders) {
+    return this.requestCerebro(url, data, reqHeaders, 'POST');
   },
 
   put(url, data) {
@@ -80,10 +80,11 @@ export default {
       });
     });
   },
-  requestCerebro(url, dataObj, methodType) {
+  requestCerebro(url, dataObj, reqHeaders, methodType) {
     return new Promise((resolve, reject) => {
       const config = {
         url,
+        headers: reqHeaders,
         method: methodType,
         cache: false,
       };

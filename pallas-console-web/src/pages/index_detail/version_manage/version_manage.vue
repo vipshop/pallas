@@ -274,7 +274,7 @@ export default {
             if (clusterData) {
               const hostParam = `http://${this.$array.strToArray(clusterData.httpAddress)[0]}`;
               const indexParam = `${this.indexName}_${row.id}`;
-              this.$http.postCerebro('/cerebro/commons/get_index_settings', { host: hostParam, index: indexParam }).then((settings) => {
+              this.$http.postCerebro('/cerebro/commons/get_index_settings', { host: hostParam, index: indexParam }, { 'es-cluster': clusterName }).then((settings) => {
                 const settingData = settings;
                 const settingInfo = settingData[indexParam].settings.index;
                 this.versionInfo.replicationNum = +settingInfo.number_of_replicas;
