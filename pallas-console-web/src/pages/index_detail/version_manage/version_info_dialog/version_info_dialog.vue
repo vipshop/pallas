@@ -606,7 +606,7 @@ export default {
           if (this.versionInfo.idField === element.fieldName) {
             errorArray.push(this.versionInfo.idField);
           }
-          if (this.versionInfo.updateTimeField === element.fieldName) {
+          if (!this.isMetaDataNull && this.versionInfo.updateTimeField === element.fieldName) {
             errorArray.push(this.versionInfo.updateTimeField);
           }
         }
