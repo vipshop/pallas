@@ -39,6 +39,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.vip.pallas.console.vo.BatchSubmitVO;
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
 import com.vip.pallas.utils.TemplateParamsExtractUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -104,23 +105,23 @@ public class TemplateController {
     @RequestMapping(value = "/add.json", method = RequestMethod.POST)
     public void add(@Validated @RequestBody TemplateVO params, HttpServletRequest request) throws Exception {
         if(params.getType() == null) {
-            throw new BusinessLevelException(500, "Type不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "Type不能为空");
         }
         String templateName = params.getTemplateName();
         Long indexId =  params.getIndexId();
         
         Index index = indexService.findById(indexId);
         if(index == null) {
-            throw new BusinessLevelException(500, "该索引不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "该索引不存在");
         }
 
         if (!AuthorizeUtil.authorizeTemplatePrivilege(request, indexId, index.getIndexName())) {
-        	throw new BusinessLevelException(403, "无权限操作");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
 
         SearchTemplate t = templateService.findByNameAndIndexId(templateName, indexId);
         if(t != null) {
-            throw new BusinessLevelException(500, "该创建templateName已存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "该创建templateName已存在");
         }
 
         SearchTemplate entity = new SearchTemplate();
@@ -145,16 +146,16 @@ public class TemplateController {
     public String debug(@RequestBody TemplateOp params, HttpServletRequest request) throws Exception {
     	Long indexId =  params.getIndexId();
         if (ObjectUtils.isEmpty(indexId)){
-			throw new BusinessLevelException(500, "indexId不能为空");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "indexId不能为空");
 		}
         
         Index index = indexService.findById(indexId);
         if(index == null) {
-            throw new BusinessLevelException(500, "该索引不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "该索引不存在");
         }
         
         if (!AuthorizeUtil.authorizeTemplatePrivilege(request, indexId, index.getIndexName())) {
-        	throw new BusinessLevelException(403, "无权限操作");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
     	
         SearchTemplate dbEntity = checkAndGetSearchTemplate(params);
@@ -179,7 +180,7 @@ public class TemplateController {
 	@RequestMapping(value = "/explain.json", method = RequestMethod.POST)
 	public String explain(@RequestBody TemplateOp params) throws Exception {
 		if (StringUtils.isBlank(params.getSql())) {
-            throw new BusinessLevelException(500, "SQL不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "SQL不能为空");
         }
         params.setSql(params.getSql().replaceAll(";", ""));
 		return templateService.parseSql(params.getSql(), params.getClusterId());
@@ -191,26 +192,26 @@ public class TemplateController {
 		Long indexId = params.getIndexId();
 		Long dsId = params.getDatasourceId();
 		if (ObjectUtils.isEmpty(indexId)){
-			throw new BusinessLevelException(500, "indexId不能为空");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "indexId不能为空");
 		}
 		if (ObjectUtils.isEmpty(dsId)) {
-			throw new BusinessLevelException(500, "数据源不能为空");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "数据源不能为空");
 		}
 		
 		Index index = indexService.findById(indexId);
         if(index == null) {
-            throw new BusinessLevelException(500, "该索引不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "该索引不存在");
         }
 
         if (!AuthorizeUtil.authorizeTemplatePrivilege(request, indexId, index.getIndexName())) {
-        	throw new BusinessLevelException(403, "无权限操作");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
 		
 		if (StringUtils.isBlank(sql)) {
-			throw new BusinessLevelException(500, "SQL不能为空");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "SQL不能为空");
 		}
 		if (!sql.startsWith("select")) {
-			throw new BusinessLevelException(500, "只允许select");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "只允许select");
 		}
 		params.setSql(sql.replaceAll(";", ""));
 		if (params.getSql().indexOf("where") < 0 && params.getSql().indexOf("limit") < 0) {
@@ -227,25 +228,25 @@ public class TemplateController {
         Long templateId =  params.getTemplateId();
         
         if (ObjectUtils.isEmpty(indexName)){
-            throw new BusinessLevelException(500, "indexName不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "indexName不能为空");
         }
         
         if (!AuthorizeUtil.authorizeTemplatePrivilege(request, indexId, indexName)) {
-        	throw new BusinessLevelException(403, "无权限操作");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
 
         if (ObjectUtils.isEmpty(templateId)){
-            throw new BusinessLevelException(500, "templateId不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "templateId不能为空");
         }
         SearchTemplate t = templateService.findById(templateId);
         if (t == null) {
-            throw new BusinessLevelException(500, "template 不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "template 不存在");
         }
 
         templateService.delateByNameAndIndexId(templateName, indexId);
         Index index = indexService.findById(indexId);
         if(index == null) {
-            throw new BusinessLevelException(500, "该索引不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "该索引不存在");
         }
 
         try {
@@ -268,7 +269,7 @@ public class TemplateController {
     public void export(@RequestParam Long indexId, String templateIds, HttpServletResponse response) throws Exception {
         Index index = indexService.findById(indexId);
         if(index == null) {
-            throw new BusinessLevelException(500, "该索引不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "该索引不存在");
         }
 
         if(templateIds != null){
@@ -298,16 +299,16 @@ public class TemplateController {
 
         Index index = indexService.findById(indexId);
         if(index == null) {
-            throw new BusinessLevelException(500, "该索引不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "该索引不存在");
         }
         
         if (!AuthorizeUtil.authorizeTemplatePrivilege(request, indexId, index.getIndexName())) {
-        	throw new BusinessLevelException(403, "无权限操作");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
 
         SearchTemplate dbEntity = templateService.findByNameAndIndexId(templateName, indexId);
         if (dbEntity == null) {
-            throw new BusinessLevelException(500, "模板不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "模板不存在");
         }
 
         Integer retry =  params.getRetry();
@@ -350,16 +351,16 @@ public class TemplateController {
 
         Index index = indexService.findById(indexId);
         if(index == null) {
-            throw new BusinessLevelException(500, "该索引不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "该索引不存在");
         }
         
         if (!AuthorizeUtil.authorizeTemplatePrivilege(req, indexId, index.getIndexName())) {
-        	throw new BusinessLevelException(403, "无权限操作");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
 
         SearchTemplate dbEntity = templateService.findByNameAndIndexId(templateName, indexId);
         if (dbEntity == null) {
-            throw new BusinessLevelException(500, "模板不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "模板不存在");
         }
 
         dbEntity.setContent(content);
@@ -390,14 +391,14 @@ public class TemplateController {
         String currentUser = SessionUtil.getLoginUser(req);
         Index index = indexService.findById(indexId);
         if(index == null) {
-            throw new BusinessLevelException(500, "该索引不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "该索引不存在");
         }
         if (!AuthorizeUtil.authorizeTemplatePrivilege(req, indexId, index.getIndexName())) {
-            throw new BusinessLevelException(403, "无权限操作");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
         Long[] templateIds = Arrays.stream(params.getTemplateIds().split(",")).map(id->Long.valueOf(id)).toArray(Long[]::new);
         if (templateIds.length<=0){
-            throw new BusinessLevelException(500, "id数组为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "id数组为空");
         }
         List<SearchTemplate> templates=templateService.findAllByIndexIdAndTemplateIds(indexId,templateIds);
         int validApprove = 0;
@@ -426,10 +427,10 @@ public class TemplateController {
         Long indexId =  params.getIndexId();
         SearchTemplate dbEntity = templateService.findByNameAndIndexId(templateName, indexId);
         if (dbEntity == null) {
-            throw new BusinessLevelException(500, "模板不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "模板不存在");
         }
         if (dbEntity.getType() != SearchTemplate.TYPE_TEMPLATE) {
-            throw new BusinessLevelException(500, "该模板类型不正确");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "该模板类型不正确");
         }
 
         Map<String, Object> apiMap = new HashMap<>();
@@ -489,15 +490,15 @@ public class TemplateController {
                                                      @RequestBody TemplateImport templateImport) throws Exception{
         String currentUser = SessionUtil.getLoginUser(req);
         if(null == templateImport) {
-            throw new BusinessLevelException(500, "请输入参数");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "请输入参数");
         }
         Index index = indexService.findById(templateImport.getIndexId());
         if (null == indexService.findById(templateImport.getIndexId())) {
-            throw new BusinessLevelException(500, "该索引不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "该索引不存在");
         }
 
         if (!AuthorizeUtil.authorizeTemplatePrivilege(req, templateImport.getIndexId(), index.getIndexName())) {
-            throw new BusinessLevelException(403, "无权限操作");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
 
         List<String> result = templateService.importTemplatesFromOtherIndex(currentUser, templateImport);
@@ -530,11 +531,11 @@ public class TemplateController {
 
         Index index = indexService.findById(indexId);
         if (null == indexService.findById(indexId)) {
-            throw new BusinessLevelException(500, "该索引不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "该索引不存在");
         }
         
         if (!AuthorizeUtil.authorizeTemplatePrivilege(req, indexId, index.getIndexName())) {
-        	throw new BusinessLevelException(403, "无权限操作");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
 
         List<SearchTemplate> list = new LinkedList<>();
@@ -556,7 +557,7 @@ public class TemplateController {
                     st.setTemplateName(entryName.substring(7));
                     st.setType(TYPE_MACRO);
                 } else {
-                    throw new BusinessLevelException(500, "上传zip内容错误，只能包含templates文件夹和macros文件夹");
+                    throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "上传zip内容错误，只能包含templates文件夹和macros文件夹");
                 }
                 if(!"".equals(st.getTemplateName().trim())){
                     st.setContent(content);
@@ -590,14 +591,14 @@ public class TemplateController {
 
     private SearchTemplate checkAndGetSearchTemplate(TemplateOp params) {
         if(params.getParams() == null) {
-            throw new BusinessLevelException(500, "Parameters不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "Parameters不能为空");
         }
         SearchTemplate dbEntity = templateService.findByNameAndIndexId(params.getTemplateName(), params.getIndexId());
         if (dbEntity == null) {
-            throw new BusinessLevelException(500, "模板不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "模板不存在");
         }
         if (dbEntity.getType() != SearchTemplate.TYPE_TEMPLATE) {
-            throw new BusinessLevelException(500, "该模板类型不正确");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "该模板类型不正确");
         }
         dbEntity.setParams(params.getParams());
         return dbEntity;

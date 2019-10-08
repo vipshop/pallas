@@ -44,6 +44,7 @@ import java.util.stream.Stream;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.ObjectNode;
@@ -95,19 +96,19 @@ public class IndexRoutingController {
         Long indexId =  ObjectMapTool.getLong(params, "indexId");
 
         if (ObjectUtils.isEmpty(indexId)){
-            throw new BusinessLevelException(500, "indexId不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "indexId不能为空");
         }
 
         String indexName =  ObjectMapTool.getString(params, "indexName");
 
         if (ObjectUtils.isEmpty(indexId)){
-            throw new BusinessLevelException(500, "indexName不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "indexName不能为空");
         }
 
         Index index = indexService.findById(indexId);
 
         if (index == null || !index.getIndexName().equals(indexName)) {
-            throw new BusinessLevelException(500, "找不到 index，id:" + indexId + ", indexName:" + indexName);
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "找不到 index，id:" + indexId + ", indexName:" + indexName);
         }
 
         IndexRouting routing = routingService.getIndexRouting(indexId, IndexRouting.ROUTE_TYPE_INDEX);
@@ -145,17 +146,17 @@ public class IndexRoutingController {
         Long indexId =  ObjectMapTool.getLong(params, "indexId");
 
         if (ObjectUtils.isEmpty(indexId)){
-            throw new BusinessLevelException(500, "indexId不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "indexId不能为空");
         }
 
         String indexName =  ObjectMapTool.getString(params, "indexName");
 
         if (ObjectUtils.isEmpty(indexName)){
-            throw new BusinessLevelException(500, "indexName不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "indexName不能为空");
         }
         Index index = indexService.findById(indexId);
         if (index == null) {
-            throw new BusinessLevelException(500, "找不到index, indexId:" + indexId);
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "找不到index, indexId:" + indexId);
         }
 
         List<Cluster> clusters = clusterService.selectPhysicalClustersByIndexId(index.getId());
@@ -187,16 +188,16 @@ public class IndexRoutingController {
         Long indexId =  ObjectMapTool.getLong(params, "indexId");
 
         if (ObjectUtils.isEmpty(indexId)){
-            throw new BusinessLevelException(500, "indexId不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "indexId不能为空");
         }
         String indexName =  ObjectMapTool.getString(params, "indexName");
 
         if (ObjectUtils.isEmpty(indexName)){
-            throw new BusinessLevelException(500, "indexName不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "indexName不能为空");
         }
         
         if (!AuthorizeUtil.authorizeIndexPrivilege(request, indexId, indexName)) {
-        	throw new BusinessLevelException(403, "无权限操作");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
         
         ArrayNode rules = ObjectMapTool.getObject(params, "rules", ArrayNode.class);
@@ -206,7 +207,7 @@ public class IndexRoutingController {
                 !(privileges.contains("index.write")
                         || privileges.contains("index.all")
                         || privileges.contains("index." + indexId + "-" + indexName))){
-            throw new BusinessLevelException(403, "无权限操作");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
 
         IndexRouting routing = routingService.getIndexRouting(indexId, IndexRouting.ROUTE_TYPE_INDEX);
@@ -223,7 +224,7 @@ public class IndexRoutingController {
             rulesStr = IndexRouting.toXContent(list);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            throw new BusinessLevelException(500, "rules格式非法：" + rules);
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "rules格式非法：" + rules);
         }
 
         list.stream()
@@ -231,7 +232,7 @@ public class IndexRoutingController {
                 .filter(g -> g.getWeight() < 0 || g.getWeight() > 100)
                 .findAny()
                 .ifPresent(t -> {
-                    throw new BusinessLevelException(500, "权重有效范围是0~100");
+                    throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "权重有效范围是0~100");
                 });
 
         routing.setRoutingsInfo(rulesStr);
@@ -277,19 +278,19 @@ public class IndexRoutingController {
         int clusterLevel =  ObjectMapTool.getInteger(params, "clusterLevel");
 
         if (ObjectUtils.isEmpty(indexId)){
-            throw new BusinessLevelException(500, "indexId不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "indexId不能为空");
         }
 
         if (ObjectUtils.isEmpty(indexName)){
-            throw new BusinessLevelException(500, "indexName不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "indexName不能为空");
         }
         
         if (!AuthorizeUtil.authorizeIndexPrivilege(request, indexId, indexName)) {
-        	throw new BusinessLevelException(403, "无权限操作");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
 
         if (ObjectUtils.isEmpty(name)){
-            throw new BusinessLevelException(500, "name不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "name不能为空");
         }
 
         IndexRoutingTargetGroup g = routingService.getIndexRoutingTargetGroups(indexId).stream()
@@ -313,7 +314,7 @@ public class IndexRoutingController {
 			if (g.isClusterLevel0() || g.isShardLevel() || g.isGroupLevel()) {
                 ArrayNode nodes = ObjectMapTool.getObject(params,"clusters", ArrayNode.class);
                 if (ObjectUtils.isEmpty(nodes)){
-                    throw new BusinessLevelException(500, "clusters不能为空");
+                    throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "clusters不能为空");
                 }
 
                 jsonStr = nodes.toString();
@@ -322,7 +323,7 @@ public class IndexRoutingController {
             } else {
                 ArrayNode nodes = ObjectMapTool.getObject(params,"nodes", ArrayNode.class);
                 if (ObjectUtils.isEmpty(nodes)){
-                    throw new BusinessLevelException(500, "nodes不能为空");
+                    throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "nodes不能为空");
                 }
 
                 jsonStr = nodes.toString();
@@ -331,7 +332,7 @@ public class IndexRoutingController {
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            throw new BusinessLevelException(500, "错误:" + e.getMessage() + "，nodes格式非法：" + jsonStr);
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "错误:" + e.getMessage() + "，nodes格式非法：" + jsonStr);
         }
 
         routingService.addOrUpdateRoutingTargetGroup(indexId, g);
@@ -344,13 +345,13 @@ public class IndexRoutingController {
         Integer state = ObjectMapTool.getInteger(params, "state");
 
         if (ObjectUtils.isEmpty(cluster)) {
-            throw new BusinessLevelException(500, "cluster不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "cluster不能为空");
         }
         if (ObjectUtils.isEmpty(nodeIp)) {
-            throw new BusinessLevelException(500, "nodeIp不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "nodeIp不能为空");
         }
         if (ObjectUtils.isEmpty(state)) {
-            throw new BusinessLevelException(500, "state不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "state不能为空");
         }
 
         routingService.updateNodeState(cluster, nodeIp, state);
@@ -361,7 +362,7 @@ public class IndexRoutingController {
         Long groupId = ObjectMapTool.getLong(params, "groupId");
 
         if (ObjectUtils.isEmpty(groupId)){
-            throw new BusinessLevelException(500, "groupId不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "groupId不能为空");
         }
 
         routingService.deleteRoutingTargetGroup(groupId);
@@ -377,22 +378,22 @@ public class IndexRoutingController {
         Long indexId = ObjectMapTool.getLong(params, "indexId");
 
         if (ObjectUtils.isEmpty(indexId)){
-            throw new BusinessLevelException(500, "indexId不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "indexId不能为空");
         }
         String indexName =  ObjectMapTool.getString(params, "indexName");
 
         if (ObjectUtils.isEmpty(indexName)){
-            throw new BusinessLevelException(500, "indexName不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "indexName不能为空");
         }
 
         ObjectNode cri = ObjectMapTool.getObject(params, "protocolControlCriteria", ObjectNode.class);
         if (ObjectUtils.isEmpty(cri)){
-            throw new BusinessLevelException(500, "protocolControlCriteria不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "protocolControlCriteria不能为空");
         }
 
         ObjectNode protocolControlMap = ObjectMapTool.getObject(params, "protocolControlMap", ObjectNode.class);
         if (ObjectUtils.isEmpty(protocolControlMap)){
-            throw new BusinessLevelException(500, "protocolControlMap不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "protocolControlMap不能为空");
         }
 
         IndexRoutingSecurity irs = routingService.getRoutingSecurity(indexId);
@@ -409,7 +410,7 @@ public class IndexRoutingController {
             fromCriteriaXContent(irs.getProtocolControls());
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            throw new BusinessLevelException(500, "原因:" + e.getMessage() + ",Criteria：" + cri + ",ProtocolControls:" + protocolControlMap);
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "原因:" + e.getMessage() + ",Criteria：" + cri + ",ProtocolControls:" + protocolControlMap);
         }
 
         routingService.addOrUpdateRoutingSecurity(indexId, irs);

@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -71,15 +72,24 @@ public class TokenController {
     @RequestMapping(path="/list.json", method={RequestMethod.GET, RequestMethod.POST})
     public List<SearchAuthorization> queryTokens(HttpServletRequest request){
         if (!AuthorizeUtil.authorizeTokenPrivilege(request, null)) {
-        	throw new BusinessLevelException(403, "无权限操作");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
         return authService.selectAll();
+    }
+
+
+    @RequestMapping(path="/delete/id.json", method={RequestMethod.POST})
+    public void deleteToken(HttpServletRequest request,@RequestParam Long tokenId){
+        if (!AuthorizeUtil.authorizeTokenPrivilege(request, null)) {
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
+        }
+        authService.deleteById(tokenId);
     }
 
     @RequestMapping(path="/insert.json", method={RequestMethod.POST})
     public void createOrUpdateToken(@RequestBody @Validated SearchAuthorization token, HttpServletRequest request){
     	if (!AuthorizeUtil.authorizeTokenPrivilege(request, null)) {
-        	throw new BusinessLevelException(403, "无权限操作");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
         if (StringUtils.isEmpty(token.getAuthorizationItems())){
             token.setAuthorizationItems("[]");
@@ -88,7 +98,7 @@ public class TokenController {
         SearchAuthorization auth = null;
         if (token.getId() == null) {
             if (tokenInDB != null) {
-                throw new BusinessLevelException(500, "token 已存在");
+                throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "token 已存在");
             }
             auth = new SearchAuthorization();
             try {
@@ -96,11 +106,11 @@ public class TokenController {
                 auth.setAuthorizationItems(SearchAuthorization.toXContent(list));
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
-                throw new BusinessLevelException(500, "authorizationItems 解析错误：" + token.getAuthorizationItems());
+                throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "authorizationItems 解析错误：" + token.getAuthorizationItems());
             }
         } else {
             if (tokenInDB != null && !tokenInDB.getId().equals(token.getId())) {
-                throw new BusinessLevelException(500, "token已存在，请插入别的token。");
+                throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "token已存在，请插入别的token。");
             }
             auth = authService.findById(token.getId());
         }
@@ -114,7 +124,7 @@ public class TokenController {
     public List<AuthorizationItemVO> privileges(HttpServletRequest request, 
             @RequestParam(required = false) @NotNull(message = "id不能为空") @Min(value = 1, message = "id必须为正数") Long id) {
     	if (!AuthorizeUtil.authorizeTokenPrivilege(request, null)) {
-        	throw new BusinessLevelException(403, "无权限操作");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
         List<AuthorizationItemVO> privileges = new LinkedList<>();
         SearchAuthorization sa = authService.findById(id);
@@ -183,17 +193,17 @@ public class TokenController {
     @RequestMapping(path="/token_privilege/update.json", method = {RequestMethod.POST})
     public void updatePrivilege(@RequestBody @Validated TokenPrivilegeVO tokenPrivilegeVO, HttpServletRequest request) {
         if (!AuthorizeUtil.authorizeTokenPrivilege(request, null)){
-        	throw new BusinessLevelException(403, "无权限操作");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
         SearchAuthorization sa = authService.findById(tokenPrivilegeVO.getId());
         if (sa == null) {
-            throw new BusinessLevelException(500, "SearchAuthorization 不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "SearchAuthorization 不存在");
         }
         try {
             sa.setAuthorizationItems(SearchAuthorization.toXContent(tokenPrivilegeVO.getAuthorizationItems()));
         } catch (Exception e) {
             logger.error("error", e);
-            throw new BusinessLevelException(500, "authorizationItems 解析错误：" + tokenPrivilegeVO.getAuthorizationItems());
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "authorizationItems 解析错误：" + tokenPrivilegeVO.getAuthorizationItems());
         }
         authService.addOrUpdateAuthorization(sa);
     }
@@ -205,7 +215,7 @@ public class TokenController {
             messageDigest = MessageDigest.getInstance("md5");
         } catch (NoSuchAlgorithmException e) {
             logger.error(e.getMessage(), e);
-            throw new BusinessLevelException(500, e.getMessage());
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, e.getMessage());
         }
         return Base64.getEncoder().encodeToString(messageDigest.digest(UUID.randomUUID().toString().getBytes()));
     }

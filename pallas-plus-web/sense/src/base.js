@@ -76,7 +76,7 @@ function callES(server, url, method, data, successCallback, completeCallback, re
     var uname = url_parts[2];
     var password = url_parts[3];
     console.log("Calling " + url + "  (uname: " + uname + " pwd: " + password + ")");
-    if (data && method == "GET") method = "POST";
+    // if (data && method == "GET") method = "POST";
 	
 	var urlbase = getSearchUrlVar("host");
 	var currentHost = urlbase;
@@ -559,8 +559,11 @@ function init() {
     sense.autocomplete.init();
     $("#send").tooltip();
     $("#send").click(function () {
-        submitCurrentRequestToES();
-        return false;
+        var req = sense.utils.getCurrentRequest();
+        if(confirm('确定发送请求 ' + req.url +' 吗?')) {
+            submitCurrentRequestToES();
+            return false;  
+        }
     });
 
     $("#copy_as_curl").click(function (e) {

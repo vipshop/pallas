@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.ConstraintViolationException;
 
+import com.vip.pallas.exception.BusinessLevelException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -43,6 +44,7 @@ public class ExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handle(Exception e) {
         String message = e.getMessage();
+        int status=HttpStatus.INTERNAL_SERVER_ERROR.value();
         LOGGER.error(message, e);
         if (e instanceof ConstraintViolationException) {
             message = ((ConstraintViolationException) e).getConstraintViolations().stream()
@@ -59,7 +61,10 @@ public class ExceptionHandler {
             if (0 < sb.length()) {
                 message = sb.toString();
             }
+        } else if (e instanceof BusinessLevelException){
+            BusinessLevelException businessLevelException = (BusinessLevelException)e;
+            status = businessLevelException.getErrorCode();
         }
-        return new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), message);
+        return new ErrorResponse(status, message);
     }
 }

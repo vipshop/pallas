@@ -26,6 +26,7 @@ import javax.annotation.Resource;
 
 import com.vip.pallas.bean.DBSchema;
 import com.vip.pallas.console.vo.TemplateFieldVO;
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
 import org.apache.commons.collections.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
@@ -62,7 +63,7 @@ public class IndexFindMetaDataController {
 	public Map<String, Object> metadata(@RequestBody Map<String, Object> params) throws SQLException, PallasException { // NOSONAR
 		Long indexId =  ObjectMapTool.getLong(params, "indexId");
 		if(ObjectUtils.isEmpty(indexId)){
-			throw new BusinessLevelException(500, "indexId不能为空");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "indexId不能为空");
 		}
 		
 		Map<String, Object> resultMap = new HashMap<>();

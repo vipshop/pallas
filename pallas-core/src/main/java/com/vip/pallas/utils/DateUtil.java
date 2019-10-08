@@ -337,6 +337,20 @@ public class DateUtil {
         return cale.getTime();
     }
 
+
+    /**
+     * Adds the specified (signed) amount of  hours to the given date
+     * @param date
+     * @param hours
+     * @return
+     */
+    public static Date addHoursToDate(Date date, int hours) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.HOUR_OF_DAY, hours);
+        return calendar.getTime();
+    }
+
     /**
      * <p>Adds the specified (signed) amount of day to the given date, based on the calendar's rules</p>
      *

@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.Min;
 
 import com.vip.pallas.console.vo.IndexVersionDynamicVO;
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
 import com.vip.pallas.mybatis.entity.*;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -113,15 +114,15 @@ public class IndexVersionController {
 		Long indexId = ObjectMapTool.getLong(params, "indexId");
 
 		if (ObjectUtils.isEmpty(versionIds)) {
-			throw new BusinessLevelException(500, "versionIds不能为空");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "versionIds不能为空");
 		}
 
 		if (ObjectUtils.isEmpty(indexName)) {
-			throw new BusinessLevelException(500, "indexName不能为空");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "indexName不能为空");
 		}
 
 		if (ObjectUtils.isEmpty(indexId)) {
-			throw new BusinessLevelException(500, "indexId不能为空");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "indexId不能为空");
 		}
 
 		List<Map<String, Object>> versionCountList = new ArrayList<>();
@@ -163,7 +164,7 @@ public class IndexVersionController {
 		Long versionId = params.getVersionId();
 
 		if (ObjectUtils.isEmpty(indexId)) {
-			throw new BusinessLevelException(500, "indexId不能为空");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "indexId不能为空");
 		}
 
 		return indexVersionService.copyVersion(indexId, versionId);
@@ -201,15 +202,15 @@ public class IndexVersionController {
 		
 		Index index = indexService.findById(indexId);
 		if (ObjectUtils.isEmpty(index)) {
-			throw new BusinessLevelException(500, "index不存在");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "index不存在");
 		}
 		if (!AuthorizeUtil.authorizeIndexVersionPrivilege(request, indexId, index.getIndexName())) {
-			throw new BusinessLevelException(403, "无权限操作");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
 		}
 		
 		IndexVersion v = indexVersionService.findById(versionId);
 		if (v == null) {
-			throw new BusinessLevelException(500, "versionId不存在");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "versionId不存在");
 		}
 
 		elasticSearchService.createIndex(index.getIndexName(), indexId, versionId);
@@ -240,16 +241,16 @@ public class IndexVersionController {
 		Long indexId = params.getIndexId();
 		Index index = indexService.findById(indexId);
 		if (index == null) {
-			throw new BusinessLevelException(500, "该索引不存在");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "该索引不存在");
 		}
 		
 		if (!AuthorizeUtil.authorizeIndexVersionPrivilege(request, indexId, index.getIndexName())) {
-			throw new BusinessLevelException(403, "无权限操作");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
 		} 
 		
 		IndexVersion v = indexVersionService.findById(id);
 		if (v == null) {
-			throw new BusinessLevelException(500, "versionId不存在");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "versionId不存在");
 		}
 		indexVersionService.enableVersion(id);
 		AuditLogUtil.log("enable versionId: id - {0},  indexId - {1}, indexName - {2}", id, index.getId(),
@@ -276,15 +277,15 @@ public class IndexVersionController {
 		
 		Index index = indexService.findById(indexId);
 		if (ObjectUtils.isEmpty(index)) {
-			throw new BusinessLevelException(500, "index不存在");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "index不存在");
 		}
 		if (!AuthorizeUtil.authorizeIndexVersionPrivilege(request, indexId, index.getIndexName())) {
-			throw new BusinessLevelException(403, "无权限操作");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
 		}
 		
 		IndexVersion v = indexVersionService.findById(versionId);
 		if (v == null) {
-			throw new BusinessLevelException(500, "versionId不存在");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "versionId不存在");
 		}
 
 		try {
@@ -322,15 +323,15 @@ public class IndexVersionController {
 		
 		Index index = indexService.findById(indexId);
 		if (ObjectUtils.isEmpty(index)) {
-			throw new BusinessLevelException(500, "index不存在");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "index不存在");
 		}
 		if (!AuthorizeUtil.authorizeIndexVersionPrivilege(request, indexId, index.getIndexName())) {
-			throw new BusinessLevelException(403, "无权限操作");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
 		}
 
 		IndexVersion v = indexVersionService.findById(versionId);
 		if (v == null) {
-			throw new BusinessLevelException(500, "versionId不存在");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "versionId不存在");
 		}
 		indexVersionService.deleteVersion(versionId);
 
@@ -359,11 +360,11 @@ public class IndexVersionController {
 
 		Index index = indexService.findById(indexVersion.getIndexId());
 		if (index == null) {
-			throw new BusinessLevelException(500, "该索引不存在");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "该索引不存在");
 		}
 		
 		if (!AuthorizeUtil.authorizeIndexVersionPrivilege(request, index.getId(), index.getIndexName())) {
-			throw new BusinessLevelException(403, "无权限操作");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
 		}
 
 		indexVersionService.insert(indexVersion, (ArrayList) schema);
@@ -404,7 +405,7 @@ public class IndexVersionController {
 		Object schema = params.getSchema();
 
 		if (ObjectUtils.isEmpty(versionId)) {
-			throw new BusinessLevelException(500, "versionId不能为空");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "versionId不能为空");
 		}
 
 		IndexVersion indexVersion = getIndexVersion(params);
@@ -412,11 +413,11 @@ public class IndexVersionController {
 
 		Index index = indexService.findById(indexVersion.getIndexId());
 		if (index == null) {
-			throw new BusinessLevelException(500, "该索引不存在");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "该索引不存在");
 		}
 		
 		if (!AuthorizeUtil.authorizeIndexVersionPrivilege(request, index.getId(), index.getIndexName())) {
-			throw new BusinessLevelException(403, "无权限操作");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
 		}
 
 		indexVersionService.update(indexVersion, (ArrayList) schema);
@@ -446,7 +447,7 @@ public class IndexVersionController {
 		Long versionId = params.getId();
 
 		if (ObjectUtils.isEmpty(versionId)) {
-			throw new BusinessLevelException(500, "versionId不能为空");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "versionId不能为空");
 		}
 
 		IndexVersion indexVersion = new IndexVersion();
@@ -456,11 +457,11 @@ public class IndexVersionController {
 
 		Index index = indexService.findById(indexVersion.getIndexId());
 		if (index == null) {
-			throw new BusinessLevelException(500, "该索引不存在");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "该索引不存在");
 		}
 
 		if (!AuthorizeUtil.authorizeIndexVersionPrivilege(request, index.getId(), index.getIndexName())) {
-			throw new BusinessLevelException(403, "无权限操作");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
 		}
 
 		Object schema = params.getSchema();
@@ -515,7 +516,7 @@ public class IndexVersionController {
 	public void exportSchema(HttpServletResponse response, HttpServletRequest request) throws Exception {
 		Long versionId = Long.valueOf((String) request.getParameter("versionId"));
 		if (ObjectUtils.isEmpty(versionId)) {
-			throw new BusinessLevelException(500, "versionId不能为空");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "versionId不能为空");
 		}
 		com.vip.pallas.bean.IndexVersion v = indexVersionService.findVersionById(versionId);
 		Index index = indexService.findById(v.getIndexId());

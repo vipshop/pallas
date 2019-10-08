@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -146,7 +147,7 @@ public class IndexController {
     @RequestMapping(value = "add.json", method = RequestMethod.POST)
     public String insert(@RequestBody @Validated IndexVO params, HttpServletRequest request) throws Exception{
         if (!AuthorizeUtil.authorizeIndexPrivilege(request, null, null)){
-        	throw new BusinessLevelException(403, "无权限操作");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
         // check if there are indexes with the same name.
         if (!params.getConfirm()) {
@@ -166,7 +167,7 @@ public class IndexController {
 
         Index findByClusterNameAndIndexName = indexService.findByClusterNameAndIndexName(index.getClusterName(), index.getIndexName());
         if (findByClusterNameAndIndexName != null) {
-            throw new BusinessLevelException(500, "indexName=" + index.getIndexName() + ", cluserName=" + index.getClusterName() + " 的index已经存在，插入失败。");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "indexName=" + index.getIndexName() + ", cluserName=" + index.getClusterName() + " 的index已经存在，插入失败。");
         }
         indexService.insert(index, dsList);
         //#337 创建好索引创建默认路由
@@ -209,14 +210,14 @@ public class IndexController {
     @RequestMapping(value = "/update.json", method = RequestMethod.POST)
 	public String update(@RequestBody @Validated IndexVO params, HttpServletRequest request) throws Exception {
         if(params.getIndexId() == null) {
-            throw new BusinessLevelException(500, "indexId不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "indexId不能为空");
         }
         Index dbIndex = indexService.findById(params.getIndexId());
         if (dbIndex == null) {
-            throw new BusinessLevelException(500, "index不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "index不存在");
         }
         if (!AuthorizeUtil.authorizeIndexPrivilege(request, dbIndex.getId(), dbIndex.getIndexName())) {
-        	throw new BusinessLevelException(403, "无权限操作");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
         
         String createUser = SessionUtil.getLoginUser(request);
@@ -252,10 +253,10 @@ public class IndexController {
         Long indexId = params.getIndexId();
         Index index = indexService.findById(indexId);
         if (index == null) {
-            throw new BusinessLevelException(500, "index不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "index不存在");
         }
         if (!AuthorizeUtil.authorizeIndexPrivilege(request, index.getId(), index.getIndexName())) {
-        	throw new BusinessLevelException(403, "无权限操作");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
         
         indexService.deleteById(indexId);
@@ -276,27 +277,27 @@ public class IndexController {
     public void updateTimeoutRetry(@RequestBody IndexOp params, HttpServletRequest request) {
         Long indexId =  params.getIndexId();
         if(ObjectUtils.isEmpty(indexId)){
-            throw new BusinessLevelException(500, "indexId不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "indexId不能为空");
         }
         Integer retry = params.getRetry();
         if(ObjectUtils.isEmpty(retry)){
-            throw new BusinessLevelException(500, "retry不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "retry不能为空");
         }
         Integer timeout = params.getTimeout();
         if(ObjectUtils.isEmpty(timeout)){
-            throw new BusinessLevelException(500, "timeout不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "timeout不能为空");
         }
         Integer slowerThan = params.getSlowerThan();
         if(ObjectUtils.isEmpty(slowerThan)){
-            throw new BusinessLevelException(500, "slowerThan不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "slowerThan不能为空");
         }
         
         Index dbIndex = indexService.findById(indexId);
         if (dbIndex == null) {
-            throw new BusinessLevelException(500, "index不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "index不存在");
         }
         if (!AuthorizeUtil.authorizeIndexPrivilege(request, dbIndex.getId(), dbIndex.getIndexName())) {
-        	throw new BusinessLevelException(403, "无权限操作");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
 
         Index index = new Index();

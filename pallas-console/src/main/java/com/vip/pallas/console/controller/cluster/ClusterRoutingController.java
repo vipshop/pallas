@@ -38,6 +38,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotBlank;
 
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
 import org.codehaus.jackson.node.ArrayNode;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
@@ -83,7 +84,7 @@ public class ClusterRoutingController {
 			HttpServletRequest request) throws Exception { // NOSONAR
         Cluster cluster = clusterService.findByName(clusterId);
         if (null == cluster){
-        	throw new BusinessLevelException(500, "cluster不存在");
+        	throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "cluster不存在");
         }
         
         Long id = cluster.getId();
@@ -126,16 +127,16 @@ public class ClusterRoutingController {
         int clusterLevel =  ObjectMapTool.getInteger(params, "clusterLevel");
 
         if (ObjectUtils.isEmpty(clusterName)){
-            throw new BusinessLevelException(500, "clusterId不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "clusterId不能为空");
         }
 
         if (ObjectUtils.isEmpty(name)){
-            throw new BusinessLevelException(500, "name不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "name不能为空");
         }
 
         Cluster cluster = clusterService.findByName(clusterName);
         if(cluster == null) {
-            throw new BusinessLevelException(500, "cluster 不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "cluster 不存在");
         }
 
 
@@ -159,7 +160,7 @@ public class ClusterRoutingController {
         try {
             ArrayNode nodes = ObjectMapTool.getObject(params,"nodes", ArrayNode.class);
             if (ObjectUtils.isEmpty(nodes)){
-                throw new BusinessLevelException(500, "nodes不能为空");
+                throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "nodes不能为空");
             }
 
             jsonStr = nodes.toString();
@@ -167,7 +168,7 @@ public class ClusterRoutingController {
             g.setNodesInfo(IndexRoutingTargetGroup.toXContent(IndexRoutingTargetGroup.fromXContent(jsonStr)));
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            throw new BusinessLevelException(500, "错误:" + e.getMessage() + "，nodes格式非法：" + jsonStr);
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "错误:" + e.getMessage() + "，nodes格式非法：" + jsonStr);
         }
 
         routingService.addOrUpdateRoutingTargetGroup(cluster.getId(), g);
@@ -179,13 +180,13 @@ public class ClusterRoutingController {
         String clusterName =  ObjectMapTool.getString(params, "clusterId");
 
         if (ObjectUtils.isEmpty(clusterName)){
-            throw new BusinessLevelException(500, "clusterId 不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "clusterId 不能为空");
         }
         ArrayNode rules = ObjectMapTool.getObject(params, "rules", ArrayNode.class);
 
         Cluster cluster = clusterService.findByName(clusterName);
         if(cluster == null) {
-            throw new BusinessLevelException(500, "cluster 不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "cluster 不存在");
         }
 
         List<String> privileges = AuthorizeUtil.loadPrivileges();
@@ -193,7 +194,7 @@ public class ClusterRoutingController {
                 !(privileges.contains("cluster.write")
                         || privileges.contains("cluster.all")
                         || privileges.contains("cluster." + clusterName))){
-            throw new BusinessLevelException(403, "无权限操作");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
 
         IndexRouting routing = routingService.getIndexRouting(cluster.getId(), IndexRouting.ROUTE_TYPE_CLUSTER);
@@ -211,7 +212,7 @@ public class ClusterRoutingController {
             rulesStr = IndexRouting.toXContent(list);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            throw new BusinessLevelException(500, "rules格式非法：" + rules);
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "rules格式非法：" + rules);
         }
 
         list.stream()
@@ -219,7 +220,7 @@ public class ClusterRoutingController {
                 .filter(g -> g.getWeight() < 0 || g.getWeight() > 100)
                 .findAny()
                 .ifPresent(t -> {
-                    throw new BusinessLevelException(500, "权重有效范围是0~100");
+                    throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "权重有效范围是0~100");
                 });
 
         routing.setRoutingsInfo(rulesStr);
@@ -232,7 +233,7 @@ public class ClusterRoutingController {
 
         Cluster cluster = clusterService.findByName(clusterName);
         if(cluster == null) {
-            throw new BusinessLevelException(500, "cluster 不存在");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "cluster 不存在");
         }
 
         Map<String, Object> resultMap = new HashMap<>();

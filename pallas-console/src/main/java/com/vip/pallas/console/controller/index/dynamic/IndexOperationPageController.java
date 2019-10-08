@@ -21,6 +21,7 @@ import com.vip.pallas.bean.IndexOperationParams;
 import com.vip.pallas.bean.monitor.ExtMetricInfoModel;
 import com.vip.pallas.bean.monitor.MonitorQueryModel;
 import com.vip.pallas.console.utils.AuthorizeUtil;
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
 import com.vip.pallas.exception.BusinessLevelException;
 import com.vip.pallas.mybatis.entity.*;
 import com.vip.pallas.service.*;
@@ -177,7 +178,7 @@ public class IndexOperationPageController{
     @RequestMapping("/index/dynamic/delete.json")
     public void deleteIndexDynamic(@RequestBody @Validated IndexOperationParams params, HttpServletRequest request) {
         if (!AuthorizeUtil.authorizeIndexPrivilege(request, params.getIndexId(), params.getIndexName())) {
-            throw new BusinessLevelException(403, "无权限操作");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
         }
         int result = indexOperationService.deleteByCondition(params);
     }
@@ -185,23 +186,23 @@ public class IndexOperationPageController{
     private void validatePaging(Integer currentPage, Integer pageSize, Long indexId) { // NOSONAR
 
         if(ObjectUtils.isEmpty(currentPage)){
-            throw new BusinessLevelException(500, "currentPage不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "currentPage不能为空");
         }
 
         if(currentPage <= 0){
-            throw new BusinessLevelException(500, "currentPage必须为正数");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "currentPage必须为正数");
         }
 
         if(ObjectUtils.isEmpty(pageSize)){
-            throw new BusinessLevelException(500, "pageSize不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "pageSize不能为空");
         }
 
         if(pageSize <= 0){
-            throw new BusinessLevelException(500, "pageSize必须为正数");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "pageSize必须为正数");
         }
 
         if(ObjectUtils.isEmpty(indexId)){
-            throw new BusinessLevelException(500, "indexId不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "indexId不能为空");
         }
     }
 }

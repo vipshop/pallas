@@ -60,7 +60,7 @@ public class PallasRestClientBuilder {
 
 	private static final Object lock = new Object();
 
-	public static final Map<String, Long> TIMEOUT_MILLS_MAP = new HashMap<>();
+	public static final Map<String, Long> TIMEOUT_MILLS_MAP = new ConcurrentHashMap<>();
 
 	public static final ConcurrentHashMap<String/** token **/
 			, PallasRestClient> CLIENT_MAP = new ConcurrentHashMap<String, PallasRestClient>();

@@ -124,7 +124,7 @@
 		<vms.version>1.2.1</vms.version>
 		<vdp.version>0.0.1-SNAPSHOT</vdp.version>
 		<venus-utils.version>0.6.1</venus-utils.version>
-		<venus-log.version>1.0.6</venus-log.version>
+		<venus-log.version>1.0.9</venus-log.version>
 
 		<protobuf.version>3.1.0</protobuf.version>
 		<aspectj.version>1.8.9</aspectj.version>

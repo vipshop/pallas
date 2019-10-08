@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,10 +59,10 @@ public class UserServiceImpl implements UserService {
 	public UserModel findByAuthenticationCode(String username, String password) {
 		User user = userRepository.selectByUsername(username);
 		if (null == user) {
-			throw new BusinessLevelException(500, "用户不存在");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "用户不存在");
 		}
 		if (!user.getPassword().equals(password)){
-			throw new BusinessLevelException(500, "用户密码错误");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "用户密码错误");
 		}
 		return beanMapper.map(user, UserModel.class);
 	}
@@ -74,19 +75,19 @@ public class UserServiceImpl implements UserService {
 			for (RoleModel roleName : userModule.getRoles()) {
 				Role role = roleRepository.selectByRoleName(roleName.getRoleName());
 				if (null == role) {
-					throw new BusinessLevelException(500, "用户信息中存在异常角色信息"); 
+					throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "用户信息中存在异常角色信息"); 
 				} else {
 					dbRoles.add(role);
 				}
 			}
 		} else {
-			throw new BusinessLevelException(500, "用户信息中未选择角色信息");
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "用户信息中未选择角色信息");
 		}
 		User user = beanMapper.map(userModule, User.class);
 		User dbUser = userRepository.selectByUsername(userModule.getUsername());
 		if (null == userModule.getId()){
 			if (null != dbUser) {
-				throw new BusinessLevelException(500, "用户名已存在"); 
+				throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "用户名已存在"); 
 			}
 			user.setCreatedBy(userModule.getLastUpdatedBy());
 			user.setCreateTime(createTime);
@@ -94,7 +95,7 @@ public class UserServiceImpl implements UserService {
 			userRepository.insertSelective(user);
 		} else {
 			if (null != dbUser && dbUser.getId() != userModule.getId()) {
-				throw new BusinessLevelException(500, "用户名已存在"); 
+				throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "用户名已存在"); 
 			}
 			userRepository.updateByPrimaryKeySelective(user);
 		}
@@ -178,7 +179,7 @@ public class UserServiceImpl implements UserService {
 	public UserModel findById(Long id) {
 		User user = userRepository.selectById(id);
 		if (null == user) {
-			throw new BusinessLevelException(500, "用户名不存在"); 
+			throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "用户名不存在"); 
 		}
 		return beanMapper.map(user, UserModel.class);
 	}

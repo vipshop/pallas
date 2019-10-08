@@ -22,6 +22,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.vip.pallas.entity.BusinessLevelExceptionCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -48,15 +49,15 @@ public class ClusterNodeController {
         String nodeIp = ObjectMapTool.getString(params, "nodeIp");
 
         if(clusterName == null) {
-            throw new BusinessLevelException(500, "clusterName不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "clusterName不能为空");
         }
 
         if(nodeIp == null) {
-            throw new BusinessLevelException(500, "nodeIp不能为空");
+            throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_INTERNAL_SERVER_ERROR, "nodeIp不能为空");
         }
         
         if (!AuthorizeUtil.authorizeClusterPrivilege(request, clusterName)) {
-    		throw new BusinessLevelException(403, "无权限操作");
+    		throw new BusinessLevelException(BusinessLevelExceptionCode.HTTP_FORBIDDEN, "无权限操作");
     	}
 
         nodeService.markRestartState(clusterName, nodeIp);

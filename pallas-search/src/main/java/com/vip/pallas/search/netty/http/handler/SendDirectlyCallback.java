@@ -122,6 +122,10 @@ public class SendDirectlyCallback implements FutureCallback<HttpResponse> {
 	}
 	protected void handleCompleted(HttpResponse response) {
 		setKeyTimeStamp();
+
+		// #103 #116 默认加gzip头，es返回时需要解压
+		autoDecompression(response);
+
 		// in case we got a bad response.
 		if (response.getStatusLine().getStatusCode() != HttpCode.HTTP_OK_CODE && response.getStatusLine().getStatusCode() != HttpCode.HTTP_NOT_FOUND && response.getStatusLine().getStatusCode() != HttpCode.HTTP_BAD_REQUEST) {
 			try {
@@ -133,8 +137,6 @@ public class SendDirectlyCallback implements FutureCallback<HttpResponse> {
 			return;
 		}
 		try {
-			// #103 默认加gzip头，es返回时需要解压
-			autoDecompression(response);
 
 			HttpEntity entity = response.getEntity();
 			byte[] content = null;
@@ -171,18 +173,19 @@ public class SendDirectlyCallback implements FutureCallback<HttpResponse> {
 	}
 
 	private void autoDecompression(HttpResponse response){
-        if (PallasSearchProperties.SEARCH_GZIP_COMPRESSION) {
-            Header contentEncoding = response.getLastHeader(HttpHeaders.CONTENT_ENCODING);
-            if (contentEncoding != null) {
-                // decompression
-                if (contentEncoding.getValue().equals(HttpHeaderValues.GZIP.toString()) || contentEncoding.getValue().equals(HttpHeaderValues.X_GZIP.toString())) {
-                    response.setEntity(new DecompressingEntity(response.getEntity(), GZIPInputStream::new));
-                } else if (contentEncoding.getValue().equals(HttpHeaderValues.DEFLATE.toString())) {
-                    response.setEntity(new DecompressingEntity(response.getEntity(), DeflaterInputStream::new));
-                }
-            }
-        }
-
+		try {
+			if (!PallasSearchProperties.SEARCH_GZIP_COMPRESSION) return;
+			Header contentEncoding = response.getLastHeader(HttpHeaders.CONTENT_ENCODING);
+			if (null == contentEncoding) return;
+			// decompression
+			if (contentEncoding.getValue().equals(HttpHeaderValues.GZIP.toString()) || contentEncoding.getValue().equals(HttpHeaderValues.X_GZIP.toString())) {
+				response.setEntity(new DecompressingEntity(response.getEntity(), GZIPInputStream::new));
+			} else if (contentEncoding.getValue().equals(HttpHeaderValues.DEFLATE.toString())) {
+				response.setEntity(new DecompressingEntity(response.getEntity(), DeflaterInputStream::new));
+			}
+		}catch (Exception e){
+			// do nothing if sth wrong happened
+		}
 	}
 
 	private void setKeyTimeStamp() {
