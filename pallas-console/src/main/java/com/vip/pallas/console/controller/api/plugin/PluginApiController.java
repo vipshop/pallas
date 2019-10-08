@@ -182,7 +182,7 @@ public class PluginApiController {
         try {
             response = client.performRequest("GET", "/_cat/nodes");
         } catch (IOException e) {
-            LOGGER.error(e.toString(), e);
+            LOGGER.error("cluster:"+clusterId+",nodeIp:"+nodeIp+",msg:"+e.toString(), e);
             return true;
         }
 
