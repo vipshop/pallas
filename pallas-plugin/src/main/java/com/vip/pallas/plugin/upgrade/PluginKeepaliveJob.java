@@ -18,9 +18,13 @@
 package com.vip.pallas.plugin.upgrade;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import com.vip.pallas.utils.PallasBasicProperties;
@@ -51,6 +55,12 @@ public class PluginKeepaliveJob implements Job {
     private static final org.apache.logging.log4j.Logger LOGGER = ESLoggerFactory.getLogger(PluginKeepaliveJob.class);
 
     private static final String PALLAS_ES_RESTART_COMMAND = System.getProperty("PALLAS_ES_RESTART_COMMAND", "/apps/svr/elasticsearch/bin/last-pallas-es.sh");
+
+    private static final String PALLAS_PLUGIN_NAME = "pallas-plugin";
+
+    private static final String PALLAS_PLUGIN_PROPERTIES_PATH = "plugin-descriptor.properties";
+
+    private static final String PALLAS_PLUGIN_VERSION_KEY = "version";
 
     public static ExtendableThreadPoolExecutor commandExecutorService = new ExtendableThreadPoolExecutor(
             3, 10, 2L, TimeUnit.MINUTES, new TaskQueue(
@@ -186,12 +196,43 @@ public class PluginKeepaliveJob implements Job {
                 version = dirName.substring(splitIndex + 1, dirName.length()) + "-SNAPSHOT";
             }
 
+            if (PALLAS_PLUGIN_NAME.equalsIgnoreCase(name) ||
+					(PALLAS_PLUGIN_NAME.contains(name) && PALLAS_PLUGIN_NAME.contains(version))){
+            	//pallas-plugin的目录未含有版本号，从其它地方读取
+				Properties properties = getPluginProperties();
+				if (null != properties){
+					String pluginVersion = properties.getProperty(PALLAS_PLUGIN_VERSION_KEY);
+					if (pluginVersion != null){
+						name = PALLAS_PLUGIN_NAME;
+						version = pluginVersion;
+					}
+				}
+			}
+
             return new String[]{name, version};
         } catch (Exception e){
             LOGGER.error("parseNameAndVersion error", e);
             return null;
         }
     }
+
+    private static Properties getPluginProperties(){
+    	String absolutePath = PluginKeepaliveJob.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		int firstIndex = absolutePath.lastIndexOf(System.getProperty("path.separator")) + 1;
+		int lastIndex = absolutePath.lastIndexOf(File.separator) + 1;
+		absolutePath = absolutePath.substring(firstIndex, lastIndex) + PALLAS_PLUGIN_PROPERTIES_PATH;
+		LOGGER.info("absolutePath = {} ", absolutePath);
+
+    	Properties properties = new Properties();
+    	try(InputStream inputStream = new FileInputStream(new File(absolutePath))) {
+			properties.load(inputStream);
+    		return properties;
+		} catch (IOException e){
+    		LOGGER.error("Fail to get properties from " + absolutePath, e);
+		}
+
+		return null;
+	}
 
     private static List<String> listDirs(String path){
         File[] files = new File(path).listFiles();
