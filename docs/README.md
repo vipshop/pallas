@@ -2,7 +2,7 @@
 <b> Curator is to Zookeeper what Pallas is to Elasticsearch.<p>
 &#8195;&#8195;&#8195;&#8195;&#8195;&#8195;&#8195;&#8195;&#8195;&#8195;&#8195;&#8195;&#8195;&#8195;&#8195;&#8195;&#8195;&#8195;--Dylan.Xue</b>
 
-Pallas, the VIP.com's uniform search platform, built on top of the [elasticsearch](https://github.com/elastic/elasticsearch), aiming to solve all kinds of search-problem, such as full-text search with scoring, database sharding search, big-data search, complex aggregation search along with performance, scalability and high avaliability required, which are hard to sovled by the tradition SQL or NoSQL database. Shinning features include:
+Pallas, the VIP.com's uniform search platform, built on the top of the [elasticsearch](https://github.com/elastic/elasticsearch), aiming to solve all kinds of searching problems, such as scored full-text searching , sharded database searching, big-data searching, complex aggregation searching, along with required performance, scalability and high availability. They are hard to be solved by the traditional SQL or NoSQL database. Shinning features include:
 * ES visualization management & monitoring tools based on [Cerebro](https://github.com/lmenezes/cerebro), [bigdesk](http://bigdesk.org/), [sense](https://github.com/StephaneBour/sense-chrome). You can get them all by visiting http://localhost:8081.
 * ES search template management based on index level.     
     * CURD, render and debug the templates.
@@ -19,15 +19,15 @@ Pallas, the VIP.com's uniform search platform, built on top of the [elasticsearc
     * Netty-based application with filter-chain pattern.
     * Service governance: index routing/timeout/retry/flow-record/slow log/index and template canary/toke-based authorization.
     * Together with Client-SDK provides you with load balance/failover abilities.
-* Pallas ES-plugin updated without a restarat.
+* Pallas ES-plugin updated without a restart.
     * Extends from AbstractSearchScript.
     * Each plugin has its own classloader.
     * Thorough class loading & unloading.
 * Pallas Console
     * ES clusters management.
     * Index management.
-    * Tempalate review process.
-    * ES-proxy management(metrisc/offline & online).
+    * Template review process.
+    * ES-proxy management(metrics/offline & online).
     * Token management.
     * Pallas plugin management.
 
