@@ -14,7 +14,7 @@ public class ThrottlingTest extends BaseSearchTest {
 
 	@Test
 	public void testThrottled() throws Exception {
-		ThrottlingPolicyHelper.putPolicy("product_comment_product_comment_search", new ThrottlingPolicy(4,1));
+		ThrottlingPolicyHelper.putPolicy("pallas-test-cluster_product_comment_product_comment_search", new ThrottlingPolicy(4,1));
 		Map<String, String> header = new HashMap<>();
 		header.put("business_code", "ittest");
 		header.put("X-PALLAS-SEARCH-ES-DOMAIN", "pallas-test-cluster");
