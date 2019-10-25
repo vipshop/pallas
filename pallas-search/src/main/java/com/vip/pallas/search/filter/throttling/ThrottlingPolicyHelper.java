@@ -34,7 +34,7 @@ public class ThrottlingPolicyHelper {
 			.newConcurrentHashMap(32);
 
 	public static void createPolicy(TemplateWithThrottling templateWithThrottling) {
-		String restTemplateId = templateWithThrottling.getIndexName() + "_" + templateWithThrottling.getTemplateName();
+		String restTemplateId = templateWithThrottling.getClusterName() + "_" + templateWithThrottling.getIndexName() + "_" + templateWithThrottling.getTemplateName();
 		Integer threshold = templateWithThrottling.getThreshold();
 		Integer maxBurstSecs = templateWithThrottling.getMaxBurstSecs();
 		ThrottlingPolicy oldPolicy = throttlingPolicyMap.get(restTemplateId);

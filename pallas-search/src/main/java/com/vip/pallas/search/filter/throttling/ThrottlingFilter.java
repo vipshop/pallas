@@ -5,6 +5,7 @@ import com.vip.pallas.search.exception.HttpCodeErrorPallasException;
 import com.vip.pallas.search.filter.base.AbstractFilter;
 import com.vip.pallas.search.filter.base.AbstractFilterContext;
 import com.vip.pallas.search.filter.common.SessionContext;
+import org.apache.commons.lang3.StringUtils;
 
 import static com.vip.pallas.search.http.HttpCode.HTTP_TOO_MANY_REQUESTS;
 
@@ -22,9 +23,9 @@ public class ThrottlingFilter extends AbstractFilter {
 	@Override
 	public void run(AbstractFilterContext filterContext, SessionContext sessionContext) throws Exception {
 		String restTemplateId = sessionContext.getRequest().getTemplateId();
-
-		if (null != restTemplateId) {
-			RateLimiter rateLimiter = ThrottlingPolicyHelper.getRateLimiterByRestTemplateId(restTemplateId);
+		String logicClusterId = sessionContext.getRequest().getLogicClusterId();
+		if (null != restTemplateId && StringUtils.isNotBlank(logicClusterId)) {
+			RateLimiter rateLimiter = ThrottlingPolicyHelper.getRateLimiterByRestTemplateId(logicClusterId + "_" + restTemplateId);
 			if (null != rateLimiter && !rateLimiter.tryAcquire()) {
 				throw new HttpCodeErrorPallasException(
 						"the request of [" + restTemplateId + "] be throttled, the limit is " + rateLimiter.getRate()
