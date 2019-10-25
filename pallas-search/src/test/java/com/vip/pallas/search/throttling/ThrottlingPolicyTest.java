@@ -64,8 +64,10 @@ public class ThrottlingPolicyTest {
 		TemplateWithThrottling templateWithThrottling = new TemplateWithThrottling();
 		String indexName = "test_index";
 		String template = "test_template";
+		String clusterName = "test_cluster";
 		templateWithThrottling.setIndexName(indexName);
 		templateWithThrottling.setTemplateName(template);
+		templateWithThrottling.setClusterName(clusterName);
 		templateWithThrottling.setThreshold(4);
 		templateWithThrottling.setMaxBurstSecs(1);
 		ThrottlingPolicyHelper.createPolicy(templateWithThrottling);
@@ -74,6 +76,7 @@ public class ThrottlingPolicyTest {
 		TemplateWithThrottling newConfig = new TemplateWithThrottling();
 		newConfig.setIndexName("test_index");
 		newConfig.setTemplateName("test_template");
+		newConfig.setClusterName("test_cluster");
 		newConfig.setThreshold(4);
 		newConfig.setMaxBurstSecs(1);
 		ThrottlingPolicyHelper.createPolicy(newConfig);
@@ -94,8 +97,10 @@ public class ThrottlingPolicyTest {
 		TemplateWithThrottling templateWithThrottling = new TemplateWithThrottling();
 		String indexName = "test_index";
 		String template = "test_template";
+		String clusterName = "test_cluster";
 		templateWithThrottling.setIndexName(indexName);
 		templateWithThrottling.setTemplateName(template);
+		templateWithThrottling.setClusterName(clusterName);
 		templateWithThrottling.setThreshold(4);
 		templateWithThrottling.setMaxBurstSecs(1);
 		ThrottlingPolicyHelper.createPolicy(templateWithThrottling);
@@ -105,6 +110,7 @@ public class ThrottlingPolicyTest {
 		TemplateWithThrottling newConfig = new TemplateWithThrottling();
 		newConfig.setIndexName("test_index");
 		newConfig.setTemplateName("test_template");
+		newConfig.setClusterName("test_cluster");
 		newConfig.setThreshold(0);
 		newConfig.setMaxBurstSecs(1);
 		ThrottlingPolicyHelper.createPolicy(newConfig);
