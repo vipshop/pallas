@@ -127,7 +127,7 @@ public class SendDirectlyCallback implements FutureCallback<HttpResponse> {
 		autoDecompression(response);
 
 		// in case we got a bad response.
-		if (response.getStatusLine().getStatusCode() != HttpCode.HTTP_OK_CODE && response.getStatusLine().getStatusCode() != HttpCode.HTTP_NOT_FOUND && response.getStatusLine().getStatusCode() != HttpCode.HTTP_BAD_REQUEST) {
+		if (response.getStatusLine().getStatusCode() >= HttpCode.HTTP_REDIRECT_CODE && response.getStatusLine().getStatusCode() != HttpCode.HTTP_NOT_FOUND && response.getStatusLine().getStatusCode() != HttpCode.HTTP_BAD_REQUEST) {
 			try {
 				String res = EntityUtils.toString(response.getEntity(), "UTF-8");
 				handleFailed(new HttpResponseException(response.getStatusLine().getStatusCode(), res));
