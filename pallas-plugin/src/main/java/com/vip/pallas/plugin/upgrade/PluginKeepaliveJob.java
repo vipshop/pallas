@@ -221,7 +221,7 @@ public class PluginKeepaliveJob implements Job {
 		int firstIndex = absolutePath.lastIndexOf(System.getProperty("path.separator")) + 1;
 		int lastIndex = absolutePath.lastIndexOf(File.separator) + 1;
 		absolutePath = absolutePath.substring(firstIndex, lastIndex) + PALLAS_PLUGIN_PROPERTIES_PATH;
-		LOGGER.debug("absolutePath = {} ", absolutePath);
+//		LOGGER.info("absolutePath = {} ", absolutePath);
 
     	Properties properties = new Properties();
     	try(InputStream inputStream = new FileInputStream(new File(absolutePath))) {
