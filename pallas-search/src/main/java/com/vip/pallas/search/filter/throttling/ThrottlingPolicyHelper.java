@@ -54,8 +54,8 @@ public class ThrottlingPolicyHelper {
 		}
 	}
 
-	public static RateLimiter getRateLimiterByIndexAndTemplateName(String indexName, String templateName){
-		String restTemplateId = indexName + "_" + templateName;
+	public static RateLimiter getRateLimiterByIndexAndTemplateName(String clusterName,String indexName, String templateName){
+		String restTemplateId = clusterName+"_"+indexName + "_" + templateName;
 		return getRateLimiterByRestTemplateId(restTemplateId);
 	}
 

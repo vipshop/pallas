@@ -21,6 +21,8 @@ public class HttpCode {
 	public static final int HTTP_OK_CODE = 200;
 	
 	public static final int HTTP_NON_AUTHORITATIVE_INFORMATION = 203;
+
+	public static final int HTTP_REDIRECT_CODE = 300;
 	
 	public static final int HTTP_REQUEST_URI_TOO_LONG = 414;
 	//调用osp服务不存在时返回460

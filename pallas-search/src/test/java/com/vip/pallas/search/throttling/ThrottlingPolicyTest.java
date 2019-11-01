@@ -64,27 +64,30 @@ public class ThrottlingPolicyTest {
 		TemplateWithThrottling templateWithThrottling = new TemplateWithThrottling();
 		String indexName = "test_index";
 		String template = "test_template";
+		String clusterName = "test_cluster";
 		templateWithThrottling.setIndexName(indexName);
 		templateWithThrottling.setTemplateName(template);
+		templateWithThrottling.setClusterName(clusterName);
 		templateWithThrottling.setThreshold(4);
 		templateWithThrottling.setMaxBurstSecs(1);
 		ThrottlingPolicyHelper.createPolicy(templateWithThrottling);
-		RateLimiter oldOne = ThrottlingPolicyHelper.getRateLimiterByIndexAndTemplateName(indexName, template);
+		RateLimiter oldOne = ThrottlingPolicyHelper.getRateLimiterByIndexAndTemplateName(clusterName,indexName, template);
 
 		TemplateWithThrottling newConfig = new TemplateWithThrottling();
 		newConfig.setIndexName("test_index");
 		newConfig.setTemplateName("test_template");
+		newConfig.setClusterName("test_cluster");
 		newConfig.setThreshold(4);
 		newConfig.setMaxBurstSecs(1);
 		ThrottlingPolicyHelper.createPolicy(newConfig);
 
-		RateLimiter newOne = ThrottlingPolicyHelper.getRateLimiterByIndexAndTemplateName(indexName, template);
+		RateLimiter newOne = ThrottlingPolicyHelper.getRateLimiterByIndexAndTemplateName(clusterName,indexName, template);
 		assertSame(oldOne, newOne);
 
 		newConfig.setThreshold(10);
 		ThrottlingPolicyHelper.createPolicy(newConfig);
 
-		newOne = ThrottlingPolicyHelper.getRateLimiterByIndexAndTemplateName(indexName, template);
+		newOne = ThrottlingPolicyHelper.getRateLimiterByIndexAndTemplateName(clusterName,indexName, template);
 
 		assertEquals(newOne.getRate(), 10, 0);
 	}
@@ -94,22 +97,25 @@ public class ThrottlingPolicyTest {
 		TemplateWithThrottling templateWithThrottling = new TemplateWithThrottling();
 		String indexName = "test_index";
 		String template = "test_template";
+		String clusterName = "test_cluster";
 		templateWithThrottling.setIndexName(indexName);
 		templateWithThrottling.setTemplateName(template);
+		templateWithThrottling.setClusterName(clusterName);
 		templateWithThrottling.setThreshold(4);
 		templateWithThrottling.setMaxBurstSecs(1);
 		ThrottlingPolicyHelper.createPolicy(templateWithThrottling);
-		RateLimiter oldOne = ThrottlingPolicyHelper.getRateLimiterByIndexAndTemplateName(indexName, template);
+		RateLimiter oldOne = ThrottlingPolicyHelper.getRateLimiterByIndexAndTemplateName(clusterName,indexName, template);
 		assertEquals(oldOne.getRate(), 4, 0);
 
 		TemplateWithThrottling newConfig = new TemplateWithThrottling();
 		newConfig.setIndexName("test_index");
 		newConfig.setTemplateName("test_template");
+		newConfig.setClusterName("test_cluster");
 		newConfig.setThreshold(0);
 		newConfig.setMaxBurstSecs(1);
 		ThrottlingPolicyHelper.createPolicy(newConfig);
 
-		RateLimiter newOne = ThrottlingPolicyHelper.getRateLimiterByIndexAndTemplateName(indexName, template);
+		RateLimiter newOne = ThrottlingPolicyHelper.getRateLimiterByIndexAndTemplateName(clusterName,indexName, template);
 
 		assertNull(newOne);
 	}
