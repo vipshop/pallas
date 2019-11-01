@@ -4,7 +4,7 @@ Pallas需要部署的模块主要包括：
   
   - pallas-console
   
-  - pallas-console-web
+  - pallas-console-web 
   
   - pallas-search
   
