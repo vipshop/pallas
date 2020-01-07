@@ -36,8 +36,12 @@ import com.vip.pallas.utils.PallasBasicProperties;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.apache.http.protocol.HttpContext;
@@ -52,9 +56,9 @@ public class PallasRestClientBuilder {
 
 	private static final Logger log = LoggerFactory.getLogger(PallasRestClientBuilder.class);
 
-	private static final long MAX_TIMEOUT_MILLS = 120L * 1000;
+	private static final Long MAX_TIMEOUT_MILLS = 120L * 1000;
 
-	private static final long DEFAULT_KEEPALIVE_MILLISECOND = 30L * 1000;
+	private static final Long DEFAULT_KEEPALIVE_MILLISECOND = 30L * 1000;
 
 	private static final Header[] EMPTY_HEADERS = new Header[0];
 
@@ -133,7 +137,7 @@ public class PallasRestClientBuilder {
 	}
 
 	private static PallasRestClient createPallasRestclient(String clientToken, CloseableHttpAsyncClient httpClient,
-			long maxTimeoutMils)
+			Long maxTimeoutMils)
 			throws InterruptedException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		// try 3times to get a valid ps-list
 		int retryCount = 3;
@@ -149,7 +153,7 @@ public class PallasRestClientBuilder {
 		RestClient restClient = null;
 		if (QueryConsoleTask.getPsListByToken(clientToken) != null) {
 			psHostList = genPsHostList(clientToken);
-			restClient = createRestClient(clientToken, httpClient, maxTimeoutMils, psHostList);
+			restClient = createRestClient(clientToken, maxTimeoutMils, psHostList);
 		}
 		pallasRestClient = new PallasRestClient(restClient, clientToken, psHostList);
 		CLIENT_MAP.put(clientToken, pallasRestClient);
@@ -157,22 +161,40 @@ public class PallasRestClientBuilder {
 		return pallasRestClient;
 	}
 
-	private static RestClient createRestClient(String clientToken, CloseableHttpAsyncClient httpClient,
-			long maxTimeoutMils, List<HttpHost> hosts)
-			throws InterruptedException, InstantiationException, IllegalAccessException, InvocationTargetException {
+	/**
+	 * 构建ES原生的RestClient，增加了账号，密码验权
+	 * @param clientToken
+	 * @param maxTimeoutMils  defaults to 30 seconds
+	 * @param hosts
+	 * https://www.elastic.co/guide/en/elasticsearch/client/java-rest/6.3/_timeouts.html
+	 * @return
+	 */
+	private static RestClient createRestClient(String clientToken, Long maxTimeoutMils, List<HttpHost> hosts){
 		log.info("start to construct a rest client for token:{}, hosts:{}", clientToken, hosts);
-		CloseableHttpAsyncClient thisClient = httpClient;
-		if (thisClient == null) {
-			thisClient = createDefaultHttpClient();
-		}
+		String username = QueryConsoleTask.getUsernameByToken(clientToken);
+		String password = QueryConsoleTask.getPasswdByToken(clientToken);
 		HttpHost[] hostArray = hosts.toArray(new HttpHost[] {});
-		Constructor<?> constructor = RestClient.class.getDeclaredConstructors()[0];
-		constructor.setAccessible(true);
-		//#450 pallas search对endpoint处理前先判断是否startWith /， 这里把prefixPath 设置成 ""强制让path做 startWith("/") 判断
-		//如果PallasRestClientBuilder也开放 setPrefixPath 记得也做类似判断
-		RestClient restClient = (RestClient) constructor.newInstance(thisClient, maxTimeoutMils, EMPTY_HEADERS,
-				hostArray, "", new RestClient.FailureListener());
-		thisClient.start();
+
+		//设置es访问的用户名，密码
+		final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+		credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(username, password));
+
+		/**
+		 * MaxRetryTimeoutMillis defaults to 30 seconds
+		 * ConnectTimeout defaults to 1 second
+		 * SocketTimeout defaults to 30 seconds
+		 */
+		RestClient restClient = RestClient.builder(hostArray).setMaxRetryTimeoutMillis(maxTimeoutMils.intValue())
+				.setHttpClientConfigCallback(httpClientBuilder -> {
+
+					RequestConfig.Builder requestConfigBuilder = RequestConfig.custom()
+							.setConnectTimeout(5000).setSocketTimeout(MAX_TIMEOUT_MILLS.intValue())
+							.setConnectionRequestTimeout(3000);
+
+					httpClientBuilder.setDefaultRequestConfig(requestConfigBuilder.build())
+							.setMaxConnPerRoute(3000).setMaxConnTotal(5000).setKeepAliveStrategy(KEEPALIVESTRATEGY);
+					return httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+				}).build();
 		log.info("rest client started, hosts: {}, token: {}, maxTimeoutMils: {}", hosts, clientToken, maxTimeoutMils);
 		return restClient;
 	}
@@ -197,7 +219,7 @@ public class PallasRestClientBuilder {
 			CleanRestClientTask.addClient(timeoutMillis, oldRestClient);
 			CloseableHttpAsyncClient httpClient = createDefaultHttpClient();
 			List<HttpHost> psHostList = genPsHostList(clientToken);
-			RestClient newRestClient = createRestClient(clientToken, httpClient, timeoutMillis, psHostList);
+			RestClient newRestClient = createRestClient(clientToken, timeoutMillis, psHostList);
 			pallasRestClient.updateInternalRestClient(newRestClient, psHostList);
 			log.warn("restClient rebuilt for token: {}, hosts: {}", clientToken, psHostList);
 		}

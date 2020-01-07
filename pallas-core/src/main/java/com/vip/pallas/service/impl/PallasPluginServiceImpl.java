@@ -223,7 +223,7 @@ public class PallasPluginServiceImpl implements PallasPluginService {
         Cluster cluster = clusterService.findByName(clusterId);
         List<String> nodeIps = new LinkedList<>();
         try {
-            RestClient client = ElasticRestClient.build(cluster.getHttpAddress());
+            RestClient client = ElasticRestClient.build(cluster.getHttpAddress(), cluster.getUsername(), cluster.getPasswd());
             Response response = client.performRequest("GET", "/_cat/nodes");
             try(BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent()))) {
                 String line;

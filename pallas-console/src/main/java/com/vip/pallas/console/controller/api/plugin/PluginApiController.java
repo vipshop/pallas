@@ -176,7 +176,7 @@ public class PluginApiController {
         if(cluster == null){
             return true;
         }
-        RestClient client = ElasticRestClient.build(cluster.getHttpAddress());
+        RestClient client = ElasticRestClient.build(cluster.getHttpAddress(),cluster.getUsername(),cluster.getPasswd());
         Response response = null;
         try {
             response = client.performRequest("GET", "/_cat/nodes");

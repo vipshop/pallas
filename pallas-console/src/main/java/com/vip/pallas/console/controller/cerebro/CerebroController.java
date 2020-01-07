@@ -68,7 +68,7 @@ public class CerebroController {
 			return resultMap;
 		}
 
-		RestClient restClient = ElasticRestClient.build(host);
+		RestClient restClient = ElasticRestClient.build(host, "", "");
 		List<Map> logs = requestLogService.loadHistory(restClient, SessionUtil.getLoginUser(request));
 		if (logs != null) {
 			resultMap.put("body", logs);
@@ -87,7 +87,7 @@ public class CerebroController {
 
 		HttpEntity entity = new NStringEntity(node.toString(), ContentType.APPLICATION_JSON);
 
-		RestClient restClient = ElasticRestClient.build(host);
+		RestClient restClient = ElasticRestClient.build(host, "", "");
 		AuditLogUtil.log("request: host={0}, path={1}, body={2} ", host, path, node.toString());
 
 		RequestLog requestLog = new RequestLog();
@@ -119,11 +119,11 @@ public class CerebroController {
 		String cluster = ObjectMapTool.getString(params, "cluster");
 		if (StringUtils.isNoneBlank(host) && StringUtils.isNoneBlank(nodeIp) && StringUtils.isNoneBlank(cluster)) {
 			if (exclude) {
-				elasticSearchService.excludeOneNode(host, nodeIp);
+				elasticSearchService.excludeOneNode(host, nodeIp,"","");
 				indexRoutingService.updateNodeState(cluster, nodeIp, 1);
 				AuditLogUtil.log("cluster {0} excludes node: {1}.", host, nodeIp);
 			} else {
-				elasticSearchService.includeOneNode(host, nodeIp);
+				elasticSearchService.includeOneNode(host, nodeIp, "", "");
 				indexRoutingService.updateNodeState(cluster, nodeIp, 0);
 				AuditLogUtil.log("cluster {0} includes node: {1}.", host, nodeIp);
 			}

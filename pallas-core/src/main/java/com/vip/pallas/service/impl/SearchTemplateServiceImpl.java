@@ -518,7 +518,7 @@ public class SearchTemplateServiceImpl implements SearchTemplateService {
     }
 
     private String sendESRequest(Cluster cluster, String method, String reqPath, String reqBody, boolean needThrowESException) throws IOException {
-        RestClient client = ElasticRestClient.build(cluster.getHttpAddress());
+        RestClient client = ElasticRestClient.build(cluster.getHttpAddress(), cluster.getUsername(), cluster.getPasswd());
         Response response;
         try {
             if(reqBody != null) {

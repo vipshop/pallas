@@ -37,16 +37,16 @@ public class ElasticSearchStub {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchStub.class);
 
-    public static RestClient getElasticRestClient(String clusterHttpAddress){
-        return ElasticRestClient.build(clusterHttpAddress);
+    public static RestClient getElasticRestClient(String clusterHttpAddress,String username,String passwd){
+        return ElasticRestClient.build(clusterHttpAddress, username, passwd);
     }
 
-    public static List<String[]> performRequest(String clusterHttpAddress, String endpoint, BiConsumer<String, List<String[]>> comsumer) {
+    public static List<String[]> performRequest(String clusterHttpAddress, String endpoint, BiConsumer<String, List<String[]>> comsumer, String username,String passwd) {
         if(clusterHttpAddress == null || clusterHttpAddress.isEmpty()){
             return Collections.EMPTY_LIST;
         }
 
-        RestClient client = getElasticRestClient(clusterHttpAddress);
+        RestClient client = getElasticRestClient(clusterHttpAddress, username, passwd);
         Response response;
         try {
             response = client.performRequest("GET", endpoint);

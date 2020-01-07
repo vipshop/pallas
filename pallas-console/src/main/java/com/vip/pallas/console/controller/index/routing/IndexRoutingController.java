@@ -253,7 +253,7 @@ public class IndexRoutingController {
 			} else if (g.isGroupLevel()) {
 				String httpAddress = StringUtils.substringBetween(g.getClustersInfo(), "address\":\"", "\"");
 				List<HashSet<String>> devideShards2Group = elasticSearchService
-						.dynamicDevideShards2Group(g.getIndexName(), httpAddress);
+						.dynamicDevideShards2Group(g.getIndexName(), httpAddress,"","");
 				fac.setNodes(Stream.iterate(1, i -> i + 1).limit(devideShards2Group.size()).map(i -> {
 					return "group " + i + ": " + devideShards2Group.get(i - 1);
 				}).collect(Collectors.toList()));
@@ -446,9 +446,13 @@ public class IndexRoutingController {
     private List<IndexRoutingTargetGroup.NodeInfo> getNodeList(String clusterName) {
 
         List<IndexRoutingTargetGroup.NodeInfo> nodeList = new LinkedList<>();
+        Cluster cluster = clusterService.findByName(clusterName);
+        String username = cluster.getUsername();
+        String passwd = cluster.getPasswd();
+
         String clusterHost = clusterService.findByName(clusterName).getHttpAddress();
-        List<String> excludeIps = elasticSearchService.getExcludeNodeList(clusterHost);
-        RestClient client = ElasticRestClient.build(clusterHost);
+        List<String> excludeIps = elasticSearchService.getExcludeNodeList(clusterHost, username, passwd);
+        RestClient client = ElasticRestClient.build(clusterHost, username, passwd);
         Response response = null;
         try {
             response = client.performRequest("GET", "/_cat/nodes");

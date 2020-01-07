@@ -122,7 +122,7 @@ public abstract class IndexVersionService {
 		List<Cluster> clusters = clusterRepository.selectPhysicalClustersByIndexId(index.getId());
 		try {
 			for (Cluster cluster : clusters) {
-				if (!elasticSearchService.isExistIndex(indexName, cluster.getHttpAddress(), versionId)) {
+				if (!elasticSearchService.isExistIndex(indexName, cluster.getHttpAddress(), versionId, cluster.getUsername(), cluster.getPasswd())) {
 					throw new PallasException("ES索引:" + indexName + "_" + versionId + "不存在，请先同步(创建)索引版本");
 				}
 				elasticSearchService.transferAliasIndex(index.getId(), indexName, versionId, cluster);
@@ -188,7 +188,7 @@ public abstract class IndexVersionService {
 			List<Cluster> clusters = clusterRepository.selectPhysicalClustersByIndexId(index.getId());
 			for (Cluster cluster : clusters) {
 				elasticSearchService.deleteAliasIndexByCluster(index.getId(), index.getIndexName(), versionId, cluster);
-				elasticSearchService.deleteIndex(cluster.getHttpAddress(), index.getIndexName() + "_" + versionId);
+				elasticSearchService.deleteIndex(cluster.getHttpAddress(), index.getIndexName() + "_" + versionId, cluster.getUsername(), cluster.getPasswd());
 			}
 			indexVersionRepository.disableVersion(versionId);
 		}

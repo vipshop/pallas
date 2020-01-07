@@ -47,6 +47,8 @@ CREATE TABLE IF NOT EXISTS `cluster` (
   `real_clusters` varchar(512) NOT NULL DEFAULT '' COMMENT '当为逻辑集群时，此项不为空，值为集群id集合，逗号分开，如：3,5',
   `accessible_ps` varchar(512) DEFAULT '' COMMENT '可以访问这个集群的pallas-search集群',
   `monitor_level` varchar(256) DEFAULT '' COMMENT '监控等级',
+   `username` varchar(64) DEFAULT NULL COMMENT '连接xpack账号',
+  `passwd` varchar(64) DEFAULT NULL COMMENT '连接xpack密码',
   PRIMARY KEY (`id`),
   UNIQUE KEY `cluster_id_unqiue` (`cluster_id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;

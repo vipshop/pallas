@@ -136,7 +136,7 @@ public class IndexVersionController {
 					List<Map> oneVersionCount = new ArrayList<>();
 					List<Cluster> clusters = clusterService.selectPhysicalClustersByIndexId(indexId);
 					for (Cluster cluster : clusters) {
-						Long dataCount = elasticSearchService.getDataCount(indexName, cluster.getHttpAddress(), vid);
+						Long dataCount = elasticSearchService.getDataCount(indexName, cluster.getHttpAddress(), vid, cluster.getUsername(), cluster.getPasswd());
 						Map<String, Long> countMap = new HashMap<>();
 						countMap.put("cid", cluster.getId());
 						countMap.put("count", dataCount == null ? 0L : dataCount);
@@ -178,7 +178,7 @@ public class IndexVersionController {
 			throws Exception {
 		try {
 			Cluster cluster = clusterService.selectByPrimaryKey(cid);
-			String indexInfo = elasticSearchService.getIndexInfo(indexName, cluster.getHttpAddress(), versionId);
+			String indexInfo = elasticSearchService.getIndexInfo(indexName, cluster.getHttpAddress(), versionId, cluster.getUsername(), cluster.getPasswd());
 			return indexInfo == null ? "该版本信息未在ES初始化,请先点击开始同步！" : indexInfo;
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
@@ -190,7 +190,7 @@ public class IndexVersionController {
 	public String retrieve(@RequestParam Long versionId, @RequestParam Long cid, @RequestParam String indexName) {
 		try {
 			Cluster cluster = clusterService.selectByPrimaryKey(cid);
-			String indexInfo = elasticSearchService.retrieveIndex(indexName, cluster.getHttpAddress(), versionId);
+			String indexInfo = elasticSearchService.retrieveIndex(indexName, cluster.getHttpAddress(), versionId, cluster.getUsername(), cluster.getPasswd());
 			return indexInfo == null ? "该版本信息未在ES初始化,请先点击开始同步！" : indexInfo;
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);

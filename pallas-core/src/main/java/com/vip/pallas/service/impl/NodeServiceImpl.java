@@ -20,6 +20,7 @@ package com.vip.pallas.service.impl;
 import com.vip.pallas.bean.NodeInfo;
 import com.vip.pallas.bean.NodeState;
 import com.vip.pallas.exception.PallasException;
+import com.vip.pallas.mybatis.entity.Cluster;
 import com.vip.pallas.mybatis.entity.Node;
 import com.vip.pallas.mybatis.entity.PluginCommand;
 import com.vip.pallas.mybatis.entity.SearchServer;
@@ -234,7 +235,8 @@ public class NodeServiceImpl implements NodeService {
 
     @Override
     public List<String> getNormalIndexOnNode(String clusterName, String nodeIp) {
-        List<String[]> shardAndNodeList = elasticSearchService.getIndexAndNodes(elasticSearchService.getHttpAddressByClusterName(clusterName));
+        Cluster cluster = elasticSearchService.getHttpAddressByClusterName(clusterName);
+        List<String[]> shardAndNodeList = elasticSearchService.getIndexAndNodes(cluster.getHttpAddress(), cluster.getUsername(), cluster.getPasswd());
         if(shardAndNodeList != null){
             return shardAndNodeList.stream().filter(e -> !e[0].startsWith(".")).filter(e -> e[1].equals(nodeIp)).map(t -> t[0])
                     .distinct().collect(toList());

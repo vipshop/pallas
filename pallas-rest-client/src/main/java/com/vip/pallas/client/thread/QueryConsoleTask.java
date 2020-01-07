@@ -50,6 +50,10 @@ public class QueryConsoleTask implements Runnable {
 	public static volatile Map<String, List<String>> psListMap = new ConcurrentHashMap<>();
 
 	private HashSet<String> tokenSet;
+
+	// es账号，密码 ConcurrentHashMap
+	public static volatile Map<String, String> usernameMap = new ConcurrentHashMap<>();
+	public static volatile Map<String, String> passwdMap = new ConcurrentHashMap<>();
 	
 	public static String addSuffixIfNecessary(String consoleQueryUrl) {
 		if (!consoleQueryUrl.endsWith(".json")) {
@@ -74,6 +78,11 @@ public class QueryConsoleTask implements Runnable {
 								String.format(PARAMS, token)));
 				if (jsonObject != null) {
 					JSONObject data = jsonObject.getJSONObject("data");
+
+					// 获取从console获取数据中es的账号，密码
+					String username = data.getString("username");
+					String passwd = data.getString("passwd");
+
 					if (data != null) {
 						String domain = data.getString("domain");
 						if (domain != null && !domain.equals(esDomainMap.get(token))) { //NOSONAR
@@ -88,6 +97,10 @@ public class QueryConsoleTask implements Runnable {
 								&& (!newPsList.containsAll(oldPsList) || (!oldPsList.containsAll(newPsList))))) { //NOSONAR
 							log.warn("psList changed from {} to {}", oldPsList, newPsList);
 							psListMap.put(token, newPsList);
+
+							// 将es的账号，密码加入到ConcurrentHashMap
+							usernameMap.put(token, username);
+							passwdMap.put(token, passwd);
 							PallasRestClientBuilder.rebuildInternalRestClient(token);
 						}
 					}
@@ -104,5 +117,13 @@ public class QueryConsoleTask implements Runnable {
 
 	public static List<String> getPsListByToken(String token) {
 		return psListMap.get(token);
+	}
+
+	public static String getUsernameByToken(String token) {
+		return usernameMap.get(token);
+	}
+
+	public static String getPasswdByToken(String token) {
+		return passwdMap.get(token);
 	}
 }

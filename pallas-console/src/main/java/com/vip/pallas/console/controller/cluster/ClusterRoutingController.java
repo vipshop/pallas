@@ -250,8 +250,10 @@ public class ClusterRoutingController {
     List<IndexRoutingTargetGroup.NodeInfo> getNodeList(String clusterName) {
         List<IndexRoutingTargetGroup.NodeInfo> nodeList = new LinkedList<>();
         String clusterHost = clusterService.findByName(clusterName).getHttpAddress();
-        List<String> excludeIps = elasticSearchService.getExcludeNodeList(clusterHost);
-        RestClient client = ElasticRestClient.build(clusterHost);
+        String username = clusterService.findByName(clusterName).getUsername();
+        String passwd = clusterService.findByName(clusterName).getPasswd();
+        List<String> excludeIps = elasticSearchService.getExcludeNodeList(clusterHost,username,passwd);
+        RestClient client = ElasticRestClient.build(clusterHost,username,passwd);
         Response response = null;
         try {
             response = client.performRequest("GET", "/_cat/nodes");

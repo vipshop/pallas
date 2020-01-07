@@ -51,6 +51,7 @@ public class ClusterServiceImpl implements ClusterService{
 
 	@Autowired
 	private IndexVersionService indexVersionService;
+	private Cluster cluster;
 
 	@Override
 	@Transactional(rollbackFor=Exception.class)
@@ -79,7 +80,7 @@ public class ClusterServiceImpl implements ClusterService{
 
 	@Override
 	public Cluster findByName(String name) {
-		Cluster cluster = clusterRepository.selectByClusterName(name);
+		cluster = clusterRepository.selectByClusterName(name);
 		if(null != cluster) {
 			cluster.setMonitorLevelModel();
 		}

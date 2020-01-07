@@ -240,10 +240,12 @@ public class MonitorServiceImpl implements MonitorService {
     public ClusterGaugeMetricModel queryClusterInfoRealTime(MonitorQueryModel queryModel) throws Exception {
         ClusterGaugeMetricModel gaugeMetricModel = new ClusterGaugeMetricModel();
         Cluster cluster =  getCluster(queryModel.getClusterName());
+        String username = cluster.getUsername();
+        String passwd = cluster.getPasswd();
 
-        JSONObject versionJsonObj = JSONObject.parseObject( elasticSearchService.runDsl(cluster.getHttpAddress(), "/"));
-        JSONObject  healthJsonobj = JSONObject.parseObject(elasticSearchService.runDsl(cluster.getHttpAddress(), "/_cluster/health"));
-        JSONObject statsJsonobj = JSONObject.parseObject(elasticSearchService.runDsl(cluster.getHttpAddress(), "/_cluster/stats?human"));
+        JSONObject versionJsonObj = JSONObject.parseObject( elasticSearchService.runDsl(cluster.getHttpAddress(), "/", username, passwd));
+        JSONObject  healthJsonobj = JSONObject.parseObject(elasticSearchService.runDsl(cluster.getHttpAddress(), "/_cluster/health", username, passwd));
+        JSONObject statsJsonobj = JSONObject.parseObject(elasticSearchService.runDsl(cluster.getHttpAddress(), "/_cluster/stats?human", username, passwd));
 
         gaugeMetricModel.setVersion(versionJsonObj.getJSONObject("version").getString("number"));
         gaugeMetricModel.setUnassignedShardCount(healthJsonobj.getLong("unassigned_shards"));
@@ -277,7 +279,7 @@ public class MonitorServiceImpl implements MonitorService {
         }
         //gauge metric group by nodeName
         Map<String/*nodeName*/, ShardInfoModel> shardInfoModelMap = elasticSearchService.getShardsNode(queryModel.getClusterName());
-        String  metricsJsonString = elasticSearchService.runDsl(cluster.getHttpAddress(), "/_nodes/stats/fs,jvm,indices,process?human");
+        String  metricsJsonString = elasticSearchService.runDsl(cluster.getHttpAddress(), "/_nodes/stats/fs,jvm,indices,process?human", cluster.getUsername(), cluster.getPasswd());
         JSONObject rawJsonObj = JSONObject.parseObject(metricsJsonString).getJSONObject("nodes");
         JSONObject metricsJsonObj = new JSONObject();
         rawJsonObj.forEach((k, v) -> {

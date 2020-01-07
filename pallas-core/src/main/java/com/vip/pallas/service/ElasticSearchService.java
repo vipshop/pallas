@@ -33,29 +33,29 @@ public interface ElasticSearchService {
 	public String genMappingJsonByVersionIdAndClusterName(Long versionId, String clusterName);
 	
 	public String createIndex(String indexName, Long indexId, Long versionId) throws IOException;
-	
+
 	public String deleteIndex(String indexName, Long indexId, Long versionId) throws IOException;
 
-	public String deleteIndex(String clusterAddress, String fullIndexName);
+	public String deleteIndex(String clusterAddress, String fullIndexName, String username, String password);
 
 	public String deleteAliasIndexByCluster(Long indexId, String indexName, Long versionId, Cluster cluster)
 			throws Exception;
 
 	String transferAliasIndex(Long indexId, String indexName, Long targetVersionId, Cluster targetCluster) throws Exception;
 	
-	public boolean isExistIndex(String indexName, String clusterHttpAddress, Long versionId);
+	public boolean isExistIndex(String indexName, String clusterHttpAddress, Long versionId, String username, String password);
 	
-	public Long getDataCount(String indexName, String httpAddress, Long versionId);
+	public Long getDataCount(String indexName, String httpAddress, Long versionId, String username, String password);
 	
-	public String getIndexInfo(String indexName, String httpAddress, Long versionId);
+	public String getIndexInfo(String indexName, String httpAddress, Long versionId, String username, String passwd);
 
-	boolean excludeOneNode(String host, String nodeIp);
+	boolean excludeOneNode(String host, String nodeIp, String username, String passwd);
 	
-	boolean includeOneNode(String host, String nodeIp);
+	boolean includeOneNode(String host, String nodeIp, String username, String passwd);
 
-	List<String> getExcludeNodeList(String clusterAddress);
+	List<String> getExcludeNodeList(String clusterAddress, String username, String passwd);
 
-	List<String> getAvalableNodeIps(String clusterAddress) throws IOException;
+	List<String> getAvalableNodeIps(String clusterAddress, String username, String passwd) throws IOException;
 
 	/**
 	 * 根据索引名（别名）找出全部索引分布集群及分片节点
@@ -81,13 +81,13 @@ public interface ElasticSearchService {
 
 	Map<String/*IndexName*/, ShardInfoModel> getShardsIndex(String clusterName) throws Exception;
 
-	List<String[]> getActualIndexs(String clusterHttpAddress);
+	List<String[]> getActualIndexs(String clusterHttpAddress, String username, String passwd);
 
-	List<String[]> getNormalIndexs(String clusterHttpAddress);
+	List<String[]> getNormalIndexs(String clusterHttpAddress, String username, String passwd);
 
-	List<String[]> getIndexAndNodes(String clusterHttpAddress);
+	List<String[]> getIndexAndNodes(String clusterHttpAddress, String username, String passwd);
 
-	String getHttpAddressByClusterName(String clusterName);
+	Cluster getHttpAddressByClusterName(String clusterName);
 
 	RestClient getRestClientByClusterName(String clusterName);
 
@@ -107,15 +107,16 @@ public interface ElasticSearchService {
 
 	String cancelDeleteByQueryTask(Long versionId, String indexName);
 
-	public String retrieveIndex(String indexName, String httpAddress, Long versionId);
+	public String retrieveIndex(String indexName, String httpAddress, Long versionId,String username, String passwd);
 
-	String runDsl(String httpAddress, String endPoint) throws IOException;
+	String runDsl(String httpAddress, String endPoint, String username, String passwd) throws IOException;
 
 	String queryByDsl(String queryString, String endPoint, Cluster cluster) throws IOException;
 
 	Map<Integer, List<String>> loadShardDistributionMap(String indexAliasName, String httpAddress) throws IOException;
 
-	List<HashSet<String>> dynamicDevideShards2Group(String indexAliasName, String httpAddress) throws IOException;
+	List<HashSet<String>> dynamicDevideShards2Group(String indexAliasName, String httpAddress, String username,
+													String passwd) throws IOException;
 
 	String dynamicUpdateIndexSettings(String indexName, Long indexId, IndexVersion indexVersion) throws IOException;
 }
