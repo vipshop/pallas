@@ -96,7 +96,7 @@ class Launcher{
         launchConsole(args);
 		LOGGER.info("start pallas-console successfully.");
 
-        browse();
+        //browse();
 
         launchSearch(args);
 		LOGGER.info("start pallas-search successfully.");

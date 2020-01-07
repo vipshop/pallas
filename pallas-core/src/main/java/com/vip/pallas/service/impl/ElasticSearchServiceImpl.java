@@ -24,6 +24,8 @@ import static java.util.stream.Collectors.toMap;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -393,12 +395,14 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
         List<Cluster> clusters = clusterRepository.selectPhysicalClustersByIndexId(indexId);
         for (Cluster cluster : clusters) {
             try {
-                if (this.isExistIndex(indexName, cluster.getHttpAddress(), versionId)) {
-                    this.deleteIndex(cluster.getHttpAddress(), indexName + "_" + versionId);
+				String username = cluster.getUsername();
+				String passwd = cluster.getPasswd();
+				if (this.isExistIndex(indexName, cluster.getHttpAddress(), versionId, username, passwd)) {
+                    this.deleteIndex(cluster.getHttpAddress(), indexName + "_" + versionId, username, passwd);
                 }
                 NStringEntity entity = new NStringEntity(genMappingJsonByVersionIdAndClusterName(versionId, cluster.getClusterId()),
                         ContentType.APPLICATION_JSON);
-                result.append(IOUtils.toString(ElasticRestClient.build(cluster.getHttpAddress())
+                result.append(IOUtils.toString(ElasticRestClient.build(cluster.getHttpAddress(), username, passwd)
                         .performRequest("PUT", "/" + indexName + "_" + versionId, Collections.emptyMap(), entity)
                         .getEntity().getContent())).append("\\n");
             } catch (IOException e) {
@@ -418,7 +422,7 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
             try {
                 NStringEntity entity = new NStringEntity(genDynamicSettingJson( indexVersion, cluster.getClusterId()),
                         ContentType.APPLICATION_JSON);
-                result.append(IOUtils.toString(ElasticRestClient.build(cluster.getHttpAddress())
+                result.append(IOUtils.toString(ElasticRestClient.build(cluster.getHttpAddress(), cluster.getUsername(), cluster.getPasswd())
                         .performRequest("PUT", "/" + indexName + "_" +  indexVersion.getId()+"/_settings", Collections.emptyMap(), entity)
                         .getEntity().getContent())).append("\\n");
             } catch (IOException e) {
@@ -435,15 +439,15 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 		StringBuilder result = new StringBuilder();
 		List<Cluster> clusters = clusterRepository.selectPhysicalClustersByIndexId(indexId);
 		for (Cluster cluster : clusters) {
-			result.append(deleteIndex(cluster.getHttpAddress(), indexName + "_" + versionId)).append("\\n");
+			result.append(deleteIndex(cluster.getHttpAddress(), indexName + "_" + versionId, cluster.getUsername(), cluster.getPasswd())).append("\\n");
 		}
 		return result.toString();
 	}
 
 	@Override
-	public String deleteIndex(String clusterAddress, String fullIndexName) {
+	public String deleteIndex(String clusterAddress, String fullIndexName, String username, String password) {
 		try {
-			return IOUtils.toString(ElasticRestClient.build(clusterAddress).performRequest("DELETE", fullIndexName,
+			return IOUtils.toString(ElasticRestClient.build(clusterAddress, username, password).performRequest("DELETE", fullIndexName,
 					Collections.emptyMap()).getEntity().getContent());
 		} catch (IOException e) {
 			logger.error(e.getClass() + " " + e.getMessage(), e);
@@ -451,10 +455,10 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 		return null;
 	}
 
-	public String createAliasIndex(String indexName, String httpAddress, Long versionId, NStringEntity entity)
+	public String createAliasIndex(String indexName, String httpAddress, Long versionId, NStringEntity entity, Cluster cluster)
 			throws Exception {
 		try {
-			return IOUtils.toString(ElasticRestClient.build(httpAddress)
+			return IOUtils.toString(ElasticRestClient.build(httpAddress, cluster.getUsername(), cluster.getPasswd())
 					.performRequest("POST", "/_aliases", Collections.emptyMap(), entity).getEntity().getContent());
         } catch (IOException e) {
         	logger.error(e.getClass() + " " + e.getMessage(), e);
@@ -473,7 +477,7 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 			if(deleteAliasJson != null){
 				try {
 		            NStringEntity entity = new NStringEntity(deleteAliasJson, ContentType.APPLICATION_JSON);
-					return IOUtils.toString(ElasticRestClient.build(cluster.getHttpAddress())
+					return IOUtils.toString(ElasticRestClient.build(cluster.getHttpAddress(), cluster.getUsername(), cluster.getPasswd())
 							.
 		            		performRequest("POST", "/_aliases", Collections.emptyMap(), entity).getEntity().getContent());
 		        } catch (IOException e) {
@@ -491,14 +495,14 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 		if (usedVersionId == null) {
 			NStringEntity entity = new NStringEntity(genCreateAliasJson(indexName, targetVersionId),
 					ContentType.APPLICATION_JSON);
-			return createAliasIndex(indexName, targetCluster.getHttpAddress(), targetVersionId, entity);
+			return createAliasIndex(indexName, targetCluster.getHttpAddress(), targetVersionId, entity, targetCluster);
 		}
 		String result = null;
 		String json = genCreateAndDeleteAliasJson(indexName, usedVersionId, targetVersionId);
 		if (json != null) {
 			try {
 				NStringEntity entity = new NStringEntity(json, ContentType.APPLICATION_JSON);
-				result = createAliasIndex(indexName, targetCluster.getHttpAddress(), targetVersionId, entity);
+				result = createAliasIndex(indexName, targetCluster.getHttpAddress(), targetVersionId, entity, targetCluster);
 				logger.info("transfer index alias {} from {} to {} in cluster {} done.", indexName, usedVersionId,
 						targetVersionId, targetCluster.getClusterId());
 			} catch (IOException e) {
@@ -565,10 +569,10 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 	}
 
 	@Override
-	public boolean isExistIndex(String indexName, String clusterHttpAddress, Long versionId) {
+	public boolean isExistIndex(String indexName, String clusterHttpAddress, Long versionId, String username, String password) {
 		try {
 			if (IOUtils.toString(ElasticRestClient
-					.build(clusterHttpAddress).performRequest("GET",
+					.build(clusterHttpAddress, username, password).performRequest("GET",
 							"/" + indexName + "_" + versionId + "/_mapping", Collections.emptyMap(), (HttpEntity) null)
 					.getEntity().getContent()) != null) {
             	return true;
@@ -581,10 +585,10 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 	}
 
 	@Override
-	public Long getDataCount(String indexName, String httpAddress, Long versionId) {
+	public Long getDataCount(String indexName, String httpAddress, Long versionId, String username, String password) {
 		try {
 			String realIndexName = indexName + "_" + versionId;
-			return ElasticRestClient.getIndexDataCount(httpAddress, realIndexName, "item");
+			return ElasticRestClient.getIndexDataCount(httpAddress, realIndexName, "item", username, password);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -592,10 +596,10 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 	}
 
 	@Override
-	public String getIndexInfo(String indexName, String httpAddress, Long versionId) {
+	public String getIndexInfo(String indexName, String httpAddress, Long versionId, String username, String passwd) {
 		try {
 			String realIndexName = indexName + "_" + versionId;
-			return ElasticRestClient.getIndexInfo(httpAddress, realIndexName);
+			return ElasticRestClient.getIndexInfo(httpAddress, realIndexName, username, passwd);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -638,7 +642,7 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 	public String executeDslByCluster(String method, String dsl, String endPoint, Cluster cluster)
 			throws IOException {
 		Response response = null;
-		RestClient client = ElasticRestClient.build(cluster.getHttpAddress());
+		RestClient client = ElasticRestClient.build(cluster.getHttpAddress(), cluster.getUsername(), cluster.getPasswd());
 		if (dsl != null) {
 			NStringEntity entity = new NStringEntity(dsl, ContentType.APPLICATION_JSON);
 			response = client.performRequest(method, endPoint, Collections.emptyMap(), entity);
@@ -649,9 +653,9 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 	}
 
 	@Override
-	public boolean excludeOneNode(String host, String nodeIp) {
+	public boolean excludeOneNode(String host, String nodeIp, String username, String passwd) {
 		try {
-			RestClient restClient = ElasticRestClient.build(host);
+			RestClient restClient = ElasticRestClient.build(host, username, passwd);
 			String responseStr = getClusterSettings(restClient);
 			 
 			// add excluded node.
@@ -682,9 +686,9 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 	}
 	
 	@Override
-	public boolean includeOneNode(String host, String nodeIp) {
+	public boolean includeOneNode(String host, String nodeIp, String username, String passwd) {
 		try {
-			RestClient restClient = ElasticRestClient.build(host);
+			RestClient restClient = ElasticRestClient.build(host, username, passwd);
 			String responseStr = getClusterSettings(restClient);
 			 
 			// add excluded node.
@@ -725,9 +729,9 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 	}
 
 	@Override
-	public List<String> getExcludeNodeList(String clusterAddress) {
+	public List<String> getExcludeNodeList(String clusterAddress, String username, String passwd) {
 		try {
-			RestClient restClient = ElasticRestClient.build(clusterAddress);
+			RestClient restClient = ElasticRestClient.build(clusterAddress, username, passwd);
 			String responseStr = getClusterSettings(restClient);
 
 			if (responseStr.indexOf("cluster.routing.allocation.exclude._ip") >= 0) {
@@ -743,8 +747,8 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 	}
 
 	@Override
-	public List<String> getAvalableNodeIps(String clusterAddress) throws IOException {
-		RestClient client = ElasticRestClient.build(clusterAddress);
+	public List<String> getAvalableNodeIps(String clusterAddress, String username, String passwd) throws IOException {
+		RestClient client = ElasticRestClient.build(clusterAddress, username, passwd);
 		Response response = client.performRequest("GET", "/_cat/nodes");
 		List<String> allNodes = new LinkedList<>();
 		try(BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent()))) {
@@ -755,7 +759,7 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 				}
 			}
 		}
-		List<String> excludeIps = getExcludeNodeList(clusterAddress);
+		List<String> excludeIps = getExcludeNodeList(clusterAddress, username, passwd);
 		return allNodes.stream().filter((String ip) -> !excludeIps.contains(ip)).collect(toList());
 	}
 
@@ -768,7 +772,7 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 			List<Map<String, List<String>>> shardNodeList = indexList.stream().map((Index index) -> clusterRepository.selectPhysicalClustersByIndexId(index.getId()).stream().collect(toMap(
 				Cluster::getClusterId,
                 (Cluster cluster) -> {
-                    List<String[]> actualIndexList = getActualIndexs(cluster.getHttpAddress());
+                    List<String[]> actualIndexList = getActualIndexs(cluster.getHttpAddress(), cluster.getUsername(), cluster.getPasswd());
                     if (actualIndexList != null && !actualIndexList.isEmpty() ) {
                         return actualIndexList.stream()
                                 .filter((String[] entry) -> aliasIndexName.equals(entry[0]))
@@ -797,7 +801,8 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 			return clusterActualIndexMap.entrySet().stream().collect(toMap(
 				Entry::getKey,
 				(Entry<String, List<String>> r) -> {
-					List<String[]> shardNodes = getIndexAndNodes(getHttpAddressByClusterName(r.getKey()));
+					Cluster cluster = getHttpAddressByClusterName(r.getKey());
+					List<String[]> shardNodes = getIndexAndNodes(cluster.getHttpAddress(), cluster.getUsername(), cluster.getPasswd());
 					if(shardNodes != null && !shardNodes.isEmpty()){
 						return shardNodes.stream()
 								.filter((String[] shard) -> r.getValue().contains(shard[0]))
@@ -813,33 +818,33 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 		return null;
 	}
 
-	public List<String[]> getNormalIndexs(String clusterHttpAddress) {
+	public List<String[]> getNormalIndexs(String clusterHttpAddress, String username, String passwd) {
 		return ElasticSearchStub.performRequest(clusterHttpAddress, "/_cat/shards/", (String line, List<String[]> list)->{
 			String[] infos = line.split("\\s+");
 			if(infos.length > 4 && ("STARTED".equals(infos[3]) || "RELOCATING".equals(infos[3])) && !infos[0].startsWith(".")){
 				list.add(new String[]{infos[0]});
 			}
-		});
+		}, username, passwd);
 	}
 
 	//aliasIndex -> shardNode
-	public List<String[]> getIndexAndNodes(String clusterHttpAddress) {
+	public List<String[]> getIndexAndNodes(String clusterHttpAddress, String username, String passwd) {
 		return ElasticSearchStub.performRequest(clusterHttpAddress, "/_cat/shards/", (String line,List<String[]> list) ->{
 			String[] infos = line.split("\\s+");
 			if(infos.length > 6 && ("STARTED".equals(infos[3]) || "RELOCATING".equals(infos[3]))){
 				list.add(new String[]{infos[0], infos[6]});
 			}
-		});
+		}, username, passwd);
 	}
 
 	//alias -> actual
-	public List<String[]> getActualIndexs(String clusterHttpAddress) {
+	public List<String[]> getActualIndexs(String clusterHttpAddress, String username, String passwd) {
 		return ElasticSearchStub.performRequest(clusterHttpAddress, "/_cat/aliases/", (String line,List<String[]> list) -> {
 			String[] infos = line.split("\\s+");
 			if(infos.length > 2){
 				list.add(new String[]{infos[0], infos[1]});
 			}
-		});
+		}, username, passwd);
 	}
 
 	@Override
@@ -911,58 +916,61 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 	@Override
     // nodeIp, nodeKind, nodeName
 	public List<String[]> getNodes(String clusterName) throws Exception {
-		return ElasticSearchStub.performRequest(getHttpAddressByClusterName(clusterName), "/_cat/nodes", (String line, List<String[]> list) -> {
+		Cluster cluster = getHttpAddressByClusterName(clusterName);
+		return ElasticSearchStub.performRequest(cluster.getHttpAddress(), "/_cat/nodes", (String line, List<String[]> list) -> {
 			String[] infos = line.split("\\s+");
 			if (infos.length > 9) {
 				list.add(new String[]{infos[0], infos[7], infos[9]});
 			}
-		});
+		}, cluster.getUsername(), cluster.getPasswd());
 	}
 
 	@Override
 	public List<String[]> getNodesInfos(String clusterName) throws Exception {
-		return ElasticSearchStub.performRequest(getHttpAddressByClusterName(clusterName), "/_cat/nodes", (String line, List<String[]> list) -> {
+		Cluster cluster = getHttpAddressByClusterName(clusterName);
+		return ElasticSearchStub.performRequest(cluster.getHttpAddress(), "/_cat/nodes", (String line, List<String[]> list) -> {
 			String[] infos = line.split("\\s+");
 			if (infos.length > 9) {
 				list.add(infos);
 			}
-		});
+		}, cluster.getUsername(), cluster.getPasswd());
 	}
 
     @Override
     // indexName, nodeIp, nodeName
     public List<String[]> getShards(String clusterName) throws Exception {
-        return ElasticSearchStub.performRequest(getHttpAddressByClusterName(clusterName), "/_cat/shards/", (String line, List<String[]> list) ->{
+		Cluster cluster = getHttpAddressByClusterName(clusterName);
+        return ElasticSearchStub.performRequest(cluster.getHttpAddress(), "/_cat/shards/", (String line, List<String[]> list) ->{
             String[] infos = line.split("\\s+");
             if(infos.length > 6 && ("STARTED".equals(infos[3]) || "RELOCATING".equals(infos[3]))){
                 list.add(new String[]{infos[0], infos[6], infos[7]});
             }
 
-        });
+        }, cluster.getUsername(), cluster.getPasswd());
     }
 
 	@Override
 	public List<String[]> getIndexInfos(String clusterName) throws Exception {
-
-		return ElasticSearchStub.performRequest(getHttpAddressByClusterName(clusterName), "/_cat/indices/", (String line, List<String[]> list) ->{
+		Cluster cluster = getHttpAddressByClusterName(clusterName);
+		return ElasticSearchStub.performRequest(cluster.getHttpAddress(), "/_cat/indices/", (String line, List<String[]> list) ->{
 			String[] infos = line.split("\\s+");
 			if(infos.length > 9){
 				list.add(infos);
 			}
-		});
+		}, cluster.getUsername(), cluster.getPasswd());
 	}
 
 	@Override
 	public Map<String, ShardInfoModel> getShardsNode(String clusterName) throws Exception {
-
+		Cluster cluster = getHttpAddressByClusterName(clusterName);
 		Map<String, ShardInfoModel> result = new HashMap<>();
-		List<String[]> shardNodeInfos = ElasticSearchStub.performRequest(getHttpAddressByClusterName(clusterName), "/_cat/shards/", (String line, List<String[]> list) ->{
+		List<String[]> shardNodeInfos = ElasticSearchStub.performRequest(cluster.getHttpAddress(), "/_cat/shards/", (String line, List<String[]> list) ->{
 			String[] infos = line.split("\\s+");
 			if(infos.length > 6 && ("STARTED".equals(infos[3]) || "RELOCATING".equals(infos[3]))){
 				list.add(infos);
 			}
 
-		});
+		}, cluster.getUsername(), cluster.getPasswd());
 		if(null == shardNodeInfos || shardNodeInfos.size() == 0) {
 			return result;
 		}
@@ -997,13 +1005,14 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 	@Override
 	public Map<String, ShardInfoModel> getShardsIndex(String clusterName) throws Exception {
 		Map<String, ShardInfoModel> result = new HashMap<>();
-		List<String[]> shardIndexInfos = ElasticSearchStub.performRequest(getHttpAddressByClusterName(clusterName), "/_cat/shards/", (String line, List<String[]> list) ->{
+		Cluster cluster = getHttpAddressByClusterName(clusterName);
+		List<String[]> shardIndexInfos = ElasticSearchStub.performRequest(cluster.getHttpAddress(), "/_cat/shards/", (String line, List<String[]> list) ->{
 			String[] infos = line.split("\\s+");
 			if(infos.length > 3 &&  ("UNASSIGNED".equals(infos[3]))){
 				list.add(infos);
 			}
 
-		});
+		}, cluster.getUsername(), cluster.getPasswd());
 
 		if(null == shardIndexInfos || shardIndexInfos.size() == 0) {
 			return result;
@@ -1021,11 +1030,20 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 
 
 	public RestClient getRestClientByClusterName(String clusterName){
-		return ElasticSearchStub.getElasticRestClient(getHttpAddressByClusterName(clusterName));
+		Cluster cluster = getHttpAddressByClusterName(clusterName);
+		String passwd = cluster.getPasswd();
+		try {
+			passwd = URLDecoder.decode(cluster.getPasswd(), "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			logger.info("passwd decode error {} : {}", cluster.getHttpAddress(), passwd);
+		} finally {
+			return ElasticSearchStub.getElasticRestClient(cluster.getHttpAddress(), cluster.getUsername(), passwd);
+
+		}
 	}
 
-	public String getHttpAddressByClusterName(String clusterName){
-		return clusterRepository.selectByClusterName(clusterName).getHttpAddress();
+	public Cluster getHttpAddressByClusterName(String clusterName) {
+		return clusterRepository.selectByClusterName(clusterName);
 	}
 
 	@Override
@@ -1131,10 +1149,10 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
     }
 
 	@Override
-	public String retrieveIndex(String indexName, String httpAddress, Long versionId) {
+	public String retrieveIndex(String indexName, String httpAddress, Long versionId, String username, String passwd) {
 		try {
 			String realIndexName = indexName + "_" + versionId;
-			return ElasticRestClient.retrieveIndexData(httpAddress, realIndexName);
+			return ElasticRestClient.retrieveIndexData(httpAddress, realIndexName, username, passwd);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -1142,8 +1160,8 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 	}
 
 	@Override
-	public String runDsl(String httpAddress, String endPoint) throws IOException {
-		RestClient client = ElasticRestClient.build(httpAddress);
+	public String runDsl(String httpAddress, String endPoint, String username, String passwd) throws IOException {
+		RestClient client = ElasticRestClient.build(httpAddress, username, passwd);
 		Response response = client.performRequest("GET", endPoint);
 		return IOUtils.toString(response.getEntity().getContent());
 	}
@@ -1151,7 +1169,7 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 	@Override
 
 	public String queryByDsl(String queryString, String endPoint, Cluster cluster) throws IOException {
-		RestClient restClient = ElasticRestClient.build(cluster.getHttpAddress());
+		RestClient restClient = ElasticRestClient.build(cluster.getHttpAddress(), cluster.getUsername(), cluster.getPasswd());
 		NStringEntity entity = new NStringEntity(queryString, ContentType.APPLICATION_JSON);
 		Response response = restClient.performRequest("POST", endPoint, Collections.emptyMap(), entity);
 		return IOUtils.toString(response.getEntity().getContent());
@@ -1164,10 +1182,11 @@ public class ElasticSearchServiceImpl implements ElasticSearchService {
 	}
 
 	@Override
-	public List<HashSet<String>> dynamicDevideShards2Group(String indexAliasName, String httpAddress)
+	public List<HashSet<String>> dynamicDevideShards2Group(String indexAliasName, String httpAddress, String username,
+														   String passwd)
 			throws IOException {
 		try {
-			String result = runDsl(httpAddress, "/_cat/shards/" + indexAliasName + "?h=shard,ip");
+			String result = runDsl(httpAddress, "/_cat/shards/" + indexAliasName + "?h=shard,ip", username, passwd);
 			HashSet<String> nodes = new HashSet<>();
 			Map<Integer, List<String>> shardDistributionMap = new HashMap<>();
 			if (result != null) {

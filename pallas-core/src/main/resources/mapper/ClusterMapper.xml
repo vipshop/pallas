@@ -9,6 +9,8 @@
     <result column="real_clusters" jdbcType="VARCHAR" property="realClusters" />
     <result column="accessible_ps" jdbcType="VARCHAR" property="accessiblePs" />
     <result column="monitor_level" jdbcType="VARCHAR" property="monitorLevel" />
+    <result column="username" jdbcType="VARCHAR" property="username"/>
+    <result column="passwd" jdbcType="VARCHAR" property="passwd"/>
   </resultMap>
   <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.vip.pallas.mybatis.entity.Cluster">
     <result column="description" jdbcType="LONGVARCHAR" property="description" />
@@ -82,9 +84,9 @@
   </delete>
   <insert id="insert" parameterType="com.vip.pallas.mybatis.entity.Cluster">
     insert into cluster (cluster_id, http_address, client_address, 
-      real_clusters, accessible_ps, description, create_time, monitor_level)
+      real_clusters, accessible_ps, description, create_time, monitor_level, username, passwd)
     values (#{clusterId,jdbcType=VARCHAR}, #{httpAddress,jdbcType=VARCHAR}, #{clientAddress,jdbcType=VARCHAR}, 
-      #{realClusters,jdbcType=VARCHAR}, #{accessiblePs,jdbcType=VARCHAR}, #{description,jdbcType=LONGVARCHAR}), #{createTime, jdbcType=TIMESTAMP}, #{monitorLevel,jdbcType=VARCHAR})
+      #{realClusters,jdbcType=VARCHAR}, #{accessiblePs,jdbcType=VARCHAR}, #{description,jdbcType=LONGVARCHAR}), #{createTime, jdbcType=TIMESTAMP}, #{monitorLevel,jdbcType=VARCHAR},#{username,jdbcType=VARCHAR}, #{passwd,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.vip.pallas.mybatis.entity.Cluster">
     insert into cluster
@@ -113,6 +115,12 @@
       <if test="monitorLevel != null">
         monitor_level,
       </if>
+      <if test="username != null">
+        username,
+      </if>
+      <if test="passwd != null">
+        passwd,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="clusterId != null">
@@ -138,6 +146,12 @@
       </if>
       <if test="monitorLevel != null">
         #{monitorLevel, jdbcType=VARCHAR},
+      </if>
+      <if test="username != null">
+        #{username, jdbcType=VARCHAR},
+      </if>
+      <if test="passwd != null">
+        #{passwd, jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -165,6 +179,12 @@
       <if test="monitorLevel != null">
         monitor_level = #{monitorLevel,jdbcType=VARCHAR},
       </if>
+      <if test="username != null">
+        username = #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="passwd != null">
+        passwd = #{passwd,jdbcType=VARCHAR},
+      </if>
     </set>
     where cluster_id = #{clusterId,jdbcType=VARCHAR}
   </update>
@@ -175,7 +195,9 @@
       real_clusters = #{realClusters,jdbcType=VARCHAR},
       accessible_ps = #{accessiblePs,jdbcType=VARCHAR},
       description = #{description,jdbcType=LONGVARCHAR},
-      monitor_level = #{monitorLevel,jdbcType=VARCHAR}
+      monitor_level = #{monitorLevel,jdbcType=VARCHAR},
+      passwd = #{passwd,jdbcType=VARCHAR},
+      username = #{username,jdbcType=VARCHAR}
     where cluster_id = #{clusterId,jdbcType=VARCHAR}
   </update>
   <update id="updateByPrimaryKey" parameterType="com.vip.pallas.mybatis.entity.Cluster">
@@ -184,7 +206,9 @@
       client_address = #{clientAddress,jdbcType=VARCHAR},
       real_clusters = #{realClusters,jdbcType=VARCHAR},
       accessible_ps = #{accessiblePs,jdbcType=VARCHAR},
-      monitor_level = #{monitorLevel,jdbcType=VARCHAR}
+      monitor_level = #{monitorLevel,jdbcType=VARCHAR},
+      passwd = #{passwd,jdbcType=VARCHAR},
+      username = #{username,jdbcType=VARCHAR}
     where cluster_id = #{clusterId,jdbcType=VARCHAR}
   </update>
 </mapper>

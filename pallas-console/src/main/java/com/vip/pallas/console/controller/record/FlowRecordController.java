@@ -131,7 +131,7 @@ public class FlowRecordController{
 
         try{
             elasticSearchService.deleteIndex(PallasConsoleProperties.FLOW_RECORD_SAVE_CLUSTER_REST_ADDRESS,
-                    ".pallas_search_record_" + recordId);
+                    ".pallas_search_record_" + recordId, "", "");
         }catch(Exception e){
             logger.error(e.toString(), e);
         }

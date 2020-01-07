@@ -138,6 +138,8 @@ public class ServerApiController {
             healthyPsList = genRealEsClusterDomainList(authorizationItem.getName());
         }
         resultMap.put("psList", healthyPsList);
+        resultMap.put("username", cluster.getUsername());
+        resultMap.put("passwd", cluster.getPasswd());
         return resultMap;
     }
 

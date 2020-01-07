@@ -41,6 +41,20 @@
                     </el-form-item>
                 </el-col>
             </el-row>
+             <el-row v-if="!clusterInfo.logicalCluster">
+                            <el-col :span="22">
+                                <el-form-item label="xpack用户名" prop="username">
+                                    <el-input v-model="clusterInfo.username"></el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row v-if="!clusterInfo.logicalCluster">
+                            <el-col :span="22">
+                                <el-form-item label="xpack密码" prop="passwd">
+                                    <el-input v-model="clusterInfo.passwd"></el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
             <el-row>
                 <el-col :span="22">
                     <el-form-item label="绑定代理集群" prop="accessiblePs" required>

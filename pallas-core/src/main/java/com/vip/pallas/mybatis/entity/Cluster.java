@@ -55,6 +55,10 @@ public class Cluster {
 
 	private MonitorLevelModel monitorLevelModel;
 
+	private String username;
+
+	private String passwd;
+
 	public MonitorLevelModel getMonitorLevelModel() {
 		return monitorLevelModel;
 	}
@@ -165,6 +169,23 @@ public class Cluster {
 
 	public void setAccessiblePs(String accessiblePs) {
 		this.accessiblePs = accessiblePs;
+	}
+
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getPasswd() {
+		return passwd;
+	}
+
+	public void setPasswd(String passwd) {
+		this.passwd = passwd;
 	}
 
 	@Override

@@ -43,6 +43,10 @@ public class ClusterVO implements Serializable {
 
     private MonitorLevelModel monitorLevelModel;
 
+    private String username;
+
+    private String passwd;
+
     public MonitorLevelModel getMonitorLevelModel() {
         return monitorLevelModel;
     }
@@ -105,5 +109,21 @@ public class ClusterVO implements Serializable {
 
     public void setAccessiblePs(String accessiblePs) {
         this.accessiblePs = accessiblePs;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPasswd() {
+        return passwd;
+    }
+
+    public void setPasswd(String passwd) {
+        this.passwd = passwd;
     }
 }
