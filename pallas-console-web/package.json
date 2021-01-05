@@ -10,7 +10,7 @@
     "lint": "eslint --ext .js,.vue src"
   },
   "dependencies": {
-    "axios": "^0.16.1",
+    "axios": "^0.21.1",
     "babel-polyfill": "^6.26.0",
     "brace": "^0.10.0",
     "diff-match-patch": "^1.0.4",
