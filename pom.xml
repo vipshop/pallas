@@ -130,7 +130,7 @@
 		<aspectj.version>1.8.9</aspectj.version>
 		<freemarker.version>2.3.23</freemarker.version>
 
-		<ant.version>1.10.1</ant.version>
+		<ant.version>1.10.9</ant.version>
 		<aws.version>1.11.195</aws.version>
 
 		<hibernate-validator.version>6.0.9.Final</hibernate-validator.version>
