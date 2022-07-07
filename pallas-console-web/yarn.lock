@@ -3467,9 +3467,9 @@ mkdirp@^0.5.0, mkdirp@^0.5.1, mkdirp@~0.5.0, mkdirp@~0.5.1:
   dependencies:
     minimist "0.0.8"
 
-moment@^2.18.1:
-  version "2.23.0"
-  resolved "http://registry.npm.taobao.org/moment/download/moment-2.23.0.tgz#759ea491ac97d54bac5ad776996e2a58cc1bc225"
+moment@^2.29.4:
+  version "2.29.4"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.4.tgz#3dbe052889fe7c1b2ed966fcb3a77328964ef108"
 
 move-concurrently@^1.0.1:
   version "1.0.1"
