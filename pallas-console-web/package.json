@@ -18,7 +18,7 @@
     "element-ui": "1.4.10",
     "font-awesome": "^4.7.0",
     "json-bigint": "^0.3.0",
-    "moment": "^2.18.1",
+    "moment": "^2.29.4",
     "vue": "^2.5.2",
     "vue-clipboard2": "^0.3.0",
     "vue-router": "^2.3.1",
