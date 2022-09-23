@@ -79,7 +79,10 @@ public class CerebroEmbed {
 		BufferedOutputStream bos = null;
 		try {
 			bis = new BufferedInputStream(zipFile.getInputStream(zipEntry));
-			File f = new File(directory + File.separator + zipEntry.getName());
+			File f = new File(directory, zipEntry.getName());
+    if (!f.toPath().normalize().startsWith(directory.toPath().normalize())) {
+      throw new IOException("Bad zip entry");
+    }
 			File f_p = f.getParentFile();
 			if (f_p != null && !f_p.exists()) {
 				f_p.mkdirs();
