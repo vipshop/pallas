@@ -126,7 +126,7 @@
 		<venus-utils.version>0.6.1</venus-utils.version>
 		<venus-log.version>1.0.9</venus-log.version>
 
-		<protobuf.version>3.1.0</protobuf.version>
+		<protobuf.version>3.16.3</protobuf.version>
 		<aspectj.version>1.8.9</aspectj.version>
 		<freemarker.version>2.3.23</freemarker.version>
 
